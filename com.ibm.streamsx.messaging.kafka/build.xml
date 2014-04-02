@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *******************************************************************************
+ * Copyright (C)2014, International Business Machines Corporation and *
+ * others. All Rights Reserved. *
+ *******************************************************************************
+-->
+<project name="com.ibm.streamsx.messaging.kafka"
+         basedir="." default="all">
+  	
+ <property environment="env"/>
+ <property name="streams.install" value="${env.STREAMS_INSTALL}"/>
+ <property name="kafka.home" value="${env.KAFKA_HOME}"/>
+ <property name="streams.op.jar" value="${streams.install}/lib/com.ibm.streams.operator.jar"/>
+ <property name="src.dir" value="${basedir}/impl/java/src"/>
+ <property name="build.dir" value="${basedir}/impl/java/bin"/>
+ <property name="lib.dir" value="${basedir}/impl/lib"/>
+ <property name="jarfile" value="streamsx.messaging.kafka.jar"/>
+ <property name="tk" value="${streams.install}/bin/spl-make-toolkit"/>
+ 
+
+ <target name="all" depends="jar, spl"/>
+ <target name="init">
+   <mkdir dir="${build.dir}"/>
+   <mkdir dir="${lib.dir}"/>   
+ </target>
+
+
+ <path id="kafka.classpath">
+    <fileset dir="${kafka.home}">
+        <include name="**/*.jar" />
+    </fileset>
+ </path>
+
+ <target name="compile" depends="init">
+   <fail message="Environment variable KAFKA_HOME needs to be set" unless="kafka.home"/>
+
+   <javac srcdir="${src.dir}" destdir="${build.dir}" debug="true">
+     <classpath>
+       <pathelement location="${streams.op.jar}"/>
+	 <path refid="kafka.classpath"/>
+     </classpath>
+   </javac>
+ </target>
+ 
+ <target name="jar" depends="compile">
+   <jar destfile="${lib.dir}/${jarfile}" basedir="${build.dir}"/>
+   <delete dir="${build.dir}"/>
+ </target>
+ 
+ <target name="clean" depends="spl-clean">
+   <delete dir="${build.dir}"/>
+   <delete dir="${lib.dir}"/>
+ </target>
+
+	<target name="spl">
+		<exec executable="${tk}">
+			<arg value="-i"/>
+			<arg value="."/>
+	  </exec>
+	</target>
+
+	<target name="spl-clean">
+		<exec executable="${tk}">
+			<arg value="-i"/>
+			<arg value="."/>
+			<arg value="-c"/>
+	  </exec>
+	</target>
+
+ 
+</project>
