@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="impl/java/bin" path="impl/java/src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="impl/lib/mqtt-client-0.4.1-20140324.080940-25.jar" sourcepath="impl/lib/mqtt-client-0.4.1-20140324.080940-25-sources.jar"/>
+	<classpathentry kind="con" path="com.ibm.streams.java/com.ibm.streams.operator"/>
+	<classpathentry kind="output" path="impl/java/bin"/>
+</classpath>
