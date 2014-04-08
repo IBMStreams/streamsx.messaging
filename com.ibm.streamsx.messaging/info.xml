@@ -1,3 +1,5 @@
+<!--Copyright (C) 2013-2014, International Business Machines Corporation  -->
+<!-- All Rights Reserved                                	                 -->
 <?xml version="1.0" encoding="UTF-8"?>
 <info:toolkitInfoModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common"
  xmlns:info="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo">
