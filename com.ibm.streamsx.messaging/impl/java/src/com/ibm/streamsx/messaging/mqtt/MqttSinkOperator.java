@@ -10,7 +10,6 @@
 package com.ibm.streamsx.messaging.mqtt;
 
 
-import java.io.BufferedWriter;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Map;
@@ -55,7 +54,7 @@ import com.ibm.streams.operator.types.Blob;
  * <p>With the exception of operator initialization, all the other events may occur concurrently with each other, 
  * which lead to these methods being called concurrently by different threads.</p> 
  */
-@PrimitiveOperator(name="MqttSinkOperator", namespace="com.ibm.streams.messaging.mqtt",
+@PrimitiveOperator(name="MqttSinkOperator", namespace="com.ibm.streamx.messaging.mqtt",
 description="Java Operator MqttSinkOperator")
 @InputPorts({@InputPortSet(description="Port that ingests tuples", cardinality=1, optional=false, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious), @InputPortSet(description="Optional input ports", optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
 @Libraries(value = {"impl/lib/*"})
@@ -87,7 +86,7 @@ public class MqttSinkOperator extends AbstractOperator {
 				// max 50 tuples in flight
 				try {
 					Tuple tuple = tupleQueue.take();
-					 Blob blockMsg = tuple.getBlob(0);
+					Blob blockMsg = tuple.getBlob(0);
 			        InputStream inputStream = blockMsg.getInputStream();
 			        int length = (int) blockMsg.getLength();
 			        byte[] byteArray = new byte[length];
@@ -250,7 +249,7 @@ public class MqttSinkOperator extends AbstractOperator {
 		this.qos = qos;
 	}
 
-    @Parameter(name="serverUri", description="Server to publish messages to.", optional=false)
+    @Parameter(name="serverURI", description="Server to publish messages to.", optional=false)
 	public void setServerUri(String serverUri) {
 		this.serverUri = serverUri;
 	}

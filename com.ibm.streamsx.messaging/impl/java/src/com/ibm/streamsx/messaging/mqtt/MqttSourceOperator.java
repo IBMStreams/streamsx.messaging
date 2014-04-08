@@ -46,7 +46,7 @@ import com.ibm.streams.operator.types.ValueFactory;
  * <p>With the exception of operator initialization, all the other events may occur concurrently with each other, 
  * which lead to these methods being called concurrently by different threads.</p> 
  */
-@PrimitiveOperator(name="MqttSourceOperator", namespace="com.ibm.streams.messaging.mqtt",
+@PrimitiveOperator(name="MqttSourceOperator", namespace="com.ibm.streamx.messaging.mqtt",
 description="Java Operator MqttSourceOperator")
 @OutputPorts({@OutputPortSet(description="Port that produces tuples", cardinality=1, optional=false, windowPunctuationOutputMode=WindowPunctuationOutputMode.Generating), @OutputPortSet(description="Optional output ports", optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Generating)})
 @Libraries(value = {"impl/lib/*"})
@@ -217,7 +217,7 @@ public class MqttSourceOperator extends AbstractOperator {
 		this.qos = qos;
 	}
 
-    @Parameter(name="serverUri", description="Server to subscribe messages from.", optional=false)
+    @Parameter(name="serverURI", description="Server to subscribe messages from.", optional=false)
 	public void setServerUri(String serverUri) {
 		this.serverUri = serverUri;
 	}
