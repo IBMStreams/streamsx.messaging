@@ -54,7 +54,7 @@ import com.ibm.streams.operator.types.Blob;
  * <p>With the exception of operator initialization, all the other events may occur concurrently with each other, 
  * which lead to these methods being called concurrently by different threads.</p> 
  */
-@PrimitiveOperator(name="MqttSinkOperator", namespace="com.ibm.streamx.messaging.mqtt",
+@PrimitiveOperator(name="MqttSinkOperator", namespace="com.ibm.streamsx.messaging.mqtt",
 description="Java Operator MqttSinkOperator")
 @InputPorts({@InputPortSet(description="Port that ingests tuples", cardinality=1, optional=false, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious), @InputPortSet(description="Optional input ports", optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
 @Libraries(value = {"impl/lib/*"})

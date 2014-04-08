@@ -4,10 +4,10 @@
   <toolkit name="com.ibm.streamsx.messaging" requiredProductVersion="3.2.0" version="1.0.0">
     <description/>
     <uriTable>
-      <uri index="2" value="com.ibm.streamx.messaging.mqtt/MqttSourceOperator"/>
-      <uri index="1" value="com.ibm.streamx.messaging.mqtt/MqttSinkOperator"/>
+      <uri index="2" value="com.ibm.streamsx.messaging.mqtt/MqttSourceOperator"/>
+      <uri index="1" value="com.ibm.streamsx.messaging.mqtt/MqttSinkOperator"/>
     </uriTable>
-    <namespace name="com.ibm.streamx.messaging.mqtt">
+    <namespace name="com.ibm.streamsx.messaging.mqtt">
       <primitiveOp language="Java" modelUriIndex="1" name="MqttSinkOperator" public="true">
         <description>Java Operator MqttSinkOperator</description>
         <parameter expressionMode="Constant" name="vmArg" optional="true" type="rstring">

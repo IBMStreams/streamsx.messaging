@@ -46,7 +46,7 @@ import com.ibm.streams.operator.types.ValueFactory;
  * <p>With the exception of operator initialization, all the other events may occur concurrently with each other, 
  * which lead to these methods being called concurrently by different threads.</p> 
  */
-@PrimitiveOperator(name="MqttSourceOperator", namespace="com.ibm.streamx.messaging.mqtt",
+@PrimitiveOperator(name="MqttSourceOperator", namespace="com.ibm.streamsx.messaging.mqtt",
 description="Java Operator MqttSourceOperator")
 @OutputPorts({@OutputPortSet(description="Port that produces tuples", cardinality=1, optional=false, windowPunctuationOutputMode=WindowPunctuationOutputMode.Generating), @OutputPortSet(description="Optional output ports", optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Generating)})
 @Libraries(value = {"impl/lib/*"})
