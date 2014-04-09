@@ -11,6 +11,7 @@ import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+// test revert
 public class Messages {
 	private static final String BUNDLE_NAME = "com.ibm.streamsx.messaging.mqtt.messages"; //$NON-NLS-1$
 

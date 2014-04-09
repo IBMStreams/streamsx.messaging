@@ -7,6 +7,7 @@
  *******************************************************************************/
 package com.ibm.streamsx.messaging.mqtt;
 
+// test revert
 public interface IMqttConstants {
 
 	public static final String CONN_TRUSTSTORE = "connection.trustStore";
