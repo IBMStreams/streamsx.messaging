@@ -4,11 +4,11 @@
   <toolkit name="com.ibm.streamsx.messaging" requiredProductVersion="3.2.0" version="1.0.0">
     <description/>
     <uriTable>
-      <uri index="2" value="com.ibm.streamsx.messaging.mqtt/MqttSourceOperator"/>
-      <uri index="1" value="com.ibm.streamsx.messaging.mqtt/MqttSinkOperator"/>
+      <uri index="2" value="com.ibm.streamsx.messaging.mqtt/MQTTSource"/>
+      <uri index="1" value="com.ibm.streamsx.messaging.mqtt/MQTTSink"/>
     </uriTable>
     <namespace name="com.ibm.streamsx.messaging.mqtt">
-      <primitiveOp language="Java" modelUriIndex="1" name="MqttSinkOperator" public="true">
+      <primitiveOp language="Java" modelUriIndex="1" name="MQTTSink" public="true">
         <description>Java Operator MqttSinkOperator</description>
         <parameter expressionMode="Constant" name="vmArg" optional="true" type="rstring">
           <description>Command line options passed to the Java Virtual Machine at startup</description>
@@ -29,7 +29,7 @@
           <description>Topic to publish to.</description>
         </parameter>
         <inputPort maxNumPorts="1" minNumPorts="1" optional="false" windowPunctInputMode="Oblivious">
-          <description>Port that ingests tuples</description>
+          <description>Port that ingests tuples.</description>
           <windowPolicy>NonWindowed</windowPolicy>
         </inputPort>
         <inputPort minNumPorts="0" optional="true" windowPunctInputMode="Oblivious">
@@ -37,7 +37,7 @@
           <windowPolicy>NonWindowed</windowPolicy>
         </inputPort>
       </primitiveOp>
-      <primitiveOp language="Java" modelUriIndex="2" name="MqttSourceOperator" public="true">
+      <primitiveOp language="Java" modelUriIndex="2" name="MQTTSource" public="true">
         <description>Java Operator MqttSourceOperator</description>
         <parameter expressionMode="Constant" name="vmArg" optional="true" type="rstring">
           <description>Command line options passed to the Java Virtual Machine at startup</description>
@@ -52,7 +52,7 @@
           <description>List of topics to subscribe to.</description>
         </parameter>
         <outputPort expressionMode="Nonexistent" maxNumPorts="1" minNumPorts="1" optional="false" windowPunctOutputMode="Generating">
-          <description>Port that produces tuples</description>
+          <description>Port that produces tuples.</description>
         </outputPort>
         <outputPort expressionMode="Nonexistent" minNumPorts="0" optional="true" windowPunctOutputMode="Generating">
           <description>Optional output ports</description>

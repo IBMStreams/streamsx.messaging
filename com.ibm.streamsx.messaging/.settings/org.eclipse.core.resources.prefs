@@ -1,3 +1,5 @@
 eclipse.preferences.version=1
-encoding//com.ibm.streamsx.messaging.mqtt/MqttSinkOperator/MqttSinkOperator.xml=UTF-8
-encoding//com.ibm.streamsx.messaging.mqtt/MqttSourceOperator/MqttSourceOperator.xml=Cp1252
+encoding//com.ibm.streamsx.messaging.mqtt/MQTTSink/MQTTSink.xml=Cp1252
+encoding//com.ibm.streamsx.messaging.mqtt/MQTTSource/MQTTSource.xml=Cp1252
+encoding//impl/java/bin/com/ibm/streamsx/messaging/mqtt/messages.properties=Cp1252
+encoding//impl/java/src/com/ibm/streamsx/messaging/mqtt/messages.properties=Cp1252
