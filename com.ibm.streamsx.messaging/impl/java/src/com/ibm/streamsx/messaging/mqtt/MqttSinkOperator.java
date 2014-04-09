@@ -65,10 +65,11 @@ public class MqttSinkOperator extends AbstractOperator {
 	
 	// Parameters
 	private String topic;
-	private int qos;
+	private int qos = 0;
 	private String serverUri;
 	private int reconnectionBound = 5;		// default 5, 0 = no retry, -1 = infinite retry
 	private float period = 5000;
+	private boolean retain = false;
 
 	private MqttClientWrapper mqttWrapper;
 	
@@ -91,7 +92,7 @@ public class MqttSinkOperator extends AbstractOperator {
 			        int length = (int) blockMsg.getLength();
 			        byte[] byteArray = new byte[length];
 			        inputStream.read(byteArray, 0, length);
-			        mqttWrapper.publish(topic, qos, byteArray);
+			        mqttWrapper.publish(topic, qos, byteArray, retain);
 					
 				} catch (InterruptedException e) {
 				
@@ -135,8 +136,7 @@ public class MqttSinkOperator extends AbstractOperator {
         OperatorContext context = getOperatorContext();
         Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " all ports are ready in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
         
-        exService.execute(new PublishRunnable());
-        exService.execute(new PublishRunnable());
+        exService.execute(new PublishRunnable());        
     }
 
     /**
@@ -244,7 +244,7 @@ public class MqttSinkOperator extends AbstractOperator {
 		this.topic = topic;
 	}
 
-    @Parameter(name="qos", description="Qos to publish to.", optional=false)
+    @Parameter(name="qos", description="Qos to publish to.", optional=true)
 	public void setQos(int qos) {
 		this.qos = qos;
 	}
@@ -283,5 +283,16 @@ public class MqttSinkOperator extends AbstractOperator {
 	public float getPeriod() {
 		return period;
 	}
+
+	public boolean isRetain() {
+		return retain;
+	}
+
+	@Parameter(name="retain", description="Indicates if messages should be retained on the MQTT server.  Default is false.", optional=true)
+	public void setRetain(boolean retain) {
+		this.retain = retain;
+	}
+	
+	
     
 }
