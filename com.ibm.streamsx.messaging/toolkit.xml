@@ -16,11 +16,14 @@
         <parameter cardinality="1" expressionMode="AttributeFree" name="period" optional="true" type="float32">
           <description>Reconnection period, default is 60 s.</description>
         </parameter>
-        <parameter cardinality="1" expressionMode="AttributeFree" name="qos" optional="false" type="int32">
+        <parameter cardinality="1" expressionMode="AttributeFree" name="qos" optional="true" type="int32">
           <description>Qos to publish to.</description>
         </parameter>
         <parameter cardinality="1" expressionMode="AttributeFree" name="reconnectionBound" optional="true" type="int32">
           <description>Reconnection bound, 0 for no retry, n for n number of retries, -1 for inifinite retry.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="retain" optional="true" type="boolean">
+          <description>Indicates if messages should be retained on the MQTT server.  Default is false.</description>
         </parameter>
         <parameter cardinality="1" expressionMode="AttributeFree" name="serverURI" optional="false" type="rstring">
           <description>Server to publish messages to.</description>
@@ -42,7 +45,7 @@
         <parameter expressionMode="Constant" name="vmArg" optional="true" type="rstring">
           <description>Command line options passed to the Java Virtual Machine at startup</description>
         </parameter>
-        <parameter cardinality="-1" expressionMode="AttributeFree" name="qos" optional="false" type="int32">
+        <parameter cardinality="-1" expressionMode="AttributeFree" name="qos" optional="true" type="int32">
           <description>List of qos for topic subscriptions</description>
         </parameter>
         <parameter cardinality="1" expressionMode="AttributeFree" name="serverURI" optional="false" type="rstring">

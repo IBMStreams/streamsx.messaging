@@ -124,6 +124,15 @@ public class MqttSourceOperator extends AbstractOperator {
         mqttWrapper.connect();
         mqttWrapper.addCallBack(callback);               
         
+        // qos is an optional parameter, set up defaults if it is not specified
+        if (qos == null)
+        {
+        	qos = new int[topics.size()];
+        	for (int i = 0; i < qos.length; i++) {
+				qos[i] = 0;
+			}
+        }
+        
         mqttWrapper.subscribe((String[])topics.toArray(new String[0]), qos);
         
         /*
@@ -212,7 +221,7 @@ public class MqttSourceOperator extends AbstractOperator {
 		this.topics = topics;
 	}
 
-    @Parameter(name="qos", description="List of qos for topic subscriptions", optional=false, cardinality=-1)
+    @Parameter(name="qos", description="List of qos for topic subscriptions", optional=true, cardinality=-1)
 	public void setQos(int[] qos) {
 		this.qos = qos;
 	}

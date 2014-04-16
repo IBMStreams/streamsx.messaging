@@ -167,10 +167,11 @@ public class MqttClientWrapper implements MqttCallback {
      * @throws MqttException
 	 * @throws InterruptedException 
      */
-    public void publish(String topicName, int qos, byte[] payload) throws MqttException, InterruptedException {    	       	
+    public void publish(String topicName, int qos, byte[] payload, boolean retain) throws MqttException, InterruptedException {    	       	
     	// Construct the message to send
    		MqttMessage message = new MqttMessage(payload);
     	message.setQos(qos);
+    	message.setRetained(retain);
 
     	if (mqttClient != null && mqttClient.isConnected()) {
     		try {
