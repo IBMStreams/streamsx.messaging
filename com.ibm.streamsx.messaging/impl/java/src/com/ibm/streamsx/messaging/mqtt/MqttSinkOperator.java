@@ -97,7 +97,6 @@ public class MqttSinkOperator extends AbstractOperator {
 				} catch (InterruptedException e) {
 				
 				} catch (Exception e) {
-					e.printStackTrace();
 
 				}
 			}			
