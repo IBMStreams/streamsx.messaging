@@ -1,8 +1,0 @@
-.settings
-.toolkitList
-com.ibm.streamsx.messaging.kafka
-*$StreamsModel.java
-impl/lib
-impl/java/bin
-toolkit.xml
-output

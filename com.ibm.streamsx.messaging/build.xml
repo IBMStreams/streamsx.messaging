@@ -5,40 +5,56 @@
  * others. All Rights Reserved. *
  *******************************************************************************
 -->
-<project name="com.ibm.streamsx.messaging.kafka"
+<project name="com.ibm.streamsx.messaging"
          basedir="." default="all">
   	
  <property environment="env"/>
  <property name="streams.install" value="${env.STREAMS_INSTALL}"/>
+ <property name="maven.bin" value="${env.MAVEN_BIN}" />
  <property name="kafka.home" value="${env.KAFKA_HOME}"/>
  <property name="streams.op.jar" value="${streams.install}/lib/com.ibm.streams.operator.jar"/>
  <property name="src.dir" value="${basedir}/impl/java/src"/>
  <property name="build.dir" value="${basedir}/impl/java/bin"/>
  <property name="lib.dir" value="${basedir}/impl/lib"/>
- <property name="jarfile" value="streamsx.messaging.kafka.jar"/>
+ <property name="jarfile" value="com.ibm.streamsx.messaging.jar"/>
  <property name="tk" value="${streams.install}/bin/spl-make-toolkit"/>
+ <property name="ext.downloads.dir" value="opt/downloaded" />
  
 
  <target name="all" depends="jar, spl"/>
  <target name="init">
-   <mkdir dir="${build.dir}"/>
-   <mkdir dir="${lib.dir}"/>   
+    <fail unless="env.MAVEN_BIN" message="Environment variable MAVEN_BIN not set."/>
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${lib.dir}"/>
+    <mkdir dir="${ext.downloads.dir}"/> 
+ </target>
+ <target name="clean" depends="spl-clean">
+    <delete dir="${build.dir}"/>
+    <delete dir="${lib.dir}/${jarfile}"/>
+    <delete dir="${ext.downloads.dir}"/> 
  </target>
 
-
- <path id="kafka.classpath">
-    <fileset dir="${kafka.home}">
-        <include name="**/*.jar" />
+ <path id="cp.ext">
+    <fileset dir="${ext.downloads.dir}">
+        <include name="*.jar" />
     </fileset>
  </path>
 
- <target name="compile" depends="init">
-   <fail message="Environment variable KAFKA_HOME needs to be set" unless="kafka.home"/>
+  <!-- Downloads libraries using maven -->
+  <target name="maven-deps">
+	<exec executable="${maven.bin}"  failonerror="true">
+		<arg value="dependency:copy-dependencies"/>
+		<arg value="-e"/>
+		<arg value="-DoutputDirectory=${ext.downloads.dir}"/>
+    </exec>
+  </target>
+ <target name="compile" depends="init, maven-deps">
 
    <javac srcdir="${src.dir}" destdir="${build.dir}" debug="true">
+		 <exclude name="**/mqtt/**"/>
      <classpath>
        <pathelement location="${streams.op.jar}"/>
-	 <path refid="kafka.classpath"/>
+	     <path refid="cp.ext"/>
      </classpath>
    </javac>
  </target>
@@ -48,11 +64,6 @@
    <delete dir="${build.dir}"/>
  </target>
  
- <target name="clean" depends="spl-clean">
-   <delete dir="${build.dir}"/>
-   <delete dir="${lib.dir}"/>
- </target>
-
 	<target name="spl">
 		<exec executable="${tk}">
 			<arg value="-i"/>

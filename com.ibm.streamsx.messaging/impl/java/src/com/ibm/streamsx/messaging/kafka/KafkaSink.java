@@ -12,10 +12,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-import kafka.javaapi.producer.Producer;
-import kafka.producer.KeyedMessage;
-import kafka.producer.ProducerConfig;
-
 import com.ibm.streams.operator.AbstractOperator;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.StreamingInput;
@@ -24,20 +20,18 @@ import com.ibm.streams.operator.logging.TraceLevel;
 import com.ibm.streams.operator.model.InputPortSet;
 import com.ibm.streams.operator.model.InputPorts;
 import com.ibm.streams.operator.model.Libraries;
-import com.ibm.streams.operator.model.OutputPortSet;
-import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
 
-@InputPorts(@InputPortSet(cardinality=1, optional=false))
-@OutputPorts(@OutputPortSet(cardinality=1, optional=false))
+@InputPorts(@InputPortSet(cardinality=1, optional=false, 
+	description="The tuples arriving on this port are expected to contain three attributes \\\"key\\\", \\\"topic\\\" and \\\"message\\\". " +
+			"Out of these \\\"message\\\", is a required attribute."))
 @PrimitiveOperator(description=KafkaSink.DESC)
-@Libraries({"@KAFKA_HOME@/*", "@KAFKA_HOME@/libs/*"})
+@Libraries({"opt/downloaded/*"})
 public class KafkaSink extends AbstractOperator {
 	private Properties properties = new Properties(), finalProperties = null;
 	private List<String> topics = new ArrayList<String>();
 	private String propFile = null;
-	private Producer<String, String> producer = null;
 	
 	private AttributeHelper topicAH = new AttributeHelper("topic"),
 							keyAH = new AttributeHelper("key"),
@@ -45,7 +39,7 @@ public class KafkaSink extends AbstractOperator {
 	
 	private static Logger trace = Logger.getLogger(KafkaSink.class.getName());
 
-	
+	KafkaClient client = null;
 	
 	@Parameter(name="kafkaProperty", cardinality=-1, optional=true, 
 			description="Specify a Kafka property \\\"key=value\\\" form. This will override any property specified in the properties file.")
@@ -74,17 +68,14 @@ public class KafkaSink extends AbstractOperator {
 
 	@Parameter(optional=true, description="Name of the attribute containing the topic. Default is \\\"topic\\\"")
 	public void setTopicAttribute(String value) {
-		topicAH.wasSet(true);
 		topicAH.setName(value);
 	}
 	@Parameter(optional=true, description="Name of the attribute containing the message. Default is \\\"message\\\"")
 	public void setMessageAttribute(String value) {
-		messageAH.wasSet(true);
 		messageAH.setName (value);
 	}
 	@Parameter(optional=true, description="Name of the attribute containing the key. Default is \\\"key\\\"")
 	public void setKeyAttribute(String value) {
-		keyAH.wasSet (true);
 		keyAH.setName (value);
 	}
 
@@ -114,10 +105,8 @@ public class KafkaSink extends AbstractOperator {
 		if(finalProperties == null || finalProperties.isEmpty())
 			throw new Exception("Kafka connection properties must be specified.");
 		//TODO: check for minimum properties
-		
-		trace.log(TraceLevel.INFO, "Initializing Kafka consumer");
-		ProducerConfig config = new ProducerConfig(finalProperties);
-		producer = new Producer<String, String>(config);
+		client = new KafkaClient(topicAH, keyAH, messageAH, finalProperties);
+		client.initProducer();
 	}
 	
 	
@@ -126,28 +115,15 @@ public class KafkaSink extends AbstractOperator {
 			throws Exception {
 		try {
 		
-			if(trace.isLoggable(TraceLevel.INFO))
-				trace.log(TraceLevel.INFO, "Sending message: " + tuple.toString());
-
-			String data = messageAH.getValue(tuple);
-			String key = data;
-			if(keyAH.isAvailable()) {
-				key=keyAH.getValue(tuple);
-			}
+			if(trace.isLoggable(TraceLevel.DEBUG))
+				trace.log(TraceLevel.DEBUG, "Sending message: " + tuple);
 			
-			if(!topics.isEmpty()) {
-				List<KeyedMessage<String, String> > lst = new ArrayList<KeyedMessage<String,String>>();
-				for(String topic : topics) {
-					lst.add(new KeyedMessage<String, String>(topic, key, data));
-				}
-				producer.send(lst);
-			}
-			else {
-				String topic = topicAH.getValue(tuple); 
-				KeyedMessage<String, String> keyedMessage = new KeyedMessage<String, String>(topic, key, data);
-				producer.send(keyedMessage);
-			}
+			if(!topics.isEmpty()) 
+				client.send(tuple, topics);
+			else 
+				client.send(tuple);
 		}catch(Exception e) {
+			//ideally we should not get here since the kafka client doesnt seem to be throwing any exceptions
 			trace.log(TraceLevel.ERROR, "Could not send message: " + tuple.toString(), e);
 		}
 	}	
@@ -155,7 +131,7 @@ public class KafkaSink extends AbstractOperator {
 	public static final String DESC = 
 			"This operator acts as a producer sending tuples as mesages to a Kafka broker." + 
 			"The broker is assumed to be already configured and running. " +
-			"If a \\\"key\\\" attribute is not specified, the entire message is used as the key. " +
+			"If a \\\"key\\\" attribute is not specified, the message is used as the key. " +
 			"A topic can be specified as either a stream attribute or as a parameter. "
 			;
 }

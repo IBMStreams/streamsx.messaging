@@ -12,10 +12,10 @@ import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.Type;
 import com.ibm.streams.operator.Type.MetaType;
-import com.ibm.streams.operator.types.RString;
 
 //Helper to check if attributes have been specified explicitly
 class AttributeHelper {
+	
 	private boolean wasSet = false, isAvailable = false;
 	private MetaType mType = null;
 	private String name = null;
@@ -40,12 +40,9 @@ class AttributeHelper {
 		return name;
 	}
 
-	public void wasSet(boolean wasSet) {
-		this.wasSet = wasSet;
-	}
-
 	public void setName(String name) {
 		this.name = name;
+		wasSet = true;
 	}
 
 	void initialize(StreamSchema ss, boolean required) throws Exception {
@@ -68,22 +65,14 @@ class AttributeHelper {
 	}
 	void setValue(OutputTuple otup, String value) {
 		if(!isAvailable) return;
-		if(mType == MetaType.USTRING)
-			otup.setString(name, value);
-		else if(mType == MetaType.RSTRING)
-			otup.setObject(name, new RString(value));
+		otup.setString(name, value);
 	}
 	void setValue(OutputTuple otup, byte[] value) {
 		if(!isAvailable) return;
-		if(mType == MetaType.USTRING)
-			otup.setString(name, new String(value));
-		else if(mType == MetaType.RSTRING)
-			otup.setObject(name, new RString(value));
+		otup.setString(name, new String(value));
 	}
 	String getValue(Tuple tuple) {
 		if(!isAvailable) return null;
-		if(mType == MetaType.USTRING)
-			return tuple.getString(name);
-		return tuple.getObject(name).toString();
+		return tuple.getString(name);
 	}
 }

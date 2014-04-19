@@ -1,0 +1,38 @@
+/*
+# Licensed Materials - Property of IBM
+# Copyright IBM Corp. 2011, 2012 
+# US Government Users Restricted Rights - Use, duplication or
+# disclosure restricted by GSA ADP Schedule Contract with
+# IBM Corp.
+*/
+namespace com.ibm.streamsx.messaging.sample.kafka;
+
+use com.ibm.streamsx.messaging.kafka::KafkaSink ;
+
+/**
+ * Example of an using [KafkaSink] as a Kafka Producer
+ * This assumes that the topic has already been created
+ * 
+ */
+composite KafkaProducer
+{
+	graph
+
+	  //create some messages and send to Kafka
+		stream<rstring topic, rstring key, rstring message> OutputStream = Beacon() {
+			param
+				iterations : 10 ;
+				period : 1.0 ;
+			output OutputStream: topic = "mytopic", message = "this is from kafka sink", key = "abc";
+		}
+
+
+		() as KafkaSinkOp = KafkaSink(OutputStream) {
+			param
+				propertiesFile : "producer.properties";
+		}
+
+}
+
+
+
