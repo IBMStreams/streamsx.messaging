@@ -56,12 +56,10 @@ public class MqttClientWrapper implements MqttCallback {
 		
 		TRACE.log(TraceLevel.DEBUG,"SetBrokerUri: " + brokerUri); //$NON-NLS-1$
 	
-		URI uri = new URI(brokerUri);
-		
 		// default to tcp:// if no scheme is specified
-		if (uri.getScheme() == null)
+		if (!brokerUri.startsWith("tcp://") && !brokerUri.startsWith("ssl://"))
 		{
-			brokerUri = "tcp://" + brokerUri; //$NON-NLS-1$
+			brokerUri = "tcp://" + brokerUri;
 		}
 		
 		this.brokerUri = brokerUri;

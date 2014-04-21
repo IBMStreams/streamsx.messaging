@@ -28,8 +28,11 @@
         <parameter cardinality="1" expressionMode="AttributeFree" name="serverURI" optional="false" type="rstring">
           <description>Server to publish messages to.</description>
         </parameter>
-        <parameter cardinality="1" expressionMode="AttributeFree" name="topic" optional="false" type="rstring">
-          <description>Topic to publish to.</description>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="topicAttrName" optional="true" type="rstring">
+          <description>Attribute that contains the topic to publish the message with.  This parameter is mutually exclusive with the "topic" parameter.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="topic" optional="true" type="rstring">
+          <description>Topic to publish to.  This parameter is mutually exclusive with the "topicAttributeName" parameter.</description>
         </parameter>
         <inputPort maxNumPorts="1" minNumPorts="1" optional="false" windowPunctInputMode="Oblivious">
           <description>Port that ingests tuples.</description>
