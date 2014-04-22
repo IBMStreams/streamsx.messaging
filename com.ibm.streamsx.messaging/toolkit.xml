@@ -42,6 +42,9 @@
           <description>Optional input ports</description>
           <windowPolicy>NonWindowed</windowPolicy>
         </inputPort>
+        <outputPort expressionMode="Nonexistent" maxNumPorts="1" minNumPorts="1" optional="true" windowPunctOutputMode="Free">
+          <description>Optional error output port.</description>
+        </outputPort>
       </primitiveOp>
       <primitiveOp language="Java" modelUriIndex="2" name="MQTTSource" public="true">
         <description>Java Operator MqttSourceOperator</description>
@@ -54,13 +57,16 @@
         <parameter cardinality="1" expressionMode="AttributeFree" name="serverURI" optional="false" type="rstring">
           <description>Server to subscribe messages from.</description>
         </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="topicOutAttrName" optional="true" type="rstring">
+          <description>Output attribute on output data stream to assign message topic to.</description>
+        </parameter>
         <parameter cardinality="-1" expressionMode="AttributeFree" name="topics" optional="false" type="rstring">
           <description>List of topics to subscribe to.</description>
         </parameter>
-        <outputPort expressionMode="Nonexistent" maxNumPorts="1" minNumPorts="1" optional="false" windowPunctOutputMode="Generating">
+        <outputPort expressionMode="Nonexistent" maxNumPorts="1" minNumPorts="1" optional="false" windowPunctOutputMode="Free">
           <description>Port that produces tuples.</description>
         </outputPort>
-        <outputPort expressionMode="Nonexistent" minNumPorts="0" optional="true" windowPunctOutputMode="Generating">
+        <outputPort expressionMode="Nonexistent" minNumPorts="0" optional="true" windowPunctOutputMode="Free">
           <description>Optional output ports</description>
         </outputPort>
       </primitiveOp>

@@ -31,8 +31,11 @@ import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.InputPortSet;
 import com.ibm.streams.operator.model.InputPortSet.WindowMode;
 import com.ibm.streams.operator.model.InputPortSet.WindowPunctuationInputMode;
+import com.ibm.streams.operator.model.OutputPortSet.WindowPunctuationOutputMode;
 import com.ibm.streams.operator.model.InputPorts;
 import com.ibm.streams.operator.model.Libraries;
+import com.ibm.streams.operator.model.OutputPortSet;
+import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
 import com.ibm.streams.operator.types.Blob;
@@ -59,11 +62,11 @@ import com.ibm.streams.operator.types.Blob;
 @PrimitiveOperator(name="MQTTSink", namespace="com.ibm.streamsx.messaging.mqtt",
 description="Java Operator MqttSinkOperator")
 @InputPorts({@InputPortSet(description="Port that ingests tuples.", cardinality=1, optional=false, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious), @InputPortSet(description="Optional input ports", optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
+@OutputPorts({@OutputPortSet(description="Optional error output port.", cardinality=1, optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
 @Libraries(value = {"impl/lib/*"})
 public class MqttSinkOperator extends AbstractOperator {
 	 
 	private static Logger TRACE = Logger.getLogger(MqttSinkOperator.class);
-
 	
 	// Parameters
 	private String topic;
@@ -132,22 +135,15 @@ public class MqttSinkOperator extends AbstractOperator {
 				checker.checkExcludedParameters("topicAttrName", "topic");
 		
 		// check that at least one of topic or topicAttributeName parameter is specified
-		Set<String> parameterNames = context.getParameterNames();
-		boolean topicSpecified = false;
-		for (String paramName : parameterNames) {
-			if (paramName.equals("topic") || paramName.equals("topicAttrName"))
-			{
-				topicSpecified=true;
-				break;
-			}			
-		}
+		Set<String> parameterNames = context.getParameterNames();		
+		boolean hasTopic = parameterNames.contains("topic") || parameterNames.contains("topicAttrName");
 		
-		if (!topicSpecified)
+		if (!hasTopic)
 		{
 			checker.setInvalidContext("At least one of the following attributes must be specified: topic, topicAttrName", null);
 		}
 		
-		check = check & topicSpecified;
+		check = check & hasTopic;
 		
 		return check;
 		

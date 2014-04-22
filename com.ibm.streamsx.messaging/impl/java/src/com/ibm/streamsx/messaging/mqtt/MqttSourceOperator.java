@@ -48,16 +48,17 @@ import com.ibm.streams.operator.types.ValueFactory;
  */
 @PrimitiveOperator(name="MQTTSource", namespace="com.ibm.streamsx.messaging.mqtt",
 description="Java Operator MqttSourceOperator")
-@OutputPorts({@OutputPortSet(description="Port that produces tuples.", cardinality=1, optional=false, windowPunctuationOutputMode=WindowPunctuationOutputMode.Generating), @OutputPortSet(description="Optional output ports", optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Generating)})
+@OutputPorts({@OutputPortSet(description="Port that produces tuples.", cardinality=1, optional=false, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free), @OutputPortSet(description="Optional output ports", optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
 @Libraries(value = {"impl/lib/*"})
 public class MqttSourceOperator extends AbstractOperator {
 	
 	private static Logger LOGGER = Logger.getLogger(MqttSourceOperator.class);
 	
+	// Parameters
 	private List<String> topics;
 	private int[] qos;
-
-	private String serverUri; 
+	private String serverUri;
+	private String topicOutAttrName;
 	
 
 	private MqttClientWrapper mqttWrapper;
@@ -189,6 +190,12 @@ public class MqttSourceOperator extends AbstractOperator {
 			StreamingOutput<OutputTuple> outputPort = getOutput(0);
 			OutputTuple tuple = outputPort.newTuple();
 			tuple.setBlob(0, ValueFactory.newBlob(blob));
+			
+			if (topicOutAttrName != null)
+			{
+				tuple.setString(topicOutAttrName, record.topic);
+			}
+			
 			outputPort.submit(tuple);
         }
     }
@@ -241,5 +248,14 @@ public class MqttSourceOperator extends AbstractOperator {
 
 	public String getServerUri() {
 		return serverUri;
+	}
+	
+	 @Parameter(name="topicOutAttrName", description="Output attribute on output data stream to assign message topic to.", optional=true)
+	public void setTopicOutAttrName(String topicOutAttrName) {
+		this.topicOutAttrName = topicOutAttrName;
+	}
+	
+	public String getTopicOutAttrName() {
+		return topicOutAttrName;
 	}
 }
