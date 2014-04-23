@@ -22,15 +22,20 @@ import org.apache.log4j.Logger;
 
 import com.ibm.streams.operator.AbstractOperator;
 import com.ibm.streams.operator.OperatorContext;
+import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.StreamingData.Punctuation;
 import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.Tuple;
+import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.InputPortSet;
 import com.ibm.streams.operator.model.InputPortSet.WindowMode;
 import com.ibm.streams.operator.model.InputPortSet.WindowPunctuationInputMode;
+import com.ibm.streams.operator.model.OutputPortSet.WindowPunctuationOutputMode;
 import com.ibm.streams.operator.model.InputPorts;
 import com.ibm.streams.operator.model.Libraries;
+import com.ibm.streams.operator.model.OutputPortSet;
+import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
 import com.ibm.streams.operator.types.Blob;
@@ -57,11 +62,11 @@ import com.ibm.streams.operator.types.Blob;
 @PrimitiveOperator(name="MQTTSink", namespace="com.ibm.streamsx.messaging.mqtt",
 description="Java Operator MqttSinkOperator")
 @InputPorts({@InputPortSet(description="Port that ingests tuples.", cardinality=1, optional=false, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious), @InputPortSet(description="Optional input ports", optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
-@Libraries(value = {"impl/lib/*"})
+@OutputPorts({@OutputPortSet(description="Optional error output port.", cardinality=1, optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
+@Libraries(value = {"opt/mqtt/*"} )
 public class MqttSinkOperator extends AbstractOperator {
 	 
 	private static Logger TRACE = Logger.getLogger(MqttSinkOperator.class);
-
 	
 	// Parameters
 	private String topic;
@@ -70,6 +75,8 @@ public class MqttSinkOperator extends AbstractOperator {
 	private int reconnectionBound = 5;		// default 5, 0 = no retry, -1 = infinite retry
 	private float period = 5000;
 	private boolean retain = false;
+	
+	private String topicAttributeName;
 
 	private MqttClientWrapper mqttWrapper;
 	
@@ -86,13 +93,28 @@ public class MqttSinkOperator extends AbstractOperator {
 				// publish tuple in the background thread
 				// max 50 tuples in flight
 				try {
-					Tuple tuple = tupleQueue.take();
-					Blob blockMsg = tuple.getBlob(0);
-			        InputStream inputStream = blockMsg.getInputStream();
-			        int length = (int) blockMsg.getLength();
-			        byte[] byteArray = new byte[length];
-			        inputStream.read(byteArray, 0, length);
-			        mqttWrapper.publish(topic, qos, byteArray, retain);
+					
+					Tuple tuple = tupleQueue.take();	
+					
+					String pubTopic = topic;
+					
+					if (topicAttributeName != null)
+					{
+						pubTopic = tuple.getString(topicAttributeName);
+					}
+					
+					if (pubTopic != null && pubTopic.length() > 0){
+						Blob blockMsg = tuple.getBlob(0);
+				        InputStream inputStream = blockMsg.getInputStream();
+				        int length = (int) blockMsg.getLength();
+				        byte[] byteArray = new byte[length];
+				        inputStream.read(byteArray, 0, length);
+				        mqttWrapper.publish(pubTopic, qos, byteArray, retain);
+					}
+					else
+					{
+						TRACE.log(TraceLevel.ERROR, "Topic to publish is empty, unable to publish message.");
+					}
 					
 				} catch (InterruptedException e) {
 				
@@ -100,7 +122,30 @@ public class MqttSinkOperator extends AbstractOperator {
 
 				}
 			}			
+		}		
+	}
+	
+	@ContextCheck(compile=true, runtime=false)
+	public static boolean compileCheckTopic(OperatorContextChecker checker)
+	{
+		OperatorContext context = checker.getOperatorContext();
+		
+		// check the topic and topicAttributeName parameters are mutually exclusive
+		boolean check = checker.checkExcludedParameters("topic", "topicAttrName") &&
+				checker.checkExcludedParameters("topicAttrName", "topic");
+		
+		// check that at least one of topic or topicAttributeName parameter is specified
+		Set<String> parameterNames = context.getParameterNames();		
+		boolean hasTopic = parameterNames.contains("topic") || parameterNames.contains("topicAttrName");
+		
+		if (!hasTopic)
+		{
+			checker.setInvalidContext("At least one of the following attributes must be specified: topic, topicAttrName", null);
 		}
+		
+		check = check & hasTopic;
+		
+		return check;
 		
 	}
 	
@@ -239,9 +284,14 @@ public class MqttSinkOperator extends AbstractOperator {
         super.shutdown();
     }
 
-    @Parameter(name="topic", description="Topic to publish to.", optional=false)
+    @Parameter(name="topic", description="Topic to publish to.  This parameter is mutually exclusive with the \\\"topicAttributeName\\\" parameter.", optional=true)
 	public void setTopics(String topic) {
 		this.topic = topic;
+		
+		if (topic.startsWith("$"))
+		{
+			topicAttributeName = topic.substring(1);
+		}
 	}
 
     @Parameter(name="qos", description="Qos to publish to.", optional=true)
@@ -291,6 +341,15 @@ public class MqttSinkOperator extends AbstractOperator {
 	@Parameter(name="retain", description="Indicates if messages should be retained on the MQTT server.  Default is false.", optional=true)
 	public void setRetain(boolean retain) {
 		this.retain = retain;
+	}
+	
+	@Parameter(name="topicAttrName", description="Attribute that contains the topic to publish the message with.  This parameter is mutually exclusive with the \\\"topic\\\" parameter.", optional=true)
+	public void setTopicAttrName(String topicAttr) {
+		this.topicAttributeName = topicAttr;
+	}
+	
+	public String getTopicAttrName() {
+		return topicAttributeName;
 	}
 	
 	
