@@ -6,7 +6,7 @@
 # disclosure restricted by GSA ADP Schedule Contract with
 # IBM Corp.
 -->
-<project name="com.ibm.streamsx.inet" basedir="." default="all">
+<project name="com.ibm.streamsx.messaging" basedir="." default="all">
 
 	<property environment="env" />
 	<property name="streams.install" value="${env.STREAMS_INSTALL}" />
@@ -20,7 +20,7 @@
 	<property name="test.build.dir" value="${test.run.dir}/bin" />
 	<property name="ext.downloads.dir" value="opt/downloaded" />
 	<property name="mqtt.dir" value="opt/mqtt" />
-	<property name="jarfile" value="com.ibm.streamsx.inet.jar" />
+	<property name="jarfile" value="com.ibm.streamsx.messaging.jar" />
 	<property name="spl-mt" value="${streams.install}/bin/spl-make-toolkit" />
 	
 	<target name="init">
@@ -100,38 +100,6 @@
 		</jar>
 		<delete dir="${build.dir}" />
 	</target>
-
-        <!-- assumes Junit 4.3 (or later) is in $HOME/.ant/lib -->
-	<target name="test" depends="jar">
-		<mkdir dir="${test.run.dir}"/>
-		<mkdir dir="${test.build.dir}"/>
-		
-		<javac srcdir="${src.dir}" destdir="${test.build.dir}" debug="true"
-			includeantruntime="yes"
-			includes="com/ibm/streamsx/inet/rest/test/**">
-			<classpath>
-				<pathelement location="${impl.lib.dir}/${jarfile}"/>
-				<path refid="cp.streams" />
-			</classpath>
-		</javac>
-	
-		  <junit printsummary="yes" haltonfailure="yes" >
-		      <classpath>
-		        <pathelement location="${test.build.dir}"/>
-		        <pathelement location="${impl.lib.dir}/${jarfile}"/>
-		        <path refid="cp.streams" />
-		      </classpath>
-
-		      <formatter type="xml"/>
-		        
-		      <batchtest todir="${test.run.dir}">
-		        <fileset dir="${src.dir}">
-		          <include name="**/*Test.java"/>
-		        </fileset>
-		      </batchtest>
-		    </junit>
-
-		</target>
 
 </project>
 
