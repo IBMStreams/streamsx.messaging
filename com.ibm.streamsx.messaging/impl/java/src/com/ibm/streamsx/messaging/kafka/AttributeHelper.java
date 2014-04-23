@@ -6,6 +6,8 @@
 //
 package com.ibm.streamsx.messaging.kafka;
 
+import java.nio.charset.Charset;
+
 import com.ibm.streams.operator.Attribute;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamSchema;
@@ -23,24 +25,19 @@ class AttributeHelper {
 		this.name = n;
 	}
 	
-	public boolean isWasSet() {
+	boolean isWasSet() {
 		return wasSet;
 	}
-
 	
-	public boolean isAvailable() {
+	boolean isAvailable() {
 		return isAvailable;
 	}
 
-	public MetaType getmType() {
-		return mType;
-	}
-
-	public String getName() {
+	String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	void setName(String name) {
 		this.name = name;
 		wasSet = true;
 	}
@@ -54,15 +51,13 @@ class AttributeHelper {
 				throw new IllegalArgumentException("Attribute not found for \"" + name + "\".");
 			return;
 		}
-		setType(a.getType().getMetaType());
-		isAvailable = true;
-	}
-	private void setType(MetaType mt) throws Exception {
-		this.mType = mt;
+		this.mType = a.getType().getMetaType();
 		if(mType != Type.MetaType.RSTRING && mType!= Type.MetaType.USTRING){
 			throw new Exception("Attribute \"" + name + "\" must be of RSTRING or USTRING type.");
 		}
+		isAvailable = true;
 	}
+	
 	void setValue(OutputTuple otup, String value) {
 		if(!isAvailable) return;
 		otup.setString(name, value);
@@ -71,8 +66,12 @@ class AttributeHelper {
 		if(!isAvailable) return;
 		otup.setString(name, new String(value));
 	}
-	String getValue(Tuple tuple) {
+	String getString(Tuple tuple) {
 		if(!isAvailable) return null;
 		return tuple.getString(name);
+	}
+	byte[] getBytes(Tuple tuple) {
+		if(!isAvailable) return null;
+		return tuple.getString(name).getBytes(Charset.forName("UTF-8"));
 	}
 }

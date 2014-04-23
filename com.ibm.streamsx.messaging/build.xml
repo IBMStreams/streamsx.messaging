@@ -10,7 +10,7 @@
   	
  <property environment="env"/>
  <property name="streams.install" value="${env.STREAMS_INSTALL}"/>
- <property name="maven.bin" value="${env.MAVEN_BIN}" />
+ <property name="maven.bin" value="${env.M2_HOME}/bin/mvn" />
  <property name="kafka.home" value="${env.KAFKA_HOME}"/>
  <property name="streams.op.jar" value="${streams.install}/lib/com.ibm.streams.operator.jar"/>
  <property name="src.dir" value="${basedir}/impl/java/src"/>
@@ -23,7 +23,7 @@
 
  <target name="all" depends="jar, spl"/>
  <target name="init">
-    <fail unless="env.MAVEN_BIN" message="Environment variable MAVEN_BIN not set."/>
+    <fail unless="env.M2_HOME" message="Environment variable M2_HOME not set."/>
     <mkdir dir="${build.dir}"/>
     <mkdir dir="${lib.dir}"/>
     <mkdir dir="${ext.downloads.dir}"/> 
