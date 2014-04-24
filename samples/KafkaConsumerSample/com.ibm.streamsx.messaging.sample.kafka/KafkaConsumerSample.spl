@@ -1,0 +1,30 @@
+// *******************************************************************************
+// * Copyright (C)2014, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************
+namespace com.ibm.streamsx.messaging.sample.kafka;
+
+use com.ibm.streamsx.messaging.kafka::KafkaSource ;
+
+/**
+ * Simple example of an using [KafkaReceiver] as a Kafka Consumer
+ * 
+ */
+composite KafkaConsumer
+{
+	graph
+		stream<rstring key, rstring message> KafkaStream = KafkaReceiver()
+		{
+			param
+				propertiesFile : "consumer.properties";
+				topic : "mytopic";
+		}
+
+		() as SinkOp = Custom(KafkaStream) {
+		logic onTuple KafkaStream : 
+			println("Message: " + (rstring)KafkaStream);
+		}
+}
+
+
+

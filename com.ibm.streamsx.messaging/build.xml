@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+// *******************************************************************************
+// * Copyright (C)2014, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************
+-->
+<project name="com.ibm.streamsx.messaging" basedir="." default="all">
+
+	<property environment="env" />
+	<property name="streams.install" value="${env.STREAMS_INSTALL}" />
+	<property name="maven.bin" value="${env.M2_HOME}/bin/mvn" />
+
+	<property name="src.dir" value="impl/java/src" />
+	<property name="build.dir" value="impl/java/classes" />
+	<property name="impl.lib.dir" value="impl/lib" />
+	<property name="lib.dir" value="lib" />
+	<property name="test.run.dir" value="tests" />
+	<property name="test.build.dir" value="${test.run.dir}/bin" />
+	<property name="ext.downloads.dir" value="opt/downloaded" />
+	<property name="mqtt.dir" value="opt/mqtt" />
+	<property name="jarfile" value="com.ibm.streamsx.messaging.jar" />
+	<property name="spl-mt" value="${streams.install}/bin/spl-make-toolkit" />
+	
+	<target name="init">
+		<fail unless="env.M2_HOME" 
+			message="Environment variable M2_HOME not set. Please set this to point to the path of maven home directory"/>
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${lib.dir}" />
+		<mkdir dir="${impl.lib.dir}" />
+		<mkdir dir="${ext.downloads.dir}" />
+	</target>
+
+	<target name="clean" depends="cpp-clean">
+		<delete dir="${build.dir}" />
+		<delete dir="${impl.lib.dir}" />
+		<delete dir="${ext.downloads.dir}" />
+		<delete dir="output"/>
+		<delete dir="impl/java/bin"/>
+		<delete dir="${test.run.dir}"/>
+		<delete dir="${test.build.dir}"/>
+	</target>
+
+
+	<path id="cp.streams">
+		<pathelement location="${streams.install}/lib/com.ibm.streams.operator.samples.jar" />
+	</path>
+
+	<path id="cp.ext.libs">
+		<fileset dir="${ext.downloads.dir}"/>
+	</path>
+	<path id="cp.mqtt">
+		<fileset dir="${mqtt.dir}"/>
+	</path>
+
+
+	<path id="cp.compile">
+		<path refid="cp.streams" />
+		<path refid="cp.ext.libs" />
+		<path refid="cp.mqtt" />
+	</path>
+	
+	<target name="all" depends="jar,cpp"/>
+	
+	<target name="cpp">
+		<exec executable="${spl-mt}" failonerror="true">
+			<arg value="-i"/>
+			<arg value="."/>
+	    </exec>
+	</target>
+
+	<target name="cpp-clean">
+		<exec executable="${spl-mt}"  failonerror="true">
+			<arg value="-c"/>
+			<arg value="-i"/>
+			<arg value="."/>
+    </exec>
+	</target>
+
+	<!-- Downloads libraries using maven -->
+	<target name="maven-deps">
+		<exec executable="${maven.bin}"  failonerror="true">
+			<arg value="dependency:copy-dependencies"/>
+			<arg value="-DoutputDirectory=${ext.downloads.dir}"/>
+	    </exec>
+	</target>
+	
+
+	<target name="compile" depends="init, maven-deps">
+		<javac srcdir="${src.dir}" destdir="${build.dir}" debug="true"
+			includeantruntime="no"
+			excludes="com/ibm/streamsx/messaging/**/*$StreamsModel.java">
+			<classpath>
+				<path refid="cp.compile" />
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar destfile="${impl.lib.dir}/${jarfile}" basedir="${build.dir}" includes="com/ibm/streamsx/messaging/**" filesonly="true">
+		</jar>
+		<delete dir="${build.dir}" />
+	</target>
+
+</project>
+

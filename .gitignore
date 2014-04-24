@@ -1,0 +1,45 @@
+# streams-specific excludes
+toolkit.xml
+impl/nl/include/*.h
+*.pm
+.toolkitList
+.settings
+doc
+# If you want to include a perl module, do
+# !foo.pm
+
+/com.ibm.streamsx.messaging/doc/
+/com.ibm.streamsx.messaging/.settings
+samples/*/output
+samples/*/toolkit.xml
+/samples/*/doc
+
+## java excludes
+*.class
+
+# exclude generated Java primitive operator model files
+*$StreamsModel.java
+
+# Package Files #
+com.ibm.streamsx.messaging/lib/*.jar
+com.ibm.streamsx.messaging/impl/lib/*.jar
+*.war
+*.ear
+
+## C++ excludes
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# temporary directories
+tmp

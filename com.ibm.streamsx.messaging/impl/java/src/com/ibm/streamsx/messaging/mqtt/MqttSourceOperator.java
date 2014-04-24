@@ -49,7 +49,7 @@ import com.ibm.streams.operator.types.ValueFactory;
 @PrimitiveOperator(name="MQTTSource", namespace="com.ibm.streamsx.messaging.mqtt",
 description="Java Operator MqttSourceOperator")
 @OutputPorts({@OutputPortSet(description="Port that produces tuples.", cardinality=1, optional=false, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free), @OutputPortSet(description="Optional output ports", optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
-@Libraries(value = {"impl/lib/*"})
+@Libraries(value = {"opt/mqtt/*"})
 public class MqttSourceOperator extends AbstractOperator {
 	
 	private static Logger LOGGER = Logger.getLogger(MqttSourceOperator.class);

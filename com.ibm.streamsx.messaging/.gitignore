@@ -1,1 +1,5 @@
 /output
+com.ibm.streamsx.messaging.kafka
+com.ibm.streamsx.messaging.mqtt
+impl/lib
+opt/downloaded
