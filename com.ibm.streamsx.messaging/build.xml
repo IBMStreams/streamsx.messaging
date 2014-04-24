@@ -89,7 +89,7 @@
 	<target name="compile" depends="init, maven-deps">
 		<javac srcdir="${src.dir}" destdir="${build.dir}" debug="true"
 			includeantruntime="no"
-			excludes="com/ibm/streamsx/messaging/**/*StreamsModel.java">
+			excludes="com/ibm/streamsx/messaging/**/*$StreamsModel.java">
 			<classpath>
 				<path refid="cp.compile" />
 			</classpath>
