@@ -2,7 +2,6 @@
 <classpath>
 	<classpathentry kind="src" output="impl/java/bin" path="impl/java/src"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="impl/lib/mqtt-client-0.4.1-20140324.080940-25.jar" sourcepath="impl/lib/mqtt-client-0.4.1-20140324.080940-25-sources.jar"/>
 	<classpathentry kind="con" path="com.ibm.streams.java/com.ibm.streams.operator"/>
 	<classpathentry kind="lib" path="opt/downloaded/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/jline-0.9.94.jar"/>
@@ -18,5 +17,6 @@
 	<classpathentry kind="lib" path="opt/downloaded/snappy-java-1.0.5.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/zkclient-0.3.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/zookeeper-3.3.4.jar"/>
+	<classpathentry kind="lib" path="opt/mqtt/mqtt-client-0.4.1-20140324.080940-25.jar"/>
 	<classpathentry kind="output" path="impl/java/bin"/>
 </classpath>

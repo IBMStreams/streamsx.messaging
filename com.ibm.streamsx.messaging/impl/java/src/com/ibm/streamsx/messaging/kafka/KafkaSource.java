@@ -19,7 +19,7 @@ import com.ibm.streams.operator.model.PrimitiveOperator;
 
 @OutputPorts(@OutputPortSet(cardinality=1, optional=false, 
 	description="Messages received from Kafka are sent on this output port."))
-@PrimitiveOperator(description=KafkaSource.DESC)
+@PrimitiveOperator(name="KafkaReceiver", description=KafkaSource.DESC)
 public class KafkaSource extends KafkaBaseOper {
 
 	private int threadsPerTopic = 1;
@@ -34,9 +34,6 @@ public class KafkaSource extends KafkaBaseOper {
 
 		if(threadsPerTopic < 1) 
 			throw new IllegalArgumentException("Number of threads per topic cannot be less than one: " + threadsPerTopic);
-		if(context.getStreamingOutputs().size() != 1) {
-			throw new Exception("Exactly one output port supported");
-		}
 	}
 
 	@Override
@@ -60,8 +57,8 @@ public class KafkaSource extends KafkaBaseOper {
 
 	public static final String DESC = 
 			"This operator acts as a Kafka consumer recieving messages for one or more topics. " +
-					"Note that there may be multiple threads receiving messages depending on the configuration specified. " +
-					"Ordering of messages is not guaranteed."
+			"Note that there may be multiple threads receiving messages depending on the configuration specified. " +
+			"Ordering of messages is not guaranteed."
 					;
 
 }

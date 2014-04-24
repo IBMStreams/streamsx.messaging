@@ -1,3 +1,9 @@
+<!--
+// *******************************************************************************
+// * Copyright (C)2014, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************
+-->
 <project name="streamsx.messaging" default="all" basedir=".">
     <description>
         Build file for streamsx.messaging project, built the toolkits and samples.

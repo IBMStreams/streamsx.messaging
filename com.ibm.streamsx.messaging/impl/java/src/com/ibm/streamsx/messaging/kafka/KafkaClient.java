@@ -192,6 +192,4 @@ class KafkaClient {
 			logger.log(TraceLevel.INFO,baseMsg + "Thread Stopping");
 		}
 	}
-	
-	
 }

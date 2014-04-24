@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-# Licensed Materials - Property of IBM
-# Copyright IBM Corp. 2011, 2013
-# US Government Users Restricted Rights - Use, duplication or
-# disclosure restricted by GSA ADP Schedule Contract with
-# IBM Corp.
+// *******************************************************************************
+// * Copyright (C)2014, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************
 -->
 <project name="com.ibm.streamsx.messaging" basedir="." default="all">
 
@@ -37,6 +36,7 @@
 		<delete dir="${impl.lib.dir}" />
 		<delete dir="${ext.downloads.dir}" />
 		<delete dir="output"/>
+		<delete dir="impl/java/bin"/>
 		<delete dir="${test.run.dir}"/>
 		<delete dir="${test.build.dir}"/>
 	</target>
@@ -88,7 +88,8 @@
 
 	<target name="compile" depends="init, maven-deps">
 		<javac srcdir="${src.dir}" destdir="${build.dir}" debug="true"
-			includeantruntime="no">
+			includeantruntime="no"
+			excludes="com/ibm/streamsx/messaging/**/*StreamsModel.java">
 			<classpath>
 				<path refid="cp.compile" />
 			</classpath>

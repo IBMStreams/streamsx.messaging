@@ -1,16 +1,14 @@
-/*
-# Licensed Materials - Property of IBM
-# Copyright IBM Corp. 2011, 2012 
-# US Government Users Restricted Rights - Use, duplication or
-# disclosure restricted by GSA ADP Schedule Contract with
-# IBM Corp.
-*/
+// *******************************************************************************
+// * Copyright (C)2014, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************
+//
 namespace com.ibm.streamsx.messaging.sample.kafka;
 
 use com.ibm.streamsx.messaging.kafka::KafkaSink ;
 
 /**
- * Example of an using [KafkaSink] as a Kafka Producer
+ * Example of an using [KafkaSender] as a Kafka Producer
  * This assumes that the topic has already been created
  * 
  */
@@ -27,7 +25,7 @@ composite KafkaProducer
 		}
 
 
-		() as KafkaSinkOp = KafkaSink(OutputStream) {
+		() as KafkaSinkOp = KafkaSender(OutputStream) {
 			param
 				propertiesFile : "producer.properties";
 		}
