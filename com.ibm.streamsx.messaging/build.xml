@@ -12,13 +12,14 @@
 	<property name="maven.bin" value="${env.M2_HOME}/bin/mvn" />
 
 	<property name="src.dir" value="impl/java/src" />
-	<property name="build.dir" value="impl/java/classes" />
+	<property name="build.dir" value="impl/java/bin" />
 	<property name="impl.lib.dir" value="impl/lib" />
 	<property name="lib.dir" value="lib" />
 	<property name="test.run.dir" value="tests" />
 	<property name="test.build.dir" value="${test.run.dir}/bin" />
 	<property name="ext.downloads.dir" value="opt/downloaded" />
 	<property name="mqtt.dir" value="opt/mqtt" />
+	<property name="gensrc.dir" value="impl/java/src-gen" />
 	<property name="jarfile" value="com.ibm.streamsx.messaging.jar" />
 	<property name="spl-mt" value="${streams.install}/bin/spl-make-toolkit" />
 	
@@ -29,6 +30,7 @@
 		<mkdir dir="${lib.dir}" />
 		<mkdir dir="${impl.lib.dir}" />
 		<mkdir dir="${ext.downloads.dir}" />
+		<mkdir dir="${gensrc.dir}" />
 	</target>
 
 	<target name="clean" depends="cpp-clean">
@@ -39,6 +41,7 @@
 		<delete dir="impl/java/bin"/>
 		<delete dir="${test.run.dir}"/>
 		<delete dir="${test.build.dir}"/>
+		<delete dir="${gensrc.dir}"/>
 	</target>
 
 
@@ -93,14 +96,13 @@
 			<classpath>
 				<path refid="cp.compile" />
 			</classpath>
+			<compilerarg line="-s ${gensrc.dir}"/>
 		</javac>
 	</target>
 
 	<target name="jar" depends="compile">
-		<jar destfile="${impl.lib.dir}/${jarfile}" basedir="${build.dir}" includes="com/ibm/streamsx/messaging/**" filesonly="true">
-		</jar>
-		<delete dir="${build.dir}" />
-		
+	<jar destfile="${impl.lib.dir}/${jarfile}" basedir="${build.dir}" includes="com/ibm/streamsx/messaging/**" filesonly="true" excludes="com/ibm/streamsx/messaging/**/*$StreamsModel.class" >
+		</jar>		
 	</target>
 
 </project>
