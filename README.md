@@ -5,15 +5,5 @@ The IBMStreams/streamsx.messaging toolkit project is an open source Streams tool
 
 
 
- To get started with building the toolkit:
- 
- 1)  Download and install Maven on your system
- 
- 2)  export M2_HOME="where you have installed maven"
- 
- 2)  At the command line, go to the root of the messaging toolkit
- 
- 3)  Type "ant"
- 
- 
- This would invoke the Ant script, which in turn, will invoke Maven.  Maven is used to download all dependencies needed for the toolkit.  After dependencies are downloaded, the Ant script will proceed to build the java files required to build the toolkit.
+ To get started with working with this toolkit:
+ https://github.com/IBMStreams/streamsx.messaging/wiki/Getting-Started-with-Developing-Messaging-Toolkit
