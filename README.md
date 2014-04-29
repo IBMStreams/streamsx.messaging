@@ -11,7 +11,7 @@ The IBMStreams/streamsx.messaging toolkit project is an open source Streams tool
  
  2)  At the command line, go to the root of the messaging toolkit
  
- 3)  Type "ant"
+ 3)  Type "ant all"
  
  
- This would invoke the Ant script, which in turn, will invoke Maven.  Maven is used to download all dependencies needed for the toolkit.  After dependencies are downloadd, the Ant script will proceed to build the java files required to buidl the toolkit.
+ This would invoke the Ant script, which in turn, will invoke Maven.  Maven is used to download all dependencies needed for the toolkit.  After dependencies are downloaded, the Ant script will proceed to build the java files required to build the toolkit.
