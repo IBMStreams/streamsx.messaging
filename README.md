@@ -9,7 +9,7 @@ The IBMStreams/streamsx.messaging toolkit project is an open source Streams tool
  
  1)  Download and install Maven on your system
  
- 2)  export M2_HOME=<where you have installed maven>
+ 2)  export M2_HOME="where you have installed maven"
  
  2)  At the command line, go to the root of the messaging toolkit
  
