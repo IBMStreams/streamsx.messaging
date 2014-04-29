@@ -101,8 +101,9 @@
 	</target>
 
 	<target name="jar" depends="compile">
-	<jar destfile="${impl.lib.dir}/${jarfile}" basedir="${build.dir}" includes="com/ibm/streamsx/messaging/**" filesonly="true" excludes="com/ibm/streamsx/messaging/**/*$StreamsModel.class" >
-		</jar>		
+	<jar destfile="${impl.lib.dir}/${jarfile}" basedir="${build.dir}" includes="com/ibm/streamsx/messaging/**" filesonly="true" >
+		</jar>
+		<delete dir="${build.dir}" />		
 	</target>
 
 </project>
