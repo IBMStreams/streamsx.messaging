@@ -19,7 +19,7 @@
 	<property name="test.build.dir" value="${test.run.dir}/bin" />
 	<property name="ext.downloads.dir" value="opt/downloaded" />
 	<property name="mqtt.dir" value="opt/mqtt" />
-	<property name="gensrc.dir" value="impl/java/src-gen" />
+	<property name="gensrc.dir" value="${basedir}/impl/java/src-gen" />
 	<property name="jarfile" value="com.ibm.streamsx.messaging.jar" />
 	<property name="spl-mt" value="${streams.install}/bin/spl-make-toolkit" />
 	

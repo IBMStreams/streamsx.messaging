@@ -3,13 +3,11 @@ toolkit.xml
 impl/nl/include/*.h
 *.pm
 .toolkitList
-.settings
 doc
 # If you want to include a perl module, do
 # !foo.pm
 
 /com.ibm.streamsx.messaging/doc/
-/com.ibm.streamsx.messaging/.settings
 samples/*/output
 samples/*/toolkit.xml
 /samples/*/doc
