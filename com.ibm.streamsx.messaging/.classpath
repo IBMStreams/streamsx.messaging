@@ -18,10 +18,5 @@
 	<classpathentry kind="lib" path="opt/downloaded/zkclient-0.3.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/zookeeper-3.3.4.jar"/>
 	<classpathentry kind="lib" path="opt/mqtt/mqtt-client-0.4.1-20140324.080940-25.jar"/>
-	<classpathentry kind="src" output="impl/java/bin" path="impl/java/src-gen">
-		<attributes>
-			<attribute name="optional" value="true"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="output" path="impl/java/bin"/>
 </classpath>
