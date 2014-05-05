@@ -34,7 +34,7 @@ public class MqttClientWrapper implements MqttCallback {
 	private static final Logger LOG = Logger.getLogger(LoggerNames.LOG_FACILITY + "." + MqttAsyncClientWrapper.class.getName());
 	
 	private String brokerUri;
-	private MqttClient mqttClient;
+	private MqttClient mqttClient; 
 	private MqttConnectOptions conOpt;
 	
 	private ArrayList<MqttCallback> callBackListeners;

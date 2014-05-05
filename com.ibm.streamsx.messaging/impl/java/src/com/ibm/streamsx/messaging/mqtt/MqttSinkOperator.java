@@ -75,8 +75,8 @@ public class MqttSinkOperator extends AbstractOperator {
 	private int reconnectionBound = 5;		// default 5, 0 = no retry, -1 = infinite retry
 	private float period = 5000;
 	private boolean retain = false;
-	
 	private String topicAttributeName;
+	private String qosAttributeName;
 
 	private MqttClientWrapper mqttWrapper;
 	
@@ -104,7 +104,13 @@ public class MqttSinkOperator extends AbstractOperator {
 						pubTopic = tuple.getString(topicAttributeName);
 					}
 					
-					if (pubTopic != null && pubTopic.length() > 0){
+					if (qosAttributeName != null)
+					{
+						msgQos = tuple.getInt(qosAttributeName);
+					}
+					
+					if (pubTopic != null && pubTopic.length() > 0
+						&& msgQos >= 0 && msgQos < 3){
 						Blob blockMsg = tuple.getBlob(0);
 				        InputStream inputStream = blockMsg.getInputStream();
 				        int length = (int) blockMsg.getLength();
@@ -114,7 +120,7 @@ public class MqttSinkOperator extends AbstractOperator {
 					}
 					else
 					{
-						TRACE.log(TraceLevel.ERROR, "Topic to publish is empty, unable to publish message.");
+						TRACE.log(TraceLevel.ERROR, Messages.getString("MqttSinkOperator.0", pubTopic, msgQos)); //$NON-NLS-1$
 					}
 					
 				} catch (InterruptedException e) {
@@ -132,16 +138,16 @@ public class MqttSinkOperator extends AbstractOperator {
 		OperatorContext context = checker.getOperatorContext();
 		
 		// check the topic and topicAttributeName parameters are mutually exclusive
-		boolean check = checker.checkExcludedParameters("topic", "topicAttrName") &&
-				checker.checkExcludedParameters("topicAttrName", "topic");
+		boolean check = checker.checkExcludedParameters("topic", "topicAttributeName") && //$NON-NLS-1$ //$NON-NLS-2$
+				checker.checkExcludedParameters("topicAttributeName", "topic"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		// check that at least one of topic or topicAttributeName parameter is specified
 		Set<String> parameterNames = context.getParameterNames();		
-		boolean hasTopic = parameterNames.contains("topic") || parameterNames.contains("topicAttrName");
+		boolean hasTopic = parameterNames.contains("topic") || parameterNames.contains("topicAttributeName"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		if (!hasTopic)
 		{
-			checker.setInvalidContext("At least one of the following attributes must be specified: topic, topicAttrName", null);
+			checker.setInvalidContext(Messages.getString("MqttSinkOperator.7"), null); //$NON-NLS-1$
 		}
 		
 		check = check & hasTopic;
@@ -160,7 +166,7 @@ public class MqttSinkOperator extends AbstractOperator {
 			throws Exception {
     	// Must call super.initialize(context) to correctly setup an operator.
 		super.initialize(context);
-        Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " initializing in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
+        Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " initializing in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         
        tupleQueue = new ArrayBlockingQueue<Tuple>(50);
        exService = Executors.newFixedThreadPool(2, context.getThreadFactory());
@@ -180,7 +186,7 @@ public class MqttSinkOperator extends AbstractOperator {
     	// This method is commonly used by source operators. 
     	// Operators that process incoming tuples generally do not need this notification. 
         OperatorContext context = getOperatorContext();
-        Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " all ports are ready in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
+        Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " all ports are ready in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         
         exService.execute(new PublishRunnable());        
     }
@@ -203,12 +209,12 @@ public class MqttSinkOperator extends AbstractOperator {
     	
     	// else if control input port
     	else {
-			TRACE.log(TraceLevel.DEBUG, "[Control Port:] Control Signal Received");
+			TRACE.log(TraceLevel.DEBUG, "[Control Port:] Control Signal Received"); //$NON-NLS-1$
 
     		// handle control signal to switch server
     		try {
 				Object object = tuple.getObject(0);
-				TRACE.log(TraceLevel.DEBUG, "[Control Port:] object: " + object + " " + object.getClass().getName());
+				TRACE.log(TraceLevel.DEBUG, "[Control Port:] object: " + object + " " + object.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
 
 				if (object instanceof Map)
 				{									
@@ -217,11 +223,11 @@ public class MqttSinkOperator extends AbstractOperator {
 					for (Iterator iterator = keySet.iterator(); iterator
 							.hasNext();) {
 						Object key = (Object) iterator.next();
-						TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + key + " " + key.getClass());
+						TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + key + " " + key.getClass()); //$NON-NLS-1$ //$NON-NLS-2$
 						
 						String serverUri = (String) map.get(key);						
 						
-						TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + IMqttConstants.CONN_SERVERURI + ":" + serverUri);
+						TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + IMqttConstants.CONN_SERVERURI + ":" + serverUri); //$NON-NLS-1$ //$NON-NLS-2$
 					
 						setServerUri(serverUri);
 						mqttWrapper.setBrokerUri(serverUri);
@@ -249,7 +255,7 @@ public class MqttSinkOperator extends AbstractOperator {
 //					mqttWrapper.disconnect();
 				}
 			} catch (Exception e) {
-				TRACE.log(TraceLevel.ERROR, "Unable to convert attribute 0 to a map.");
+				TRACE.log(TraceLevel.ERROR, Messages.getString("MqttSinkOperator.21")); //$NON-NLS-1$
 			}
     	}
     }
@@ -274,7 +280,7 @@ public class MqttSinkOperator extends AbstractOperator {
     @Override
     public synchronized void shutdown() throws Exception {
         OperatorContext context = getOperatorContext();
-        Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " shutting down in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
+        Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " shutting down in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                 
         shutdown = true;
         exService.shutdown();
@@ -289,7 +295,7 @@ public class MqttSinkOperator extends AbstractOperator {
 	public void setTopics(String topic) {
 		this.topic = topic;
 		
-		if (topic.startsWith("$"))
+		if (topic.startsWith("$")) //$NON-NLS-1$
 		{
 			topicAttributeName = topic.substring(1);
 		}
@@ -344,13 +350,22 @@ public class MqttSinkOperator extends AbstractOperator {
 		this.retain = retain;
 	}
 	
-	@Parameter(name="topicAttrName", description="Attribute that contains the topic to publish the message with.  This parameter is mutually exclusive with the \\\"topic\\\" parameter.", optional=true)
+	@Parameter(name="topicAttributeName", description="Attribute name that contains the topic to publish the message with.  This parameter is mutually exclusive with the \\\"topic\\\" parameter.", optional=true)
 	public void setTopicAttrName(String topicAttr) {
 		this.topicAttributeName = topicAttr;
 	}
 	
 	public String getTopicAttrName() {
 		return topicAttributeName;
+	}
+	
+	@Parameter(name="qosAttributeName", description="Attribute name that contains the qos to publish the message with.  This parameter is mutually exclusive with the \\\"qos\\\" parameter.", optional=true)
+	public void setQosAttributeName(String qosAttributeName) {
+		this.qosAttributeName = qosAttributeName;
+	}
+	
+	public String getQosAttributeName() {
+		return qosAttributeName;
 	}
 	
 	
