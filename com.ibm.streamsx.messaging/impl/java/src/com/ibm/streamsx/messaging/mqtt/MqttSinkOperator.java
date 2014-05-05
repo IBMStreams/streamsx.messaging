@@ -97,6 +97,7 @@ public class MqttSinkOperator extends AbstractOperator {
 					Tuple tuple = tupleQueue.take();	
 					
 					String pubTopic = topic;
+					int msgQos = qos;
 					
 					if (topicAttributeName != null)
 					{
@@ -109,7 +110,7 @@ public class MqttSinkOperator extends AbstractOperator {
 				        int length = (int) blockMsg.getLength();
 				        byte[] byteArray = new byte[length];
 				        inputStream.read(byteArray, 0, length);
-				        mqttWrapper.publish(pubTopic, qos, byteArray, retain);
+				        mqttWrapper.publish(pubTopic, msgQos, byteArray, retain);
 					}
 					else
 					{
