@@ -9,21 +9,32 @@
 package com.ibm.streamsx.messaging.mqtt;
 
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import com.ibm.streams.operator.AbstractOperator;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OutputTuple;
+import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.StreamingOutput;
+import com.ibm.streams.operator.Tuple;
+import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.Libraries;
 import com.ibm.streams.operator.model.OutputPortSet;
+import com.ibm.streams.operator.model.InputPortSet.WindowMode;
+import com.ibm.streams.operator.model.InputPortSet.WindowPunctuationInputMode;
 import com.ibm.streams.operator.model.OutputPortSet.WindowPunctuationOutputMode;
+import com.ibm.streams.operator.model.InputPortSet;
+import com.ibm.streams.operator.model.InputPorts;
 import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
@@ -48,17 +59,21 @@ import com.ibm.streams.operator.types.ValueFactory;
  */
 @PrimitiveOperator(name="MQTTSource", namespace="com.ibm.streamsx.messaging.mqtt",
 description="Java Operator MqttSourceOperator")
+@InputPorts({@InputPortSet(description="Optional input ports", optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
 @OutputPorts({@OutputPortSet(description="Port that produces tuples.", cardinality=1, optional=false, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free), @OutputPortSet(description="Optional output ports", optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
 @Libraries(value = {"opt/mqtt/*"})
 public class MqttSourceOperator extends AbstractOperator {
 	
-	private static Logger LOGGER = Logger.getLogger(MqttSourceOperator.class);
+	private static Logger TRACE = Logger.getLogger(MqttSourceOperator.class);
 	
 	// Parameters
 	private List<String> topics;
 	private int[] qos;
 	private String serverUri;
 	private String topicOutAttrName;
+	
+	private int reconnectionBound = IMqttConstants.DEFAULT_RECONNECTION_BOUND;		// default 5, 0 = no retry, -1 = infinite retry
+	private float period = IMqttConstants.DEFAULT_RECONNECTION_PERIOD;
 	
 
 	private MqttClientWrapper mqttWrapper;
@@ -87,7 +102,13 @@ public class MqttSourceOperator extends AbstractOperator {
 
 		@Override
 		public void connectionLost(Throwable cause) {
-				
+			try {
+				connectAndSubscribe();
+			} catch (MqttException e) {
+				TRACE.error("Reconnection failed.", e);
+			} catch (InterruptedException e) {
+				TRACE.error("Reconnection failed.", e);
+			}
 		}
 
 		@Override
@@ -122,19 +143,7 @@ public class MqttSourceOperator extends AbstractOperator {
         
         mqttWrapper = new MqttClientWrapper();
         mqttWrapper.setBrokerUri(serverUri);
-        mqttWrapper.connect();
-        mqttWrapper.addCallBack(callback);               
-        
-        // qos is an optional parameter, set up defaults if it is not specified
-        if (qos == null)
-        {
-        	qos = new int[topics.size()];
-        	for (int i = 0; i < qos.length; i++) {
-				qos[i] = 0;
-			}
-        }
-        
-        mqttWrapper.subscribe((String[])topics.toArray(new String[0]), qos);
+        connectAndSubscribe();
         
         /*
          * Create the thread for producing tuples. 
@@ -162,6 +171,22 @@ public class MqttSourceOperator extends AbstractOperator {
          */
         processThread.setDaemon(false);
     }
+
+	private void connectAndSubscribe() throws MqttException, InterruptedException {
+		mqttWrapper.connect(getReconnectionBound(), getPeriod());
+        mqttWrapper.addCallBack(callback);               
+        
+        // qos is an optional parameter, set up defaults if it is not specified
+        if (qos == null)
+        {
+        	qos = new int[topics.size()];
+        	for (int i = 0; i < qos.length; i++) {
+				qos[i] = 0;
+			}
+        }
+        
+        mqttWrapper.subscribe((String[])topics.toArray(new String[0]), qos);
+	}
 
     /**
      * Notification that initialization is complete and all input and output ports 
@@ -199,6 +224,57 @@ public class MqttSourceOperator extends AbstractOperator {
 			outputPort.submit(tuple);
         }
     }
+    
+    @Override
+    public void process(StreamingInput<Tuple> stream, Tuple tuple)
+    		throws Exception {
+    	handleControlSignal(tuple);
+    }
+    
+	private void handleControlSignal(Tuple tuple) {
+		// handle control signal to switch server
+		try {
+			Object object = tuple.getMap("mqttConfig");
+			TRACE.log(TraceLevel.DEBUG, "[Control Port:] object: " + object + " " + object.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
+
+			if (object instanceof Map)
+			{									
+				Map map = (Map)object;
+				Set keySet = map.keySet();
+				for (Iterator iterator = keySet.iterator(); iterator
+						.hasNext();) {
+					Object key = (Object) iterator.next();
+					TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + key + " " + key.getClass()); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					String keyStr = key.toString();
+					
+					// case insensitive checks
+					if (keyStr.toLowerCase().equals(IMqttConstants.CONN_SERVERURI.toLowerCase()))
+					{
+						Object serverUri = map.get(key);				
+						
+						String serverUriStr = serverUri.toString();
+						
+						// only handle if server URI has changed
+						if (!serverUriStr.toLowerCase().equals(getServerUri().toLowerCase()))
+						{						
+							TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + IMqttConstants.CONN_SERVERURI + ":" + serverUri); //$NON-NLS-1$ //$NON-NLS-2$
+						
+							setServerUri(serverUriStr);
+							mqttWrapper.setBrokerUri(serverUriStr);
+							
+							// disconnect and try to connect again.
+							// Disconnect is synchronous so wait for that to finish and attempt to connect.
+							mqttWrapper.disconnect();
+							connectAndSubscribe();	
+						}
+					}					
+				}
+			}
+		} catch (Exception e) {
+			TRACE.log(TraceLevel.ERROR, Messages.getString("MqttSinkOperator.21")); //$NON-NLS-1$
+		}
+	}
 
     /**
      * Shutdown this operator, which will interrupt the thread
@@ -257,5 +333,23 @@ public class MqttSourceOperator extends AbstractOperator {
 	
 	public String getTopicOutAttrName() {
 		return topicOutAttrName;
+	}
+	
+	@Parameter(name="reconnectionBound", description="Reconnection bound, 0 for no retry, n for n number of retries, -1 for inifinite retry.", optional=true)
+	public void setReconnectionBound(int reconnectionBound) {
+		this.reconnectionBound = reconnectionBound;
+	}
+	
+	@Parameter(name="period", description="Reconnection period, default is 60 s.", optional=true)
+	public void setPeriod(float period) {
+		this.period = period;
+	}
+	
+	public int getReconnectionBound() {
+		return reconnectionBound;
+	}
+	
+	public float getPeriod() {
+		return period;
 	}
 }

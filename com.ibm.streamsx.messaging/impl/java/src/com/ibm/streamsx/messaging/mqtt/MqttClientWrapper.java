@@ -8,7 +8,6 @@
  
 package com.ibm.streamsx.messaging.mqtt;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -192,7 +191,12 @@ public class MqttClientWrapper implements MqttCallback {
     	}
     	else if (mqttClient != null){
     		// make sure this client is disconnected
-    		disconnect();
+    		try {
+				disconnect();
+			} catch (MqttException e) {
+				// may get exception if client is already disconnected
+				// keep going
+			}
     		
     		connect(reconnectionBound, period);
     		
@@ -222,14 +226,10 @@ public class MqttClientWrapper implements MqttCallback {
     	mqttClient.subscribe(topics, qos);    	    	    
     }
 	
-    synchronized public void disconnect()
+    synchronized public void disconnect() throws MqttException
     {
     	TRACE.log(TraceLevel.INFO, "[Disconnect:] " + brokerUri); //$NON-NLS-1$
-    	try {
-			mqttClient.disconnect();			
-		} catch (MqttException e) {																												
-			TRACE.log(TraceLevel.ERROR, e);
-		}
+		mqttClient.disconnect();
     }
     
     public void addCallBack(MqttCallback callback)

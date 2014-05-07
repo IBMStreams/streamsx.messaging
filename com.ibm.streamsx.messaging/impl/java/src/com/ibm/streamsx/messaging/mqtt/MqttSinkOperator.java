@@ -72,8 +72,8 @@ public class MqttSinkOperator extends AbstractOperator {
 	private String topic;
 	private int qos = 0;
 	private String serverUri;
-	private int reconnectionBound = 5;		// default 5, 0 = no retry, -1 = infinite retry
-	private float period = 5000;
+	private int reconnectionBound = IMqttConstants.DEFAULT_RECONNECTION_BOUND;		// default 5, 0 = no retry, -1 = infinite retry
+	private float period = IMqttConstants.DEFAULT_RECONNECTION_PERIOD;
 	private boolean retain = false;
 	private String topicAttributeName;
 	private String qosAttributeName;
@@ -126,6 +126,7 @@ public class MqttSinkOperator extends AbstractOperator {
 				} catch (InterruptedException e) {
 				
 				} catch (Exception e) {
+					e.printStackTrace();
 
 				}
 			}			
@@ -211,54 +212,56 @@ public class MqttSinkOperator extends AbstractOperator {
     	else {
 			TRACE.log(TraceLevel.DEBUG, "[Control Port:] Control Signal Received"); //$NON-NLS-1$
 
-    		// handle control signal to switch server
-    		try {
-				Object object = tuple.getObject(0);
-				TRACE.log(TraceLevel.DEBUG, "[Control Port:] object: " + object + " " + object.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
-
-				if (object instanceof Map)
-				{									
-					Map map = (Map)object;
-					Set keySet = map.keySet();
-					for (Iterator iterator = keySet.iterator(); iterator
-							.hasNext();) {
-						Object key = (Object) iterator.next();
-						TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + key + " " + key.getClass()); //$NON-NLS-1$ //$NON-NLS-2$
-						
-						String serverUri = (String) map.get(key);						
-						
-						TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + IMqttConstants.CONN_SERVERURI + ":" + serverUri); //$NON-NLS-1$ //$NON-NLS-2$
-					
-						setServerUri(serverUri);
-						mqttWrapper.setBrokerUri(serverUri);
-						
-						// disconnect only
-						// when the publishh happens, the publish will detect that
-						// the connection is lost
-						// we will attempt to make the connection again before publishing
-						// again
-						mqttWrapper.disconnect();
-						
-					}
-//					String serverUri = (String)((Map)object).get(new RString("connection.serverURI"));
-//					
-//					TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + IMqttConstants.CONN_SERVERURI + ":" + serverUri);
-//				
-//					setServerUri(serverUri);
-//					mqttWrapper.setBrokerUri(serverUri);
-//					
-//					// disconnect only
-//					// when the publishh happens, the publish will detect that
-//					// the connection is lost
-//					// we will attempt to make the connection again before publishing
-//					// again
-//					mqttWrapper.disconnect();
-				}
-			} catch (Exception e) {
-				TRACE.log(TraceLevel.ERROR, Messages.getString("MqttSinkOperator.21")); //$NON-NLS-1$
-			}
+    		handleControlSignal(tuple);
     	}
     }
+
+	private void handleControlSignal(Tuple tuple) {
+		// handle control signal to switch server
+		try {
+			Object object = tuple.getObject(0);
+			TRACE.log(TraceLevel.DEBUG, "[Control Port:] object: " + object + " " + object.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
+
+			if (object instanceof Map)
+			{									
+				Map map = (Map)object;
+				Set keySet = map.keySet();
+				for (Iterator iterator = keySet.iterator(); iterator
+						.hasNext();) {
+					Object key = (Object) iterator.next();
+					TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + key + " " + key.getClass()); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					String keyStr = key.toString();
+					
+					// case insensitive checks
+					if (keyStr.toLowerCase().equals(IMqttConstants.CONN_SERVERURI.toLowerCase()))
+					{
+						Object serverUri = map.get(key);				
+						
+						String serverUriStr = serverUri.toString();
+						
+						// only handle if server URI has changed
+						if (!serverUriStr.toLowerCase().equals(getServerUri().toLowerCase()))
+						{						
+							TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + IMqttConstants.CONN_SERVERURI + ":" + serverUri); //$NON-NLS-1$ //$NON-NLS-2$
+						
+							setServerUri(serverUriStr);
+							mqttWrapper.setBrokerUri(serverUriStr);
+							
+							// disconnect only
+							// when the publish happens, the publish will detect that
+							// the connection is lost
+							// we will attempt to make the connection again before publishing
+							// again
+							mqttWrapper.disconnect();
+						}
+					}					
+				}
+			}
+		} catch (Exception e) {
+			TRACE.log(TraceLevel.ERROR, Messages.getString("MqttSinkOperator.21")); //$NON-NLS-1$
+		}
+	}
     
     /**
      * Process an incoming punctuation that arrived on the specified port.

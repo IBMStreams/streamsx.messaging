@@ -13,5 +13,7 @@ public interface IMqttConstants {
 	public static final String CONN_KEYSTORE = "connection.keyStore";
 	public static final String CONN_KEYSTORE_PASSWORD = "connection.keyStorePassword";
 	public static final String CONN_SERVERURI = "connection.serverURI";
+	public static final int DEFAULT_RECONNECTION_BOUND = 5;
+	public static final int DEFAULT_RECONNECTION_PERIOD = 5000;
 	
 }
