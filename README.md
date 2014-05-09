@@ -7,3 +7,5 @@ The IBMStreams/streamsx.messaging toolkit project is an open source Streams tool
 
  To get started with working with this toolkit:
 https://github.com/IBMStreams/streamsx.messaging/wiki/Getting-Started-with-Toolkit-Development
+
+Test Changes
