@@ -169,11 +169,11 @@ public class MqttClientWrapper implements MqttCallback {
 			mqttClient.connect(conOpt);			
 
 		} catch (MqttSecurityException e) {
-			TRACE.log(TraceLevel.ERROR, "[Connect:] Unable to connect to server", e); //$NON-NLS-1$
-			LOG.log(TraceLevel.ERROR, "[Connect:] Unable to connect to server", e); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR, Messages.getString("MqttClientWrapper.0"), e); //$NON-NLS-1$
+			LOG.log(TraceLevel.ERROR, Messages.getString("MqttClientWrapper.1"), e); //$NON-NLS-1$
 		} catch (MqttException e) {
-			TRACE.log(TraceLevel.ERROR,"[Connect:] Unable to connect to server", e); //$NON-NLS-1$
-			LOG.log(TraceLevel.ERROR, "[Connect:] Unable to connect to server", e); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR,Messages.getString("MqttClientWrapper.2"), e); //$NON-NLS-1$
+			LOG.log(TraceLevel.ERROR, Messages.getString("MqttClientWrapper.3"), e); //$NON-NLS-1$
 		}
 
 		return mqttClient.isConnected(); 
@@ -235,7 +235,7 @@ public class MqttClientWrapper implements MqttCallback {
     	
     	if (topics.length != qos.length)
     	{
-    		throw new RuntimeException("Number of topics must equal to number of qos entries."); //$NON-NLS-1$
+    		throw new RuntimeException(Messages.getString("MqttClientWrapper.4")); //$NON-NLS-1$
     	}
     	
     	if (TRACE.getLevel() == TraceLevel.INFO)
