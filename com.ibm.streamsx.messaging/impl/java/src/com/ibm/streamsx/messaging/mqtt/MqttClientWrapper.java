@@ -30,14 +30,14 @@ public class MqttClientWrapper implements MqttCallback {
 	private static final int COMMAND_TIMEOUT = 5000;
 
 	private static final Logger TRACE = Logger.getLogger(MqttAsyncClientWrapper.class);
-	private static final Logger LOG = Logger.getLogger(LoggerNames.LOG_FACILITY + "." + MqttAsyncClientWrapper.class.getName());
+	private static final Logger LOG = Logger.getLogger(LoggerNames.LOG_FACILITY + "." + MqttAsyncClientWrapper.class.getName()); //$NON-NLS-1$
 	
 	private String brokerUri;
 	private MqttClient mqttClient;
 	private MqttConnectOptions conOpt;
 	
 	private ArrayList<MqttCallback> callBackListeners;
-	private float period = 5000;
+	private long period = 5000;
 	private int reconnectionBound = 5;
  
 	private boolean shutdown; 
@@ -56,9 +56,9 @@ public class MqttClientWrapper implements MqttCallback {
 		TRACE.log(TraceLevel.DEBUG,"SetBrokerUri: " + brokerUri); //$NON-NLS-1$
 	
 		// default to tcp:// if no scheme is specified
-		if (!brokerUri.startsWith("tcp://") && !brokerUri.startsWith("ssl://"))
+		if (!brokerUri.startsWith("tcp://") && !brokerUri.startsWith("ssl://")) //$NON-NLS-1$ //$NON-NLS-2$
 		{
-			brokerUri = "tcp://" + brokerUri;
+			brokerUri = "tcp://" + brokerUri; //$NON-NLS-1$
 		}
 		
 		this.brokerUri = brokerUri;
@@ -93,7 +93,7 @@ public class MqttClientWrapper implements MqttCallback {
 		}
 	}
 	
-	synchronized public void connect(int reconnectionBound, float period) throws InterruptedException, MqttException {
+	synchronized public void connect(int reconnectionBound, long period) throws InterruptedException, MqttException {
 		
 		this.reconnectionBound = reconnectionBound;
 		this.period = period;
@@ -106,20 +106,43 @@ public class MqttClientWrapper implements MqttCallback {
 		TRACE.log(TraceLevel.INFO, "[Connect:] reconnectBound:" + reconnectionBound); //$NON-NLS-1$
 		TRACE.log(TraceLevel.INFO, "[Connect:] period:" + period); //$NON-NLS-1$
 		
-		mqttClient = new MqttClient(this.brokerUri, clientId, dataStore);
+		String uriToConnect = brokerUri;
+		mqttClient = new MqttClient(uriToConnect, clientId, dataStore);
 
-		if (reconnectionBound >= 0) {
+		if (reconnectionBound > 0) {
+			// Bounded retry
 			for (int i = 0; i < reconnectionBound && !shutdown; i++) {
-				boolean success = doConnectToServer(period, i);				
+				boolean success = doConnectToServer(i);				
 				if (success)
 					break;
-			}
-		} else {
-			// this will be an infinite loop
+				
+				// sleep for period before retrying 
+				Thread.sleep(period);
+				
+				if (!this.brokerUri.equals(uriToConnect)){
+					// URI has changed, abort retry
+					break;
+				}
+			}				
+		} else if (reconnectionBound == 0)
+		{
+			// no retry, so try to connect once
+			doConnectToServer(0);
+		}
+		else {
+			// Infinite retry
 			for (int i = 0; !shutdown; i++) {
-				boolean success = doConnectToServer(period, i);
+				boolean success = doConnectToServer(i);
 				if (success)
 					break;
+				
+				// sleep for period before retrying
+				Thread.sleep(period);
+				
+				if (!this.brokerUri.equals(uriToConnect)){
+					// URI has changed, abort retry
+					break;
+				}
 			}
 		}
 		if (mqttClient.isConnected()) {
@@ -138,7 +161,7 @@ public class MqttClientWrapper implements MqttCallback {
 	 * @return
 	 * @throws InterruptedException
 	 */
-	private boolean doConnectToServer(float period, int i)
+	private boolean doConnectToServer(int i) 
 			throws InterruptedException {
 
 		try {
@@ -146,14 +169,14 @@ public class MqttClientWrapper implements MqttCallback {
 			mqttClient.connect(conOpt);			
 
 		} catch (MqttSecurityException e) {
-			TRACE.log(TraceLevel.ERROR, Messages.getString("MqttAsyncClientWrapper.9"), e); //$NON-NLS-1$
-			LOG.log(TraceLevel.ERROR, Messages.getString("MqttAsyncClientWrapper.9"), e); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR, "[Connect:] Unable to connect to server", e); //$NON-NLS-1$
+			LOG.log(TraceLevel.ERROR, "[Connect:] Unable to connect to server", e); //$NON-NLS-1$
 		} catch (MqttException e) {
-			TRACE.log(TraceLevel.ERROR,Messages.getString("MqttAsyncClientWrapper.10"), e); //$NON-NLS-1$
-			LOG.log(TraceLevel.ERROR, Messages.getString("MqttAsyncClientWrapper.9"), e); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR,"[Connect:] Unable to connect to server", e); //$NON-NLS-1$
+			LOG.log(TraceLevel.ERROR, "[Connect:] Unable to connect to server", e); //$NON-NLS-1$
 		}
 
-		return mqttClient.isConnected();
+		return mqttClient.isConnected(); 
 	}
 
 	/**
@@ -218,7 +241,7 @@ public class MqttClientWrapper implements MqttCallback {
     	if (TRACE.getLevel() == TraceLevel.INFO)
     	{
 	    	for (int i : qos) {
-	    		String msg = Messages.getString("MqttAsyncClientWrapper.1", topics[i], qos[i]); //$NON-NLS-1$	    
+	    		String msg = "[Subscribe:] {0} qos: {1}"; //$NON-NLS-1$	    
 	    		TRACE.log(TraceLevel.INFO, msg); 
 			}
     	}
@@ -245,7 +268,7 @@ public class MqttClientWrapper implements MqttCallback {
 	@Override
 	public void connectionLost(Throwable cause) {
 		
-		TRACE.log(TraceLevel.WARN, Messages.getString("MqttAsyncClientWrapper.0") + brokerUri); //$NON-NLS-1$
+		TRACE.log(TraceLevel.WARN, "Connection Lost: " + brokerUri); //$NON-NLS-1$
 		
 		for (Iterator iterator = callBackListeners.iterator(); iterator.hasNext();) {
 			MqttCallback callbackListener = (MqttCallback) iterator.next();

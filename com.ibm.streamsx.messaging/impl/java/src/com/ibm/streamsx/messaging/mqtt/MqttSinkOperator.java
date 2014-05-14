@@ -60,7 +60,7 @@ import com.ibm.streams.operator.types.Blob;
  * which lead to these methods being called concurrently by different threads.</p> 
  */
 @PrimitiveOperator(name="MQTTSink", namespace="com.ibm.streamsx.messaging.mqtt",
-description="Java Operator MqttSinkOperator")
+description=SPLDocConstants.MQTT_SINK_OP_DESCRIPTION) 
 @InputPorts({@InputPortSet(description="Port that ingests tuples.", cardinality=1, optional=false, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious), @InputPortSet(description="Optional input ports", optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
 @OutputPorts({@OutputPortSet(description="Optional error output port.", cardinality=1, optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
 @Libraries(value = {"opt/mqtt/*"} )
@@ -73,7 +73,7 @@ public class MqttSinkOperator extends AbstractOperator {
 	private int qos = 0;
 	private String serverUri;
 	private int reconnectionBound = IMqttConstants.DEFAULT_RECONNECTION_BOUND;		// default 5, 0 = no retry, -1 = infinite retry
-	private float period = IMqttConstants.DEFAULT_RECONNECTION_PERIOD;
+	private long period = IMqttConstants.DEFAULT_RECONNECTION_PERIOD;
 	private boolean retain = false;
 	private String topicAttributeName;
 	private String qosAttributeName;
@@ -124,10 +124,9 @@ public class MqttSinkOperator extends AbstractOperator {
 					}
 					
 				} catch (InterruptedException e) {
-				
+					TRACE.log(TraceLevel.ERROR, "Unable to publish message",e);
 				} catch (Exception e) {
-					e.printStackTrace();
-
+					TRACE.log(TraceLevel.ERROR, "Unable to publish message", e);
 				}
 			}			
 		}		
@@ -253,7 +252,7 @@ public class MqttSinkOperator extends AbstractOperator {
 							// the connection is lost
 							// we will attempt to make the connection again before publishing
 							// again
-							mqttWrapper.disconnect();
+							mqttWrapper.disconnect();							
 						}
 					}					
 				}
@@ -331,8 +330,8 @@ public class MqttSinkOperator extends AbstractOperator {
 		this.reconnectionBound = reconnectionBound;
 	}
 	
-	@Parameter(name="period", description="Reconnection period, default is 60 s.", optional=true)
-	public void setPeriod(float period) {
+	@Parameter(name="period", description="Reconnection period in ms, default is 60000 ms.", optional=true)
+	public void setPeriod(long period) {
 		this.period = period;
 	}
 	
@@ -340,7 +339,7 @@ public class MqttSinkOperator extends AbstractOperator {
 		return reconnectionBound;
 	}
 	
-	public float getPeriod() {
+	public long getPeriod() {
 		return period;
 	}
 

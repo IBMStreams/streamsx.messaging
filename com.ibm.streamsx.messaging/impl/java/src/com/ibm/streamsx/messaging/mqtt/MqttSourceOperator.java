@@ -9,6 +9,7 @@
 package com.ibm.streamsx.messaging.mqtt;
 
 
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import com.ibm.streams.operator.AbstractOperator;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OutputTuple;
+import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.Tuple;
@@ -39,6 +41,7 @@ import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
 import com.ibm.streams.operator.types.ValueFactory;
+import com.ibm.streamsx.messaging.mqtt.MqttClientRequest.MqttClientRequestType;
 
 /**
  * A source operator that does not receive any input streams and produces new tuples. 
@@ -62,7 +65,7 @@ description="Java Operator MqttSourceOperator")
 @InputPorts({@InputPortSet(description="Optional input ports", optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
 @OutputPorts({@OutputPortSet(description="Port that produces tuples.", cardinality=1, optional=false, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free), @OutputPortSet(description="Optional output ports", optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
 @Libraries(value = {"opt/mqtt/*"})
-public class MqttSourceOperator extends AbstractOperator {
+public class MqttSourceOperator extends AbstractOperator { 
 	
 	private static Logger TRACE = Logger.getLogger(MqttSourceOperator.class);
 	
@@ -73,19 +76,21 @@ public class MqttSourceOperator extends AbstractOperator {
 	private String topicOutAttrName;
 	
 	private int reconnectionBound = IMqttConstants.DEFAULT_RECONNECTION_BOUND;		// default 5, 0 = no retry, -1 = infinite retry
-	private float period = IMqttConstants.DEFAULT_RECONNECTION_PERIOD;
+	private long period = IMqttConstants.DEFAULT_RECONNECTION_PERIOD;
 	
 
 	private MqttClientWrapper mqttWrapper;
 	private boolean shutdown = false;
 	
 	private ArrayBlockingQueue<MqttMessageRecord> messageQueue;
+	private ArrayBlockingQueue<MqttClientRequest> clientRequestQueue;
 
 	/**
 	 * Thread for calling <code>produceTuples()</code> to produce tuples 
 	 */
     private Thread processThread;
     
+    private Thread clientRequestThread;
     
     private class MqttMessageRecord {
     	String topic;
@@ -102,13 +107,7 @@ public class MqttSourceOperator extends AbstractOperator {
 
 		@Override
 		public void connectionLost(Throwable cause) {
-			try {
-				connectAndSubscribe();
-			} catch (MqttException e) {
-				TRACE.error("Reconnection failed.", e);
-			} catch (InterruptedException e) {
-				TRACE.error("Reconnection failed.", e);
-			}
+			submitConnectAndSubscribe(getServerUri());
 		}
 
 		@Override
@@ -140,10 +139,10 @@ public class MqttSourceOperator extends AbstractOperator {
         Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " initializing in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
         
         messageQueue = new ArrayBlockingQueue<MqttSourceOperator.MqttMessageRecord>(50);
+        clientRequestQueue = new ArrayBlockingQueue<MqttClientRequest>(20);
         
         mqttWrapper = new MqttClientWrapper();
         mqttWrapper.setBrokerUri(serverUri);
-        connectAndSubscribe();
         
         /*
          * Create the thread for producing tuples. 
@@ -170,7 +169,67 @@ public class MqttSourceOperator extends AbstractOperator {
          * operator is complete.
          */
         processThread.setDaemon(false);
+        
+        /*
+         * Create the thread for producing tuples. 
+         * The thread is created at initialize time but started.
+         * The thread will be started by allPortsReady().
+         */
+        clientRequestThread = getOperatorContext().getThreadFactory().newThread(
+                new Runnable() {
+
+                    @Override
+                    public void run() {                       
+                        handleClientRequests();                                  
+                    }
+                    
+                });
+        
+        /*
+         * Set the thread not to be a daemon to ensure that the SPL runtime
+         * will wait for the thread to complete before determining the
+         * operator is complete.
+         */
+        clientRequestThread.setDaemon(true);
     }
+
+	protected void handleClientRequests() {
+		while (!shutdown)
+        {
+        	try {
+				MqttClientRequest request = clientRequestQueue.take();
+				
+				if (request.getReqType() == MqttClientRequestType.CONNECT)
+				{
+					TRACE.log(TraceLevel.DEBUG, "[Request Queue:] " + IMqttConstants.CONN_SERVERURI + ":" + serverUri); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					setServerUri(request.getServerUri());
+					mqttWrapper.setBrokerUri(request.getServerUri());
+					
+					// disconnect and try to connect again.
+					// Disconnect is synchronous so wait for that to finish and attempt to connect.
+					try {
+						mqttWrapper.disconnect();
+					} catch (Exception e) {
+						// disconnect may fail as the server may have been disconnected
+						TRACE.log(TraceLevel.DEBUG, "[Request Queue:] Disconnect exception."); //$NON-NLS-1$ //$NON-NLS-2$
+					}					
+					connectAndSubscribe();	
+				}
+				
+				
+			} catch (InterruptedException e) {			
+				TRACE.log(TraceLevel.DEBUG, "[Request Queue:] Thread interrupted as expected"); //$NON-NLS-1$ //$NON-NLS-2$
+			} catch (URISyntaxException e1) {
+				TRACE.log(TraceLevel.DEBUG, "[Request Queue:] URI Syntax Exception",e1); //$NON-NLS-1$ //$NON-NLS-2$
+			} catch (MqttException e) {				
+				TRACE.log(TraceLevel.DEBUG, "[Request Queue:] MQTT Client Error",e); //$NON-NLS-1$ //$NON-NLS-2$
+			} 
+        	
+        	
+        }
+		
+	}
 
 	private void connectAndSubscribe() throws MqttException, InterruptedException {
 		mqttWrapper.connect(getReconnectionBound(), getPeriod());
@@ -199,7 +258,22 @@ public class MqttSourceOperator extends AbstractOperator {
         Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " all ports are ready in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
     	// Start a thread for producing tuples because operator 
     	// implementations must not block and must return control to the caller.
-        processThread.start();
+        processThread.start();        
+        clientRequestThread.start(); 
+        
+        // submit and subscribe on background thread, allow operator to start
+        submitConnectAndSubscribe(getServerUri());        
+    }
+    
+    private void submitConnectAndSubscribe(String serverUri) {
+    	try {
+    		// connect request will automatically take current topics and subscribe
+			MqttClientRequest request = new MqttClientRequest().setReqType(MqttClientRequestType.CONNECT).setServerUri(serverUri);
+			clientRequestQueue.put(request);
+			
+		} catch (InterruptedException e) {
+		
+		}
     }
     
     /**
@@ -231,46 +305,76 @@ public class MqttSourceOperator extends AbstractOperator {
     	handleControlSignal(tuple);
     }
     
+	/**
+	 * In the handling of control signal of MQTTSource, the following should occur
+	 * 1)  read in the entire tuple to see what topic actions need to be taken
+	 * 2)  update topic subscription list before handling any connection signal
+	 * 3)  handle connection signal
+	 * @param tuple
+	 */
 	private void handleControlSignal(Tuple tuple) {
 		// handle control signal to switch server
 		try {
-			Object object = tuple.getMap("mqttConfig");
-			TRACE.log(TraceLevel.DEBUG, "[Control Port:] object: " + object + " " + object.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
+			// TODO:  Build a more atomic request on topic updates and connection
+			// TODO:  if a connect signal comes in, wake up the waiting thread, clear
+			//  all pending connection requests, and submit one
+			StreamSchema streamSchema = tuple.getStreamSchema();
+			int attributeCount = streamSchema.getAttributeCount();
+			
+			for(int i=0; i<attributeCount; i++)
+			{
+				Object object = tuple.getObject(i);
+				TRACE.log(TraceLevel.DEBUG, "[Control Port:] object: " + object + " " + object.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
 
-			if (object instanceof Map)
-			{									
-				Map map = (Map)object;
-				Set keySet = map.keySet();
-				for (Iterator iterator = keySet.iterator(); iterator
-						.hasNext();) {
-					Object key = (Object) iterator.next();
-					TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + key + " " + key.getClass()); //$NON-NLS-1$ //$NON-NLS-2$
-					
-					String keyStr = key.toString();
-					
-					// case insensitive checks
-					if (keyStr.toLowerCase().equals(IMqttConstants.CONN_SERVERURI.toLowerCase()))
-					{
-						Object serverUri = map.get(key);				
+				// if it's a map, it must be the mqttConfig attribute
+				if (object instanceof Map)
+				{									
+					Map map = (Map)object;
+					Set keySet = map.keySet();
+					for (Iterator iterator = keySet.iterator(); iterator
+							.hasNext();) {
+						Object key = (Object) iterator.next();
+						TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + key + " " + key.getClass()); //$NON-NLS-1$ //$NON-NLS-2$
 						
-						String serverUriStr = serverUri.toString();
+						String keyStr = key.toString();
 						
-						// only handle if server URI has changed
-						if (!serverUriStr.toLowerCase().equals(getServerUri().toLowerCase()))
-						{						
-							TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + IMqttConstants.CONN_SERVERURI + ":" + serverUri); //$NON-NLS-1$ //$NON-NLS-2$
-						
-							setServerUri(serverUriStr);
-							mqttWrapper.setBrokerUri(serverUriStr);
+						// case insensitive checks
+						if (keyStr.toLowerCase().equals(IMqttConstants.CONN_SERVERURI.toLowerCase()))
+						{
+							Object serverUri = map.get(key);				
 							
-							// disconnect and try to connect again.
-							// Disconnect is synchronous so wait for that to finish and attempt to connect.
-							mqttWrapper.disconnect();
-							connectAndSubscribe();	
-						}
-					}					
+							String serverUriStr = serverUri.toString();
+							
+							// only handle if server URI has changed
+							if (!serverUriStr.toLowerCase().equals(getServerUri().toLowerCase()))
+							{
+								// we must override the serverURI field here for the request
+								// processing thread to get out of the loop.
+								
+								setServerUri(serverUriStr);
+								mqttWrapper.setBrokerUri(serverUriStr);
+								
+								submitConnectAndSubscribe(serverUriStr);
+								
+								// wake up the thread in case it is sleeping
+								clientRequestThread.interrupt();
+							}
+						}					
+					}
+				}
+				else if (object instanceof List)
+				{
+					List<Tuple> topicList = (List<Tuple>)object;
+					for (Tuple topicDesc : topicList) {
+						String action=topicDesc.getString("action");
+						List topics = topicDesc.getList("topics");
+						int qos = topicDesc.getInt("qos");
+					}
+					System.out.println(object.toString());
 				}
 			}
+			
+			
 		} catch (Exception e) {
 			TRACE.log(TraceLevel.ERROR, Messages.getString("MqttSinkOperator.21")); //$NON-NLS-1$
 		}
@@ -340,8 +444,8 @@ public class MqttSourceOperator extends AbstractOperator {
 		this.reconnectionBound = reconnectionBound;
 	}
 	
-	@Parameter(name="period", description="Reconnection period, default is 60 s.", optional=true)
-	public void setPeriod(float period) {
+	@Parameter(name="period", description="Reconnection period in ms, default is 60000 ms.", optional=true)
+	public void setPeriod(long period) {
 		this.period = period;
 	}
 	
@@ -349,7 +453,7 @@ public class MqttSourceOperator extends AbstractOperator {
 		return reconnectionBound;
 	}
 	
-	public float getPeriod() {
+	public long getPeriod() {
 		return period;
 	}
 }
