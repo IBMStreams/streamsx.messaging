@@ -8,7 +8,7 @@ package com.ibm.streamsx.messaging.mqtt;
  */
 public class MqttClientRequest {
 	
-	public enum MqttClientRequestType {CONNECT, ADD_TOPICS, REMOVE_TOPICS, UPDATE_TOPICS};
+	public enum MqttClientRequestType {CONNECT, ADD_TOPICS, REMOVE_TOPICS, UPDATE_TOPICS, REPLACE_TOPICS};
 	
 	private MqttClientRequestType reqType;
 	private String serverUri;

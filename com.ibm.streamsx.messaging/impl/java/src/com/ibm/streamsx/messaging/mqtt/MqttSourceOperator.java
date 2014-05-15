@@ -217,7 +217,27 @@ public class MqttSourceOperator extends AbstractOperator {
 					connectAndSubscribe();	
 				}
 				
-				
+				else if (request.getReqType() == MqttClientRequestType.ADD_TOPICS)
+				{
+					// add to topic list
+					// add subscription, only need to add the specified topic
+				}
+				else if (request.getReqType() == MqttClientRequestType.REMOVE_TOPICS)
+				{
+					// remove from topic list
+					// unsubscribe the specified topic
+				}
+				else if (request.getReqType() == MqttClientRequestType.UPDATE_TOPICS) {
+					// update qos for topic
+					// unsubscribe specified topic
+					// subscribe topic with new qos					
+				}
+				else if (request.getReqType() == MqttClientRequestType.REPLACE_TOPICS)
+				{
+					// unsubscribe all topics
+					// undate topic list and qos list
+					// subscribe to new set of topics with correct qos
+				}				
 			} catch (InterruptedException e) {			
 				TRACE.log(TraceLevel.DEBUG, "[Request Queue:] Thread interrupted as expected"); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (URISyntaxException e1) {
