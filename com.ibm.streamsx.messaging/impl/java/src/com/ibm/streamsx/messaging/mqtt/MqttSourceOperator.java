@@ -64,7 +64,7 @@ import com.ibm.streamsx.messaging.mqtt.MqttClientRequest.MqttClientRequestType;
 description="Java Operator MqttSourceOperator")
 @InputPorts({@InputPortSet(description="Optional input ports", optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
 @OutputPorts({@OutputPortSet(description="Port that produces tuples.", cardinality=1, optional=false, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free), @OutputPortSet(description="Optional output ports", optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
-@Libraries(value = {"opt/mqtt/*"})
+@Libraries(value = {"opt/downloaded/*"})
 public class MqttSourceOperator extends AbstractOperator { 
 	
 	private static Logger TRACE = Logger.getLogger(MqttSourceOperator.class);

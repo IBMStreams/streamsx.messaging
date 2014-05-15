@@ -63,7 +63,7 @@ import com.ibm.streams.operator.types.Blob;
 description=SPLDocConstants.MQTT_SINK_OP_DESCRIPTION) 
 @InputPorts({@InputPortSet(description="Port that ingests tuples.", cardinality=1, optional=false, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious), @InputPortSet(description="Optional input ports", optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
 @OutputPorts({@OutputPortSet(description="Optional error output port.", cardinality=1, optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
-@Libraries(value = {"opt/mqtt/*"} )
+@Libraries(value = {"opt/downloaded/*"} )
 public class MqttSinkOperator extends AbstractOperator {
 	 
 	private static Logger TRACE = Logger.getLogger(MqttSinkOperator.class);
