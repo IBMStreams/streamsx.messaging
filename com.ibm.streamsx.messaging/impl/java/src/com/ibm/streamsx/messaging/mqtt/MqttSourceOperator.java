@@ -61,9 +61,9 @@ import com.ibm.streamsx.messaging.mqtt.MqttClientRequest.MqttClientRequestType;
  * which lead to these methods being called concurrently by different threads.</p> 
  */
 @PrimitiveOperator(name="MQTTSource", namespace="com.ibm.streamsx.messaging.mqtt",
-description="Java Operator MqttSourceOperator")
-@InputPorts({@InputPortSet(description="Optional input ports", optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
-@OutputPorts({@OutputPortSet(description="Port that produces tuples.", cardinality=1, optional=false, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free), @OutputPortSet(description="Optional output ports", optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
+description=SPLDocConstants.MQTTSRC_OP_DESCRIPTION)
+@InputPorts({@InputPortSet(description=SPLDocConstants.MQTTSRC_INPUT_PORT0, optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
+@OutputPorts({@OutputPortSet(description=SPLDocConstants.MQTTSRC_OUPUT_PORT_0, cardinality=1, optional=false, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free), @OutputPortSet(description=SPLDocConstants.MQTTSRC_OUTPUT_PORT_1, optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
 @Libraries(value = {"opt/downloaded/*"})
 public class MqttSourceOperator extends AbstractOperator { 
 	
@@ -423,17 +423,17 @@ public class MqttSourceOperator extends AbstractOperator {
         super.shutdown();
     }
     
-    @Parameter(name="topics", description="List of topics to subscribe to.", optional=false, cardinality=-1)
+    @Parameter(name="topics", description=SPLDocConstants.MQTTSRC_PARAM_TOPICS_DESC, optional=false, cardinality=-1)
 	public void setTopics(List<String> topics) {
 		this.topics = topics;
 	}
 
-    @Parameter(name="qos", description="List of qos for topic subscriptions", optional=true, cardinality=-1)
+    @Parameter(name="qos", description=SPLDocConstants.MQTTSRC_PARAM_QOS_DESC, optional=true, cardinality=-1)
 	public void setQos(int[] qos) {
 		this.qos = qos;
 	}
 
-    @Parameter(name="serverURI", description="Server to subscribe messages from.", optional=false)
+    @Parameter(name="serverURI", description=SPLDocConstants.MQTTSRC_PARAM_SERVERIURI_DESC, optional=false)
 	public void setServerUri(String serverUri) {
 		this.serverUri = serverUri;
 	}
@@ -450,7 +450,7 @@ public class MqttSourceOperator extends AbstractOperator {
 		return serverUri;
 	}
 	
-	 @Parameter(name="topicOutAttrName", description="Output attribute on output data stream to assign message topic to.", optional=true)
+	 @Parameter(name="topicOutAttrName", description=SPLDocConstants.MQTTSRC_PARAM_TOPICATTRNAME_DESC, optional=true)
 	public void setTopicOutAttrName(String topicOutAttrName) {
 		this.topicOutAttrName = topicOutAttrName;
 	}
@@ -459,12 +459,12 @@ public class MqttSourceOperator extends AbstractOperator {
 		return topicOutAttrName;
 	}
 	
-	@Parameter(name="reconnectionBound", description="Reconnection bound, 0 for no retry, n for n number of retries, -1 for inifinite retry.", optional=true)
+	@Parameter(name="reconnectionBound", description=SPLDocConstants.MQTTSRC_PARAM_RECONN_BOUND_DESC, optional=true)
 	public void setReconnectionBound(int reconnectionBound) {
 		this.reconnectionBound = reconnectionBound;
 	}
 	
-	@Parameter(name="period", description="Reconnection period in ms, default is 60000 ms.", optional=true)
+	@Parameter(name="period", description=SPLDocConstants.MQTTSRC_PARAM_PERIOD_DESC, optional=true)
 	public void setPeriod(long period) {
 		this.period = period;
 	}

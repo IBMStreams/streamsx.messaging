@@ -60,9 +60,9 @@ import com.ibm.streams.operator.types.Blob;
  * which lead to these methods being called concurrently by different threads.</p> 
  */
 @PrimitiveOperator(name="MQTTSink", namespace="com.ibm.streamsx.messaging.mqtt",
-description=SPLDocConstants.MQTT_SINK_OP_DESCRIPTION) 
-@InputPorts({@InputPortSet(description="Port that ingests tuples.", cardinality=1, optional=false, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious), @InputPortSet(description="Optional input ports", optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
-@OutputPorts({@OutputPortSet(description="Optional error output port.", cardinality=1, optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
+description=SPLDocConstants.MQTTSINK_OP_DESCRIPTION) 
+@InputPorts({@InputPortSet(description=SPLDocConstants.MQTTSINK_INPUTPORT0, cardinality=1, optional=false, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious), @InputPortSet(description=SPLDocConstants.MQTTSINK_INPUTPORT1, optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
+@OutputPorts({@OutputPortSet(description=SPLDocConstants.MQTTSINK_OUTPUT_PORT0, cardinality=1, optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
 @Libraries(value = {"opt/downloaded/*"} )
 public class MqttSinkOperator extends AbstractOperator {
 	 
@@ -293,7 +293,7 @@ public class MqttSinkOperator extends AbstractOperator {
         super.shutdown();
     }
 
-    @Parameter(name="topic", description="Topic to publish to.  This parameter is mutually exclusive with the \\\"topicAttributeName\\\" parameter.", optional=true)
+    @Parameter(name="topic", description=SPLDocConstants.MQTTSINK_PARAM_TOPIC_DESC, optional=true)
 	public void setTopics(String topic) {
 		this.topic = topic;
 		
@@ -303,12 +303,12 @@ public class MqttSinkOperator extends AbstractOperator {
 		}
 	}
 
-    @Parameter(name="qos", description="Qos to publish to.", optional=true)
+    @Parameter(name="qos", description=SPLDocConstants.MQTTSINK_PARAM_QOS_DESC, optional=true)
 	public void setQos(int qos) {
 		this.qos = qos;
 	}
 
-    @Parameter(name="serverURI", description="Server to publish messages to.", optional=false)
+    @Parameter(name="serverURI", description=SPLDocConstants.MQTTSINK_PARAM_SERVERURI_DESC, optional=false)
 	public void setServerUri(String serverUri) {
 		this.serverUri = serverUri;
 	}
@@ -325,12 +325,12 @@ public class MqttSinkOperator extends AbstractOperator {
 		return serverUri;
 	}
 	
-	@Parameter(name="reconnectionBound", description="Reconnection bound, 0 for no retry, n for n number of retries, -1 for inifinite retry.", optional=true)
+	@Parameter(name="reconnectionBound", description=SPLDocConstants.MQTTSINK_PARAM_RECONN_BOUND_DESC, optional=true)
 	public void setReconnectionBound(int reconnectionBound) {
 		this.reconnectionBound = reconnectionBound;
 	}
 	
-	@Parameter(name="period", description="Reconnection period in ms, default is 60000 ms.", optional=true)
+	@Parameter(name="period", description=SPLDocConstants.MQTTSINK_PARAM_PERIOD_DESC, optional=true)
 	public void setPeriod(long period) {
 		this.period = period;
 	}
@@ -347,12 +347,12 @@ public class MqttSinkOperator extends AbstractOperator {
 		return retain;
 	}
 
-	@Parameter(name="retain", description="Indicates if messages should be retained on the MQTT server.  Default is false.", optional=true)
+	@Parameter(name="retain", description=SPLDocConstants.MQTTSINK_PARAM_RETAIN_DESC, optional=true)
 	public void setRetain(boolean retain) {
 		this.retain = retain;
 	}
 	
-	@Parameter(name="topicAttributeName", description="Attribute name that contains the topic to publish the message with.  This parameter is mutually exclusive with the \\\"topic\\\" parameter.", optional=true)
+	@Parameter(name="topicAttributeName", description=SPLDocConstants.MQTTSINK_PARAM_TOPIC_ATTR_NAME_DESC, optional=true)
 	public void setTopicAttrName(String topicAttr) {
 		this.topicAttributeName = topicAttr;
 	}
@@ -361,7 +361,7 @@ public class MqttSinkOperator extends AbstractOperator {
 		return topicAttributeName;
 	}
 	
-	@Parameter(name="qosAttributeName", description="Attribute name that contains the qos to publish the message with.  This parameter is mutually exclusive with the \\\"qos\\\" parameter.", optional=true)
+	@Parameter(name="qosAttributeName", description=SPLDocConstants.MQTTSINK_PARAM_QOS_ATTR_NAME_DESC, optional=true)
 	public void setQosAttributeName(String qosAttributeName) {
 		this.qosAttributeName = qosAttributeName;
 	}
