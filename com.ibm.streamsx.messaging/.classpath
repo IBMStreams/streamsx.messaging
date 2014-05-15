@@ -17,6 +17,6 @@
 	<classpathentry kind="lib" path="opt/downloaded/snappy-java-1.0.5.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/zkclient-0.3.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/zookeeper-3.3.4.jar"/>
-	<classpathentry kind="lib" path="opt/mqtt/mqtt-client-0.4.1-20140324.080940-25.jar"/>
+	<classpathentry kind="lib" path="C:/git/streamsx.messaging/com.ibm.streamsx.messaging/opt/downloaded/mqtt-client-0.4.1-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="impl/java/bin"/>
 </classpath>

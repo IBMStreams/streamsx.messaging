@@ -84,7 +84,7 @@
 	<target name="maven-deps">
 		<exec executable="${maven.bin}"  failonerror="true">
 			<arg value="dependency:copy-dependencies"/>
-			<arg value="-DoutputDirectory=${ext.downloads.dir}"/>
+			<arg value="-DoutputDirectory=${ext.downloads.dir}"/>			
 	    </exec>
 	</target>
 	
