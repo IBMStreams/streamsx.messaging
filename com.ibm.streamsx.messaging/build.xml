@@ -18,7 +18,6 @@
 	<property name="test.run.dir" value="tests" />
 	<property name="test.build.dir" value="${test.run.dir}/bin" />
 	<property name="ext.downloads.dir" value="opt/downloaded" />
-	<property name="mqtt.dir" value="opt/mqtt" />
 	<property name="gensrc.dir" value="${basedir}/impl/java/src-gen" />
 	<property name="jarfile" value="com.ibm.streamsx.messaging.jar" />
 	<property name="spl-mt" value="${streams.install}/bin/spl-make-toolkit" />
@@ -52,15 +51,11 @@
 	<path id="cp.ext.libs">
 		<fileset dir="${ext.downloads.dir}"/>
 	</path>
-	<path id="cp.mqtt">
-		<fileset dir="${mqtt.dir}"/>
-	</path>
 
 
 	<path id="cp.compile">
 		<path refid="cp.streams" />
 		<path refid="cp.ext.libs" />
-		<path refid="cp.mqtt" />
 	</path>
 	
 	<target name="all" depends="jar,cpp"/>
