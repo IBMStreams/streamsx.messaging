@@ -81,8 +81,9 @@ public class MqttSinkOperator extends AbstractOperator {
 	private MqttClientWrapper mqttWrapper;
 	
 	private ArrayBlockingQueue<Tuple> tupleQueue;
-	private ExecutorService exService;
 	private boolean shutdown;
+
+	private Thread publishThread;
 	
 	private class PublishRunnable implements Runnable {
 
@@ -169,7 +170,6 @@ public class MqttSinkOperator extends AbstractOperator {
         Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " initializing in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         
        tupleQueue = new ArrayBlockingQueue<Tuple>(50);
-       exService = Executors.newFixedThreadPool(2, context.getThreadFactory());
         
        mqttWrapper = new MqttClientWrapper();
        mqttWrapper.setBrokerUri(serverUri);
@@ -188,7 +188,9 @@ public class MqttSinkOperator extends AbstractOperator {
         OperatorContext context = getOperatorContext();
         Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " all ports are ready in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         
-        exService.execute(new PublishRunnable());        
+        publishThread = context.getThreadFactory().newThread(new PublishRunnable());
+        publishThread.start();
+        
     }
 
     /**
@@ -244,15 +246,18 @@ public class MqttSinkOperator extends AbstractOperator {
 						{						
 							TRACE.log(TraceLevel.DEBUG, "[Control Port:] " + IMqttConstants.CONN_SERVERURI + ":" + serverUri); //$NON-NLS-1$ //$NON-NLS-2$
 						
-							setServerUri(serverUriStr);
-							mqttWrapper.setBrokerUri(serverUriStr);
+							// set pending broker URI to get wrapper out of retry loop
+							mqttWrapper.setPendingBrokerUri(serverUriStr);
 							
 							// disconnect only
 							// when the publish happens, the publish will detect that
 							// the connection is lost
 							// we will attempt to make the connection again before publishing
 							// again
-							mqttWrapper.disconnect();							
+							mqttWrapper.disconnect();				
+							
+							// interrupt the publish thread in case it is sleeping
+							publishThread.interrupt();
 						}
 					}					
 				}
@@ -285,7 +290,6 @@ public class MqttSinkOperator extends AbstractOperator {
         Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " shutting down in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                 
         shutdown = true;
-        exService.shutdown();
         mqttWrapper.disconnect();
         mqttWrapper.shutdown();
         

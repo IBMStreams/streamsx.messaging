@@ -107,7 +107,7 @@ public class MqttSourceOperator extends AbstractOperator {
 
 		@Override
 		public void connectionLost(Throwable cause) {
-			submitConnectAndSubscribe(getServerUri());
+			scheduleConnectAndSubscribe(getServerUri());
 		}
 
 		@Override
@@ -200,21 +200,28 @@ public class MqttSourceOperator extends AbstractOperator {
 				MqttClientRequest request = clientRequestQueue.take();
 				
 				if (request.getReqType() == MqttClientRequestType.CONNECT)
-				{
-					TRACE.log(TraceLevel.DEBUG, "[Request Queue:] " + IMqttConstants.CONN_SERVERURI + ":" + serverUri); //$NON-NLS-1$ //$NON-NLS-2$
-					
-					setServerUri(request.getServerUri());
-					mqttWrapper.setBrokerUri(request.getServerUri());
-					
-					// disconnect and try to connect again.
-					// Disconnect is synchronous so wait for that to finish and attempt to connect.
-					try {
-						mqttWrapper.disconnect();
-					} catch (Exception e) {
-						// disconnect may fail as the server may have been disconnected
-						TRACE.log(TraceLevel.DEBUG, "[Request Queue:] Disconnect exception."); //$NON-NLS-1$ //$NON-NLS-2$
-					}					
-					connectAndSubscribe();	
+				{				
+					// only handle the last request
+					if (mqttWrapper.getPendingBrokerUri().isEmpty()
+							|| !mqttWrapper.getPendingBrokerUri().isEmpty()
+							&& mqttWrapper.getPendingBrokerUri().equals(
+									request.getServerUri()))
+					{
+						TRACE.log(TraceLevel.DEBUG, "[Request Queue:] " + IMqttConstants.CONN_SERVERURI + ":" + serverUri); //$NON-NLS-1$ //$NON-NLS-2$
+
+						setServerUri(request.getServerUri());
+						mqttWrapper.setBrokerUri(request.getServerUri());
+						
+						// disconnect and try to connect again.
+						// Disconnect is synchronous so wait for that to finish and attempt to connect.
+						try {
+							mqttWrapper.disconnect();
+						} catch (Exception e) {
+							// disconnect may fail as the server may have been disconnected
+							TRACE.log(TraceLevel.DEBUG, "[Request Queue:] Disconnect exception."); //$NON-NLS-1$ //$NON-NLS-2$
+						}					
+						connectAndSubscribe();
+					}
 				}
 				
 				else if (request.getReqType() == MqttClientRequestType.ADD_TOPICS)
@@ -282,10 +289,10 @@ public class MqttSourceOperator extends AbstractOperator {
         clientRequestThread.start(); 
         
         // submit and subscribe on background thread, allow operator to start
-        submitConnectAndSubscribe(getServerUri());        
+        scheduleConnectAndSubscribe(getServerUri());        
     }
     
-    private void submitConnectAndSubscribe(String serverUri) {
+    private void scheduleConnectAndSubscribe(String serverUri) {
     	try {
     		// connect request will automatically take current topics and subscribe
 			MqttClientRequest request = new MqttClientRequest().setReqType(MqttClientRequestType.CONNECT).setServerUri(serverUri);
@@ -368,13 +375,11 @@ public class MqttSourceOperator extends AbstractOperator {
 							// only handle if server URI has changed
 							if (!serverUriStr.toLowerCase().equals(getServerUri().toLowerCase()))
 							{
-								// we must override the serverURI field here for the request
-								// processing thread to get out of the loop.
+								// set pending broker URI field to get wrapper
+								// to get out of retry loop
+								mqttWrapper.setPendingBrokerUri(serverUriStr);
 								
-								setServerUri(serverUriStr);
-								mqttWrapper.setBrokerUri(serverUriStr);
-								
-								submitConnectAndSubscribe(serverUriStr);
+								scheduleConnectAndSubscribe(serverUriStr);
 								
 								// wake up the thread in case it is sleeping
 								clientRequestThread.interrupt();

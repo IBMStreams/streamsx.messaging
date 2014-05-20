@@ -32,9 +32,13 @@ public class MqttClientWrapper implements MqttCallback {
 	private static final Logger TRACE = Logger.getLogger(MqttAsyncClientWrapper.class);
 	private static final Logger LOG = Logger.getLogger(LoggerNames.LOG_FACILITY + "." + MqttAsyncClientWrapper.class.getName()); //$NON-NLS-1$
 	
+	private static final String EMPTY_STR = "";
+	
 	private String brokerUri;
 	private MqttClient mqttClient;
 	private MqttConnectOptions conOpt;
+	
+	private String pendingBrokerUri = EMPTY_STR;
 	
 	private ArrayList<MqttCallback> callBackListeners;
 	private long period = 5000;
@@ -119,7 +123,7 @@ public class MqttClientWrapper implements MqttCallback {
 				// sleep for period before retrying 
 				Thread.sleep(period);
 				
-				if (!this.brokerUri.equals(uriToConnect)){
+				if (isUriChanged(uriToConnect)){
 					// URI has changed, abort retry
 					break;
 				}
@@ -139,14 +143,19 @@ public class MqttClientWrapper implements MqttCallback {
 				// sleep for period before retrying
 				Thread.sleep(period);
 				
-				if (!this.brokerUri.equals(uriToConnect)){
+				if (isUriChanged(uriToConnect)){
 					// URI has changed, abort retry
 					break;
 				}
 			}
 		}
-		if (mqttClient.isConnected()) {
-			mqttClient.setCallback(this);
+		if (mqttClient.isConnected()) {			
+			TRACE.log(TraceLevel.INFO, "[Connect Success:]" + brokerUri); //$NON-NLS-1$
+			
+			mqttClient.setCallback(this);			
+			
+			// clear when connected
+			clearPendingBrokerUri();
 		} else {
 			throw new RuntimeException("Unable to connect to server: " //$NON-NLS-1$
 					+ brokerUri);
@@ -186,8 +195,9 @@ public class MqttClientWrapper implements MqttCallback {
      * @param payload the set of bytes to send to the MQTT server
      * @throws MqttException
 	 * @throws InterruptedException 
+	 * @throws URISyntaxException 
      */
-    public void publish(String topicName, int qos, byte[] payload, boolean retain) throws MqttException, InterruptedException {    	       	
+    public void publish(String topicName, int qos, byte[] payload, boolean retain) throws MqttException, InterruptedException, URISyntaxException {    	       	
     	// Construct the message to send
    		MqttMessage message = new MqttMessage(payload);
     	message.setQos(qos);
@@ -199,10 +209,7 @@ public class MqttClientWrapper implements MqttCallback {
 			} catch (Exception e) {
 				if (!mqttClient.isConnected())
 				{
-		    		// make sure this client is disconnected
-		    		disconnect();
-		    		
-		    		connect(reconnectionBound, period);
+		    		connectForPublish();
 		    		
 		    		// publish
 		    		if (mqttClient.isConnected())
@@ -213,15 +220,7 @@ public class MqttClientWrapper implements MqttCallback {
 			}
     	}
     	else if (mqttClient != null){
-    		// make sure this client is disconnected
-    		try {
-				disconnect();
-			} catch (MqttException e) {
-				// may get exception if client is already disconnected
-				// keep going
-			}
-    		
-    		connect(reconnectionBound, period);
+    		connectForPublish();
     		
     		// publish
     		if (mqttClient.isConnected())
@@ -230,6 +229,23 @@ public class MqttClientWrapper implements MqttCallback {
     		}
     	}
     }
+
+    private void connectForPublish()  throws URISyntaxException, InterruptedException, MqttException{
+
+			try {
+				// make sure this client is disconnected
+				disconnect();
+			} catch (MqttException e) {
+				// This is ok
+			} 
+			
+			if (getPendingBrokerUri() != null && !getPendingBrokerUri().isEmpty())
+			{
+				setBrokerUri(getPendingBrokerUri());						    			
+			}
+				
+			connect(reconnectionBound, period);		
+	}
     
     public void subscribe(String[] topics, int[] qos) throws MqttException {
     	
@@ -303,6 +319,29 @@ public class MqttClientWrapper implements MqttCallback {
 	{
 		TRACE.log(TraceLevel.DEBUG, "[Shutdown async client]"); //$NON-NLS-1$
 		shutdown = true;
+	}
+	
+	public void setPendingBrokerUri(String pendingBrokerUri) {
+		this.pendingBrokerUri = pendingBrokerUri;
+	}
+	
+	public String getPendingBrokerUri() {
+		return pendingBrokerUri;
+	}
+	
+	public void clearPendingBrokerUri()
+	{
+		setPendingBrokerUri(EMPTY_STR);
+	}
+	
+	private boolean isUriChanged(String uriToConnect)
+	{
+		if (getPendingBrokerUri().isEmpty())
+			return false;
+		else if (getPendingBrokerUri().equals(uriToConnect))
+			return false;
+		
+		return true;
 	}
 
 }
