@@ -11,12 +11,12 @@ package com.ibm.streamsx.messaging.mqtt;
 
 
 import java.io.InputStream;
+import java.lang.Thread.State;
+import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 
@@ -31,10 +31,10 @@ import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.InputPortSet;
 import com.ibm.streams.operator.model.InputPortSet.WindowMode;
 import com.ibm.streams.operator.model.InputPortSet.WindowPunctuationInputMode;
-import com.ibm.streams.operator.model.OutputPortSet.WindowPunctuationOutputMode;
 import com.ibm.streams.operator.model.InputPorts;
 import com.ibm.streams.operator.model.Libraries;
 import com.ibm.streams.operator.model.OutputPortSet;
+import com.ibm.streams.operator.model.OutputPortSet.WindowPunctuationOutputMode;
 import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
@@ -45,7 +45,7 @@ import com.ibm.streams.operator.types.Blob;
  * This pattern supports a number of input streams and no output streams. 
  * <P>
  * The following event methods from the Operator interface can be called:
- * </p>
+ * </p> 
  * <ul>
  * <li><code>initialize()</code> to perform operator initialization</li>
  * <li>allPortsReady() notification indicates the operator's ports are ready to process and submit tuples</li> 
@@ -110,26 +110,89 @@ public class MqttSinkOperator extends AbstractOperator {
 						msgQos = tuple.getInt(qosAttributeName);
 					}
 					
-					if (pubTopic != null && pubTopic.length() > 0
-						&& msgQos >= 0 && msgQos < 3){
-						Blob blockMsg = tuple.getBlob(0);
-				        InputStream inputStream = blockMsg.getInputStream();
-				        int length = (int) blockMsg.getLength();
-				        byte[] byteArray = new byte[length];
-				        inputStream.read(byteArray, 0, length);
-				        mqttWrapper.publish(pubTopic, msgQos, byteArray, retain);
+					// disconnect if we have received a control signal
+					if (!mqttWrapper.getPendingBrokerUri().isEmpty())
+					{
+						mqttWrapper.disconnect();
+					}
+					
+					// if connected, go straight to publishing
+					if (mqttWrapper.isConnected())
+					{
+						// inline this block of code instead of method call
+						// to avoid unnecessary method call overhead
+						if (pubTopic != null && pubTopic.length() > 0
+							&& msgQos >= 0 && msgQos < 3){
+							Blob blockMsg = tuple.getBlob(0);
+					        InputStream inputStream = blockMsg.getInputStream();
+					        int length = (int) blockMsg.getLength();
+					        byte[] byteArray = new byte[length];
+					        inputStream.read(byteArray, 0, length);
+					        mqttWrapper.publish(pubTopic, msgQos, byteArray, retain);
+						}
+						else
+						{
+							TRACE.log(TraceLevel.ERROR, Messages.getString("MqttSinkOperator.0", pubTopic, msgQos)); //$NON-NLS-1$
+						}
 					}
 					else
 					{
-						TRACE.log(TraceLevel.ERROR, Messages.getString("MqttSinkOperator.0", pubTopic, msgQos)); //$NON-NLS-1$
+						// if not connected, connect before publishing
+						boolean connected = validateConnection();
+						
+						while (!connected && mqttWrapper.isUriChanged(mqttWrapper.getBrokerUri()))
+						{
+							connected = validateConnection();
+						}
+						
+						if (!connected)
+						{
+							throw new RuntimeException("Unable to connect to server: " + getServerUri());
+						}
+						
+						// inline this block of code instead of method call
+						// to avoid unnecessary method call overhead
+						if (pubTopic != null && pubTopic.length() > 0
+								&& msgQos >= 0 && msgQos < 3){
+							Blob blockMsg = tuple.getBlob(0);
+					        InputStream inputStream = blockMsg.getInputStream();
+					        int length = (int) blockMsg.getLength();
+					        byte[] byteArray = new byte[length];
+					        inputStream.read(byteArray, 0, length);
+					        mqttWrapper.publish(pubTopic, msgQos, byteArray, retain);
+						}
+						else
+						{
+							TRACE.log(TraceLevel.ERROR, Messages.getString("MqttSinkOperator.0", pubTopic, msgQos)); //$NON-NLS-1$
+						}
 					}
-					
-				} catch (InterruptedException e) {
-					TRACE.log(TraceLevel.ERROR, "Unable to publish message",e);
 				} catch (Exception e) {
 					TRACE.log(TraceLevel.ERROR, "Unable to publish message", e);
+					throw new RuntimeException(e);
 				}
 			}			
+		}
+
+		private boolean validateConnection()  {
+			if (!mqttWrapper.isConnected())
+			{
+				try {
+					if (!mqttWrapper.getPendingBrokerUri().isEmpty())
+					{
+						mqttWrapper.setBrokerUri(mqttWrapper.getPendingBrokerUri());
+						
+						// need to update parameter value too
+						setServerUri(mqttWrapper.getPendingBrokerUri());
+					}
+					
+					mqttWrapper.connect(getReconnectionBound(), getPeriod());
+				} catch (URISyntaxException e) {
+					throw new RuntimeException(e);
+				} catch (Exception e) {
+				} 
+			}
+			
+			return mqttWrapper.isConnected();
 		}		
 	}
 	
@@ -173,7 +236,10 @@ public class MqttSinkOperator extends AbstractOperator {
         
        mqttWrapper = new MqttClientWrapper();
        mqttWrapper.setBrokerUri(serverUri);
-       mqttWrapper.connect(getReconnectionBound(), getPeriod());
+       mqttWrapper.setReconnectionBound(getReconnectionBound());
+       mqttWrapper.setPeriod(getPeriod());
+       // do not connect here... connection is done on the publish thread when a message
+       // is ready to be published
 	}
 
     /**
@@ -249,15 +315,9 @@ public class MqttSinkOperator extends AbstractOperator {
 							// set pending broker URI to get wrapper out of retry loop
 							mqttWrapper.setPendingBrokerUri(serverUriStr);
 							
-							// disconnect only
-							// when the publish happens, the publish will detect that
-							// the connection is lost
-							// we will attempt to make the connection again before publishing
-							// again
-							mqttWrapper.disconnect();				
-							
 							// interrupt the publish thread in case it is sleeping
-							publishThread.interrupt();
+							if (publishThread.getState() == State.TIMED_WAITING)
+								publishThread.interrupt();								
 						}
 					}					
 				}

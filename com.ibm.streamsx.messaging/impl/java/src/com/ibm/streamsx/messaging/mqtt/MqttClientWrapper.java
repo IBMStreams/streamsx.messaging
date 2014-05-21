@@ -20,6 +20,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
@@ -193,59 +194,21 @@ public class MqttClientWrapper implements MqttCallback {
      * @param topicName the name of the topic to publish to
      * @param qos the quality of service to delivery the message at (0,1,2)
      * @param payload the set of bytes to send to the MQTT server
+	 * @throws MqttPersistenceException 
      * @throws MqttException
 	 * @throws InterruptedException 
 	 * @throws URISyntaxException 
      */
-    public void publish(String topicName, int qos, byte[] payload, boolean retain) throws MqttException, InterruptedException, URISyntaxException {    	       	
-    	// Construct the message to send
-   		MqttMessage message = new MqttMessage(payload);
-    	message.setQos(qos);
-    	message.setRetained(retain);
+	  public void publish(String topicName, int qos, byte[] payload, boolean retain) throws MqttPersistenceException, MqttException {    	       	
+	    	// Construct the message to send
+	   		MqttMessage message = new MqttMessage(payload);
+	    	message.setQos(qos);
+	    	message.setRetained(retain);
 
-    	if (mqttClient != null && mqttClient.isConnected()) {
-    		try {
+	    	if (mqttClient != null && mqttClient.isConnected()) {
 				mqttClient.publish(topicName, message);
-			} catch (Exception e) {
-				if (!mqttClient.isConnected())
-				{
-		    		connectForPublish();
-		    		
-		    		// publish
-		    		if (mqttClient.isConnected())
-		    		{
-		    			mqttClient.publish(topicName, message);
-		    		}
-				}
-			}
-    	}
-    	else if (mqttClient != null){
-    		connectForPublish();
-    		
-    		// publish
-    		if (mqttClient.isConnected())
-    		{
-    			mqttClient.publish(topicName, message);
-    		}
-    	}
-    }
-
-    private void connectForPublish()  throws URISyntaxException, InterruptedException, MqttException{
-
-			try {
-				// make sure this client is disconnected
-				disconnect();
-			} catch (MqttException e) {
-				// This is ok
-			} 
-			
-			if (getPendingBrokerUri() != null && !getPendingBrokerUri().isEmpty())
-			{
-				setBrokerUri(getPendingBrokerUri());						    			
-			}
-				
-			connect(reconnectionBound, period);		
-	}
+	    	}
+	    }
     
     public void subscribe(String[] topics, int[] qos) throws MqttException {
     	
@@ -267,8 +230,11 @@ public class MqttClientWrapper implements MqttCallback {
 	
     synchronized public void disconnect() throws MqttException
     {
-    	TRACE.log(TraceLevel.INFO, "[Disconnect:] " + brokerUri); //$NON-NLS-1$
-		mqttClient.disconnect();
+    	if (mqttClient != null)
+    	{
+	    	TRACE.log(TraceLevel.INFO, "[Disconnect:] " + brokerUri); //$NON-NLS-1$
+			mqttClient.disconnect();
+    	}
     }
     
     public void addCallBack(MqttCallback callback)
@@ -334,7 +300,7 @@ public class MqttClientWrapper implements MqttCallback {
 		setPendingBrokerUri(EMPTY_STR);
 	}
 	
-	private boolean isUriChanged(String uriToConnect)
+	public boolean isUriChanged(String uriToConnect)
 	{
 		if (getPendingBrokerUri().isEmpty())
 			return false;
@@ -342,6 +308,22 @@ public class MqttClientWrapper implements MqttCallback {
 			return false;
 		
 		return true;
+	}
+	
+	public void setReconnectionBound(int reconnectionBound) {
+		this.reconnectionBound = reconnectionBound;
+	}
+	
+	public void setPeriod(long period) {
+		this.period = period;
+	}
+	
+	public boolean isConnected()
+	{
+		if (mqttClient == null)
+			return false;
+		
+		return mqttClient.isConnected();
 	}
 
 }
