@@ -1,9 +1,6 @@
 /*******************************************************************************
- * Licensed Materials - Property of IBM
- * Copyright IBM Corp. 2014
- * US Government Users Restricted Rights - Use, duplication or
- * disclosure restricted by GSA ADP Schedule Contract with
- * IBM Corp.
+ * Copyright (C) 2014, International Business Machines Corporation
+ * All Rights Reserved
  *******************************************************************************/
  
 package com.ibm.streamsx.messaging.mqtt;
@@ -226,6 +223,15 @@ public class MqttClientWrapper implements MqttCallback {
     	}
     	
     	mqttClient.subscribe(topics, qos);    	    	    
+    }
+    
+    public void unsubscribe(String[] topics) throws MqttException {
+    	if (TRACE.getLevel() == TraceLevel.INFO)
+    	{
+	    	String msg = "[Unsubscribe:] " + topics;   
+	    } 
+    	
+    	mqttClient.unsubscribe(topics);   	 
     }
 	
     synchronized public void disconnect() throws MqttException

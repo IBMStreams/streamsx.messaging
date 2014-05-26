@@ -1,9 +1,6 @@
 /*******************************************************************************
- * Licensed Materials - Property of IBM
- * Copyright IBM Corp. 2014
- * US Government Users Restricted Rights - Use, duplication or
- * disclosure restricted by GSA ADP Schedule Contract with
- * IBM Corp.
+ * Copyright (C) 2014, International Business Machines Corporation
+ * All Rights Reserved
  *******************************************************************************/
 package com.ibm.streamsx.messaging.mqtt;
 
@@ -15,5 +12,8 @@ public interface IMqttConstants {
 	public static final String CONN_SERVERURI = "connection.serverURI";
 	public static final int DEFAULT_RECONNECTION_BOUND = 5;
 	public static final long DEFAULT_RECONNECTION_PERIOD = 60000;
+	public static final String MQTTSRC_TOPICDESC_QOS = "qos";
+	public static final String MQTTSRC_TOPICDESC_TOPICS = "topics";
+	public static final String MQTTSRC_TOPICDESC_ACTION = "action";
 	
 }
