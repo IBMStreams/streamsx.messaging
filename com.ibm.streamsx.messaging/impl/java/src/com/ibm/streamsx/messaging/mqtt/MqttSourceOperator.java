@@ -6,6 +6,8 @@
 package com.ibm.streamsx.messaging.mqtt;
 
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,6 +21,7 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.xml.sax.SAXException;
 
 import scala.actors.threadpool.Arrays;
 
@@ -30,6 +33,7 @@ import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.Type.MetaType;
+import com.ibm.streams.operator.log4j.LogLevel;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.InputPortSet;
 import com.ibm.streams.operator.model.InputPortSet.WindowMode;
@@ -67,7 +71,7 @@ description=SPLDocConstants.MQTTSRC_OP_DESCRIPTION)
 @InputPorts({@InputPortSet(description=SPLDocConstants.MQTTSRC_INPUT_PORT0, optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
 @OutputPorts({@OutputPortSet(description=SPLDocConstants.MQTTSRC_OUPUT_PORT_0, cardinality=1, optional=false, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free), @OutputPortSet(description=SPLDocConstants.MQTTSRC_OUTPUT_PORT_1, optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
 @Libraries(value = {"opt/downloaded/*"})
-@Icons(location16="com.ibm.streamsx.messaging.mqtt/MQTTSource/MQTTSource_16.gif", location32="com.ibm.streamsx.messaging.mqtt/MQTTSource/MQTTSource_32.gif")
+@Icons(location16="icons/MQTTSource_16.gif", location32="icons/MQTTSource_32.gif")
 public class MqttSourceOperator extends AbstractOperator { 
 	
 	private static Logger TRACE = Logger.getLogger(MqttSourceOperator.class);
@@ -77,6 +81,8 @@ public class MqttSourceOperator extends AbstractOperator {
 	private List<Integer> paramQos;
 	private String serverUri;
 	private String topicOutAttrName;
+	private String connectionDocument;
+	private String connection;
 	
 	private int reconnectionBound = IMqttConstants.DEFAULT_RECONNECTION_BOUND;		// default 5, 0 = no retry, -1 = infinite retry
 	private long period = IMqttConstants.DEFAULT_RECONNECTION_PERIOD;
@@ -145,7 +151,9 @@ public class MqttSourceOperator extends AbstractOperator {
         clientRequestQueue = new ArrayBlockingQueue<MqttClientRequest>(20);
         
         mqttWrapper = new MqttClientWrapper();
-        mqttWrapper.setBrokerUri(serverUri);
+        
+        initializeServerUri();
+        mqttWrapper.setBrokerUri(getServerUri());
         
         /*
          * Create the thread for producing tuples. 
@@ -196,6 +204,47 @@ public class MqttSourceOperator extends AbstractOperator {
         clientRequestThread.setDaemon(true);       
     }
 
+    private void initializeServerUri() throws Exception {
+		
+		// if serverUri is null, read connection document
+		if (getServerUri()==null)
+		{
+			ConnectionDocumentHelper helper = new ConnectionDocumentHelper();
+			String connDoc = getConnectionDocument();
+			
+			// if connection document is not specified, default to ../etc/connections.xml
+			if (connDoc == null)
+			{
+				File dataDirectory = getOperatorContext().getPE().getDataDirectory();
+				connDoc = dataDirectory.getAbsolutePath() + "../etc/connections.xml";
+			}			
+			
+			// convert from relative path to absolute path is necessary
+			if (!connDoc.startsWith("/"))
+			{
+				File dataDirectory = getOperatorContext().getPE().getDataDirectory();
+				connDoc = dataDirectory.getAbsolutePath() + "/" + connDoc;
+			}
+			
+			try {
+				helper.parseAndValidateConnectionDocument(connDoc);
+				ConnectionSpecification connectionSpecification = helper.getConnectionSpecification(getConnection());
+				if (connectionSpecification != null)
+				{
+					setServerUri(connectionSpecification.getServerUri());	
+				}
+				else
+				{
+					TRACE.log(LogLevel.ERROR, "Unable to find the connection from the connection document: " + getConnection());
+					throw new RuntimeException("Unable to find the connection from connection document.  Unable to initialize serverUri.");
+				}
+			} catch (SAXException | IOException e) {
+				TRACE.log(LogLevel.ERROR, "Connection document is malformed.");
+				throw e;				
+			}
+		}
+	}
+
 	protected void handleClientRequests() {
 		while (!shutdown)
         {
@@ -210,7 +259,7 @@ public class MqttSourceOperator extends AbstractOperator {
 							&& mqttWrapper.getPendingBrokerUri().equals(
 									request.getServerUri()))
 					{
-						TRACE.log(TraceLevel.DEBUG, "[Request Queue:] " + IMqttConstants.CONN_SERVERURI + ":" + serverUri); //$NON-NLS-1$ //$NON-NLS-2$
+						TRACE.log(TraceLevel.DEBUG, "[Request Queue:] " + IMqttConstants.CONN_SERVERURI + ":" + getServerUri()); //$NON-NLS-1$ //$NON-NLS-2$
 
 						setServerUri(request.getServerUri());
 						mqttWrapper.setBrokerUri(request.getServerUri());
@@ -544,7 +593,7 @@ public class MqttSourceOperator extends AbstractOperator {
 		}
 	}
 
-    @Parameter(name="serverURI", description=SPLDocConstants.MQTTSRC_PARAM_SERVERIURI_DESC, optional=false)
+    @Parameter(name="serverURI", description=SPLDocConstants.MQTTSRC_PARAM_SERVERIURI_DESC, optional=true)
 	public void setServerUri(String serverUri) {
 		this.serverUri = serverUri;
 	}
@@ -591,4 +640,23 @@ public class MqttSourceOperator extends AbstractOperator {
 	public long getPeriod() {
 		return period;
 	}
+	
+	public String getConnection() {
+		return connection;
+	}
+	
+	@Parameter(name = "connection", description = "Name of the connection specification of the MQTT element in the connection document.", optional = true)
+	public void setConnection(String connection) {
+		this.connection = connection;
+	}
+	
+	public String getConnectionDocument() {
+		return connectionDocument;
+	}
+	
+	@Parameter(name = "connectionDocument", description = "Path to connection document.  If unspecified, default to ../etc/connections.xml", optional = true)
+	public void setConnectionDocument(String connectionDocument) {
+		this.connectionDocument = connectionDocument;
+	}
+	
 }

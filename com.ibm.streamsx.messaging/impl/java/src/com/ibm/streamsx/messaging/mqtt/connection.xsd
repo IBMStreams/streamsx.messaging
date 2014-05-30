@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- begin_generated_IBM_copyright_prolog                             -->
+<!--                                                                  -->
+<!-- This is an automatically generated copyright prolog.             -->
+<!-- After initializing,  DO NOT MODIFY OR MOVE                       -->
+<!-- **************************************************************** -->
+<!-- Licensed Materials - Property of IBM                             -->
+<!-- 5724-Y95                                                         -->
+<!-- (C) Copyright IBM Corp.  2012, 2012    All Rights Reserved.      -->
+<!-- US Government Users Restricted Rights - Use, duplication or      -->
+<!-- disclosure restricted by GSA ADP Schedule Contract with          -->
+<!-- IBM Corp.                                                        -->
+<!--                                                                  -->
+<!-- end_generated_IBM_copyright_prolog                               -->
+
+
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="http://www.ibm.com/xmlns/prod/streams/adapters"
+        xmlns:st="http://www.ibm.com/xmlns/prod/streams/adapters"
+        attributeFormDefault="unqualified"
+        elementFormDefault="unqualified">
+
+  <element name="connections">
+    <complexType>
+      <sequence>
+        <element name="connection_specifications" minOccurs="0" maxOccurs="1">
+          <complexType>
+            <sequence>
+              <element name="connection_specification" minOccurs="0" maxOccurs="unbounded">
+                <complexType>
+                  <choice minOccurs="1" maxOccurs="1">
+                    <element name="MQTT">
+                      <complexType>
+                        <attribute name="serverURI" use="required" type="anyURI"/>
+			   <attribute name="trustStore" type="anyURI"/>
+			   <attribute name="keyStore" type="anyURI"/>
+			   <attribute name="keyStorePassword" type="string"/>
+                      </complexType>
+                    </element>
+                  </choice>
+                  <attribute name="name" use="required" type="NCName"/>
+                </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+    </complexType>
+  </element>
+
+
+</schema>

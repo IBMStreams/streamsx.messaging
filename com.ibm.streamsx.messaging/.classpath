@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" output="impl/java/bin" path="impl/java/src"/>
+	<classpathentry kind="src" path="impl/java/src"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="opt/downloaded/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/jline-0.9.94.jar"/>

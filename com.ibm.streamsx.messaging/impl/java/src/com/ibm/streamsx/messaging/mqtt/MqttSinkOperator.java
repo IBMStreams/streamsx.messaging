@@ -7,6 +7,8 @@
 package com.ibm.streamsx.messaging.mqtt;
 
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Thread.State;
 import java.net.URISyntaxException;
@@ -16,6 +18,7 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.log4j.Logger;
+import org.xml.sax.SAXException;
 
 import com.ibm.streams.operator.AbstractOperator;
 import com.ibm.streams.operator.OperatorContext;
@@ -24,11 +27,12 @@ import com.ibm.streams.operator.StreamingData.Punctuation;
 import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
+import com.ibm.streams.operator.log4j.LogLevel;
 import com.ibm.streams.operator.log4j.TraceLevel;
+import com.ibm.streams.operator.model.Icons;
 import com.ibm.streams.operator.model.InputPortSet;
 import com.ibm.streams.operator.model.InputPortSet.WindowMode;
 import com.ibm.streams.operator.model.InputPortSet.WindowPunctuationInputMode;
-import com.ibm.streams.operator.model.Icons;
 import com.ibm.streams.operator.model.InputPorts;
 import com.ibm.streams.operator.model.Libraries;
 import com.ibm.streams.operator.model.OutputPortSet;
@@ -62,7 +66,7 @@ description=SPLDocConstants.MQTTSINK_OP_DESCRIPTION)
 @InputPorts({@InputPortSet(description=SPLDocConstants.MQTTSINK_INPUTPORT0, cardinality=1, optional=false, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious), @InputPortSet(description=SPLDocConstants.MQTTSINK_INPUTPORT1, optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
 @OutputPorts({@OutputPortSet(description=SPLDocConstants.MQTTSINK_OUTPUT_PORT0, cardinality=1, optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
 @Libraries(value = {"opt/downloaded/*"} )
-@Icons(location16="com.ibm.streamsx.messaging.mqtt/MQTTSink/MQTTSink_16.gif", location32="com.ibm.streamsx.messaging.mqtt/MQTTSink/MQTTSink_32.gif")
+@Icons(location16="icons/MQTTSink_16.gif", location32="icons/MQTTSink_32.gif")
 public class MqttSinkOperator extends AbstractOperator {
 	 
 	private static Logger TRACE = Logger.getLogger(MqttSinkOperator.class);
@@ -76,6 +80,8 @@ public class MqttSinkOperator extends AbstractOperator {
 	private boolean retain = false;
 	private String topicAttributeName;
 	private String qosAttributeName;
+	private String connectionDocument;
+	private String connection;
 
 	private MqttClientWrapper mqttWrapper;
 	
@@ -233,13 +239,55 @@ public class MqttSinkOperator extends AbstractOperator {
         
        tupleQueue = new ArrayBlockingQueue<Tuple>(50);
         
-       mqttWrapper = new MqttClientWrapper();
+       mqttWrapper = new MqttClientWrapper();       
+       initializeServerUri();
        mqttWrapper.setBrokerUri(serverUri);
        mqttWrapper.setReconnectionBound(getReconnectionBound());
        mqttWrapper.setPeriod(getPeriod());
        // do not connect here... connection is done on the publish thread when a message
        // is ready to be published
 	} 
+	
+	private void initializeServerUri() throws Exception {
+		
+		// if serverUri is null, read connection document
+		if (getServerUri()==null)
+		{
+			ConnectionDocumentHelper helper = new ConnectionDocumentHelper();
+			String connDoc = getConnectionDocument();
+			
+			// if connection document is not specified, default to ../etc/connections.xml
+			if (connDoc == null)
+			{
+				File dataDirectory = getOperatorContext().getPE().getDataDirectory();
+				connDoc = dataDirectory.getAbsolutePath() + "../etc/connections.xml";
+			}			
+			
+			// convert from relative path to absolute path is necessary
+			if (!connDoc.startsWith("/"))
+			{
+				File dataDirectory = getOperatorContext().getPE().getDataDirectory();
+				connDoc = dataDirectory.getAbsolutePath() + "/" + connDoc;
+			}
+			
+			try {
+				helper.parseAndValidateConnectionDocument(connDoc);
+				ConnectionSpecification connectionSpecification = helper.getConnectionSpecification(getConnection());
+				if (connectionSpecification != null)
+				{
+					setServerUri(connectionSpecification.getServerUri());	
+				}
+				else
+				{
+					TRACE.log(LogLevel.ERROR, "Unable to find the connection from the connection document: " + getConnection());
+					throw new RuntimeException("Unable to find the connection from connection document.  Unable to initialize serverUri.");
+				}
+			} catch (SAXException | IOException e) {
+				TRACE.log(LogLevel.ERROR, "Connection document is malformed.");
+				throw e;				
+			}
+		}
+	}
 
     /**
      * Notification that initialization is complete and all input and output ports 
@@ -371,7 +419,7 @@ public class MqttSinkOperator extends AbstractOperator {
 		this.qos = qos;
 	}
 
-    @Parameter(name="serverURI", description=SPLDocConstants.MQTTSINK_PARAM_SERVERURI_DESC, optional=false)
+    @Parameter(name="serverURI", description=SPLDocConstants.MQTTSINK_PARAM_SERVERURI_DESC, optional=true)
 	public void setServerUri(String serverUri) {
 		this.serverUri = serverUri;
 	}
@@ -433,6 +481,22 @@ public class MqttSinkOperator extends AbstractOperator {
 		return qosAttributeName;
 	}
 	
+	public String getConnection() {
+		return connection;
+	}
 	
+	@Parameter(name = "connection", description = "Name of the connection specification of the MQTT element in the connection document.", optional = true)
+	public void setConnection(String connection) {
+		this.connection = connection;
+	}
+	
+	public String getConnectionDocument() {
+		return connectionDocument;
+	}
+	
+	@Parameter(name = "connectionDocument", description = "Path to connection document.  If unspecified, default to ../etc/connections.xml", optional = true)
+	public void setConnectionDocument(String connectionDocument) {
+		this.connectionDocument = connectionDocument;
+	}
     
 }
