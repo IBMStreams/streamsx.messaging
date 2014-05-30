@@ -216,7 +216,7 @@ public class MqttSourceOperator extends AbstractOperator {
 			if (connDoc == null)
 			{
 				File dataDirectory = getOperatorContext().getPE().getDataDirectory();
-				connDoc = dataDirectory.getAbsolutePath() + "../etc/connections.xml";
+				connDoc = dataDirectory.getAbsolutePath() + "/../etc/connections.xml";
 			}			
 			
 			// convert from relative path to absolute path is necessary

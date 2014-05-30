@@ -1,3 +1,9 @@
+/*******************************************************************************
+ * Copyright (C) 2014, International Business Machines Corporation
+ * All Rights Reserved
+ *******************************************************************************/
+
+
 package com.ibm.streamsx.messaging.mqtt;
 
 import java.io.IOException;
@@ -51,7 +57,7 @@ class ConnectionDocumentHelper {
 
 		// read schema from classpath
 		InputStream resourceAsStream = getClass().getResourceAsStream(
-				"connection.xsd");
+				"mqttconnection.xsd");
 		Source streamSource = new StreamSource(resourceAsStream);
 
 		// create new schema
