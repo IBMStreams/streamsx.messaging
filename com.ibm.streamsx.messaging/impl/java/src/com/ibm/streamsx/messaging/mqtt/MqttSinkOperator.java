@@ -7,8 +7,6 @@
 package com.ibm.streamsx.messaging.mqtt;
 
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Thread.State;
 import java.net.URISyntaxException;
@@ -18,16 +16,13 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.log4j.Logger;
-import org.xml.sax.SAXException;
 
-import com.ibm.streams.operator.AbstractOperator;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.StreamingData.Punctuation;
 import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
-import com.ibm.streams.operator.log4j.LogLevel;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.Icons;
 import com.ibm.streams.operator.model.InputPortSet;
@@ -67,22 +62,18 @@ description=SPLDocConstants.MQTTSINK_OP_DESCRIPTION)
 @OutputPorts({@OutputPortSet(description=SPLDocConstants.MQTTSINK_OUTPUT_PORT0, cardinality=1, optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
 @Libraries(value = {"opt/downloaded/*"} )
 @Icons(location16="icons/MQTTSink_16.gif", location32="icons/MQTTSink_32.gif")
-public class MqttSinkOperator extends AbstractOperator {
+public class MqttSinkOperator extends AbstractMqttOperator {
 	 
-	private static Logger TRACE = Logger.getLogger(MqttSinkOperator.class);
+	static Logger TRACE = Logger.getLogger(MqttSinkOperator.class);
 	
 	// Parameters
 	private String topic;
 	private int qos = 0;
-	private String serverUri;
 	private int reconnectionBound = IMqttConstants.DEFAULT_RECONNECTION_BOUND;		// default 5, 0 = no retry, -1 = infinite retry
 	private long period = IMqttConstants.DEFAULT_RECONNECTION_PERIOD;
 	private boolean retain = false;
 	private String topicAttributeName;
 	private String qosAttributeName;
-	private String connectionDocument;
-	private String connection;
-
 	private MqttClientWrapper mqttWrapper;
 	
 	private ArrayBlockingQueue<Tuple> tupleQueue;
@@ -137,7 +128,7 @@ public class MqttSinkOperator extends AbstractOperator {
 						}
 						else
 						{
-							TRACE.log(TraceLevel.ERROR, Messages.getString("MqttSinkOperator.0", pubTopic, msgQos)); //$NON-NLS-1$
+							TRACE.log(TraceLevel.ERROR, Messages.getString("Error_MqttSinkOperator.0", pubTopic, msgQos)); //$NON-NLS-1$
 						}
 					}
 					else
@@ -152,7 +143,7 @@ public class MqttSinkOperator extends AbstractOperator {
 						
 						if (!connected)
 						{
-							throw new RuntimeException("Unable to connect to server: " + getServerUri());
+							throw new RuntimeException(Messages.getString("Error_MqttSinkOperator.1") + getServerUri()); //$NON-NLS-1$
 						}
 						
 						// inline this block of code instead of method call
@@ -168,11 +159,11 @@ public class MqttSinkOperator extends AbstractOperator {
 						}
 						else
 						{
-							TRACE.log(TraceLevel.ERROR, Messages.getString("MqttSinkOperator.0", pubTopic, msgQos)); //$NON-NLS-1$
+							TRACE.log(TraceLevel.ERROR, Messages.getString("Error_MqttSinkOperator.0", pubTopic, msgQos)); //$NON-NLS-1$
 						}
 					}
 				} catch (Exception e) {
-					TRACE.log(TraceLevel.ERROR, "Unable to publish message", e);
+					TRACE.log(TraceLevel.ERROR, Messages.getString("Error_MqttSinkOperator.2"), e); //$NON-NLS-1$
 					throw new RuntimeException(e);
 				}
 			}			
@@ -216,7 +207,7 @@ public class MqttSinkOperator extends AbstractOperator {
 		
 		if (!hasTopic)
 		{
-			checker.setInvalidContext(Messages.getString("MqttSinkOperator.7"), null); //$NON-NLS-1$
+			checker.setInvalidContext(Messages.getString("Error_MqttSinkOperator.7"), null); //$NON-NLS-1$
 		}
 		
 		check = check & hasTopic;
@@ -241,55 +232,14 @@ public class MqttSinkOperator extends AbstractOperator {
         
        mqttWrapper = new MqttClientWrapper();       
        initializeServerUri();
-       mqttWrapper.setBrokerUri(serverUri);
+       mqttWrapper.setBrokerUri(getServerUri());
        mqttWrapper.setReconnectionBound(getReconnectionBound());
        mqttWrapper.setPeriod(getPeriod());
        // do not connect here... connection is done on the publish thread when a message
        // is ready to be published
 	} 
 	
-	private void initializeServerUri() throws Exception {
-		
-		// if serverUri is null, read connection document
-		if (getServerUri()==null)
-		{
-			ConnectionDocumentHelper helper = new ConnectionDocumentHelper();
-			String connDoc = getConnectionDocument();
-			
-			// if connection document is not specified, default to ../etc/connections.xml
-			if (connDoc == null)
-			{
-				File dataDirectory = getOperatorContext().getPE().getDataDirectory();
-				connDoc = dataDirectory.getAbsolutePath() + "/../etc/connections.xml";
-			}			
-			
-			// convert from relative path to absolute path is necessary
-			if (!connDoc.startsWith("/"))
-			{
-				File dataDirectory = getOperatorContext().getPE().getDataDirectory();
-				connDoc = dataDirectory.getAbsolutePath() + "/" + connDoc;
-			}
-			
-			try {
-				helper.parseAndValidateConnectionDocument(connDoc);
-				ConnectionSpecification connectionSpecification = helper.getConnectionSpecification(getConnection());
-				if (connectionSpecification != null)
-				{
-					setServerUri(connectionSpecification.getServerUri());	
-				}
-				else
-				{
-					TRACE.log(LogLevel.ERROR, "Unable to find the connection from the connection document: " + getConnection());
-					throw new RuntimeException("Unable to find the connection from connection document.  Unable to initialize serverUri.");
-				}
-			} catch (SAXException | IOException e) {
-				TRACE.log(LogLevel.ERROR, "Connection document is malformed.");
-				throw e;				
-			}
-		}
-	}
-
-    /**
+	/**
      * Notification that initialization is complete and all input and output ports 
      * are connected and ready to receive and submit tuples.
      * @throws Exception Operator failure, will cause the enclosing PE to terminate.
@@ -370,7 +320,7 @@ public class MqttSinkOperator extends AbstractOperator {
 				}
 			}
 		} catch (Exception e) {
-			TRACE.log(TraceLevel.ERROR, Messages.getString("MqttSinkOperator.21")); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR, Messages.getString("Error_MqttSinkOperator.21")); //$NON-NLS-1$
 		}
 	}
     
@@ -419,12 +369,7 @@ public class MqttSinkOperator extends AbstractOperator {
 		this.qos = qos;
 	}
 
-    @Parameter(name="serverURI", description=SPLDocConstants.MQTTSINK_PARAM_SERVERURI_DESC, optional=true)
-	public void setServerUri(String serverUri) {
-		this.serverUri = serverUri;
-	}
-	
-	public String getTopics() {
+    public String getTopics() {
 		return topic;
 	}
 
@@ -432,10 +377,6 @@ public class MqttSinkOperator extends AbstractOperator {
 		return qos;
 	}
 
-	public String getServerUri() {
-		return serverUri;
-	}
-	
 	@Parameter(name="reconnectionBound", description=SPLDocConstants.MQTTSINK_PARAM_RECONN_BOUND_DESC, optional=true)
 	public void setReconnectionBound(int reconnectionBound) {
 		this.reconnectionBound = reconnectionBound;
@@ -479,24 +420,6 @@ public class MqttSinkOperator extends AbstractOperator {
 	
 	public String getQosAttributeName() {
 		return qosAttributeName;
-	}
-	
-	public String getConnection() {
-		return connection;
-	}
-	
-	@Parameter(name = "connection", description = "Name of the connection specification of the MQTT element in the connection document.", optional = true)
-	public void setConnection(String connection) {
-		this.connection = connection;
-	}
-	
-	public String getConnectionDocument() {
-		return connectionDocument;
-	}
-	
-	@Parameter(name = "connectionDocument", description = "Path to connection document.  If unspecified, default to ../etc/connections.xml", optional = true)
-	public void setConnectionDocument(String connectionDocument) {
-		this.connectionDocument = connectionDocument;
 	}
     
 }
