@@ -6,11 +6,13 @@ package com.ibm.streamsx.messaging.mqtt;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.xml.sax.SAXException;
 
 import com.ibm.streams.operator.AbstractOperator;
+import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.log4j.LogLevel;
 import com.ibm.streams.operator.log4j.LoggerNames;
 import com.ibm.streams.operator.log4j.TraceLevel;
@@ -98,4 +100,24 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		}
 	}
 
+	
+	protected static void validateNumber(OperatorContextChecker checker,
+			String parameterName, long min, long max) {
+		try {
+			List<String> paramValues = checker.getOperatorContext()
+					.getParameterValues(parameterName);
+			for (String strVal : paramValues) {
+				Long longVal = Long.valueOf(strVal);
+
+				if (longVal.longValue() > max || longVal.longValue() < min) {
+					checker.setInvalidContext(
+							Messages.getString("Error_AbstractMqttOperator.0"), //$NON-NLS-1$
+							new Object[] { parameterName, min, max });
+				}
+			}
+		} catch (NumberFormatException e) {
+			checker.setInvalidContext(Messages.getString("Error_AbstractMqttOperator.1"), //$NON-NLS-1$
+					new Object[] { parameterName });
+		}
+	}
 }

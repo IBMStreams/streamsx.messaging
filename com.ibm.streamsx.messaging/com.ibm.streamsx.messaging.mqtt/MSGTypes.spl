@@ -1,0 +1,42 @@
+namespace com.ibm.streamsx.messaging.mqtt;
+/*
+* Composite that defines types to be used to update MQTTSource operator using control port
+*/
+public composite MQTTSourceUpdate
+{
+    type
+    
+        /**
+        * Actions that can be applied to update the topics / Qos for MQTTSource
+        * operator
+        */
+        static TopicsUpdateAction = enum { ADD, REMOVE, REPLACE, UPDATE } ;
+        
+        /**
+        * A descriptor to describe how the topics / qos should be updated in
+        * MQTTSource operator. 
+        * action - the action to apply for the topics specified
+        * topics - list of topics to add / remove / update or replace
+        * qos - qos of the topics to be added, updated or replace.  value is ignored for remove action. Valid value is 0,1 or 2.
+        */
+        static TopicsUpdateDesc = TopicsUpdateAction action, list<rstring> topics,
+            uint32 qos ;
+            
+        /**
+        * Expected schema for the control input port of the MQTTSource operator
+        */
+        static ControlPortType = list<TopicsUpdateDesc> topic, map<rstring,
+            rstring> mqttConfig;
+}
+
+/*
+* Composite that contains types to be used to update MQTTSink operator using control port
+*/
+public composite MQTTSinkUpdate
+{
+    type
+       /*
+       * The expected schema for the control input port in the MQTTSink operator
+       */
+        static ControlPortType = map<rstring, rstring> mqttConfig;
+}

@@ -22,13 +22,16 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import scala.actors.threadpool.Arrays;
 
+import com.ibm.streams.operator.Attribute;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.Tuple;
+import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.Type.MetaType;
+import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.Icons;
 import com.ibm.streams.operator.model.InputPortSet;
@@ -125,8 +128,65 @@ public class MqttSourceOperator extends AbstractMqttOperator {
     	
     };
     
+    @ContextCheck(compile=false)
+    public  static void runtimeChecks(OperatorContextChecker checker) {
+    	
+    	validateNumber(checker, "period", 0, Long.MAX_VALUE); //$NON-NLS-1$
+    	validateNumber(checker, "qos", 0, 2); //$NON-NLS-1$
+    	validateNumber(checker, "reconnectionBound", -1, Long.MAX_VALUE); //$NON-NLS-1$
+    	
+    	List<String> topicValues = checker.getOperatorContext().getParameterValues("topics"); //$NON-NLS-1$
+    	List<String> qosValues = checker.getOperatorContext().getParameterValues("qos"); //$NON-NLS-1$
+    	
+    	if (qosValues.size() > 0 && topicValues.size() != qosValues.size())
+    	{
+    		checker.setInvalidContext(Messages.getString("Error_MqttSourceOperator.5"), new Object[] {}); //$NON-NLS-1$
+    	}
+    	
+    	if (checker.getOperatorContext().getParameterNames().contains("topicOutAttrName")) { //$NON-NLS-1$
+    		
+    		List<String> parameterValues = checker.getOperatorContext().getParameterValues("topicOutAttrName"); //$NON-NLS-1$
+    		String outAttributeName = parameterValues.get(0);
+	    	List<StreamingOutput<OutputTuple>> outputPorts = checker.getOperatorContext().getStreamingOutputs();
+	    	if (outputPorts.size() > 0)
+	    	{
+	    		StreamingOutput<OutputTuple> outputPort = outputPorts.get(0);
+	    		StreamSchema streamSchema = outputPort.getStreamSchema();
+	    		boolean check = checker.checkRequiredAttributes(streamSchema, outAttributeName);
+	    		if (check)
+	    			checker.checkAttributeType(streamSchema.getAttribute(outAttributeName), MetaType.RSTRING, MetaType.USTRING);
+	    	}
+    	}
+    }
+    
+    @ContextCheck(compile=true, runtime=false)
+	public static void checkOutputPort(OperatorContextChecker checker) {
+		List<StreamingOutput<OutputTuple>> outputPorts = checker.getOperatorContext().getStreamingOutputs();
+		
+		if (outputPorts.size() > 0)
+		{
+			StreamingOutput<OutputTuple> dataPort = outputPorts.get(0);
+			StreamSchema streamSchema = dataPort.getStreamSchema();
+			Set<String> attributeNames = streamSchema.getAttributeNames();
 
-    /**
+			boolean blobFound = false;
+			for (String attrName : attributeNames) {
+				Attribute attr = streamSchema.getAttribute(attrName);
+				
+				if (attr.getType().getMetaType().equals(MetaType.BLOB))
+				{
+					blobFound = true;
+					break;
+				}				
+			}
+			if (!blobFound)
+			{
+				checker.setInvalidContext(Messages.getString("Error_MqttSourceOperator.0"), new Object[]{}); //$NON-NLS-1$
+			}
+		}
+		// TODO:  check control input port
+    }
+	/**
      * Initialize this operator. Called once before any tuples are processed.
      * @param context OperatorContext for this operator.
      * @throws Exception Operator failure, will cause the enclosing PE to terminate.
@@ -136,7 +196,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
             throws Exception {
     	// Must call super.initialize(context) to correctly setup an operator.
         super.initialize(context);
-        Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " initializing in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
+        Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " initializing in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         
         messageQueue = new ArrayBlockingQueue<MqttSourceOperator.MqttMessageRecord>(50);
         clientRequestQueue = new ArrayBlockingQueue<MqttClientRequest>(20);
@@ -159,7 +219,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
                         try {
                             produceTuples();
                         } catch (Exception e) {
-                            Logger.getLogger(this.getClass()).error("Operator error", e);
+                            Logger.getLogger(this.getClass()).error("Operator error", e); //$NON-NLS-1$
                         }                    
                     }
                     
@@ -233,7 +293,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 				// The MQTT client does not provide a way for us to query for the information 
 				else if (request.getReqType() == MqttClientRequestType.ADD_TOPICS)
 				{
-					TRACE.log(TraceLevel.DEBUG, "[Request Queue: Add Topics] " + request.getTopics() + ":" + request.getQos()); 
+					TRACE.log(TraceLevel.DEBUG, "[Request Queue: Add Topics] " + request.getTopics() + ":" + request.getQos());  //$NON-NLS-1$ //$NON-NLS-2$
 					// add to topic list
 					addTopics(request.getTopics(), request.getQos());
 					int[] qos = createQosList(request.getTopics(), request.getQos());
@@ -242,14 +302,14 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 				}
 				else if (request.getReqType() == MqttClientRequestType.REMOVE_TOPICS)
 				{
-					TRACE.log(TraceLevel.DEBUG, "[Request Queue: remove Topics] " + request.getTopics());
+					TRACE.log(TraceLevel.DEBUG, "[Request Queue: remove Topics] " + request.getTopics()); //$NON-NLS-1$
 					// remove from topic list
 					removeTopics(request.getTopics());
 					// unsubscribe the specified topic
 					mqttWrapper.unsubscribe(request.getTopics());
 				}
 				else if (request.getReqType() == MqttClientRequestType.UPDATE_TOPICS) {
-					TRACE.log(TraceLevel.DEBUG, "[Request Queue: Update Topics] " + request.getTopics() + ":" + request.getQos());
+					TRACE.log(TraceLevel.DEBUG, "[Request Queue: Update Topics] " + request.getTopics() + ":" + request.getQos()); //$NON-NLS-1$ //$NON-NLS-2$
 					// update qos for topic
 					updateTopics(request.getTopics(), request.getQos());
 					// unsubscribe specified topic
@@ -261,7 +321,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 				}
 				else if (request.getReqType() == MqttClientRequestType.REPLACE_TOPICS)
 				{
-					TRACE.log(TraceLevel.DEBUG, "[Request Queue: Replace Topics] " + request.getTopics() + ":" + request.getQos());
+					TRACE.log(TraceLevel.DEBUG, "[Request Queue: Replace Topics] " + request.getTopics() + ":" + request.getQos()); //$NON-NLS-1$ //$NON-NLS-2$
 					
 					// unsubscribe all topics	
 					mqttWrapper.unsubscribe((String[]) paramTopics.toArray(new String[0]));
@@ -354,7 +414,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
     @Override
     public synchronized void allPortsReady() throws Exception {
         OperatorContext context = getOperatorContext();
-        Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " all ports are ready in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
+        Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " all ports are ready in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     	// Start a thread for producing tuples because operator 
     	// implementations must not block and must return control to the caller.
         processThread.start();        
@@ -503,7 +563,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 			
 			
 		} catch (Exception e) {
-			TRACE.log(TraceLevel.ERROR, Messages.getString("MqttSinkOperator.21")); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR, ""); //$NON-NLS-1$
 		}
 	}
 
@@ -521,7 +581,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
             processThread = null;
         }
         OperatorContext context = getOperatorContext();
-        Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " shutting down in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
+        Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " shutting down in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         
         mqttWrapper.disconnect();
         mqttWrapper.shutdown();

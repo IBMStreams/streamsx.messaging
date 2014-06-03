@@ -11,17 +11,21 @@ import java.io.InputStream;
 import java.lang.Thread.State;
 import java.net.URISyntaxException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.log4j.Logger;
 
+import com.ibm.streams.operator.Attribute;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
+import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingData.Punctuation;
 import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.Tuple;
+import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.Icons;
@@ -213,6 +217,64 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 		check = check & hasTopic;
 		
 		return check;
+		
+	}
+	
+	   @ContextCheck(compile=false)
+	    public  static void runtimeChecks(OperatorContextChecker checker) {
+	    	
+	    	validateNumber(checker, "period", 0, Long.MAX_VALUE); //$NON-NLS-1$
+	    	validateNumber(checker, "qos", 0, 2); //$NON-NLS-1$
+	    	validateNumber(checker, "reconnectionBound", -1, Long.MAX_VALUE); //$NON-NLS-1$
+	    	
+	    	checkInputAttribute(checker, "qosAttributeName", MetaType.INT32); //$NON-NLS-1$
+	    	checkInputAttribute(checker, "topicAttributeName", MetaType.RSTRING, MetaType.USTRING); //$NON-NLS-1$
+	    }
+
+	private static void checkInputAttribute(OperatorContextChecker checker, String parameterName, MetaType... validTypes) {
+		if (checker.getOperatorContext().getParameterNames().contains(parameterName)) {
+			
+			List<String> parameterValues = checker.getOperatorContext().getParameterValues(parameterName);
+			String attributeName = parameterValues.get(0);
+			List<StreamingInput<Tuple>> inputPorts = checker.getOperatorContext().getStreamingInputs();
+			if (inputPorts.size() > 0)
+			{
+				StreamingInput<Tuple> outputPort = inputPorts.get(0);
+				StreamSchema streamSchema = outputPort.getStreamSchema();
+				boolean check = checker.checkRequiredAttributes(streamSchema, attributeName);
+				if (check)
+					checker.checkAttributeType(streamSchema.getAttribute(attributeName), validTypes);
+			}
+		}
+	}
+	
+	@ContextCheck(compile=true, runtime=false)
+	public static void checkInputPortSchema(OperatorContextChecker checker) {
+		List<StreamingInput<Tuple>> inputPorts = checker.getOperatorContext().getStreamingInputs();
+		
+		if (inputPorts.size() > 0)
+		{
+			StreamingInput<Tuple> dataPort = inputPorts.get(0);
+			StreamSchema streamSchema = dataPort.getStreamSchema();
+			Set<String> attributeNames = streamSchema.getAttributeNames();
+
+			boolean blobFound = false;
+			for (String attrName : attributeNames) {
+				Attribute attr = streamSchema.getAttribute(attrName);
+				
+				if (attr.getType().getMetaType().equals(MetaType.BLOB))
+				{
+					blobFound = true;
+					break;
+				}				
+			}
+			if (!blobFound)
+			{
+				checker.setInvalidContext(Messages.getString("Error_MqttSinkOperator.5"), new Object[]{}); //$NON-NLS-1$
+			}
+		}
+		//TODO:  check control input port
+		
 		
 	}
 	
