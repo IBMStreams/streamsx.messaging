@@ -40,3 +40,23 @@ public composite MQTTSinkUpdate
        */
         static ControlPortType = map<rstring, rstring> mqttConfig;
 }
+
+/** Convenience method for creating a control signal that modifies
+ * subscription setting for MQTTSource operator
+ * 
+ */
+public MQTTSourceUpdate.ControlPortType
+	newControlSignal(MQTTSourceUpdate.TopicsUpdateAction action,
+	list<rstring> topics, uint32 qos)
+{
+	MQTTSourceUpdate.TopicsUpdateDesc desc = { action = action,
+		topics = topics, qos = qos } ;
+	mutable list<MQTTSourceUpdate.TopicsUpdateDesc>
+		topicUpdate =(list<MQTTSourceUpdate.TopicsUpdateDesc>) [ desc ] ;
+	map<rstring, rstring> empty = { } ;
+
+	MQTTSourceUpdate.ControlPortType signal = { topic = topicUpdate, mqttConfig =
+		empty } ;
+		
+	return signal;
+}
