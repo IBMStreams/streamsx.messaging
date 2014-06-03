@@ -563,7 +563,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 			
 			
 		} catch (Exception e) {
-			TRACE.log(TraceLevel.ERROR, ""); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR, Messages.getString("Error_MqttSinkOperator.21")); //$NON-NLS-1$
 		}
 	}
 
