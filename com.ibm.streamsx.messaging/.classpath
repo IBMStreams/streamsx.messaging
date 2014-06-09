@@ -1,27 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" output="impl/java/bin" path="impl/java/src"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="com.ibm.streams.java/com.ibm.streams.operator"/>
-	<classpathentry kind="lib" path="opt/downloaded/activation-1.1.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/jline-0.9.94.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/jopt-simple-3.2.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/junit-3.8.1.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/kafka_2.8.0-0.8.1.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/log4j-1.2.15.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/mail-1.4.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/metrics-annotation-2.2.0.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/metrics-core-2.2.0.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/scala-library-2.8.0.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/slf4j-api-1.7.2.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/snappy-java-1.0.5.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/zkclient-0.3.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/zookeeper-3.3.4.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/mqtt-client-0.4.1-SNAPSHOT.jar"/>
 	<classpathentry kind="src" path="impl/java/src-gen">
 		<attributes>
 			<attribute name="optional" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="output" path="impl/java/bin"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

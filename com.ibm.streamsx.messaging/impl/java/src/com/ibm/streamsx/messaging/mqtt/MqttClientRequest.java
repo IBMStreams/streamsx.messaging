@@ -1,4 +1,10 @@
+/*******************************************************************************
+ * Copyright (C) 2014, International Business Machines Corporation
+ * All Rights Reserved
+ *******************************************************************************/
 package com.ibm.streamsx.messaging.mqtt;
+
+import java.util.HashMap;
 
 
 
@@ -8,7 +14,22 @@ package com.ibm.streamsx.messaging.mqtt;
  */
 public class MqttClientRequest {
 	
+	private static final String MQTTSRC_TOPIC_REPLACE = "REPLACE";
+	private static final String MQTTSRC_TOPIC_UPDATE = "UPDATE";
+	private static final String MQTTSRC_TOPIC_REMOVE = "REMOVE";
+	private static final String MQTTSRC_TOPIC_ADD = "ADD";
+	
 	public enum MqttClientRequestType {CONNECT, ADD_TOPICS, REMOVE_TOPICS, UPDATE_TOPICS, REPLACE_TOPICS};
+	
+	// mapping between SPL topic description action to MQTT client request
+	private static HashMap<String, MqttClientRequestType> SPL_TO_REQTYPE_MAP = new HashMap<String, MqttClientRequest.MqttClientRequestType>();
+	
+	static {
+		SPL_TO_REQTYPE_MAP.put(MqttClientRequest.MQTTSRC_TOPIC_ADD, MqttClientRequestType.ADD_TOPICS);
+		SPL_TO_REQTYPE_MAP.put(MqttClientRequest.MQTTSRC_TOPIC_REMOVE, MqttClientRequestType.REMOVE_TOPICS);
+		SPL_TO_REQTYPE_MAP.put(MqttClientRequest.MQTTSRC_TOPIC_UPDATE, MqttClientRequestType.UPDATE_TOPICS);
+		SPL_TO_REQTYPE_MAP.put(MqttClientRequest.MQTTSRC_TOPIC_REPLACE, MqttClientRequestType.REPLACE_TOPICS);
+	}
 	
 	private MqttClientRequestType reqType;
 	private String serverUri;
@@ -42,9 +63,12 @@ public class MqttClientRequest {
 	}
 	public MqttClientRequest setQos(int qos) {
 		this.qos = qos;
-		return this;
+		return this; 
 	}
 
-	
+	public static MqttClientRequestType getRequestType(String splUpdateCode)
+	{
+		return SPL_TO_REQTYPE_MAP.get(splUpdateCode);
+	}
 	
 }

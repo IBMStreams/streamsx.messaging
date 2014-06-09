@@ -1,0 +1,85 @@
+// *******************************************************************************
+// * Copyright (C)2014, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************
+namespace application ;
+
+use com.ibm.streamsx.messaging.mqtt::*;
+
+/** This sample demonstrates how to use the MQTTSource and MQTTSink operator.
+ * 
+ * This sample uses a Beacon to generate tuple of type PersonSchema.  The tuples are
+ * converted to blob in csv format.  The blob is then sent to a MQTT provider as messages
+ * using a MQTTSink operator.
+ * 
+ * This sample also has a MQTTSource operator that subscribes to messages being sent by the
+ * MQTTSink operator.  The messages are received as blob and parsed and csv format.  The messages
+ * are then written to a file.
+ * 
+ * Submission Parameter:
+ * serverUri - the uri to the MQTT provider for publishing and subscribing messages. 
+ */
+composite MqttSample
+{
+	param
+		expression<rstring> $serverUri : getSubmissionTimeValue("serverUri") ;
+	type
+		PersonSchema = int32 id, rstring fname, rstring lname, int32 age,
+			rstring gender, float32 score, float64 total ;
+	graph
+		stream<PersonSchema> InputData = Beacon()
+		{
+			param
+				initDelay : 5.0 ;
+				iterations : 100000u ;
+			output
+				InputData : id =(int32) IterationCount(), fname = "Cristiana", lname =
+					"Chitic", age = 30, gender = "F", score =(float32) 93.2, total = 664.4 ;
+		}
+
+		/*
+		 * Convert input data to blob in csv format.
+		 */
+		(stream<blob msg> CsvMsg) as FormatMsg = Format(InputData)
+		{
+			param
+				format : csv ;
+			output
+				CsvMsg : msg = Output() ;
+		}
+
+		() as MQTTSink_6 = MQTTSink(CsvMsg as inPort0Alias)
+		{
+			param
+				serverURI : $serverUri ;
+				topic : "Person" ;
+		}
+
+		stream<blob receivePersonData> MyMessageStream = MQTTSource()
+		{
+			param
+				serverURI : $serverUri ;
+				topics : "Person", "Person2" ;
+		}
+
+		/*
+		 * Parse the csv format blob message data to csv data.
+		 */
+		stream<PersonSchema> ParsedMsg = Parse(MyMessageStream)
+		{
+			param
+				format : csv ;
+		}
+
+		/*
+		 * Write the csv data to the data file
+		 */
+		() as MyMessageSink = FileSink(ParsedMsg)
+		{
+			param
+				file : "mqttmsg.csv" ;
+				format : csv ;
+				flush : 1u ;
+		}
+
+}
