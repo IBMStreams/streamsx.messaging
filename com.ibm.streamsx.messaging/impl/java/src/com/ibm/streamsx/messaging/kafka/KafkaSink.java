@@ -23,7 +23,7 @@ import com.ibm.streams.operator.model.PrimitiveOperator;
 @InputPorts(@InputPortSet(cardinality=1, optional=false, 
 	description="The tuples arriving on this port are expected to contain three attributes \\\"key\\\", \\\"topic\\\" and \\\"message\\\". " +
 			"Out of these \\\"message\\\", is a required attribute."))
-@PrimitiveOperator(name="KafkaSender", description=KafkaSink.DESC)
+@PrimitiveOperator(name="KafkaProducer", description=KafkaSink.DESC)
 public class KafkaSink extends KafkaBaseOper {
 	private static final Logger trace = Logger.getLogger(KafkaSink.class.getName());
 
@@ -53,6 +53,10 @@ public class KafkaSink extends KafkaBaseOper {
 		
 		if(topics.size() == 0 && !topicAH.isAvailable())
 			throw new Exception("Topic has not been specified. Specify either the \"topicAttribute\" or \"topic\" parameters.");
+		
+		if(keyAH.isAvailable() && ( keyAH.isString() != messageAH.isString())) {
+			throw new Exception("Key and Message attributes must have compatible types.");
+		}
 		
 		if(!topics.isEmpty())
 			trace.log(TraceLevel.INFO, "Topics: " + topics.toString());

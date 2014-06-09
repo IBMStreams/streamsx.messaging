@@ -19,7 +19,7 @@ import com.ibm.streams.operator.model.PrimitiveOperator;
 
 @OutputPorts(@OutputPortSet(cardinality=1, optional=false, 
 	description="Messages received from Kafka are sent on this output port."))
-@PrimitiveOperator(name="KafkaReceiver", description=KafkaSource.DESC)
+@PrimitiveOperator(name="KafkaConsumer", description=KafkaSource.DESC)
 public class KafkaSource extends KafkaBaseOper {
 
 	private int threadsPerTopic = 1;

@@ -12,6 +12,7 @@
   <property environment="env" />
   <property name="streams.install" value="${env.STREAMS_INSTALL}" />
   <property name="toolkit" location="com.ibm.streamsx.messaging"/>
+  <property name="toolkit.test" location="tests"/>
   <property name="tmp" location="tmp" />
 	
   <target name="all" depends="toolkit,samples"/>
@@ -81,8 +82,8 @@
   </target>
   
   <!-- Test targets -->
-  <target name="tests">
-     <ant dir="${toolkit}" target="test"/>
+  <target name="tests" depends="toolkit">
+     <ant dir="${toolkit.test}" target="all"/>
   </target>
 
 

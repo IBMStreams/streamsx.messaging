@@ -41,7 +41,8 @@ class KafkaClient {
 	private Properties finalProperties = null;
 	private boolean isInit = false, isConsumer = false;
 	
-	private Producer<byte[],byte[]> producer = null;
+	private AProducerHelper producer = null;
+	
 
 	static final Logger trace = Logger.getLogger(KafkaClient.class.getCanonicalName());
 	
@@ -60,52 +61,39 @@ class KafkaClient {
 	}
 	
 	//producer related methods
-	public void initProducer() {
+	public void initProducer() throws Exception {
 		checkInit(false);
 		
 		trace.log(TraceLevel.INFO, "Initializing Kafka Producer: " + finalProperties);
 		ProducerConfig config = new ProducerConfig(finalProperties);
-		producer = new Producer<byte[], byte[]>(config);
+		
+		if(messageAH.isString())
+			producer = new ProducerStringHelper();
+		else
+			producer = new ProducerByteHelper();
+		
+		producer.init(config, keyAH, messageAH);
 	}
 	
-	public void send(Tuple tuple, List<String> topics) {
+	public void send(Tuple tuple, List<String> topics) throws Exception {
 		if(isConsumer)
 			throw new RuntimeException("This object has not been initialized as a producer");
 		
 		if(trace.isLoggable(TraceLevel.DEBUG))
 			trace.log(TraceLevel.DEBUG, "Sending Tuple To Kafka: " + tuple +", Topics: " + topics);
 		
-		byte[] data = messageAH.getBytes(tuple);
-		byte[] key = data;
-		if(keyAH.isAvailable()) {
-			key=keyAH.getBytes(tuple);
-		}
+		producer.send(tuple, topics);
 
-		List<KeyedMessage<byte[], byte[]> > lst = 
-				new ArrayList<KeyedMessage<byte[],byte[]>>(topics.size());
-		for(String topic : topics) {
-			lst.add(new KeyedMessage<byte[], byte[]>(topic, key, data));
-		}
-		producer.send(lst);
 	}
 	
-	public void send(Tuple tuple) {
+	public void send(Tuple tuple) throws Exception {
 		if(isConsumer)
 			throw new RuntimeException("This object has not been initialized as a producer");
 		
 		if(trace.isLoggable(TraceLevel.DEBUG))
 			trace.log(TraceLevel.DEBUG, "Sending Tuple To Kafka: " + tuple);
-
-		byte[] data = messageAH.getBytes(tuple);
-		byte[] key = data;
-		if(keyAH.isAvailable()) {
-			key=keyAH.getBytes(tuple);
-		}
-
-		String topic = topicAH.getString(tuple); 	
-		KeyedMessage<byte[], byte[]> keyedMessage = 
-				new KeyedMessage<byte[], byte[]>(topic,key, data);
-		producer.send(keyedMessage);
+		
+		producer.send(tuple,  topicAH);
 	}
 	
 	
@@ -148,6 +136,9 @@ class KafkaClient {
 	}
 	
 	private void newMessage(String topic, MessageAndMetadata<byte[], byte[]> msg) throws Exception {
+		if(shutdown) return;
+		if(trace.isLoggable(TraceLevel.DEBUG))
+			trace.log(TraceLevel.DEBUG, "Topic: " + topic + ", Message: " + msg );
 		OutputTuple otup = streamingOutput.newTuple();
 		if(topicAH.isAvailable())
 			topicAH.setValue(otup, topic);
@@ -191,5 +182,99 @@ class KafkaClient {
 			}
 			logger.log(TraceLevel.INFO,baseMsg + "Thread Stopping");
 		}
+	}
+}
+
+abstract class AProducerHelper {
+	AttributeHelper keyAH=null, messageAH = null;
+
+	abstract void init(ProducerConfig config, AttributeHelper keyAH, AttributeHelper messageAH) throws Exception;
+	
+	abstract void send(Tuple tuple, AttributeHelper topicAH)  throws Exception;
+	
+	abstract void send(Tuple tuple,  List<String> topics)  throws Exception;
+	
+} 
+
+class ProducerByteHelper extends AProducerHelper {
+	private Producer<byte[],byte[]> producer = null;
+	
+	@Override
+	void init(ProducerConfig config, AttributeHelper keyAH, AttributeHelper messageAH) {
+		producer = new Producer<byte[], byte[]>(config);
+		this.keyAH = keyAH;
+		this.messageAH = messageAH;
+	}
+	
+	
+	@Override
+	void send(Tuple tuple, AttributeHelper topicAH) throws Exception {
+		byte[] data = messageAH.getBytes(tuple);
+		byte[] key = data;
+		if(keyAH.isAvailable()) {
+			key=keyAH.getBytes(tuple);
+		}
+
+		String topic = topicAH.getString(tuple); 	
+		KeyedMessage<byte[], byte[]> keyedMessage = 
+				new KeyedMessage<byte[], byte[]>(topic,key, data);
+		producer.send(keyedMessage);
+	}
+	
+	@Override
+	void send(Tuple tuple, List<String> topics) throws Exception {
+		byte[] data = messageAH.getBytes(tuple);
+		byte[] key = data;
+		if(keyAH.isAvailable()) {
+			key=keyAH.getBytes(tuple);
+		}
+		List<KeyedMessage<byte[], byte[]> > lst = 
+				new ArrayList<KeyedMessage<byte[],byte[]>>(topics.size());
+		for(String topic : topics) {
+			lst.add(new KeyedMessage<byte[], byte[]>(topic, key, data));
+		}
+		producer.send(lst);
+	}	
+} 
+
+class ProducerStringHelper extends AProducerHelper {
+	private Producer<String, String> producer = null;
+
+	@Override
+	void init(ProducerConfig config, AttributeHelper keyAH,
+			AttributeHelper messageAH) {
+		producer = new Producer<String, String>(config);
+		this.keyAH = keyAH;
+		this.messageAH = messageAH;
+	}
+
+	@Override
+	void send(Tuple tuple, AttributeHelper topicAH) throws Exception {
+		String data = messageAH.getString(tuple);
+		String key = data;
+		if(keyAH.isAvailable()) {
+			key=keyAH.getString(tuple);
+		}
+
+		String topic = topicAH.getString(tuple); 	
+		KeyedMessage<String, String> keyedMessage = 
+				new KeyedMessage<String, String>(topic,key, data);
+		producer.send(keyedMessage);
+	}
+
+	@Override
+	void send(Tuple tuple, List<String> topics) throws Exception {
+		String data = messageAH.getString(tuple);
+		String key = data;
+		if(keyAH.isAvailable()) {
+			key=keyAH.getString(tuple);
+		}
+		List<KeyedMessage<String, String> > lst = 
+				new ArrayList<KeyedMessage<String,String>>(topics.size());
+		for(String topic : topics) {
+			lst.add(new KeyedMessage<String, String>(topic, key, data));
+		}
+		producer.send(lst);
+		
 	}
 }

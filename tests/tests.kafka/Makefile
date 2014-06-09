@@ -10,7 +10,7 @@ args=-t ../../com.ibm.streamsx.messaging
 ns=com.ibm.streamsx.messaging.kafka.tests
 outputdir=./output
 
-tests=BasicFunctionTestMain
+tests=BasicFunctionTestMain ProducerTopicTestFailMain
 
 rntest=./scripts/testRunner.sh
 ftest=./scripts/expectFail.sh
@@ -25,7 +25,7 @@ compile: ${tests}
 	${rntest} ${outputdir}/$@/bin/standalone ${ns}::$@.producerProperties=producer.properties ${ns}::$@.consumerProperties=consumer.properties
 
 
-%Failtest:
+%FailMain:
 	${ftest} ${sc} -T ${args} --output-directory ${outputdir}/$@ -M ${ns}::$@ 
 
 clean:
