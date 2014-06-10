@@ -80,8 +80,6 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 	private String topicOutAttrName;
 	private int reconnectionBound = IMqttConstants.DEFAULT_RECONNECTION_BOUND;		// default 5, 0 = no retry, -1 = infinite retry
 	private long period = IMqttConstants.DEFAULT_RECONNECTION_PERIOD;
-	
-
 	private MqttClientWrapper mqttWrapper;
 	private boolean shutdown = false;
 	
@@ -127,6 +125,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 		}    	
     	
     };
+
     
     @ContextCheck(compile=false)
     public  static void runtimeChecks(OperatorContextChecker checker) {
@@ -203,7 +202,9 @@ public class MqttSourceOperator extends AbstractMqttOperator {
         
         mqttWrapper = new MqttClientWrapper();
         
-        initializeServerUri();
+        initFromConnectionDocument();
+        setupSslProperties(mqttWrapper);
+        
         mqttWrapper.setBrokerUri(getServerUri());
         
         /*
@@ -254,7 +255,6 @@ public class MqttSourceOperator extends AbstractMqttOperator {
          */
         clientRequestThread.setDaemon(true);       
     }
-   
 
 	protected void handleClientRequests() {
 		while (!shutdown)
@@ -642,5 +642,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 	public long getPeriod() {
 		return period;
 	}
+	
+	
 	
 }

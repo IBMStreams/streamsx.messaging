@@ -21,6 +21,7 @@
 			   <attribute name="trustStore" type="anyURI"/>
 			   <attribute name="keyStore" type="anyURI"/>
 			   <attribute name="keyStorePassword" type="string"/>
+			   <attribute name="trustStorePassword" type="string"/>
                       </complexType>
                     </element>
                   </choice>

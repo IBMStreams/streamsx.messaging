@@ -8,6 +8,7 @@ package com.ibm.streamsx.messaging.mqtt;
 public class ConnectionSpecification  {
 	private String serverUri;
 	private String trustStore;
+	private String trustStorePassword;
 	private String keyStore;
 	private String keyStorePassword;
 	
@@ -39,4 +40,14 @@ public class ConnectionSpecification  {
 		this.keyStorePassword = keyStorePassword;
 		return this;
 	}
+
+	public ConnectionSpecification setTrustStorePassword(String trustStorePassword) {
+		this.trustStorePassword = trustStorePassword;
+		return this;
+	}
+	
+	public String getTrustStorePassword() {
+		return trustStorePassword;
+	}
+
 }

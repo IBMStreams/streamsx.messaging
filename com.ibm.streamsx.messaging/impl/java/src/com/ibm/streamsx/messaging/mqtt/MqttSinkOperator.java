@@ -189,6 +189,7 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 				} catch (URISyntaxException e) {
 					throw new RuntimeException(e);
 				} catch (Exception e) {
+					e.printStackTrace();
 				} 
 			}
 			
@@ -293,10 +294,12 @@ public class MqttSinkOperator extends AbstractMqttOperator {
        tupleQueue = new ArrayBlockingQueue<Tuple>(50);
         
        mqttWrapper = new MqttClientWrapper();       
-       initializeServerUri();
+       initFromConnectionDocument();
        mqttWrapper.setBrokerUri(getServerUri());
        mqttWrapper.setReconnectionBound(getReconnectionBound());
        mqttWrapper.setPeriod(getPeriod());
+       
+       setupSslProperties(mqttWrapper);
        // do not connect here... connection is done on the publish thread when a message
        // is ready to be published
 	} 

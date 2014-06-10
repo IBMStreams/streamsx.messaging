@@ -7,11 +7,14 @@ package com.ibm.streamsx.messaging.mqtt;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.xml.sax.SAXException;
 
 import com.ibm.streams.operator.AbstractOperator;
+import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.log4j.LogLevel;
 import com.ibm.streams.operator.log4j.LoggerNames;
@@ -20,18 +23,45 @@ import com.ibm.streams.operator.model.Parameter;
 
 public abstract class AbstractMqttOperator extends AbstractOperator {
 	
+	public static final String PARAMNAME_KEY_STORE_PASSWORD = "keyStorePassword";
+	public static final String PARAMNAME_KEY_STORE = "keyStore";
+	public static final String PARAMNAME_TRUST_STORE_PASSWORD = "trustStorePassword";
+	public static final String PARAMNAME_TRUST_STORE = "trustStore";
+	public static final String PARAMNAME_CONNDOC = "connectionDocument";
+	public static final String PARAMNAME_CONNECTION = "connection";
+	public static final String PARAMNAME_SERVER_URI = "serverURI";
+	
 	static Logger TRACE = Logger.getLogger(AbstractMqttOperator.class);
+	
 	private static final Logger LOG = Logger.getLogger(LoggerNames.LOG_FACILITY + "." + AbstractMqttOperator.class.getName()); //$NON-NLS-1$
 
 	private String serverUri;
 	private String connectionDocument;
 	private String connection;
+	private String trustStore;
+	private String trustStorePassword;
+	private String keyStore;
+	private String keyStorePassword;
 
 	public AbstractMqttOperator() {
 		super();
 	}
+	
+    @ContextCheck(compile=true, runtime=false)
+   	public static void checkParams(OperatorContextChecker checker) {
 
-	@Parameter(name = "serverURI", description = SPLDocConstants.MQTTSRC_PARAM_SERVERIURI_DESC, optional = true)
+		Set<String> parameterNames = checker.getOperatorContext().getParameterNames();
+		if (!parameterNames.contains(PARAMNAME_SERVER_URI) && !parameterNames.contains(PARAMNAME_CONNECTION)){
+			checker.setInvalidContext("One of serverUri or connection must be set", new Object[] {});
+		}
+		
+		checker.checkExcludedParameters(PARAMNAME_SERVER_URI, PARAMNAME_CONNECTION, PARAMNAME_CONNDOC);
+		checker.checkExcludedParameters(PARAMNAME_CONNECTION, PARAMNAME_SERVER_URI);
+		checker.checkDependentParameters(PARAMNAME_CONNDOC, PARAMNAME_CONNECTION);
+		
+	}
+
+	@Parameter(name = PARAMNAME_SERVER_URI, description = SPLDocConstants.MQTTSRC_PARAM_SERVERIURI_DESC, optional = true)
 	public void setServerUri(String serverUri) {
 		this.serverUri = serverUri;
 	}
@@ -44,7 +74,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		return connection;
 	}
 
-	@Parameter(name = "connection", description = "Name of the connection specification of the MQTT element in the connection document.", optional = true)
+	@Parameter(name = PARAMNAME_CONNECTION, description = "Name of the connection specification of the MQTT element in the connection document.", optional = true)
 	public void setConnection(String connection) {
 		this.connection = connection;
 	}
@@ -53,15 +83,20 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		return connectionDocument;
 	}
 
-	@Parameter(name = "connectionDocument", description = "Path to connection document.  If unspecified, default to ../etc/connections.xml", optional = true)
+	@Parameter(name = PARAMNAME_CONNDOC, description = "Path to connection document.  If unspecified, default to ../etc/connections.xml", optional = true)
 	public void setConnectionDocument(String connectionDocument) {
 		this.connectionDocument = connectionDocument;
 	}
 
-	protected void initializeServerUri() throws Exception {
+	protected void initFromConnectionDocument() throws Exception {
+		
+		// TODO:  serverUri and connection - at least once must exist
+		// only read from connection document if connection is specified
+		// only initialize from connection document if parameter is not
+		// already initialized
 		
 		// if serverUri is null, read connection document
-		if (getServerUri()==null)
+		if (getConnection() != null)
 		{
 			ConnectionDocumentHelper helper = new ConnectionDocumentHelper();
 			String connDoc = getConnectionDocument();
@@ -86,6 +121,23 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 				if (connectionSpecification != null)
 				{
 					setServerUri(connectionSpecification.getServerUri());	
+					
+					String trustStore = connectionSpecification.getTrustStore();
+					String trustStorePw = connectionSpecification.getTrustStorePassword();
+					String keyStore = connectionSpecification.getKeyStore();
+					String keyStorePw = connectionSpecification.getKeyStorePassword();					
+					
+					if (getTrustStore() == null)
+						setTrustStore(trustStore);
+					
+					if (getKeyStore() == null)
+						setKeyStore(keyStore);
+					
+					if (getKeyStorePassword() == null)
+						setKeyStorePassword(keyStorePw);				
+					
+					if (getTrustStorePassword() == null)
+						setTrustStorePassword(trustStorePw);
 				}
 				else
 				{
@@ -101,6 +153,75 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	}
 
 	
+	protected void setupSslProperties(MqttClientWrapper client) {
+		String trustStore = getTrustStore();
+		String trustStorePw = getTrustStorePassword();
+	    String keyStore = getKeyStore();
+	    String keyStorePw = getKeyStorePassword();
+
+	    
+	    if (trustStore != null && keyStore != null)
+	    {
+	    	Properties sslProperties = new Properties();
+	    	
+	    	if (trustStore != null)
+	    	{
+	    		sslProperties.setProperty(IMqttConstants.SSL_TRUST_STORE, trustStore);
+	    	}
+	    	
+	    	if (keyStore != null) {
+	    		sslProperties.setProperty(IMqttConstants.SSL_KEY_STORE, keyStore);
+	    	}
+	    	
+	    	if (keyStorePw != null)
+	    	{
+	    		sslProperties.setProperty(IMqttConstants.SSL_KEY_STORE_PASSWORD, keyStorePw);	    		
+	    	}
+	    	
+	    	if (trustStorePw != null)
+	    	{
+	    		sslProperties.setProperty(IMqttConstants.SSK_TRUST_STORE_PASSWORD, keyStorePw);
+	    	}
+	    	client.setSslProperties(sslProperties);
+	    }
+	}
+
+	public String getTrustStore() {
+		return toAbsolute(trustStore);
+	}
+
+	@Parameter(name = PARAMNAME_TRUST_STORE, optional = true, description = "The parameter of type rstring specifies the name of the file that contains the public certificate of the trusted MQTT server")
+	public void setTrustStore(String trustStore) {
+		this.trustStore = trustStore;
+	}
+
+	public String getKeyStore() {
+		return toAbsolute(keyStore);
+	}
+
+	@Parameter(name = PARAMNAME_KEY_STORE, optional = true, description = "This optional parameter of type rstring specifies the file that contains the public and private key certificates of the MQTT client.")
+	public void setKeyStore(String keyStore) {
+		this.keyStore = keyStore;
+	}
+
+	public String getKeyStorePassword() {
+		return keyStorePassword;
+	}
+
+	@Parameter(name = PARAMNAME_KEY_STORE_PASSWORD, optional = true, description = "This optional parameter of type rstring specifies keystore password.")
+	public void setKeyStorePassword(String keyStorePassword) {
+		this.keyStorePassword = keyStorePassword;
+	}
+	
+	public String getTrustStorePassword() {
+		return trustStorePassword;
+	}
+	
+	@Parameter(name = PARAMNAME_TRUST_STORE_PASSWORD, optional = true, description = "This optional parameter of type rstring specifies the truststore password.")
+	public void setTrustStorePassword(String trustStorePassword) {
+		this.trustStorePassword = trustStorePassword;
+	}
+
 	protected static void validateNumber(OperatorContextChecker checker,
 			String parameterName, long min, long max) {
 		try {
@@ -119,5 +240,15 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 			checker.setInvalidContext(Messages.getString("Error_AbstractMqttOperator.1"), //$NON-NLS-1$
 					new Object[] { parameterName });
 		}
+	}
+	
+	protected String toAbsolute(String path)
+	{		
+		if (path != null && !path.startsWith("/"))
+		{
+			File dataDir = getOperatorContext().getPE().getDataDirectory();
+			return dataDir.getAbsolutePath() + "/" + path;
+		}
+		return path;
 	}
 }

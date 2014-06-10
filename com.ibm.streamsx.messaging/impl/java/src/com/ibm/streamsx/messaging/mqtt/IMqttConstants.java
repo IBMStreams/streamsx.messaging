@@ -15,5 +15,9 @@ public interface IMqttConstants {
 	public static final String MQTTSRC_TOPICDESC_QOS = "qos";
 	public static final String MQTTSRC_TOPICDESC_TOPICS = "topics";
 	public static final String MQTTSRC_TOPICDESC_ACTION = "action";
+	public static final String SSL_KEY_STORE_PASSWORD = "com.ibm.ssl.keyStorePassword";
+	public static final String SSL_KEY_STORE = "com.ibm.ssl.keyStore";
+	public static final String SSL_TRUST_STORE = "com.ibm.ssl.trustStore";
+	static final String SSK_TRUST_STORE_PASSWORD = "com.ibm.ssl.trustStorePassword";
 	
 }

@@ -8,7 +8,6 @@ package com.ibm.streamsx.messaging.mqtt;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -125,13 +124,15 @@ class ConnectionDocumentHelper {
 									"keyStore"); //$NON-NLS-1$
 							String keyStorePassword = getAttributeValue(
 									attributes, "keyStorePassword"); //$NON-NLS-1$
+							String trustStorePassword = getAttributeValue(attributes, "trustStorePassword"); //$NON-NLS-1$
 
 							if (!serverUriStr.isEmpty()) {
 								ConnectionSpecification specObj = new ConnectionSpecification();
 								specObj.setServerUri(serverUriStr)
 										.setTrustStore(trustStore)
 										.setKeyStore(keyStore)
-										.setKeyStorePassword(keyStorePassword);
+										.setKeyStorePassword(keyStorePassword)
+										.setTrustStorePassword(trustStorePassword);
 
 								connSpecMap.put(name, specObj);
 							}

@@ -8,6 +8,7 @@ package com.ibm.streamsx.messaging.mqtt;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -110,6 +111,7 @@ public class MqttClientWrapper implements MqttCallback {
 		
 		String uriToConnect = brokerUri;
 		mqttClient = new MqttClient(uriToConnect, clientId, dataStore);
+		
 
 		if (reconnectionBound > 0) {
 			// Bounded retry
@@ -330,6 +332,11 @@ public class MqttClientWrapper implements MqttCallback {
 			return false;
 		
 		return mqttClient.isConnected();
+	}
+	
+	public void setSslProperties(Properties sslProperties)
+	{
+		conOpt.setSSLProperties(sslProperties);
 	}
 
 }
