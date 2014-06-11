@@ -157,7 +157,7 @@ public class MqttClientWrapper implements MqttCallback {
 			// clear when connected
 			clearPendingBrokerUri();
 		} else {
-			throw new RuntimeException("Unable to connect to server: " //$NON-NLS-1$
+			throw new MqttClientConnectException("Unable to connect to server: " //$NON-NLS-1$
 					+ brokerUri);
 		}
 
@@ -240,8 +240,11 @@ public class MqttClientWrapper implements MqttCallback {
     {
     	if (mqttClient != null)
     	{
-	    	TRACE.log(TraceLevel.INFO, "[Disconnect:] " + brokerUri); //$NON-NLS-1$
-			mqttClient.disconnect();
+    		if (mqttClient.isConnected())
+    		{
+		    	TRACE.log(TraceLevel.INFO, "[Disconnect:] " + brokerUri); //$NON-NLS-1$
+				mqttClient.disconnect();
+    		}
     	}
     }
     

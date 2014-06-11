@@ -8,12 +8,13 @@ public class SPLDocConstants {
 
 	// SPL Documentation for MQTTSource
 	static final String MQTTSRC_OP_DESCRIPTION = "Java Operator MqttSourceOperator";
-	static final String MQTTSRC_OUTPUT_PORT_1 = "Optional output ports";
+	static final String MQTTSRC_OUTPUT_PORT_1 = "Optional error output ports.  The error output port is expected to have a single attribute of rstring or ustring.";
 	static final String MQTTSRC_OUPUT_PORT_0 = "Port that produces tuples.";
 	static final String MQTTSRC_INPUT_PORT0 = "Optional input ports";
 	static final String MQTTSRC_PARAM_PERIOD_DESC = "Reconnection period in ms, default is 60000 ms.";
 	static final String MQTTSRC_PARAM_RECONN_BOUND_DESC = "Reconnection bound, 0 for no retry, n for n number of retries, -1 for inifinite retry.";
 	static final String MQTTSRC_PARAM_TOPICATTRNAME_DESC = "Output attribute on output data stream to assign message topic to.";
+	static final String MQTTSRC_PARAM_ERRORATTRNAME_DESC = "Output attribute on optional error output port to assign error message to.";
 	static final String MQTTSRC_PARAM_SERVERIURI_DESC = "Server to subscribe messages from.";
 	static final String MQTTSRC_PARAM_QOS_DESC = "List of qos for topic subscriptions";
 	static final String MQTTSRC_PARAM_TOPICS_DESC = "List of topics to subscribe to.";

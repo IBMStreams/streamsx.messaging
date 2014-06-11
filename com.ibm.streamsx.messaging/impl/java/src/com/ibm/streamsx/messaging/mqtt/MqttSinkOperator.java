@@ -20,6 +20,8 @@ import org.apache.log4j.Logger;
 
 import com.ibm.streams.operator.Attribute;
 import com.ibm.streams.operator.OperatorContext;
+import com.ibm.streams.operator.OutputTuple;
+import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingData.Punctuation;
@@ -62,8 +64,11 @@ import com.ibm.streams.operator.types.Blob;
  */
 @PrimitiveOperator(name="MQTTSink", namespace="com.ibm.streamsx.messaging.mqtt",
 description=SPLDocConstants.MQTTSINK_OP_DESCRIPTION) 
-@InputPorts({@InputPortSet(description=SPLDocConstants.MQTTSINK_INPUTPORT0, cardinality=1, optional=false, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious), @InputPortSet(description=SPLDocConstants.MQTTSINK_INPUTPORT1, optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
-@OutputPorts({@OutputPortSet(description=SPLDocConstants.MQTTSINK_OUTPUT_PORT0, cardinality=1, optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
+@InputPorts({
+		@InputPortSet(description = SPLDocConstants.MQTTSINK_INPUTPORT0, cardinality = 1, optional = false, windowingMode = WindowMode.NonWindowed, windowPunctuationInputMode = WindowPunctuationInputMode.Oblivious),
+		@InputPortSet(description = SPLDocConstants.MQTTSINK_INPUTPORT1, optional = true, windowingMode = WindowMode.NonWindowed, windowPunctuationInputMode = WindowPunctuationInputMode.Oblivious) })
+@OutputPorts({
+		@OutputPortSet(description = SPLDocConstants.MQTTSINK_OUTPUT_PORT0, cardinality = 1, optional = true, windowPunctuationOutputMode = WindowPunctuationOutputMode.Free) })
 @Libraries(value = {"opt/downloaded/*"} )
 @Icons(location16="icons/MQTTSink_16.gif", location32="icons/MQTTSink_32.gif")
 public class MqttSinkOperator extends AbstractMqttOperator {
@@ -132,7 +137,9 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 						}
 						else
 						{
-							TRACE.log(TraceLevel.ERROR, Messages.getString("Error_MqttSinkOperator.0", pubTopic, msgQos)); //$NON-NLS-1$
+							String errorMsg = Messages.getString("Error_MqttSinkOperator.0", pubTopic, msgQos); //$NON-NLS-1$
+							TRACE.log(TraceLevel.ERROR, errorMsg); 
+							submitToErrorPort(errorMsg);
 						}
 					}
 					else
@@ -147,7 +154,9 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 						
 						if (!connected)
 						{
-							throw new RuntimeException(Messages.getString("Error_MqttSinkOperator.1") + getServerUri()); //$NON-NLS-1$
+							String errorMsg = Messages.getString("Error_MqttSinkOperator.1", getServerUri()); //$NON-NLS-1$
+							submitToErrorPort(errorMsg);
+							throw new RuntimeException(errorMsg); 
 						}
 						
 						// inline this block of code instead of method call
@@ -163,17 +172,30 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 						}
 						else
 						{
-							TRACE.log(TraceLevel.ERROR, Messages.getString("Error_MqttSinkOperator.0", pubTopic, msgQos)); //$NON-NLS-1$
+							String errorMsg = Messages.getString("Error_MqttSinkOperator.0", pubTopic, msgQos); //$NON-NLS-1$
+							TRACE.log(TraceLevel.ERROR, errorMsg); //$NON-NLS-1$
+							submitToErrorPort(errorMsg);
 						}
 					}
-				} catch (Exception e) {
-					TRACE.log(TraceLevel.ERROR, Messages.getString("Error_MqttSinkOperator.2"), e); //$NON-NLS-1$
-					throw new RuntimeException(e);
+				} 
+				catch (MqttClientConnectException e)
+				{
+					// we should exit if we get a connect exception
+					if (e instanceof MqttClientConnectException)
+					{
+						throw new RuntimeException(e);
+					}
+				}				
+				catch (Exception e) {
+					// do not rethrow exception, log and keep going
+					String errorMsg = Messages.getString("Error_MqttSinkOperator.2"); //$NON-NLS-1$
+					TRACE.log(TraceLevel.ERROR, errorMsg, e); 
+					submitToErrorPort(errorMsg);
 				}
 			}			
 		}
 
-		private boolean validateConnection()  {
+		private boolean validateConnection() throws MqttClientConnectException{
 			if (!mqttWrapper.isConnected())
 			{
 				try {
@@ -187,9 +209,19 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 					
 					mqttWrapper.connect(getReconnectionBound(), getPeriod());
 				} catch (URISyntaxException e) {
+					String errorMsg = Messages.getString(Messages.getString("Error_MqttSinkOperator.22"), mqttWrapper.getBrokerUri()); //$NON-NLS-1$
+					TRACE.log(TraceLevel.ERROR, errorMsg, e);
+					submitToErrorPort(errorMsg);	
 					throw new RuntimeException(e);
 				} catch (Exception e) {
-					e.printStackTrace();
+					String errorMsg = Messages.getString(Messages.getString("Error_MqttSinkOperator.22"), mqttWrapper.getBrokerUri()); //$NON-NLS-1$
+					TRACE.log(TraceLevel.ERROR, errorMsg, e);
+					submitToErrorPort(errorMsg);			
+					
+					if (e instanceof MqttClientConnectException)
+					{
+						throw (MqttClientConnectException)e;
+					}
 				} 
 			}
 			
@@ -277,6 +309,11 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 		//TODO:  check control input port
 		
 		
+	}
+	
+	@ContextCheck(compile = true, runtime = false)
+	public static void checkOutputPort(OperatorContextChecker checker) {
+		validateSchemaForErrorOutputPort(checker, getErrorPortFromContext(checker.getOperatorContext()));
 	}
 	
     /**
@@ -385,7 +422,9 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 				}
 			}
 		} catch (Exception e) {
-			TRACE.log(TraceLevel.ERROR, Messages.getString("Error_MqttSinkOperator.21")); //$NON-NLS-1$
+			String errorMsg = Messages.getString("Error_MqttSinkOperator.21", tuple.toString()); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR, errorMsg); //$NON-NLS-1$
+			submitToErrorPort(errorMsg);
 		}
 	}
     
@@ -486,5 +525,16 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 	public String getQosAttributeName() {
 		return qosAttributeName;
 	}
+	
+	protected StreamingOutput<OutputTuple> getErrorOutputPort() {
+		return getErrorPortFromContext(getOperatorContext());
+	}
     
+	private static StreamingOutput<OutputTuple> getErrorPortFromContext(OperatorContext opContext) {
+		List<StreamingOutput<OutputTuple>> streamingOutputs = opContext.getStreamingOutputs();
+		if (streamingOutputs.size() > 0) {
+			return streamingOutputs.get(0);
+		}
+		return null;
+	}
 }

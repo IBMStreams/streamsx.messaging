@@ -15,6 +15,10 @@ import org.xml.sax.SAXException;
 
 import com.ibm.streams.operator.AbstractOperator;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
+import com.ibm.streams.operator.OutputTuple;
+import com.ibm.streams.operator.StreamSchema;
+import com.ibm.streams.operator.StreamingOutput;
+import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.log4j.LogLevel;
 import com.ibm.streams.operator.log4j.LoggerNames;
@@ -22,18 +26,20 @@ import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.Parameter;
 
 public abstract class AbstractMqttOperator extends AbstractOperator {
-	
-	public static final String PARAMNAME_KEY_STORE_PASSWORD = "keyStorePassword";
-	public static final String PARAMNAME_KEY_STORE = "keyStore";
-	public static final String PARAMNAME_TRUST_STORE_PASSWORD = "trustStorePassword";
-	public static final String PARAMNAME_TRUST_STORE = "trustStore";
-	public static final String PARAMNAME_CONNDOC = "connectionDocument";
-	public static final String PARAMNAME_CONNECTION = "connection";
-	public static final String PARAMNAME_SERVER_URI = "serverURI";
-	
+
+	public static final String PARAMNAME_KEY_STORE_PASSWORD = "keyStorePassword"; //$NON-NLS-1$
+	public static final String PARAMNAME_KEY_STORE = "keyStore"; //$NON-NLS-1$
+	public static final String PARAMNAME_TRUST_STORE_PASSWORD = "trustStorePassword"; //$NON-NLS-1$
+	public static final String PARAMNAME_TRUST_STORE = "trustStore"; //$NON-NLS-1$
+	public static final String PARAMNAME_CONNDOC = "connectionDocument"; //$NON-NLS-1$
+	public static final String PARAMNAME_CONNECTION = "connection"; //$NON-NLS-1$
+	public static final String PARAMNAME_SERVER_URI = "serverURI"; //$NON-NLS-1$
+	public static final String PARAMNAME_ERROR_OUT_ATTR_NAME = "errorOutAttrName"; //$NON-NLS-1$
+
 	static Logger TRACE = Logger.getLogger(AbstractMqttOperator.class);
-	
-	private static final Logger LOG = Logger.getLogger(LoggerNames.LOG_FACILITY + "." + AbstractMqttOperator.class.getName()); //$NON-NLS-1$
+
+	private static final Logger LOG = Logger.getLogger(LoggerNames.LOG_FACILITY
+			+ "." + AbstractMqttOperator.class.getName()); //$NON-NLS-1$
 
 	private String serverUri;
 	private String connectionDocument;
@@ -46,19 +52,25 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	public AbstractMqttOperator() {
 		super();
 	}
-	
-    @ContextCheck(compile=true, runtime=false)
-   	public static void checkParams(OperatorContextChecker checker) {
 
-		Set<String> parameterNames = checker.getOperatorContext().getParameterNames();
-		if (!parameterNames.contains(PARAMNAME_SERVER_URI) && !parameterNames.contains(PARAMNAME_CONNECTION)){
-			checker.setInvalidContext("One of serverUri or connection must be set", new Object[] {});
+	@ContextCheck(compile = true, runtime = false)
+	public static void checkParams(OperatorContextChecker checker) {
+
+		Set<String> parameterNames = checker.getOperatorContext()
+				.getParameterNames();
+		if (!parameterNames.contains(PARAMNAME_SERVER_URI)
+				&& !parameterNames.contains(PARAMNAME_CONNECTION)) {
+			checker.setInvalidContext(
+					Messages.getString("Error_AbstractMqttOperator.7"), new Object[] {}); //$NON-NLS-1$
 		}
-		
-		checker.checkExcludedParameters(PARAMNAME_SERVER_URI, PARAMNAME_CONNECTION, PARAMNAME_CONNDOC);
-		checker.checkExcludedParameters(PARAMNAME_CONNECTION, PARAMNAME_SERVER_URI);
-		checker.checkDependentParameters(PARAMNAME_CONNDOC, PARAMNAME_CONNECTION);
-		
+
+		checker.checkExcludedParameters(PARAMNAME_SERVER_URI,
+				PARAMNAME_CONNECTION, PARAMNAME_CONNDOC);
+		checker.checkExcludedParameters(PARAMNAME_CONNECTION,
+				PARAMNAME_SERVER_URI);
+		checker.checkDependentParameters(PARAMNAME_CONNDOC,
+				PARAMNAME_CONNECTION);
+
 	}
 
 	@Parameter(name = PARAMNAME_SERVER_URI, description = SPLDocConstants.MQTTSRC_PARAM_SERVERIURI_DESC, optional = true)
@@ -89,101 +101,106 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	}
 
 	protected void initFromConnectionDocument() throws Exception {
-		
-		// TODO:  serverUri and connection - at least once must exist
+
+		// serverUri and connection - at least once must exist
 		// only read from connection document if connection is specified
 		// only initialize from connection document if parameter is not
 		// already initialized
-		
+
 		// if serverUri is null, read connection document
-		if (getConnection() != null)
-		{
+		if (getConnection() != null) {
 			ConnectionDocumentHelper helper = new ConnectionDocumentHelper();
 			String connDoc = getConnectionDocument();
-			
-			// if connection document is not specified, default to ../etc/connections.xml
-			if (connDoc == null)
-			{
-				File dataDirectory = getOperatorContext().getPE().getDataDirectory();
-				connDoc = dataDirectory.getAbsolutePath() + "/../etc/connections.xml"; //$NON-NLS-1$
-			}			
-			
+
+			// if connection document is not specified, default to
+			// ../etc/connections.xml
+			if (connDoc == null) {
+				File dataDirectory = getOperatorContext().getPE()
+						.getDataDirectory();
+				connDoc = dataDirectory.getAbsolutePath()
+						+ "/../etc/connections.xml"; //$NON-NLS-1$
+			}
+
 			// convert from relative path to absolute path is necessary
 			if (!connDoc.startsWith("/")) //$NON-NLS-1$
 			{
-				File dataDirectory = getOperatorContext().getPE().getDataDirectory();
+				File dataDirectory = getOperatorContext().getPE()
+						.getDataDirectory();
 				connDoc = dataDirectory.getAbsolutePath() + "/" + connDoc; //$NON-NLS-1$
 			}
-			
+
 			try {
 				helper.parseAndValidateConnectionDocument(connDoc);
-				ConnectionSpecification connectionSpecification = helper.getConnectionSpecification(getConnection());
-				if (connectionSpecification != null)
-				{
-					setServerUri(connectionSpecification.getServerUri());	
-					
+				ConnectionSpecification connectionSpecification = helper
+						.getConnectionSpecification(getConnection());
+				if (connectionSpecification != null) {
+					setServerUri(connectionSpecification.getServerUri());
+
 					String trustStore = connectionSpecification.getTrustStore();
-					String trustStorePw = connectionSpecification.getTrustStorePassword();
+					String trustStorePw = connectionSpecification
+							.getTrustStorePassword();
 					String keyStore = connectionSpecification.getKeyStore();
-					String keyStorePw = connectionSpecification.getKeyStorePassword();					
-					
+					String keyStorePw = connectionSpecification
+							.getKeyStorePassword();
+
 					if (getTrustStore() == null)
 						setTrustStore(trustStore);
-					
+
 					if (getKeyStore() == null)
 						setKeyStore(keyStore);
-					
+
 					if (getKeyStorePassword() == null)
-						setKeyStorePassword(keyStorePw);				
-					
+						setKeyStorePassword(keyStorePw);
+
 					if (getTrustStorePassword() == null)
 						setTrustStorePassword(trustStorePw);
-				}
-				else
-				{
-					TRACE.log(TraceLevel.ERROR, Messages.getString("Error_AbstractMqttOperator.3") + getConnection()); //$NON-NLS-1$
-					LOG.log(LogLevel.ERROR, Messages.getString("Error_AbstractMqttOperator.3") + getConnection()); //$NON-NLS-1$
-					throw new RuntimeException(Messages.getString("Error_AbstractMqttOperator.5")); //$NON-NLS-1$
+				} else {
+					TRACE.log(
+							TraceLevel.ERROR,
+							Messages.getString("Error_AbstractMqttOperator.3") + getConnection()); //$NON-NLS-1$
+					LOG.log(LogLevel.ERROR,
+							Messages.getString("Error_AbstractMqttOperator.3") + getConnection()); //$NON-NLS-1$
+					throw new RuntimeException(
+							Messages.getString("Error_AbstractMqttOperator.5")); //$NON-NLS-1$
 				}
 			} catch (SAXException | IOException e) {
-				TRACE.log(LogLevel.ERROR, Messages.getString("Error_AbstractMqttOperator.6")); //$NON-NLS-1$
-				throw e;				
+				TRACE.log(LogLevel.ERROR,
+						Messages.getString("Error_AbstractMqttOperator.6")); //$NON-NLS-1$
+				throw e;
 			}
 		}
 	}
 
-	
 	protected void setupSslProperties(MqttClientWrapper client) {
 		String trustStore = getTrustStore();
 		String trustStorePw = getTrustStorePassword();
-	    String keyStore = getKeyStore();
-	    String keyStorePw = getKeyStorePassword();
+		String keyStore = getKeyStore();
+		String keyStorePw = getKeyStorePassword();
 
-	    
-	    if (trustStore != null && keyStore != null)
-	    {
-	    	Properties sslProperties = new Properties();
-	    	
-	    	if (trustStore != null)
-	    	{
-	    		sslProperties.setProperty(IMqttConstants.SSL_TRUST_STORE, trustStore);
-	    	}
-	    	
-	    	if (keyStore != null) {
-	    		sslProperties.setProperty(IMqttConstants.SSL_KEY_STORE, keyStore);
-	    	}
-	    	
-	    	if (keyStorePw != null)
-	    	{
-	    		sslProperties.setProperty(IMqttConstants.SSL_KEY_STORE_PASSWORD, keyStorePw);	    		
-	    	}
-	    	
-	    	if (trustStorePw != null)
-	    	{
-	    		sslProperties.setProperty(IMqttConstants.SSK_TRUST_STORE_PASSWORD, keyStorePw);
-	    	}
-	    	client.setSslProperties(sslProperties);
-	    }
+		if (trustStore != null && keyStore != null) {
+			Properties sslProperties = new Properties();
+
+			if (trustStore != null) {
+				sslProperties.setProperty(IMqttConstants.SSL_TRUST_STORE,
+						trustStore);
+			}
+
+			if (keyStore != null) {
+				sslProperties.setProperty(IMqttConstants.SSL_KEY_STORE,
+						keyStore);
+			}
+
+			if (keyStorePw != null) {
+				sslProperties.setProperty(
+						IMqttConstants.SSL_KEY_STORE_PASSWORD, keyStorePw);
+			}
+
+			if (trustStorePw != null) {
+				sslProperties.setProperty(
+						IMqttConstants.SSK_TRUST_STORE_PASSWORD, keyStorePw);
+			}
+			client.setSslProperties(sslProperties);
+		}
 	}
 
 	public String getTrustStore() {
@@ -212,11 +229,11 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	public void setKeyStorePassword(String keyStorePassword) {
 		this.keyStorePassword = keyStorePassword;
 	}
-	
+
 	public String getTrustStorePassword() {
 		return trustStorePassword;
 	}
-	
+
 	@Parameter(name = PARAMNAME_TRUST_STORE_PASSWORD, optional = true, description = "This optional parameter of type rstring specifies the truststore password.")
 	public void setTrustStorePassword(String trustStorePassword) {
 		this.trustStorePassword = trustStorePassword;
@@ -237,18 +254,67 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 				}
 			}
 		} catch (NumberFormatException e) {
-			checker.setInvalidContext(Messages.getString("Error_AbstractMqttOperator.1"), //$NON-NLS-1$
+			checker.setInvalidContext(
+					Messages.getString("Error_AbstractMqttOperator.1"), //$NON-NLS-1$
 					new Object[] { parameterName });
 		}
 	}
+
+	protected static void validateSchemaForErrorOutputPort(
+		OperatorContextChecker checker,
+		StreamingOutput<OutputTuple> errorPort) {
 	
-	protected String toAbsolute(String path)
-	{		
-		if (path != null && !path.startsWith("/"))
+		if (errorPort != null)
+		{
+			Set<String> parameterNames = checker.getOperatorContext()
+					.getParameterNames();
+	
+			// if error port is present, check that it has the right schema
+			// if there is not output parameter for error message, make sure
+			// it's only
+			// one attribute of ustring or rstring
+			if (!parameterNames.contains(PARAMNAME_ERROR_OUT_ATTR_NAME)) {
+				StreamSchema streamSchema = errorPort.getStreamSchema();
+				int attrCount = streamSchema.getAttributeCount();
+	
+				if (attrCount > 1) {
+					checker.setInvalidContext(
+							Messages.getString("Error_MqttSourceOperator.6"), new Object[] {}); //$NON-NLS-1$
+				}
+	
+				checker.checkAttributeType(streamSchema.getAttribute(0),
+						MetaType.RSTRING, MetaType.USTRING);
+			}
+		}
+	}
+
+	protected String toAbsolute(String path) {
+		if (path != null && !path.startsWith("/")) //$NON-NLS-1$
 		{
 			File dataDir = getOperatorContext().getPE().getDataDirectory();
-			return dataDir.getAbsolutePath() + "/" + path;
+			return dataDir.getAbsolutePath() + "/" + path; //$NON-NLS-1$
 		}
 		return path;
+	}
+
+	/**
+	 * @return error output port if present, null if not specified
+	 */
+	abstract protected StreamingOutput<OutputTuple> getErrorOutputPort();
+	
+	protected void submitToErrorPort(String errorMsg) {
+		StreamingOutput<OutputTuple> errorOutputPort = getErrorOutputPort();
+		if (errorOutputPort != null) {
+			OutputTuple errorTuple = errorOutputPort.newTuple();
+
+			errorTuple.setString(0, errorMsg);
+
+			try {
+				errorOutputPort.submit(errorTuple);
+			} catch (Exception e) {
+				TRACE.log(TraceLevel.ERROR,
+						Messages.getString("Error_AbstractMqttOperator.10"), e); //$NON-NLS-1$
+			}
+		}
 	}
 }

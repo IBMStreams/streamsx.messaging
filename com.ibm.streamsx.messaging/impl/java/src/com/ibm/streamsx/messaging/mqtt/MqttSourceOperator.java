@@ -64,18 +64,19 @@ import com.ibm.streamsx.messaging.mqtt.MqttClientRequest.MqttClientRequestType;
  * <p>With the exception of operator initialization, all the other events may occur concurrently with each other, 
  * which lead to these methods being called concurrently by different threads.</p> 
  */
-@PrimitiveOperator(name="MQTTSource", namespace="com.ibm.streamsx.messaging.mqtt",
-description=SPLDocConstants.MQTTSRC_OP_DESCRIPTION)
-@InputPorts({@InputPortSet(description=SPLDocConstants.MQTTSRC_INPUT_PORT0, optional=true, windowingMode=WindowMode.NonWindowed, windowPunctuationInputMode=WindowPunctuationInputMode.Oblivious)})
-@OutputPorts({@OutputPortSet(description=SPLDocConstants.MQTTSRC_OUPUT_PORT_0, cardinality=1, optional=false, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free), @OutputPortSet(description=SPLDocConstants.MQTTSRC_OUTPUT_PORT_1, optional=true, windowPunctuationOutputMode=WindowPunctuationOutputMode.Free)})
-@Libraries(value = {"opt/downloaded/*"})
-@Icons(location16="icons/MQTTSource_16.gif", location32="icons/MQTTSource_32.gif")
+@PrimitiveOperator(name = "MQTTSource", namespace = "com.ibm.streamsx.messaging.mqtt", description = SPLDocConstants.MQTTSRC_OP_DESCRIPTION)
+@InputPorts({ @InputPortSet(description = SPLDocConstants.MQTTSRC_INPUT_PORT0, optional = true, windowingMode = WindowMode.NonWindowed, windowPunctuationInputMode = WindowPunctuationInputMode.Oblivious) })
+@OutputPorts({
+		@OutputPortSet(description = SPLDocConstants.MQTTSRC_OUPUT_PORT_0, cardinality = 1, optional = false, windowPunctuationOutputMode = WindowPunctuationOutputMode.Free),
+		@OutputPortSet(description = SPLDocConstants.MQTTSRC_OUTPUT_PORT_1, optional = true, cardinality = 1, windowPunctuationOutputMode = WindowPunctuationOutputMode.Free) })
+@Libraries(value = { "opt/downloaded/*" })
+@Icons(location16 = "icons/MQTTSource_16.gif", location32 = "icons/MQTTSource_32.gif")
 public class MqttSourceOperator extends AbstractMqttOperator { 
 	
 	private static Logger TRACE = Logger.getLogger(MqttSourceOperator.class);
 	
 	// Parameters 
-	private List<String> paramTopics;
+	private List<String> paramTopics; 
 	private List<Integer> paramQos;
 	private String topicOutAttrName;
 	private int reconnectionBound = IMqttConstants.DEFAULT_RECONNECTION_BOUND;		// default 5, 0 = no retry, -1 = infinite retry
@@ -183,8 +184,11 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 				checker.setInvalidContext(Messages.getString("Error_MqttSourceOperator.0"), new Object[]{}); //$NON-NLS-1$
 			}
 		}
+		
+		validateSchemaForErrorOutputPort(checker, getErrorPortFromContext(checker.getOperatorContext()));
 		// TODO:  check control input port
     }
+
 	/**
      * Initialize this operator. Called once before any tuples are processed.
      * @param context OperatorContext for this operator.
@@ -334,12 +338,24 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 					mqttWrapper.subscribe(request.getTopics(), qos);
 				}				
 			} catch (InterruptedException e) {			
-				TRACE.log(TraceLevel.DEBUG, "[Request Queue:] Thread interrupted as expected"); //$NON-NLS-1$ //$NON-NLS-2$
+				TRACE.log(TraceLevel.DEBUG, "[Request Queue:] Thread interrupted as expected: " + e.getLocalizedMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (URISyntaxException e1) {
-				TRACE.log(TraceLevel.DEBUG, "[Request Queue:] URI Syntax Exception",e1); //$NON-NLS-1$ //$NON-NLS-2$
+				String errorMsg = "[Request Queue:] URI Syntax Exception: " + e1.getLocalizedMessage();
+				TRACE.log(TraceLevel.ERROR, errorMsg,e1);
+				submitToErrorPort(errorMsg);
 			} catch (MqttException e) {				
-				TRACE.log(TraceLevel.DEBUG, "[Request Queue:] MQTT Client Error",e); //$NON-NLS-1$ //$NON-NLS-2$
-			} 
+				String errorMsg = "[Request Queue:] MQTT Client Error: " + e.getLocalizedMessage();
+				TRACE.log(TraceLevel.ERROR, errorMsg,e);
+				submitToErrorPort(errorMsg);
+			} catch (RuntimeException e) {
+				String errorMsg = "[Request Queue:] Runtime exception occurred: " + e.getLocalizedMessage();
+				TRACE.log(TraceLevel.ERROR, errorMsg,e);
+				submitToErrorPort(errorMsg);
+				
+				// rethrow connect exception to cause the operator to exit
+				if (e instanceof MqttClientConnectException)
+					throw e;
+			}
         }
 		
 	}
@@ -483,8 +499,9 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 	 * 2)  update topic subscription list before handling any connection signal
 	 * 3)  handle connection signal
 	 * @param tuple
+	 * @throws Exception 
 	 */
-	private void handleControlSignal(Tuple tuple) {
+	private void handleControlSignal(Tuple tuple) throws Exception {
 		// 
 		try {
 			StreamSchema streamSchema = tuple.getStreamSchema();
@@ -563,11 +580,17 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 			
 			
 		} catch (Exception e) {
-			TRACE.log(TraceLevel.ERROR, Messages.getString("Error_MqttSinkOperator.21")); //$NON-NLS-1$
+			
+			String tupleAsString = tuple.toString();
+			String errorMsg = Messages.getString("Error_MqttSinkOperator.21", tupleAsString);
+
+			TRACE.log(TraceLevel.ERROR,errorMsg); //$NON-NLS-1$
+						
+			submitToErrorPort(errorMsg);
 		}
 	}
 
-    /**
+	/**
      * Shutdown this operator, which will interrupt the thread
      * executing the <code>produceTuples()</code> method.
      * @throws Exception Operator failure, will cause the enclosing PE to terminate.
@@ -644,5 +667,17 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 	}
 	
 	
+	@Override
+	protected StreamingOutput<OutputTuple> getErrorOutputPort() {
+		return getErrorPortFromContext(getOperatorContext());
+	}
+
+	private static StreamingOutput<OutputTuple> getErrorPortFromContext(OperatorContext opContext) {
+		List<StreamingOutput<OutputTuple>> streamingOutputs = opContext.getStreamingOutputs();
+		if (streamingOutputs.size() > 1) {
+			return streamingOutputs.get(1);
+		}
+		return null;
+	}
 	
 }
