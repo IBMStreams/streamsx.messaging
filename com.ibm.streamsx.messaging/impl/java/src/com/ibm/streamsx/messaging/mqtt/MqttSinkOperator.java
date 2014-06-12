@@ -209,12 +209,12 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 					
 					mqttWrapper.connect(getReconnectionBound(), getPeriod());
 				} catch (URISyntaxException e) {
-					String errorMsg = Messages.getString(Messages.getString("Error_MqttSinkOperator.22"), mqttWrapper.getBrokerUri()); //$NON-NLS-1$
+					String errorMsg = Messages.getString(Messages.getString("Error_MqttSinkOperator.22")); //$NON-NLS-1$
 					TRACE.log(TraceLevel.ERROR, errorMsg, e);
 					submitToErrorPort(errorMsg);	
 					throw new RuntimeException(e);
 				} catch (Exception e) {
-					String errorMsg = Messages.getString(Messages.getString("Error_MqttSinkOperator.22"), mqttWrapper.getBrokerUri()); //$NON-NLS-1$
+					String errorMsg = Messages.getString(Messages.getString("Error_MqttSinkOperator.22")); //$NON-NLS-1$
 					TRACE.log(TraceLevel.ERROR, errorMsg, e);
 					submitToErrorPort(errorMsg);			
 					

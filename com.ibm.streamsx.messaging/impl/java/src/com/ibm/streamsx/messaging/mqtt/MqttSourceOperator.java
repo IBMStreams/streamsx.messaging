@@ -340,15 +340,15 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 			} catch (InterruptedException e) {			
 				TRACE.log(TraceLevel.DEBUG, "[Request Queue:] Thread interrupted as expected: " + e.getLocalizedMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (URISyntaxException e1) {
-				String errorMsg = "[Request Queue:] URI Syntax Exception: " + e1.getLocalizedMessage();
+				String errorMsg = Messages.getString("Error_MqttSourceOperator.27", e1.getLocalizedMessage()); //$NON-NLS-1$
 				TRACE.log(TraceLevel.ERROR, errorMsg,e1);
 				submitToErrorPort(errorMsg);
 			} catch (MqttException e) {				
-				String errorMsg = "[Request Queue:] MQTT Client Error: " + e.getLocalizedMessage();
+				String errorMsg = Messages.getString("Error_MqttSourceOperator.25", e.getLocalizedMessage()); //$NON-NLS-1$
 				TRACE.log(TraceLevel.ERROR, errorMsg,e);
 				submitToErrorPort(errorMsg);
 			} catch (RuntimeException e) {
-				String errorMsg = "[Request Queue:] Runtime exception occurred: " + e.getLocalizedMessage();
+				String errorMsg = Messages.getString("Error_MqttSourceOperator.26", e.getLocalizedMessage()); //$NON-NLS-1$
 				TRACE.log(TraceLevel.ERROR, errorMsg,e);
 				submitToErrorPort(errorMsg);
 				
@@ -533,7 +533,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 							String serverUriStr = serverUri.toString();
 							
 							// only handle if server URI has changed
-							if (!serverUriStr.toLowerCase().equals(getServerUri().toLowerCase()))
+							if (!serverUriStr.isEmpty() && !serverUriStr.toLowerCase().equals(getServerUri().toLowerCase()))
 							{
 								// set pending broker URI field to get wrapper
 								// to get out of retry loop
@@ -543,6 +543,19 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 								
 								// wake up the thread in case it is sleeping
 								clientRequestThread.interrupt();
+							}
+							else if (serverUriStr.isEmpty())
+							{
+								String errorMsg = Messages.getString("Error_MqttSourceOperator.3"); //$NON-NLS-1$
+								
+								TRACE.log(TraceLevel.ERROR,errorMsg);
+								submitToErrorPort(errorMsg);								
+							}
+							else if (serverUriStr.toLowerCase().equals(getServerUri().toLowerCase())){
+
+								String errorMsg = Messages.getString("Warning_MqttSourceOperator.4"); //$NON-NLS-1$
+								
+								TRACE.log(TraceLevel.WARN,errorMsg);
 							}
 						}					
 					}
@@ -560,19 +573,37 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 								.hasNext();) {
 							// must call toString as the topic can come in as list of RString
 							String topicFromSignal = (String) iterator.next().toString();
-							reqTopics.add(topicFromSignal);
+							
+							if (!topicFromSignal.isEmpty()){
+								reqTopics.add(topicFromSignal);
+							}
+							else
+							{
+								String errorMsg = Messages.getString("Warning_MqttSourceOperator.0"); //$NON-NLS-1$								
+								TRACE.log(TraceLevel.WARN,errorMsg);
+							}
 						}
 						int signalQos = topicDesc.getInt(IMqttConstants.MQTTSRC_TOPICDESC_QOS);
 						
-						// construct client request
-						MqttClientRequest request = new MqttClientRequest();
-						MqttClientRequestType reqType = MqttClientRequest.getRequestType(signalAction);
-						
-						if (reqType != null)
+						if (signalQos >= 0 && signalQos < 3 && reqTopics.size() > 0)
 						{
-							request.setReqType(reqType).setTopics((String[])reqTopics.toArray(new String[0])).setQos(signalQos);							
-							// submit client request
-							clientRequestQueue.put(request);
+							// construct client request
+							MqttClientRequest request = new MqttClientRequest();
+							MqttClientRequestType reqType = MqttClientRequest.getRequestType(signalAction);
+							
+							if (reqType != null)
+							{
+								request.setReqType(reqType).setTopics((String[])reqTopics.toArray(new String[0])).setQos(signalQos);							
+								// submit client request
+								clientRequestQueue.put(request);
+							}
+						}
+						else if (reqTopics.size() > 0)
+						{
+							String errorMsg = Messages.getString("Error_MqttSourceOperator.24", reqTopics.toString(), signalQos); //$NON-NLS-1$
+							
+							TRACE.log(TraceLevel.ERROR,errorMsg);
+							submitToErrorPort(errorMsg);	
 						}
 					}
 				}
@@ -582,7 +613,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 		} catch (Exception e) {
 			
 			String tupleAsString = tuple.toString();
-			String errorMsg = Messages.getString("Error_MqttSinkOperator.21", tupleAsString);
+			String errorMsg = Messages.getString("Error_MqttSinkOperator.21", tupleAsString); //$NON-NLS-1$
 
 			TRACE.log(TraceLevel.ERROR,errorMsg); //$NON-NLS-1$
 						
