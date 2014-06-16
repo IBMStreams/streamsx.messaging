@@ -43,7 +43,7 @@ class ConnectionDocumentHelper {
 	
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 	
-	LinkedHashMap<String, ConnectionSpecification> connSpecMap = new LinkedHashMap<>();
+	LinkedHashMap<String, ConnectionSpecification> connSpecMap = new LinkedHashMap<String, ConnectionSpecification>();
 
 	public void parseAndValidateConnectionDocument(String connectionDocument)
 			throws Exception, SAXException, IOException,

@@ -163,7 +163,11 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 					throw new RuntimeException(
 							Messages.getString("Error_AbstractMqttOperator.5")); //$NON-NLS-1$
 				}
-			} catch (SAXException | IOException e) {
+			} catch (SAXException e) {
+				TRACE.log(LogLevel.ERROR,
+						Messages.getString("Error_AbstractMqttOperator.6")); //$NON-NLS-1$
+				throw e;
+			} catch (IOException e) {
 				TRACE.log(LogLevel.ERROR,
 						Messages.getString("Error_AbstractMqttOperator.6")); //$NON-NLS-1$
 				throw e;
