@@ -8,11 +8,11 @@ namespace com.ibm.streamsx.messaging.sample.kafka;
 use com.ibm.streamsx.messaging.kafka::KafkaSink ;
 
 /**
- * Example of an using [KafkaSender] as a Kafka Producer
+ * Example of using a [KafkaProducer]
  * This assumes that the topic has already been created
  * 
  */
-composite KafkaProducer
+composite KafkaProducerSample
 {
 	graph
 

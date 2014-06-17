@@ -5,21 +5,27 @@
 
 package com.ibm.streamsx.messaging.kafka;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Set;
 
 import com.ibm.streams.operator.Attribute;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.Tuple;
-import com.ibm.streams.operator.Type;
 import com.ibm.streams.operator.Type.MetaType;
+import com.ibm.streams.operator.types.Blob;
+import com.ibm.streams.operator.types.ValueFactory;
 
 //Helper to check if attributes have been specified explicitly
 class AttributeHelper {
-	
+	static final Charset CS = Charset.forName("UTF-8"); 
 	private boolean wasSet = false, isAvailable = false;
 	private MetaType mType = null;
 	private String name = null;
+	private boolean isString = false;
+	
 	AttributeHelper(String n) {
 		this.name = n;
 	}
@@ -41,7 +47,7 @@ class AttributeHelper {
 		wasSet = true;
 	}
 
-	void initialize(StreamSchema ss, boolean required) throws Exception {
+	void initialize(StreamSchema ss, boolean required, Set<MetaType> supportedTypes) throws Exception {
 		Attribute a = ss.getAttribute(name);
 		if(a == null) {
 			if(wasSet)
@@ -51,26 +57,49 @@ class AttributeHelper {
 			return;
 		}
 		this.mType = a.getType().getMetaType();
-		if(mType != Type.MetaType.RSTRING && mType!= Type.MetaType.USTRING){
-			throw new Exception("Attribute \"" + name + "\" must be of RSTRING or USTRING type.");
+		isString = mType == MetaType.RSTRING || mType == MetaType.USTRING;
+		
+		if(!supportedTypes.contains(mType)){
+			throw new Exception("Attribute \"" + name + "\" must be one of:  " + supportedTypes);
 		}
 		isAvailable = true;
+	}
+	boolean isString() {
+		return isString;
 	}
 	
 	void setValue(OutputTuple otup, String value) {
 		if(!isAvailable) return;
-		otup.setString(name, value);
+		if(isString) 
+			otup.setString(name, value);
+		else 
+			otup.setBlob(name, ValueFactory.newBlob(value.getBytes(CS)));
 	}
 	void setValue(OutputTuple otup, byte[] value) {
 		if(!isAvailable) return;
-		otup.setString(name, new String(value));
+		if(isString) 
+			otup.setString(name, new String(value, CS));
+		else 
+			otup.setBlob(name, ValueFactory.newBlob(value));
 	}
-	String getString(Tuple tuple) {
+	String getString(Tuple tuple) throws IOException {
 		if(!isAvailable) return null;
-		return tuple.getString(name);
+		if(isString)
+			return tuple.getString(name);
+        return new String(getBytesFromBlob(tuple, name));
 	}
-	byte[] getBytes(Tuple tuple) {
+	byte[] getBytes(Tuple tuple) throws IOException {
 		if(!isAvailable) return null;
-		return tuple.getString(name).getBytes(Charset.forName("UTF-8"));
+		if(isString)
+			return tuple.getString(name).getBytes(CS);
+		return getBytesFromBlob(tuple, name);
+	}
+	private static byte[] getBytesFromBlob(Tuple tuple, String name) throws IOException {
+		Blob blockMsg = tuple.getBlob(name);
+        InputStream inputStream = blockMsg.getInputStream();
+        int length = (int) blockMsg.getLength();
+        byte[] byteArray = new byte[length];
+        inputStream.read(byteArray, 0, length);
+        return byteArray;
 	}
 }
