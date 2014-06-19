@@ -36,11 +36,16 @@
 					<groupId>com.sun.jdmk</groupId>
 					<artifactId>jmxtools</artifactId>
 				</exclusion>
-				<exclusion>
+ 				<exclusion>
 					<groupId>javax.jms</groupId>
 					<artifactId>jms</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-client</artifactId>
+			<version>5.11-SNAPSHOT</version>			
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.paho</groupId>

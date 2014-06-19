@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- begin_generated_IBM_copyright_prolog                             -->
+<!--                                                                  -->
+<!-- This is an automatically generated copyright prolog.             -->
+<!-- After initializing,  DO NOT MODIFY OR MOVE                       -->
+<!-- **************************************************************** -->
+<!-- Licensed Materials - Property of IBM                             -->
+<!-- 5724-Y95                                                         -->
+<!-- (C) Copyright IBM Corp.  2013, 2013    All Rights Reserved.      -->
+<!-- US Government Users Restricted Rights - Use, duplication or      -->
+<!-- disclosure restricted by GSA ADP Schedule Contract with          -->
+<!-- IBM Corp.                                                        -->
+<!--                                                                  -->
+<!-- end_generated_IBM_copyright_prolog                               -->
+
+
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        targetNamespace="http://www.ibm.com/xmlns/prod/streams/adapters"
+        xmlns:st="http://www.ibm.com/xmlns/prod/streams/adapters"
+        attributeFormDefault="unqualified"
+        elementFormDefault="unqualified">
+
+  <simpleType name="native_data_type">
+  	<restriction base="string">
+  		<enumeration value="Byte" />
+  		<enumeration value="Short" />
+  		<enumeration value="Int" />
+  		<enumeration value="Long" />
+  		<enumeration value="Float" />
+  		<enumeration value="Double" />
+  		<enumeration value="Boolean" />
+  		<enumeration value="Bytes" />
+  		<enumeration value="String" />
+  	</restriction>
+  </simpleType>
+
+  <simpleType name="JMS_message_class">
+    <restriction base="string">
+      <enumeration value="map"/>
+      <enumeration value="stream"/>
+      <enumeration value="bytes"/>
+      <enumeration value="wbe"/>
+      <enumeration value="wbe22"/>
+      <enumeration value="xml"/>
+      <enumeration value="empty"/>
+    </restriction>
+  </simpleType>
+  
+  <simpleType name="JMS_delivery_mode">
+    <restriction base="string">
+      <enumeration value="persistent"/>
+      <enumeration value="non_persistent"/>
+    </restriction>
+  </simpleType>
+
+  <element name="connections">
+    <complexType>
+      <sequence>
+        <element name="connection_specifications" minOccurs="0" maxOccurs="1">
+          <complexType>
+            <sequence>
+              <element name="connection_specification" minOccurs="0" maxOccurs="unbounded">
+                <complexType>
+                  <choice minOccurs="1" maxOccurs="1">
+                    <element name="JMS">
+                      <complexType>
+			   <attribute name="provider_url" use="required" type="string"/>
+                        <attribute name="initial_context" use="required" type="anyURI"/>
+                        <attribute name="connection_factory" use="required" type="string"/>
+                        <attribute name="user"  type="string"/>
+                        <attribute name="password"  type="string"/>
+                      </complexType>
+                    </element>
+                  </choice>
+                  <attribute name="name" use="required" type="NCName"/>
+                </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+
+        <element name="access_specifications" minOccurs="0" maxOccurs="1">
+          <complexType>
+            <sequence>
+              <element name="access_specification" minOccurs="0" maxOccurs="unbounded">
+                <complexType>
+                  <sequence>
+                    <choice>
+                      <element name="destination">
+                        <complexType>
+                          <attribute name="identifier" use="required" type="string"/>
+                          <attribute name="message_class" use="required" type="st:JMS_message_class"/>
+                         <attribute name="delivery_mode" use="optional" type="st:JMS_delivery_mode"/>
+                        </complexType>
+                      </element>
+                    </choice>
+                    <sequence>
+                      <element name="uses_connection" minOccurs="1" maxOccurs="unbounded">
+                        <complexType>
+                          <attribute name="connection" use="required" type="NCName"/>
+                        </complexType>
+                      </element>
+                      <element name="native_schema" minOccurs="0" maxOccurs="1">
+                        <complexType>
+                          <sequence>
+                            <element name="attribute" minOccurs="1" maxOccurs="unbounded">
+                              <complexType>
+                                <attribute name="name" use="required" type="NCName"/>
+                                <attribute name="type" use="required" type="st:native_data_type"/>
+                                <attribute name="length" use="optional" type="integer"/>
+			         </complexType>
+                            </element>
+                          </sequence>
+                         </complexType>
+                      </element>
+                    </sequence>
+                  </sequence>
+                  <attribute name="name" use="required" type="NCName"/>
+                </complexType>
+              </element>
+            </sequence>
+          </complexType>
+        </element>
+      </sequence>
+    </complexType>
+  </element>
+
+
+</schema>

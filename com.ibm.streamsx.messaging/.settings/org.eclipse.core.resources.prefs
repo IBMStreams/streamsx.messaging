@@ -44,5 +44,5 @@ encoding//opt/downloaded/slf4j-api-1.7.2.jar=UTF-8
 encoding//opt/downloaded/snappy-java-1.0.5.jar=UTF-8
 encoding//opt/downloaded/zkclient-0.3.jar=UTF-8
 encoding//opt/downloaded/zookeeper-3.3.4.jar=UTF-8
-encoding/build.xml=Cp1252
+encoding/build.xml=UTF-8
 encoding/pom.xml=Cp1252
