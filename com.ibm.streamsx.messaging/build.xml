@@ -60,7 +60,7 @@
 	
 	<target name="all" depends="jar, cpp"/>
 	
-	<target name="cpp" depends="copyresources">
+	<target name="cpp">
 		<exec executable="${spl-mt}" failonerror="true">
 			<arg value="-i"/>
 			<arg value="."/>
@@ -85,7 +85,7 @@
 	</target>
 	
 
-	<target name="compile" depends="init, maven-deps">
+	<target name="compile" depends="init, maven-deps, copyresources">
 		<javac srcdir="${src.dir}" destdir="${build.dir}" debug="true"
 			includeantruntime="no"
 			excludes="com/ibm/streamsx/messaging/**/*$StreamsModel.java" >
@@ -103,8 +103,8 @@
 	</target>
 	
 	 <target name="copyresources">
-		<copy todir="build.dir">
-		    <fileset dir="src.dir" includes="**/*.xsd,**/*.properties" />
+		<copy todir="${build.dir}">
+		    <fileset dir="${src.dir}" includes="**/*.xsd,**/*.properties" />
 		</copy>
 	  </target>
 
