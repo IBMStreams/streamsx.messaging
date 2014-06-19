@@ -5,7 +5,7 @@
 //
 namespace com.ibm.streamsx.messaging.sample.kafka;
 
-use com.ibm.streamsx.messaging.kafka::KafkaSink ;
+use com.ibm.streamsx.messaging.kafka::KafkaProducer ;
 
 /**
  * Example of using a [KafkaProducer]
@@ -25,7 +25,7 @@ composite KafkaProducerSample
 		}
 
 
-		() as KafkaSinkOp = KafkaSender(OutputStream) {
+		() as KafkaSinkOp = KafkaProducer(OutputStream) {
 			param
 				propertiesFile : "producer.properties";
 		}

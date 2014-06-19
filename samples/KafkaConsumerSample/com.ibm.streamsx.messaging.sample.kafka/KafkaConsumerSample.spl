@@ -4,7 +4,7 @@
 // *******************************************************************************
 namespace com.ibm.streamsx.messaging.sample.kafka;
 
-use com.ibm.streamsx.messaging.kafka::KafkaSource ;
+use com.ibm.streamsx.messaging.kafka::KafkaConsumer ;
 
 /**
  * Simple example of using a [KafkaConsumer]
