@@ -1,12 +1,12 @@
-#Mon Jun 16 15:22:03 EDT 2014
+#Fri Jun 20 16:43:57 EDT 2014
 copytosourcelist=
-hreftargetslist=dita/com.ibm.streamsx.messaging.mqtt$MQTTSink.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaSender.xml,dita/com.ibm.streamsx.messaging.mqtt$MQTTSource.xml,dita/com.ibm.streamsx.messaging.mqtt$.xml,dita/com.ibm.streamsx.messaging.kafka$.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaReceiver.xml,dita/com.ibm.streamsx.messaging.mqtt$MSGTypes$spl.xml,dita/toolkit.xml,dita/OperatorModel.xml
+hreftargetslist=dita/com.ibm.streamsx.messaging.mqtt$MQTTSink.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaSender.xml,dita/com.ibm.streamsx.messaging.mqtt$MQTTSource.xml,dita/com.ibm.streamsx.messaging.mqtt$.xml,dita/com.ibm.streamsx.messaging.kafka$.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaReceiver.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaConsumer.xml,dita/com.ibm.streamsx.messaging.mqtt$MSGTypes$spl.xml,dita/toolkit.xml,dita/OperatorModel.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaProducer.xml
 fullditatopicfile=fullditatopic.list
 fullditamapandtopicfile=fullditamapandtopic.list
-fullditatopiclist=dita/com.ibm.streamsx.messaging.mqtt$MQTTSink.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaSender.xml,dita/com.ibm.streamsx.messaging.mqtt$MQTTSource.xml,dita/com.ibm.streamsx.messaging.mqtt$.xml,dita/com.ibm.streamsx.messaging.kafka$.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaReceiver.xml,dita/com.ibm.streamsx.messaging.mqtt$MSGTypes$spl.xml,dita/toolkit.xml,dita/OperatorModel.xml
-fullditamapandtopiclist=dita/com.ibm.streamsx.messaging.mqtt$MQTTSink.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaSender.xml,dita/com.ibm.streamsx.messaging.mqtt$MQTTSource.xml,dita/toolkit.ditamap,dita/com.ibm.streamsx.messaging.mqtt$.xml,dita/com.ibm.streamsx.messaging.kafka$.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaReceiver.xml,dita/com.ibm.streamsx.messaging.mqtt$MSGTypes$spl.xml,dita/toolkit.xml,dita/OperatorModel.xml
+fullditatopiclist=dita/com.ibm.streamsx.messaging.mqtt$MQTTSink.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaSender.xml,dita/com.ibm.streamsx.messaging.mqtt$MQTTSource.xml,dita/com.ibm.streamsx.messaging.mqtt$.xml,dita/com.ibm.streamsx.messaging.kafka$.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaReceiver.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaConsumer.xml,dita/com.ibm.streamsx.messaging.mqtt$MSGTypes$spl.xml,dita/toolkit.xml,dita/OperatorModel.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaProducer.xml
+fullditamapandtopiclist=dita/com.ibm.streamsx.messaging.mqtt$MQTTSink.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaSender.xml,dita/com.ibm.streamsx.messaging.mqtt$MQTTSource.xml,dita/toolkit.ditamap,dita/com.ibm.streamsx.messaging.mqtt$.xml,dita/com.ibm.streamsx.messaging.kafka$.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaReceiver.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaConsumer.xml,dita/com.ibm.streamsx.messaging.mqtt$MSGTypes$spl.xml,dita/toolkit.xml,dita/OperatorModel.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaProducer.xml
 hrefditatopicfile=hrefditatopic.list
-hrefditatopiclist=dita/com.ibm.streamsx.messaging.mqtt$MQTTSink.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaSender.xml,dita/com.ibm.streamsx.messaging.mqtt$MQTTSource.xml,dita/com.ibm.streamsx.messaging.mqtt$.xml,dita/com.ibm.streamsx.messaging.kafka$.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaReceiver.xml,dita/com.ibm.streamsx.messaging.mqtt$MSGTypes$spl.xml,dita/toolkit.xml
+hrefditatopiclist=dita/com.ibm.streamsx.messaging.mqtt$MQTTSink.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaSender.xml,dita/com.ibm.streamsx.messaging.mqtt$MQTTSource.xml,dita/com.ibm.streamsx.messaging.mqtt$.xml,dita/com.ibm.streamsx.messaging.kafka$.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaReceiver.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaConsumer.xml,dita/com.ibm.streamsx.messaging.mqtt$MSGTypes$spl.xml,dita/toolkit.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaProducer.xml
 user.input.file=dita/toolkit.ditamap
 subtargetsfile=subtargets.list
 fullditamapfile=fullditamap.list
@@ -23,11 +23,11 @@ conreflist=
 resourceonlyfile=resourceonly.list
 imagefile=image.list
 resourceonlylist=
-imagelist=image/com.ibm.streamsx.messaging.mqtt$MQTTSource.svg,image/com.ibm.streamsx.messaging.kafka$KafkaReceiver.svg,image/com.ibm.streamsx.messaging.mqtt$MQTTSink.svg,image/com.ibm.streamsx.messaging.kafka$KafkaSender.svg
+imagelist=image/com.ibm.streamsx.messaging.mqtt$MQTTSource.svg,image/com.ibm.streamsx.messaging.kafka$KafkaReceiver.svg,image/com.ibm.streamsx.messaging.mqtt$MQTTSink.svg,image/com.ibm.streamsx.messaging.kafka$KafkaSender.svg,image/com.ibm.streamsx.messaging.kafka$KafkaConsumer.svg,image/com.ibm.streamsx.messaging.kafka$KafkaProducer.svg
 htmlfile=html.list
 htmllist=
 canditopicsfile=canditopics.list
-canditopicslist=dita/com.ibm.streamsx.messaging.mqtt$MQTTSink.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaSender.xml,dita/com.ibm.streamsx.messaging.mqtt$MQTTSource.xml,dita/com.ibm.streamsx.messaging.mqtt$.xml,dita/com.ibm.streamsx.messaging.kafka$.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaReceiver.xml,dita/com.ibm.streamsx.messaging.mqtt$MSGTypes$spl.xml,dita/toolkit.xml,dita/OperatorModel.xml
+canditopicslist=dita/com.ibm.streamsx.messaging.mqtt$MQTTSink.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaSender.xml,dita/com.ibm.streamsx.messaging.mqtt$MQTTSource.xml,dita/com.ibm.streamsx.messaging.mqtt$.xml,dita/com.ibm.streamsx.messaging.kafka$.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaReceiver.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaConsumer.xml,dita/com.ibm.streamsx.messaging.mqtt$MSGTypes$spl.xml,dita/toolkit.xml,dita/OperatorModel.xml,dita/com.ibm.streamsx.messaging.kafka$KafkaProducer.xml
 keyreffile=keyref.list
 subjectschemefile=subjectscheme.list
 keyreflist=

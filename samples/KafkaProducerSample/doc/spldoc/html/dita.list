@@ -1,4 +1,4 @@
-#Mon Jun 16 15:22:24 EDT 2014
+#Fri Jun 20 16:44:20 EDT 2014
 copytosourcelist=
 hreftargetslist=dita/com.ibm.streamsx.messaging.sample.kafka$.xml,dita/com.ibm.streamsx.messaging.sample.kafka$KafkaProducerSample$spl.xml,dita/toolkit.xml
 fullditatopicfile=fullditatopic.list
@@ -23,7 +23,7 @@ conreflist=
 resourceonlyfile=resourceonly.list
 imagefile=image.list
 resourceonlylist=
-imagelist=image/com.ibm.streamsx.messaging.sample.kafka$KafkaProducer.svg
+imagelist=image/com.ibm.streamsx.messaging.sample.kafka$KafkaProducerSample.svg
 htmlfile=html.list
 htmllist=
 canditopicsfile=canditopics.list
