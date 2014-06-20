@@ -2,12 +2,7 @@
  * Copyright (C) 2014, International Business Machines Corporation
  * All Rights Reserved
  *******************************************************************************/
-//
-// *******************************************************************************
-// * Copyright (C)2014, International Business Machines Corporation and *
-// * others. All Rights Reserved. *
-// *******************************************************************************
-//
+
 package com.ibm.streamsx.messaging.kafka;
 
 
