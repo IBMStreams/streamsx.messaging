@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- begin_generated_IBM_copyright_prolog                             -->
-<!--                                                                  -->
-<!-- This is an automatically generated copyright prolog.             -->
-<!-- After initializing,  DO NOT MODIFY OR MOVE                       -->
-<!-- **************************************************************** -->
-<!-- Licensed Materials - Property of IBM                             -->
-<!-- 5724-Y95                                                         -->
-<!-- (C) Copyright IBM Corp.  2013, 2013    All Rights Reserved.      -->
-<!-- US Government Users Restricted Rights - Use, duplication or      -->
-<!-- disclosure restricted by GSA ADP Schedule Contract with          -->
-<!-- IBM Corp.                                                        -->
-<!--                                                                  -->
-<!-- end_generated_IBM_copyright_prolog                               -->
+<!--
+// *******************************************************************************
+// * Copyright (C)2013, 2014, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// ********************************************************************************
+-->
 <operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
   <javaOperatorModel>
     <context>
@@ -44,7 +37,7 @@
           <cmn:description>Java operator class library</cmn:description>
           <cmn:managedLibrary>
             <cmn:libPath>../../impl/java/bin</cmn:libPath>
-            <cmn:libPath>../../impl/lib/com.ibm.streams.operator.samples.jar</cmn:libPath>              
+            <cmn:libPath>../../impl/lib/com.ibm.streamsx.messaging.jar</cmn:libPath>              
           </cmn:managedLibrary>
         </library>
       </libraryDependencies>
