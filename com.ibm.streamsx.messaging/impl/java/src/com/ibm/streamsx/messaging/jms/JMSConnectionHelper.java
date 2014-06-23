@@ -1,17 +1,7 @@
-/* begin_generated_IBM_copyright_prolog                             */
-/*                                                                  */
-/* This is an automatically generated copyright prolog.             */
-/* After initializing,  DO NOT MODIFY OR MOVE                       */
-/* **************************************************************** */
-/* IBM Confidential                                                 */
-/* OCO Source Materials                                             */
-/* 5724-Y95                                                         */
-/* (C) Copyright IBM Corp.  2013, 2013                              */
-/* The source code for this program is not published or otherwise   */
-/* divested of its trade secrets, irrespective of what has          */
-/* been deposited with the U.S. Copyright Office.                   */
-/*                                                                  */
-/* end_generated_IBM_copyright_prolog                               */
+/*******************************************************************************
+ * Copyright (C) 2013, 2014, International Business Machines Corporation
+ * All Rights Reserved
+ *******************************************************************************/
 package com.ibm.streamsx.messaging.jms;
 
 import com.ibm.streams.operator.metrics.Metric;
@@ -70,6 +60,11 @@ class JMSConnectionHelper {
 	// Metric to indicate the number of failed inserts to the JMS Provider by
 	// JMSSink
 	private Metric nFailedInserts;
+	// userPrincipal and userCredential will be initialized by 
+	// createAdministeredObjects and used for connection
+	private String userPrincipal = null;
+	private String userCredential = null;
+	
 
 	// procedure to detrmine if there exists a valid connection or not
 	private boolean isConnectValid() {
@@ -164,6 +159,9 @@ class JMSConnectionHelper {
 			String connectionFactory, String destination)
 			throws NamingException {
 
+		this.userPrincipal = userPrincipal;
+		this.userCredential = userCredential;
+		
 		// Create a JNDI API InitialContext object if none exists
 		// create a properties object and add all the mandatory and optional
 		// parameter
@@ -258,7 +256,12 @@ class JMSConnectionHelper {
 	private boolean connect(boolean isProducer) throws JMSException {
 
 		// Create connection.
-		setConnect(connFactory.createConnection());
+		if (userPrincipal != null && !userPrincipal.isEmpty() && 
+				userCredential != null && !userCredential.isEmpty() )
+			setConnect(connFactory.createConnection(userPrincipal, userCredential));
+		else
+			setConnect(connFactory.createConnection());
+		
 		// Create session from connection; false means
 		// session is not transacted.
 		setSession(getConnect().createSession(false, Session.AUTO_ACKNOWLEDGE));
@@ -268,15 +271,15 @@ class JMSConnectionHelper {
 			setProducer(getSession().createProducer(dest));
 
 			// set the delivery mode if it is specified
-			// default is persistent
+			// default is non-persistent
 			if (deliveryMode == null) {
-				getProducer().setDeliveryMode(DeliveryMode.PERSISTENT);
+				getProducer().setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 			} else {
-				if (deliveryMode.trim().equals("NON_PERSISTENT")) {
+				if (deliveryMode.trim().toLowerCase().equals("non_persistent")) {
 					getProducer().setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 				}
 
-				if (deliveryMode.trim().equals("PERSISTENT")) {
+				if (deliveryMode.trim().toLowerCase().equals("persistent")) {
 					getProducer().setDeliveryMode(DeliveryMode.PERSISTENT);
 				}
 			}

@@ -1,29 +1,19 @@
-/* begin_generated_IBM_copyright_prolog                             */
-/*                                                                  */
-/* This is an automatically generated copyright prolog.             */
-/* After initializing,  DO NOT MODIFY OR MOVE                       */
-/* **************************************************************** */
-/* IBM Confidential                                                 */
-/* OCO Source Materials                                             */
-/* 5724-Y95                                                         */
-/* (C) Copyright IBM Corp.  2013, 2013                              */
-/* The source code for this program is not published or otherwise   */
-/* divested of its trade secrets, irrespective of what has          */
-/* been deposited with the U.S. Copyright Office.                   */
-/*                                                                  */
-/* end_generated_IBM_copyright_prolog                               */
+/*******************************************************************************
+ * Copyright (C) 2013, 2014, International Business Machines Corporation
+ * All Rights Reserved
+ *******************************************************************************/
 package com.ibm.streamsx.messaging.jms;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
+
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,15 +23,17 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import com.ibm.streams.operator.Attribute;
 import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.Type;
 import com.ibm.streams.operator.Type.MetaType;
-import com.ibm.streams.operator.Attribute;
 
 //This class parses and validates the connections document 
 class ConnectionDocumentParser {

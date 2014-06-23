@@ -1,56 +1,35 @@
-/* begin_generated_IBM_copyright_prolog                             */
-/*                                                                  */
-/* This is an automatically generated copyright prolog.             */
-/* After initializing,  DO NOT MODIFY OR MOVE                       */
-/* **************************************************************** */
-/* IBM Confidential                                                 */
-/* OCO Source Materials                                             */
-/* 5724-Y95                                                         */
-/* (C) Copyright IBM Corp.  2013, 2013                              */
-/* The source code for this program is not published or otherwise   */
-/* divested of its trade secrets, irrespective of what has          */
-/* been deposited with the U.S. Copyright Office.                   */
-/*                                                                  */
-/* end_generated_IBM_copyright_prolog                               */
+/*******************************************************************************
+ * Copyright (C) 2013, 2014, International Business Machines Corporation
+ * All Rights Reserved
+ *******************************************************************************/
 package com.ibm.streamsx.messaging.jms;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Logger;
-import javax.jms.JMSException;
+
 import javax.jms.Message;
 import javax.naming.NamingException;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.SAXException;
+
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
-import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.Type;
+import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.logging.LogLevel;
 import com.ibm.streams.operator.logging.LoggerNames;
-import com.ibm.streams.operator.model.Parameter;
-import com.ibm.streams.operator.model.CustomMetric;
 import com.ibm.streams.operator.metrics.Metric;
+import com.ibm.streams.operator.model.CustomMetric;
+import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.samples.patterns.ProcessTupleProducer;
 
 //The JMSSource operator converts a message JMS queue or topic to stream
-public class JMSSource extends ProcessTupleProducer {
-	public static final String IBM_COPYRIGHT = " Licensed Materials-Property of IBM                              " + //$NON-NLS-1$ 
-			" 5724-Y95                                                        "
-			+ //$NON-NLS-1$ 
-			" (C) Copyright IBM Corp.  2011, 2012    All Rights Reserved.     "
-			+ //$NON-NLS-1$ 
-			" US Government Users Restricted Rights - Use, duplication or     "
-			+ //$NON-NLS-1$ 
-			" disclosure restricted by GSA ADP Schedule Contract with         "
-			+ //$NON-NLS-1$ 
-			" IBM Corp.                                                        "
-			+ //$NON-NLS-1$ 
-			"                                                                 "; //$NON-NLS-1$ 
-	/* end_generated_IBM_copyright_code */
+public class JMSSource extends ProcessTupleProducer {	
 
 	private static final String CLASS_NAME = "com.ibm.streamsx.messaging.jms.JMSSource";
 
@@ -305,6 +284,8 @@ public class JMSSource extends ProcessTupleProducer {
 			NamingException, ConnectionException, Exception {
 
 		super.initialize(context);
+		
+		JmsClasspathUtil.setupClassPaths(context);
 
 		// create connection document parser object (which is responsible for
 		// parsing the connection document)
@@ -325,10 +306,7 @@ public class JMSSource extends ProcessTupleProducer {
 		// the operator throws a runtime error and abort
 
 		connectionDocumentParser.parseAndValidateConnectionDocument(
-				connectionDocument, connection, access, streamSchema,/*
-																	 * isProducer=
-																	 * false
-																	 */false);
+				connectionDocument, connection, access, streamSchema, false);
 
 		// codepage parameter can come only if message class is bytes
 
@@ -360,27 +338,29 @@ public class JMSSource extends ProcessTupleProducer {
 		// messageType.
 
 		switch (connectionDocumentParser.getMessageType()) {
-		case map:
-			messageHandlerImpl = new MapMessageHandler(
-					connectionDocumentParser.getNativeSchemaObjects());
-			break;
-		case stream:
-			messageHandlerImpl = new StreamMessageHandler(
-					connectionDocumentParser.getNativeSchemaObjects());
-			break;
-		case bytes:
-			messageHandlerImpl = new BytesMessageHandler(
-					connectionDocumentParser.getNativeSchemaObjects(), codepage);
-			break;
-		case empty:
-			messageHandlerImpl = new EmptyMessageHandler(
-					connectionDocumentParser.getNativeSchemaObjects());
-			break;
+			case map:
+				messageHandlerImpl = new MapMessageHandler(
+						connectionDocumentParser.getNativeSchemaObjects());
+				break;
+			case stream:
+				messageHandlerImpl = new StreamMessageHandler(
+						connectionDocumentParser.getNativeSchemaObjects());
+				break;
+			case bytes:
+				messageHandlerImpl = new BytesMessageHandler(
+						connectionDocumentParser.getNativeSchemaObjects(), codepage);
+				break;
+			case empty:
+				messageHandlerImpl = new EmptyMessageHandler(
+						connectionDocumentParser.getNativeSchemaObjects());
+				break;
+			default:
+				throw new RuntimeException("No valid message class is specified.");
 		}
 	}
 
 	@Override
-	protected void process() throws JMSException, UnsupportedEncodingException,
+	protected void process() throws UnsupportedEncodingException,
 			InterruptedException, ConnectionException, Exception {
 		// create the initial connection.
 		jmsConnectionHelper.createInitialConnection();

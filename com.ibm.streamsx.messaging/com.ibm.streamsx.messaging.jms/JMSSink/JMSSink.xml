@@ -43,9 +43,6 @@
         <library>
           <cmn:description>Java operator class library</cmn:description>
           <cmn:managedLibrary>
-            <cmn:libPath>@STREAMS_MESSAGING_AMQ_HOME@/lib/*</cmn:libPath>
-            <cmn:libPath>@STREAMS_MESSAGING_AMQ_HOME@/lib/optional/*</cmn:libPath>
-            <cmn:libPath>@STREAMS_MESSAGING_WMQ_HOME@/java/lib/*</cmn:libPath>
             <cmn:libPath>../../impl/java/bin</cmn:libPath>
             <cmn:libPath>../../impl/lib/com.ibm.streams.operator.samples.jar</cmn:libPath>              
           </cmn:managedLibrary>

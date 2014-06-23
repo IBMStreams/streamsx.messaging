@@ -1,36 +1,28 @@
-/* begin_generated_IBM_copyright_prolog                             */
-/*                                                                  */
-/* This is an automatically generated copyright prolog.             */
-/* After initializing,  DO NOT MODIFY OR MOVE                       */
-/* **************************************************************** */
-/* IBM Confidential                                                 */
-/* OCO Source Materials                                             */
-/* 5724-Y95                                                         */
-/* (C) Copyright IBM Corp.  2013, 2013                              */
-/* The source code for this program is not published or otherwise   */
-/* divested of its trade secrets, irrespective of what has          */
-/* been deposited with the U.S. Copyright Office.                   */
-/*                                                                  */
-/* end_generated_IBM_copyright_prolog                               */
+/*******************************************************************************
+ * Copyright (C) 2013, 2014, International Business Machines Corporation
+ * All Rights Reserved
+ *******************************************************************************/
 package com.ibm.streamsx.messaging.jms;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.List;
+
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageEOFException;
 import javax.jms.MessageNotReadableException;
+import javax.jms.Session;
+
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.Tuple;
+import com.ibm.streams.operator.Type;
 import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.metrics.Metric;
 import com.ibm.streams.operator.types.Blob;
 import com.ibm.streams.operator.types.RString;
 import com.ibm.streams.operator.types.Timestamp;
-import javax.jms.Session;
-import com.ibm.streams.operator.Type;
 
 //This class handles the JMS Bytes message type 
 class BytesMessageHandler extends JMSMessageHandlerImpl {
@@ -48,8 +40,7 @@ class BytesMessageHandler extends JMSMessageHandlerImpl {
 		codepage = cpage;
 	}
 
-	BytesMessageHandler(List<NativeSchema> nativeSchemaObjects, String cpage,
-			Metric nTruncatedInserts) {
+	BytesMessageHandler(List<NativeSchema> nativeSchemaObjects, String cpage, Metric nTruncatedInserts) {
 		super(nativeSchemaObjects, nTruncatedInserts);
 		// set the codepage parameter if one is specified in the operator model,
 		// if not a default value of UTF-8 is assumed
@@ -57,8 +48,8 @@ class BytesMessageHandler extends JMSMessageHandlerImpl {
 	}
 
 	// For JMSSink operator, convert the incoming tuple to a JMS BytesMessage
-	public Message convertTupleToMessage(Tuple tuple, Session session)
-			throws JMSException, UnsupportedEncodingException {
+	public Message convertTupleToMessage(Tuple tuple, Session session) throws JMSException,
+			UnsupportedEncodingException {
 		// create a new BytesMessage
 		BytesMessage message;
 		synchronized (session) {
@@ -82,21 +73,18 @@ class BytesMessageHandler extends JMSMessageHandlerImpl {
 				// variable to hold the bytes data
 				byte[] bytedata = null;
 				int size;
-				MetaType metaType = tuple.getStreamSchema().getAttribute(name)
-						.getType().getMetaType();
+				MetaType metaType = tuple.getStreamSchema().getAttribute(name).getType().getMetaType();
 				switch (metaType) {
 
 				case DECIMAL32:
 				case DECIMAL64:
 				case DECIMAL128: {
-					bytedata = tuple.getBigDecimal(name).toString()
-							.getBytes(codepage);
+					bytedata = tuple.getBigDecimal(name).toString().getBytes(codepage);
 				}
 					break;
 				case TIMESTAMP: {
 
-					bytedata = ((tuple.getTimestamp(name).getTimeAsSeconds())
-							.toString()).getBytes(codepage);
+					bytedata = ((tuple.getTimestamp(name).getTimeAsSeconds()).toString()).getBytes(codepage);
 				}
 					break;
 
@@ -151,8 +139,7 @@ class BytesMessageHandler extends JMSMessageHandlerImpl {
 				// with null
 
 				byte topad = ' ';
-				if (tuple.getStreamSchema().getAttribute(name).getType()
-						.getMetaType() == Type.MetaType.BLOB)
+				if (tuple.getStreamSchema().getAttribute(name).getType().getMetaType() == Type.MetaType.BLOB)
 					topad = 0;
 				if (length > 0) {
 
@@ -186,6 +173,8 @@ class BytesMessageHandler extends JMSMessageHandlerImpl {
 				break;
 			case Boolean:
 				message.writeBoolean(tuple.getBoolean(name));
+			default:
+				break;
 			}
 		}
 		// if the isTruncated boolean is set, increment the metric
@@ -198,8 +187,7 @@ class BytesMessageHandler extends JMSMessageHandlerImpl {
 	}
 
 	// For JMSSource operator, convert the incoming JMS BytesMessage to tuple
-	public MessageAction convertMessageToTuple(Message message,
-			OutputTuple tuple) throws JMSException,
+	public MessageAction convertMessageToTuple(Message message, OutputTuple tuple) throws JMSException,
 			UnsupportedEncodingException {
 		if (!(message instanceof BytesMessage)) {
 			// We got a wrong message type so throw an error
@@ -306,28 +294,22 @@ class BytesMessageHandler extends JMSMessageHandlerImpl {
 						// we are interested in this currentObject only if it is
 						// present in streams schema
 						if (currentObject.getIsPresentInStreamSchema()) {
-							switch (tuple.getStreamSchema().getAttribute(name)
-									.getType().getMetaType()) {
+							switch (tuple.getStreamSchema().getAttribute(name).getType().getMetaType()) {
 
 							case DECIMAL32:
 							case DECIMAL64:
 							case DECIMAL128: {
 
-								String stringdata = new String(b, 0, lenRead,
-										codepage);
-								BigDecimal bigDecValue = new BigDecimal(
-										stringdata);
+								String stringdata = new String(b, 0, lenRead, codepage);
+								BigDecimal bigDecValue = new BigDecimal(stringdata);
 								tuple.setBigDecimal(name, bigDecValue);
 
 							}
 								break;
 							case TIMESTAMP: {
-								String timeseriesData = new String(b, 0,
-										lenRead, codepage);
-								BigDecimal bigDecValue = new BigDecimal(
-										timeseriesData);
-								tuple.setTimestamp(name,
-										Timestamp.getTimestamp(bigDecValue));
+								String timeseriesData = new String(b, 0, lenRead, codepage);
+								BigDecimal bigDecValue = new BigDecimal(timeseriesData);
+								tuple.setTimestamp(name, Timestamp.getTimestamp(bigDecValue));
 
 							}
 								break;
