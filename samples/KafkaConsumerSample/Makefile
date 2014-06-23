@@ -7,7 +7,7 @@ STREAMS_MSG_TOOLKIT ?=../../com.ibm.streamsx.messaging
 SPLC_FLAGS ?= -a -t $(STREAMS_MSG_TOOLKIT)
 SPLC = $(STREAMS_INSTALL)/bin/sc
 SPL_CMD_ARGS ?= 
-SPL_MAIN_COMPOSITE ?= com.ibm.streamsx.messaging.sample.kafka::KafkaConsumer
+SPL_MAIN_COMPOSITE ?= com.ibm.streamsx.messaging.sample.kafka::KafkaConsumerSample
 
 all: standalone
 

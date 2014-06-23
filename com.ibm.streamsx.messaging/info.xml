@@ -6,7 +6,7 @@
  <info:identity>
    <info:name>com.ibm.streamsx.messaging</info:name>
    <info:description></info:description>
-   <info:version>1.0.0</info:version>
+   <info:version>0.7.0</info:version>
    <info:requiredProductVersion>3.2.0</info:requiredProductVersion>
  </info:identity>
  <info:dependencies/>
