@@ -1,0 +1,38 @@
+// *******************************************************************************
+// * Copyright (C)2014, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************                               
+use com.ibm.streamsx.messaging.jms::* ;
+
+/** JMSSinkMain sample demonstrates how to send data to a messaging server using the
+ *  JMSSink operator.
+ * 
+ *  This sample uses connects to a messaging server as specified in the connection 
+ *  document located in ../etc/connections.xml.  The connection info, and the
+ *  data schema for the message is defined in the connection document.
+ * 
+ */
+composite JMSSinkMain
+{
+	type
+		PersonSchema = int32 id, rstring fname, rstring lname, int32 age,
+			rstring gender, float32 score, float64 total ;
+	graph
+
+		stream<PersonSchema> inputData = FileSource()
+		{
+			param
+				file : "testdata.csv" ;
+				format : csv ;
+				initDelay : 1.0 ;
+		}
+
+		() as mySink = JMSSink(inputData)
+		{
+			param
+				//	connectionDocument : default is ./etc/connections.xml;
+				connection : "conn1" ;
+				access : "access1" ;
+		}
+
+}
