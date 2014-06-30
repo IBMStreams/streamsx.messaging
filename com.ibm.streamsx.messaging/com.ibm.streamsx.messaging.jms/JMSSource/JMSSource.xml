@@ -1,0 +1,137 @@
+<?xml version="1.0" ?>
+<!--
+// *******************************************************************************
+// * Copyright (C)2013, 2014, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************
+-->
+<operatorModel
+  xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" 
+  xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <javaOperatorModel>
+    <context> 
+      <description>The JMSSource operator subscribes to data from WebSphere MQ or Apache Active MQ  Queue or Topic.</description>
+  	  <iconUri size="16">JMSSource_16.gif</iconUri>
+	  <iconUri size="32">JMSSource_32.gif</iconUri>
+	  <metrics>
+      	<metric>
+          <name>nMessagesRead</name>
+          <description docHref="">The number of messages read successfully from a JMS Provider's queue or topic.</description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>nMessagesDropped</name>
+          <description docHref="">The number of messages dropped in the application.</description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>nReconnectionAttempts</name>
+          <description docHref="">The number of reconnection attempts made before a successful connection.</description>
+          <kind>Counter</kind>
+        </metric>
+      </metrics>
+      <executionSettings>
+        <className>com.ibm.streamsx.messaging.jms.JMSSource</className>
+        <vmArgs/>
+      </executionSettings>
+      <libraryDependencies>
+        <library>
+          <cmn:description>Java operator class library</cmn:description>
+          <cmn:managedLibrary>
+            <cmn:libPath>../../impl/java/bin</cmn:libPath>
+            <cmn:libPath>../../impl/lib/com.ibm.streamsx.messaging.jar</cmn:libPath>      
+          </cmn:managedLibrary>
+        </library>	    
+      </libraryDependencies>
+      <codeTemplates>
+        <codeTemplate name="JMSSource">
+          <description>Basic JMSSource template</description>
+          <template>stream&lt;${streamType}&gt; ${streamName} = JMSSource()   {
+	      param
+            	connection : &quot;${ConnectionSpecificationName}&quot;;
+                access : &quot;${AccessSpecificationName}&quot;;
+          }</template>
+        </codeTemplate>
+      </codeTemplates>
+    </context>  
+    <parameters>
+    <parameter>
+        <name>codepage</name>
+        <description>Speciifes the code page of the target system using which ustring conversions have to be done,defaults to UTF8.</description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+	  <parameter>
+        <name>reconnectionPolicy</name>
+        <description>Specifies the reconnection policy.The valid values are: NoRetry, InfiniteRetry and BoundedRetry.</description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>reconnectionBound</name>
+        <description>Specifies the number of successive connections that will be attempted for this operator.</description>
+        <optional>true</optional>
+        <type>int32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>period</name>
+        <description>Specifies the time period in seconds which the operator will wait before trying to reconnect.</description>
+        <optional>true</optional>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>initDelay</name>
+        <description>Number of seconds to delay before starting to produce tuples</description>
+        <optional>true</optional>
+        <type>int64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>access</name>
+        <description>Specifies access specification name.</description>
+        <optional>false</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>connection</name>
+        <description>Specifies name of the connection specification containing an JMS element.</description>
+        <optional>false</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+	  <parameter>
+	  <name>connectionDocument</name>
+        <description>Specifies the pathname of a file containing the connection and access specifications identified by the connection and access parameters. If the parameter is absent, the operator will use the default location filepath ../etc/connections.xml.</description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+    </parameters>
+    <inputPorts>
+    </inputPorts>
+    <outputPorts>
+	  <outputPortSet>
+        <description>Mandatory output port which will submit tuples that are read.</description>
+        <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>-1</windowPunctuationInputPort>
+        <cardinality>1</cardinality>
+        <optional>false</optional>
+      </outputPortSet>
+      <outputPortSet>
+        <description>An optional output port which will submit tuples when an error occurs.</description>
+        <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>-1</windowPunctuationInputPort>
+        <cardinality>1</cardinality>
+        <optional>true</optional>
+      </outputPortSet>
+    </outputPorts>
+  </javaOperatorModel>
+</operatorModel>
+

@@ -8,13 +8,16 @@ package com.ibm.streamsx.messaging.kafka;
 
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.ibm.streams.operator.AbstractOperator;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.StreamSchema;
+import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.logging.TraceLevel;
 import com.ibm.streams.operator.model.Libraries;
 import com.ibm.streams.operator.model.Parameter;
@@ -50,9 +53,18 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	
 	public void initSchema (StreamSchema ss ) throws Exception {
 		trace.log(TraceLevel.INFO, "Connection properties: " + finalProperties);
-		topicAH.initialize(ss, false);
-		keyAH.initialize(ss, false);
-		messageAH.initialize(ss, true);
+		
+		Set<MetaType> supportedTypes =new HashSet<MetaType>();
+		supportedTypes.add(MetaType.RSTRING);
+		supportedTypes.add(MetaType.USTRING);
+		supportedTypes.add(MetaType.BLOB);
+		
+		keyAH.initialize(ss, false, supportedTypes);
+		messageAH.initialize(ss, true, supportedTypes);
+		
+		//blobs are not supported for topics
+		supportedTypes.remove(MetaType.BLOB);
+		topicAH.initialize(ss, false, supportedTypes);
 		
 		trace.log(TraceLevel.INFO, "Creating client");
 		client = new KafkaClient(topicAH, keyAH, messageAH, finalProperties);

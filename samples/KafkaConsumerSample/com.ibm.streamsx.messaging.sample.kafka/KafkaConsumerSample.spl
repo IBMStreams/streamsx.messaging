@@ -4,16 +4,16 @@
 // *******************************************************************************
 namespace com.ibm.streamsx.messaging.sample.kafka;
 
-use com.ibm.streamsx.messaging.kafka::KafkaSource ;
+use com.ibm.streamsx.messaging.kafka::KafkaConsumer ;
 
 /**
- * Simple example of an using [KafkaReceiver] as a Kafka Consumer
+ * Simple example of using a [KafkaConsumer]
  * 
  */
-composite KafkaConsumer
+composite KafkaConsumerSample
 {
 	graph
-		stream<rstring key, rstring message> KafkaStream = KafkaReceiver()
+		stream<rstring key, rstring message> KafkaStream = KafkaConsumer()
 		{
 			param
 				propertiesFile : "consumer.properties";
