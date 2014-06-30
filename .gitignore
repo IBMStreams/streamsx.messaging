@@ -6,7 +6,11 @@ impl/nl/include/*.h
 .settings
 doc
 # If you want to include a perl module, do
-# !foo.pm
+!Access.pm
+!Connection.pm
+!Edge.pm
+!XMSSinkCommon.pm
+!XMSSourceCommon.pm
 
 /com.ibm.streamsx.messaging/doc/
 /com.ibm.streamsx.messaging/.settings
