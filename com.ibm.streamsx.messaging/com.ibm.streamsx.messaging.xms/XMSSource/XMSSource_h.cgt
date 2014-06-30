@@ -1,0 +1,72 @@
+<%
+#######################################################################
+# Copyright (C)2014, International Business Machines Corporation and  
+# others. All Rights Reserved.                                    
+#######################################################################    
+%>
+
+/* Additional includes go here */
+#include <SPL/Runtime/Operator/OperatorMetrics.h>
+#include <SPL/Runtime/Common/Metric.h> 
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+class MY_OPERATOR : public MY_BASE_OPERATOR ,public xms::MessageListener {
+	
+public:
+
+	// Constructor
+	MY_OPERATOR();
+
+	// Destructor
+	virtual ~MY_OPERATOR(){
+	finalizeOperator();
+	}
+
+	// Processing for source and threaded operators 
+	void process(uint32_t idx);
+	
+	// Notify port readiness
+	void allPortsReady(); 
+
+
+	void initialize();
+
+	std::string xms2std(const xms::String & pString); 
+
+
+/*
+ * Message listener implementation 
+ */
+	virtual xmsVOID onMessage(xms::Message * pMsg);
+	
+	// Performance Metrics
+	SPL::int64 nMessagesRead;
+	Metric & nMessagesReadPC;
+	SPL::int64 nMessagesDropped;
+	Metric & nMessagesDroppedPC;
+	SPL::int64 nConnectionAttempts;
+	Metric & nConnectionAttemptsPC;
+
+	
+private:
+ /*
+ * Private member variables
+ */
+	#include "XMSCommon.h"
+	
+	//For setting the period value
+	double periodVal;
+
+	boolean isErrorPortSpecified;
+	boolean isInitialConnectionFailure;
+	
+	
+	//To send the output to the error port if one is specified
+	void sendOutputErrorMsg(ostringstream& ErrMsg);
+
+	//update the perfomance counters
+	void updatePerformanceCounters();
+ 	
+};
+<%SPL::CodeGen::headerEpilogue($model);%>

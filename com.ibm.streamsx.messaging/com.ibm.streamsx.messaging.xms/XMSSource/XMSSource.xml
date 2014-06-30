@@ -1,0 +1,174 @@
+<?xml version="1.0" ?>
+<!--  
+Copyright (C)2014, International Business Machines Corporation and  
+others. All Rights Reserved. 
+-->
+<operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <cppOperatorModel>
+    <context>
+      <description>The XMSSource operator subscribes to data from WebSphere MQ Queue or Topic.</description>
+	<iconUri size="16">XMSSource_16.gif</iconUri>
+      <iconUri size="32">XMSSource_32.gif</iconUri>
+      <metrics>
+        <metric>
+          <name>nMessagesRead</name>
+          <description>The number of messages read successfully.</description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>nMessagesDropped</name>
+          <description>The number of messages dropped.</description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>nConnectionAttempts</name>
+          <description>The number of connection attempts made before a successful connection.</description>
+          <kind>Counter</kind>
+        </metric>
+      </metrics> 
+      <customLiterals>
+	 <enumeration>
+          <name>ReconnectionPolicy</name>
+          <value>InfiniteRetry</value>
+          <value>NoRetry</value>
+          <value>BoundedRetry</value>
+        </enumeration>
+      </customLiterals>
+      <libraryDependencies>
+        <library>
+          <cmn:description> IBM Message Service Client for C/C++ (XMS) libraries</cmn:description>
+          <cmn:managedLibrary>
+            <cmn:lib>gxi01l</cmn:lib>
+            <cmn:lib>gxi</cmn:lib>
+            <cmn:libPath>@XMS_HOME@/lib64</cmn:libPath>
+            <cmn:includePath>@XMS_HOME@/tools/cpp/include</cmn:includePath>
+            <cmn:includePath>@XMS_HOME@/tools/c/include</cmn:includePath>
+            <cmn:command></cmn:command>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description>WebSphere MQ Client libraries</cmn:description>
+          <cmn:managedLibrary>
+            <cmn:libPath>@MQ_HOME@/lib64</cmn:libPath>
+            <cmn:includePath>@MQ_HOME@/lib64</cmn:includePath>
+            <cmn:command></cmn:command>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description>Code that is common to both XMSSource and XMSSink is located in a directory ../Common relative to both of these operators.</cmn:description>
+          <cmn:managedLibrary>
+            <cmn:libPath>../Common</cmn:libPath>
+            <cmn:includePath>../Common</cmn:includePath>
+            <cmn:command></cmn:command>
+          </cmn:managedLibrary>
+        </library>
+      </libraryDependencies>
+      <providesSingleThreadedContext>Always</providesSingleThreadedContext>
+      <incrementalCompilationStrategy>ResultDependent</incrementalCompilationStrategy>
+      <allowCustomLogic>true</allowCustomLogic>
+      <codeTemplates>
+        <codeTemplate name="XMSSource">
+          <description>Basic XMSSource template</description>
+          <template>stream&lt;${streamType}&gt; ${streamName} = XMSSource()   {
+	      param
+            	connection : &quot;${ConnectionSpecificationName}&quot;;
+                access : &quot;${AccessSpecificationName}&quot;;
+          }</template>
+        </codeTemplate>
+      </codeTemplates>
+    </context>
+    <parameters>
+      <allowAny>false</allowAny>
+      <parameter>
+        <name>reconnectionPolicy</name>
+        <description>Specifies the reconnection policy.The valid values are: NoRetry, InfiniteRetry and BoundedRetry.</description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>CustomLiteral</expressionMode>
+        <type>ReconnectionPolicy</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>reconnectionBound</name>
+        <description>Specifies the number of successive connections that will be attempted for this operator.</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>uint32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>period</name>
+        <description> The time period in seconds which the operator will wait before trying to reconnect</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>initDelay</name>
+        <description>Number of seconds to delay before starting to produce tuples</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>connection</name>
+        <description>Specifies name of the connection specification containing an XMS element.</description>
+        <optional>false</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>access</name>
+        <description>Specifies access specification name.</description>
+        <optional>false</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>connectionDocument</name>
+        <description>Specifies the pathname of a file containing the connection and access specifications identified by the connection and access parameters. If the parameter is absent, the operator will use the default location filepath ./etc/connections.xml.</description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+    </parameters>
+    <inputPorts/>
+    <outputPorts>
+      <outputPortSet>
+        <description>The output port that submits a tuple for each message read successfully from MQ.</description>
+        <expressionMode>Expression</expressionMode>
+        <autoAssignment>false</autoAssignment>
+        <completeAssignment>false</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>-1</windowPunctuationInputPort>
+        <tupleMutationAllowed>true</tupleMutationAllowed>
+	 <cardinality>1</cardinality>
+        <optional>false</optional>
+      </outputPortSet>
+      <outputPortSet>
+        <description>An optional output port which will submit a tuple when an error occurs</description>
+        <expressionMode>Constant</expressionMode>
+        <autoAssignment>false</autoAssignment>
+        <completeAssignment>false</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>-1</windowPunctuationInputPort>
+        <tupleMutationAllowed>true</tupleMutationAllowed>
+        <cardinality>1</cardinality>
+        <optional>true</optional>
+      </outputPortSet>
+    </outputPorts>
+  </cppOperatorModel>
+</operatorModel>

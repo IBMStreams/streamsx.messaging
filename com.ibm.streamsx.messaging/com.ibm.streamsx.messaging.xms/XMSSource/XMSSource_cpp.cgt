@@ -1,0 +1,999 @@
+<%
+#######################################################################
+# Copyright (C)2014, International Business Machines Corporation and  
+# others. All Rights Reserved.                                    
+#######################################################################    
+
+### BEGIN OPERATOR SPECIFIC ###
+my $connTag = 'XMS';  
+my $accessTag = 'destination';
+### END OPERATOR SPECIFIC ###
+
+
+# Set up commonly variables from the context and operator objects.
+my $operator = $model->getContext();
+my $operClass = $operator->getClass();
+
+#For ERROR PORT OUTPUT
+my $operatorErrorPort = undef;
+
+# Add the directory where the common edge adapters modules reside (the grandparent of the operator's code
+# generator template's directory) to the INC search path
+use File::Basename;
+use Cwd 'realpath';
+
+my $modelroot = $model->getContext()->getOperatorDirectory();
+unshift @INC, dirname($modelroot) . "/Common";	
+require Connection;
+require Access;
+require Edge;
+
+
+# Set up the objects that interface with this operator's connection specification and access specification.
+my ($conn, $access) = Edge::connectionSetup($model, $connTag, $accessTag);
+
+# Edge::resolveParms needs to know what parameters are checked by the restriction model (restriction.xml)
+my @checkedParmNames=('connection','access','connectionDocument','reconnectionPolicy','reconnectionBound','period','initDelay');
+
+my $accessParms = Edge::resolveParms($model, $access, \@checkedParmNames);
+
+my $outStream;
+my $initDelayParmValue;
+my $outAttrsFromNativeSchema;
+
+
+
+
+$outStream = $model->getOutputPortAt(0);
+$outAttrsFromNativeSchema =
+		Edge::restrictSourceSchemaAttributes($access, $outStream, $operClass);
+# Note: if the initDelay parameter is specified, the restriction model guarantees that it has
+# a single value.
+
+my $initDelay = $model->getParameterByName('initDelay');
+if (defined $initDelay) {
+	$initDelayParmValue = $initDelay->getValueAt(0)->getCppExpression();
+}
+else {
+	$initDelayParmValue = 0;
+}
+
+
+# Error ports are optional so even if one is allowed it may not be used.
+if ($model->getNumberOfOutputPorts() == 2) {
+	$operatorErrorPort = $model->getOutputPortAt(1);
+}
+use XMSSourceCommon;
+XMSSourceCommon::verify($model);
+
+#Need to know about the reconnection policy
+
+#An optional parameter reconnectionPolicy specifies the reconnection policy that would be applicable during initial/intermittent connection failures.
+#The valid values for this parameter are NoRetry, BoundedRetry and InfiniteRetry.
+#If not specified, it is set toBoundedRetry with a reconnectionBound of 5 and a period of 60 seconds. 
+my $reconnectionPolicy = $model->getParameterByName("reconnectionPolicy");
+
+#reconnectionBound specifies the number of successive connections that will be attempted for this operator. 
+#It is an optional parameter of type uint32. 
+#It can appear only when the reconnectionPolicy parameter is set to BoundedRetry and cannot appear otherwise.If not present the default value is taken to be 5.
+my $reconnectionBound = $model->getParameterByName("reconnectionBound");
+
+#The period parameter specifies the time period in seconds which the operator will wait before trying to reconnect.  
+#It is an optional parameter of type float64. 
+#If not specified, the default value is 60.0. It must appear only when the reconnectionPolicy parameter is specified 
+my $period = $model->getParameterByName("period");
+my $periodVal=0.0; 
+
+
+#Need a period value if not present then replace it with default value 60 secs
+$periodVal = $period ? $period->getValueAt(0)->getCppExpression(): 60.0;
+
+
+#Need a reconnectionBound value if not present then replace it with default value of 5
+if (defined $reconnectionBound) {
+	$reconnectionBound = $model->getParameterByName("reconnectionBound")->getValueAt(0)->getSPLExpression();
+}
+else{
+	if (!defined $reconnectionPolicy){
+		$reconnectionBound =5;
+	}
+	else {
+		if ( $reconnectionPolicy->getValueAt(0)->getSPLExpression()  eq "NoRetry" ){
+#reconnectionPolicy is NoRetry, reconnectionBound is 0
+			$reconnectionBound=0;
+		}
+		else {
+			if ( $reconnectionPolicy->getValueAt(0)->getSPLExpression()  eq "BoundedRetry" ){
+#reconnectionPolicy is BoundedRetry and reconnectionBound is absent, default value 5 is used
+				$reconnectionBound=5;
+			}
+			else { 
+#reconnectionPolicy is infiniteRetry
+				$reconnectionBound=-1;
+			}
+		}
+	}
+}
+
+
+# Set the reconnectionPolicy value, 1=Bounded retry, 2= NoRetry, 3= InfiniteRetry
+if (defined $reconnectionPolicy) {
+	if( $reconnectionPolicy->getValueAt(0)->getSPLExpression()  eq "BoundedRetry" ){
+		$reconnectionPolicy=1;
+	}
+	else{
+		if ( $reconnectionPolicy->getValueAt(0)->getSPLExpression()  eq "NoRetry" ){
+			$reconnectionPolicy=2;
+		}
+		else {
+			$reconnectionPolicy=3;
+		}
+	}
+}
+else {
+	$reconnectionPolicy=1;
+}
+%>
+
+#include <SPL/Runtime/Common/RuntimeException.h>
+#include "xms.hpp"
+#include "MessagingResource.h"  
+
+using namespace std;
+
+
+
+<%SPL::CodeGen::implementationPrologue($model);%>
+
+
+// Constructor
+MY_OPERATOR::MY_OPERATOR(): nMessagesReadPC( getContext().getMetrics().getCustomMetricByName("nMessagesRead")),nMessagesDroppedPC( getContext().getMetrics().getCustomMetricByName("nMessagesDropped")),nConnectionAttemptsPC( getContext().getMetrics().getCustomMetricByName("nConnectionAttempts"))
+{
+
+	SPLAPPTRC(L_DEBUG, "Entry: Constructor", "XMSSource");
+
+	periodVal=0.0;
+
+	//Check if error port is specified and likewise set the isErrorPortSpecified variable
+	<%if ($model->getNumberOfOutputPorts() == 2) { %>
+	isErrorPortSpecified=true;
+	<% }
+	else{%>
+	isErrorPortSpecified=false;
+	<%}%>
+
+
+
+
+	/*
+	 *  Initialize member variables using values from the Connection document
+	 */
+	<%
+# InitialContext and ConnectionFactory are guaranteed to be there by the XML Schema
+	my $ic =$conn->getAttributeByName('initial_context');
+
+# Append .bindings to the URL, if it is a file based one that refers to a directory. The XMS client requires this
+
+	if ((substr($ic,0,8) eq 'file:///') &&  	# If it starts with file:///
+	(substr($ic,-1)  eq '/'))			# and it ends with a /
+	{
+		$ic .= '.bindings';                      # append .bindings
+	}
+
+	%>
+	pInitialContext = new xms::String("<%=$ic %>");
+	pConnectionFactory = new xms::String("<%=$conn->getAttributeByName('connection_factory'); %>");
+	<%
+
+# UserId and Password can be omitted
+
+	if ($conn->hasAttributeName('user')) { %>
+	pUserID = new xms::String("<%=$conn->getAttributeByName('user'); %>");  <% } else { %>
+	pUserID = NULL;   <% }
+
+	if ($conn->hasAttributeName('password')) { %>
+	pPassword = new xms::String("<%=$conn->getAttributeByName('password'); %>"); <% } else { %>
+	pPassword = NULL;  <% }
+
+# message_class tells us what type of XMS message is to be output
+	my $msgType = $access->getAttributeByName('message_class');
+
+	my $nparm = $access->getNumberOfNativeSchemaAttributes();
+
+	my $parmlist = [];
+
+
+	my $parm = $access->getNumberOfNativeSchemaAttributes();
+
+
+
+# We now build a list (parmlist) that controls how each incoming message is going to be processed. We start by going through
+# the native schema, adding an entry for each attribute that appears in that schema. There may be attributes in the native
+# schema that we aren't interested in, since they don't appear in the output stream. However we still add them to the list since 
+# when we are processing some messages types (e.g. stream and bytes messages) we need so skip over these attributes. We indicate 
+# such attributes by recording them in the list with blank attribute names.
+
+# We need to raise an error if there's a mismatch between the type in the output stream and the type in the native schema
+
+
+# We also keep a track of the native schema attributes that appear in the output stream in the schemaAttrs list
+	my %schemaAttrs = {};
+
+	for ( my $i=0; $i < $nparm; $i++ )
+	{
+		my $parm = {};
+		$$parm{_name} = $access->getNativeSchemaAttributeNameAt($i);
+		$$parm{_type} = $access->getNativeSchemaAttributeTypeAt($i);
+		$$parm{_length} = $access->getNativeSchemaAttributeLengthAt($i);
+
+
+
+# The last attribute in the schema needs some special handling in the case of BytesMessages
+		if (($msgType eq 'bytes') && ($i eq $nparm-1))
+		{
+# A length value of -1 indicates that no length was specified in the schema. This is normally not allowed
+# for Strings or Bytes in a Bytes Message (and will be checked for later). However we do want to allow it
+# in the special case where it is the last attribute in the schema. So we check for that case here and replace
+# the -1 with a special value (-9999)
+
+
+			if ((($$parm{_type} eq "String") || ($$parm{_type} eq "Bytes")) && ($$parm{_length} eq -1 ))
+			{
+				$$parm{_length} = -9999;
+			}
+		}
+
+
+
+# If the schema attribute exists in the output stream we need to check that the schema type matches the output type
+		if ( defined $outStream->getAttributeByName ( $$parm{_name} ) )
+		{
+
+# We are interested in this schema attribute, so add it to our list
+			$schemaAttrs { $$parm{_name} } = $$parm{_type};
+
+		}
+
+
+
+# We aren't interested in this attribute, but we still need to add it to the list. We do so giving it a blank name
+		else
+		{
+			$$parm{_name} = '';
+		}
+
+# add the attribute to the list
+		push @$parmlist, $parm;
+	}
+# We now go through the output stream attributes. We allow output stream attributes that don't exist in the native schema - but only
+# if they have been assigned explicit values. We need to raise an error if there's an unassigned attribute in the output stream that
+# doesn't appear in the native schema or if there's a mismatch between the type in the output stream and the type in the native schema
+
+	for (my $i = 0; $i < $outStream->getNumberOfAttributes(); $i++)
+	{
+		my $outputAttr = $outStream->getAttributeAt($i);
+
+# If an output attribute has been assigned a constant value and it wasn't in the native schema, then we need to add it to the list
+		if ($outputAttr->hasAssignment())
+		{
+			if ( !defined $schemaAttrs {$outputAttr->getName()} )
+			{
+				my $parm = {};
+				$$parm{_name} = $outputAttr->getName();
+				$$parm{_type} = "CONSTANT";
+				push @$parmlist, $parm;
+			}
+		}
+
+	}
+	%>
+
+	/*
+	* Initialize variables that are to do with the access spec
+	*/
+ 
+	pDestination = new xms::String("<%=$access->getAttributeByName('identifier'); %>");
+	pQueueURI = NULL;
+	pTopicURI = NULL;
+	pDest = NULL;
+
+	iDeliveryMode = XMSC_DELIVERY_NOT_PERSISTENT;
+	
+	fatalError = false;
+	connected = false;
+
+	periodVal = <%=$periodVal%>;
+	//Now attempt to create the XMS objects
+	if (createAdminObjects() != XMS_OK)
+		fatalError = true;
+	else if (createXMS(CONSUMER,<%=$reconnectionPolicy%>,<%=$reconnectionBound%>,(xmsFLOAT)periodVal) == XMS_OK)
+	{
+		connected = true;
+		//In case of initial connection failure, we need to set a flag to avoid reconnection when the MQ is down from the beginning, to distinguish the case for transient conection failure
+		isInitialConnectionFailure=false;
+
+	}
+	else
+	{
+		isInitialConnectionFailure=true;
+	}
+	SPLAPPTRC(L_DEBUG, "Exit: Constructor", "XMSSource");
+
+}
+
+
+//send the output to the error port if error port is specified and tuple information is present
+void MY_OPERATOR::sendOutputErrorMsg(ostringstream& ErrMsg){
+
+	//Append the initialization error message 
+	ostringstream PrintMessage;
+	PrintMessage<<InitializationErrMsg.str();
+	PrintMessage<<ErrMsg.str();
+
+	<%
+	if (defined $operatorErrorPort) {
+		print" OPort1Type otupleError((rstring)PrintMessage.str());\n";
+		print" submit(otupleError, 1); \n";
+	}
+	%>
+}
+
+
+
+// Notify port readiness
+void MY_OPERATOR::allPortsReady() 
+{
+	// Notifies that all ports are ready. No tuples should be submitted before
+	// this. Source operators can use this method to spawn threads.
+
+
+	createThreads(1); // Create source thread
+
+}
+
+
+
+void MY_OPERATOR::initialize()
+{
+	SPL::rstring logmsg = INIT_WAIT(<%=$initDelayParmValue%>);
+	SPLAPPLOG(L_INFO, logmsg, "XMSSource");
+	getPE().blockUntilShutdownRequest(<%=$initDelayParmValue%>);
+
+}
+
+// Processing for source and threaded operators   
+void MY_OPERATOR::process(uint32_t idx)
+{
+	SPL::rstring logmsg;
+	ostringstream ErrMsg;
+	initialize();
+	SPLAPPTRC(L_TRACE, "Entry: process()", "XMSSource");
+	
+	if (fatalError == true){
+		
+		SPLAPPLOG(L_ERROR, PREVIOUS_ERROR, "XMSSource");
+		<% if (defined $operatorErrorPort ) { %>
+				ErrMsg<<PREVIOUS_ERROR;
+		    	sendOutputErrorMsg(ErrMsg);
+		<% }%>
+	}
+
+	else{
+		try
+		{
+			consumer.setMessageListener(this);
+			conn.start();
+			SPLAPPTRC(L_TRACE, "Message Listener attached", "XMSSource");
+			getPE().blockUntilShutdownRequest();
+		}
+		catch (xms::Exception & ex) {
+			logmsg = MESSAGE_LISTENER_ERROR(ex.getErrorString().c_str());
+			SPLAPPLOG(L_ERROR, logmsg, "XMSSource");
+			ErrMsg<<"Unable to start the message listener WITH ID, exception = "<<ex.getErrorString();
+			<%	if (defined $operatorErrorPort ) { %>
+				sendOutputErrorMsg(ErrMsg);
+			<% }%>
+			processException(ex);
+		}
+		SPLAPPTRC(L_TRACE, "Exit: process()", "XMSSource");
+	}	
+}
+
+
+
+
+/*
+ * SYNOPSIS:   Utility method to convert an xms::String object into a std:string
+               Placing this in a separate method avoids issues with the xms::String being deleted
+               before the std::string is initialised
+ * PARAMETERS: pString - pointer to the XMS string
+ * RETURNS:    std::string
+ */
+
+inline std::string MY_OPERATOR::xms2std(const xms::String & pString)
+{
+	return std::string(pString.c_str());
+}
+
+/*
+ * SYNOPSIS:   Overloaded virtual method for the message listener. This
+ *             method will be called when a message is received.
+ *             It is our responsibiity to release the supplied
+ *             xms::Message object using the C++ 'delete' operator.
+ * PARAMETERS: pMsg - pointer to the received message object
+ * RETURNS:    xmsVOID
+ */
+
+
+xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg) 
+
+{
+	SPL::rstring logmsg;
+	SPLAPPTRC(L_TRACE, "Entry: MsgListener onMessage", "XMSSource");
+	ostringstream ErrMsg;
+	
+	try
+	{
+		SPLAPPTRC(L_TRACE, "Received Message " << pMsg->getJMSMessageID(), "XMSSource");
+
+		// Create the output tuple.
+		OPort0Type tuple;
+
+		/*
+		 * Get the message type
+		 */
+
+		xmsMESSAGE_TYPE type = pMsg->getTypeId();
+
+		/*
+		 * The way that the message is processed depends on its type, and the message_class attribute from
+		 * the Access specification
+		 */
+		// this is the type of the message we have actually received
+		switch(type)
+		{
+		case XMS_MESSAGE_TYPE_BYTES:
+		{
+
+			<% if ($msgType ne 'bytes')
+# $msgType is the type we expected to receive
+			{   %>
+				logmsg=DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","bytes");
+				SPLAPPLOG(L_WARN, logmsg, "XMSSource");
+				ErrMsg<<logmsg;
+				<%	if (defined $operatorErrorPort ) { %>
+					sendOutputErrorMsg(ErrMsg);
+				<% }%>
+
+			<%
+			}
+			else
+			{ %>
+			xms::BytesMessage *pBytes = reinterpret_cast<xms::BytesMessage *>(pMsg);
+
+			<%
+# Iterate through the attributes listed either in the native schema or the output stream
+
+			for ( my $i=0; $i < @$parmlist; $i++ )
+			{
+				my $parm = @$parmlist[$i];
+				my $type = $$parm{_type};
+				my $dpsName = $$parm{_name};
+				my $length = $$parm{_length};
+				%>
+				<%
+				# Check the attribute length.  This is required if the attribute is listed in the native schema
+				# and if it has a String or Bytes data type. A value of -1 indicates that it hasn't been set.
+
+				if ($type ne '')
+				{
+					# A length is required for String and Bytes attributes. Set up the C++ length variable
+					if (($type eq 'String') || ($type eq 'Bytes'))
+					{
+						# Use an explicit length if there is one
+						if ($length >= 0 )
+						{
+							print "{\n"; %>
+							xmsINT length = <%=$length%>;
+						<%}
+
+						# If there's a length of -2, this indicates that the attribute is preceded by a 2 byte length count
+						elsif ($length == -2)
+						{
+							print "{\n";%>
+							xmsINT length = pBytes->readShort();
+						<%}
+
+						# If there's a length of -4, this indicates that the attribute is preceded by a 4 byte length count
+						elsif ($length == -4)
+						{
+							print "{\n";%>
+							xmsINT length = pBytes->readInt();
+						<%}
+						# If there's a length of -8, this indicates that the attribute is preceded by an 8 byte length count
+						elsif ($length == -8)
+						{
+							print "{\n";%>
+							xmsLONG llength = pBytes->readLong();
+							if ((llength < 0L) || (llength > 2147483647L))
+							{
+								logmsg = DISCARD_MSG_INVALID_LENGTH(llength);
+								SPLAPPLOG(L_WARN, logmsg, "XMSSource");
+								<%	if (defined $operatorErrorPort ) { %>
+									ErrMsg<<logmsg;
+									sendOutputErrorMsg(ErrMsg);
+								<% }%>
+								break;
+							}
+							xmsINT length = (xmsINT)llength; 
+						<%}
+						# If the length is -9999, that's the special case of the last attribute in the schema
+						elsif ($length == -9999)
+						{
+							print "{\n";%>
+							int length = pBytes->readBytes(NULL, XMSC_QUERY_SIZE, NULL);
+							
+						<%}
+						
+					}
+				}
+
+				#if we aren't interested in this one, simply read and discard from the message
+				if ( $dpsName eq '')
+				{
+					if (($type eq 'String') || ($type eq 'Bytes'))
+					{%>
+						//Skip the specified number of bytes
+						SPLAPPTRC(L_TRACE, "Skipping over" << length << " bytes", "XMSSource");
+						xmsINT len = pBytes->readBytes(NULL, length, NULL);
+						if (len < length) 
+						{
+							
+							SPLAPPLOG(L_WARN, DISCARD_MSG_TOO_SHORT , "XMSSource");
+							<%	if (defined $operatorErrorPort ) { %>
+									ErrMsg<<DISCARD_MSG_TOO_SHORT;
+									sendOutputErrorMsg(ErrMsg);
+								<% }%>
+							break;
+						}
+					<%}
+					else
+					{%>
+							pBytes->read<%=$type%>();
+					<%}
+
+
+				}
+				else
+				{
+					my $outputAttr = $outStream->getAttributeByName($dpsName);
+
+					# If the SPL programmer has assigned a value to the attribute, use that
+
+					if ($outputAttr->hasAssignment())
+					{%>
+						SPLAPPTRC(L_TRACE, "..Using assigned value instead of value read from message ", "XMSSource");
+						//read past the value from the incoming message, if there is one
+						<%
+						if ($type ne '')
+						{
+							if (($type eq 'String') || ($type eq 'Bytes'))
+							{%>
+								// Skip the specified number of bytes
+								SPLAPPTRC(L_TRACE, "Skipping over " << length << " bytes", "XMSSource");
+								xmsINT len = pBytes->readBytes(NULL, length, NULL);
+								if (len < length)
+								{
+									SPLAPPLOG(L_WARN, DISCARD_MSG_TOO_SHORT , "XMSSource");
+									<%	if (defined $operatorErrorPort ) { %>
+										ErrMsg<<DISCARD_MSG_TOO_SHORT;
+										sendOutputErrorMsg(ErrMsg);
+								<% }%>
+									break;
+								}
+							<%}
+							else
+							{%>
+								pBytes->read<%=$type%>();
+							<%}
+						}
+						print "tuple.set_$dpsName(",$outputAttr->getAssignment(),");\n";
+					}
+					# Otherwise, retrieve the attribute from the XMS message
+					else
+					{
+						if (($type eq 'String') || ($type eq 'Bytes'))
+
+						{%>
+							xmsSBYTE buffer[length];
+							xmsINT len = pBytes->readBytes(buffer, length, NULL);
+							if (len < length)
+							{
+								SPLAPPLOG(L_WARN, DISCARD_MSG_TOO_SHORT , "XMSSource");
+								
+								<% if (defined $operatorErrorPort ) { %>
+									ErrMsg<<DISCARD_MSG_TOO_SHORT;
+									sendOutputErrorMsg(ErrMsg);
+								<% }%>
+								break;
+							}
+							<%
+							if ($type eq 'String')
+							{%>
+								tuple.set_<%=$dpsName%>(std::string((char *)buffer, length));
+							<%}
+							else
+							{%>
+								//code to support blob data type in map
+								blob xmsBufferMod;
+								xmsBufferMod.setData((const unsigned char*)buffer,length);
+								tuple.set_<%=$dpsName%>(xmsBufferMod);
+							<%}
+						}
+						else
+						{%>
+							tuple.set_<%=$dpsName%>(pBytes->read<%=$type%>());
+						<%}%>
+						SPLAPPTRC(L_TRACE, "Read attribute of type $type with value " << tuple.get_<%=$dpsName%>(), "XMSSource");
+					<%}
+				}
+				# close the C++ block that was used to process the length
+				if (($type eq 'String') || ($type eq 'Bytes'))
+				{
+					print "}\n";
+				}
+
+			}%>
+			// Submit the tuple 
+			submit(tuple,0);
+			nMessagesRead++;
+			updatePerformanceCounters();
+			SPLAPPTRC(L_TRACE, "Tuple submitted by MsgListener onMessage", "XMSSource");
+			<%} %>
+			break;
+
+
+		}
+
+
+		case XMS_MESSAGE_TYPE_MAP:
+		{
+			<%if ($msgType ne 'map')
+			{%>
+				//$msgType is the type we expected to receive
+				
+				logmsg=DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","map");
+				SPLAPPLOG(L_WARN, logmsg, "XMSSource");
+				ErrMsg<<logmsg;
+				<%	if (defined $operatorErrorPort ) { %>
+					sendOutputErrorMsg(ErrMsg);
+				<% }%>
+
+			<%}
+			
+			else
+			{%>
+				xms::MapMessage *pMap = reinterpret_cast<xms::MapMessage *>(pMsg);
+
+				<%
+				# Iterate through the attributes listed either in the native schema or the output stream
+				for ( my $i=0; $i < @$parmlist; $i++ )
+				{
+					my $parm = @$parmlist[$i];
+					my $type = $$parm{_type};
+					my $dpsName = $$parm{_name};
+					my $length = $$parm{_length};
+					# Only bother with attributes that are also in the output stream
+					if ( $dpsName ne '')
+					{
+						my $outputAttr = $outStream->getAttributeByName($dpsName);
+						# If the SPL programmer has assigned a value to the attribute, use that
+						if ($outputAttr->hasAssignment())
+						{%>
+							SPLAPPTRC(L_TRACE, "..Using assigned value instead of value read from message ", "XMSSource");
+							tuple.set_<%=$dpsName%>(<%=$outputAttr%>->getAssignment());
+						<%}
+						# Otherwise, retrieve the attribute from the XMS message
+						elsif ($type eq 'String')
+						{%>
+							tuple.set_<%=$dpsName%>(xms2std(pMap->getString("<%=$dpsName%>")));
+						<%}
+						elsif ($type eq 'Bytes')
+						{
+							my $length = $$parm{_length};
+							# Query the length of the data to be retrieved
+							print "{\n";%>
+							//int length = pMap->getBytes(",'"',$dpsName,'"',",NULL, XMSC_QUERY_SIZE, NULL);
+							int length = pMap->getBytes("<%=$dpsName%>",NULL, XMSC_QUERY_SIZE, NULL);
+							//Read all the data into a local buffer
+							//code to support blob data type in map
+							char xmsBuffer[length+1];
+							pMap->getBytes("<%=$dpsName%>",(xmsSBYTE*)xmsBuffer, length, NULL);
+							int lengthP;
+							lengthP=length;
+							//if the native schema contained a length, then we need to make sure we don't copy more bytes over
+							<%if ($length > 0)
+							{%>
+								length = (length > <%=$length%>) ? <%=$length%> : length;							
+							<%}%>
+							blob xmsBufferMod;
+							int i=0;
+							xmsBufferMod.setData((const unsigned char*)xmsBuffer,length);
+							if (length>lengthP)
+							{
+								uint8 topad=32; 
+								for(i=length;i<lengthP;i++)
+									xmsBufferMod+=topad;
+							}	
+							tuple.set_<%=$dpsName%>(xmsBufferMod);
+							<% print "}\n";
+						}
+						else
+						{%>
+							tuple.set_<%=$dpsName%>(pMap->get<%=$type%>("<%=$dpsName%>"));
+						<%}
+					}
+				}%>
+				// Submit the tuple 
+				submit(tuple,0);
+				nMessagesRead++;
+				updatePerformanceCounters();
+				SPLAPPTRC(L_TRACE, "Tuple submitted by MsgListener onMessage", "XMSSource");
+		<%	} %>
+			break;
+		}
+		case XMS_MESSAGE_TYPE_STREAM:
+		{
+			<%if ($msgType ne 'stream')
+			# $msgType is the type we expected to receive
+			{%>
+				logmsg=DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","stream");
+				SPLAPPLOG(L_WARN, logmsg, "XMSSource");
+				ErrMsg<<logmsg;
+				<%	if (defined $operatorErrorPort ) { %>
+					sendOutputErrorMsg(ErrMsg);
+				<% }%>
+
+			<%}
+			else
+			{%>
+				xms::StreamMessage *pStream = reinterpret_cast<xms::StreamMessage *>(pMsg);
+
+				<%
+				# Iterate through the attributes listed either in the native schema or the output stream
+				for ( my $i=0; $i < @$parmlist; $i++ )
+				{
+					my $parm = @$parmlist[$i];
+					my $type = $$parm{_type};
+					my $dpsName = $$parm{_name};
+					my $length = $$parm{_length};
+					my $outputAttr = $outStream->getAttributeByName($dpsName);
+					
+					# Byte arrays (ByteLists) need special treatment
+					if ($type eq 'Bytes')
+					{
+						# Query the length of the data to be retrieved
+						print "{\n";
+						%>
+						int length;
+						pStream->readObject(NULL, XMSC_QUERY_SIZE, &length);
+						//Read all the data into a local buffer - XMS seems to require the buffer to be one byte bigger
+						SPLAPPTRC(L_TRACE, "Attempting to read byte array of size " <<length, "XMSSource");
+
+						//Code to support blob on Stream message type
+						char xmsBuffer[length+1];
+						pStream->readBytes((xmsSBYTE*)xmsBuffer, length+1, NULL);
+
+						//Now check to see if this is actually one we are interested in. If it isn't, there is nothing more for us to do
+						<%
+						if ( $dpsName eq '')
+						{%>
+							SPLAPPTRC(L_TRACE, "..Skipping over attribute from stream message ", "XMSSource");
+						<%}
+						else
+						{
+							# If the output stream has a value assigned, then use that instead of the value we just read
+							if ($outputAttr->hasAssignment())
+							{%>
+								SPLAPPTRC(L_TRACE, "..Using assigned value instead of value read from message ", "XMSSource");
+								tuple.set_<%=$dpsName%>((<%=$outputAttr%>)->getAssignment());
+							<%}
+							else
+							{%>
+								//Code to support blob on Stream message type
+								int lengthP;
+								lengthP=length;
+								//if the native schema contained a length, then we need to make sure we don't copy more bytes over
+								<%
+								if ($length > 0)
+								{
+									print " length = (length > $length) ? $length : length;\n";
+								}%>
+								blob xmsBufferMod;
+								int i=0;
+								xmsBufferMod.setData((const unsigned char*)xmsBuffer,length); 
+	
+								if (length>lengthP)
+								{
+									uint8 topad=32;
+									for(i=length;i<lengthP;i++)
+									{
+											xmsBufferMod+=topad; 
+									}
+								}
+								tuple.set_<%=$dpsName%>(xmsBufferMod);
+	
+							<%}
+						}
+						print "}\n";
+					}
+					# All the other types can be handled by the same code
+
+
+					#if we aren't interested in this attribute, simply read and discard from the stream message
+					elsif ( $dpsName eq '')
+					{%>
+						SPLAPPTRC(L_TRACE, "..Skipping over attribute from stream message ", "XMSSource");
+						pStream->read<%=$type%>();
+					<%}
+					else
+					{
+						# If the SPL programmer has assigned a value to the attribute, use that instead
+						if ($outputAttr->hasAssignment())
+						{
+							if ($type ne '')
+							{
+								print "pStream->read$type();";
+							}
+							%>
+							tuple.set_<%=$dpsName%>(<%=$outputAttr%>->getAssignment());
+							SPLAPPTRC(L_TRACE, "..Using assigned value instead of value read from message ", "XMSSource");
+						<%}
+
+						# Otherwise, retrieve the attribute from the XMS message
+						elsif ($type eq 'String')
+						{%>
+							tuple.set_<%=$dpsName%>(xms2std(pStream->readString()));
+						<%}
+						else
+						{%>
+							tuple.set_<%=$dpsName%>(pStream->read<%=$type%>());
+						<%}
+					}
+				}%>	
+				// Submit the tuple
+				submit(tuple,0);
+				nMessagesRead++;
+				updatePerformanceCounters();
+				SPLAPPTRC(L_TRACE, "Tuple submitted by MsgListener onMessage", "XMSSource");
+			<%} %>
+			break;
+		}
+
+		case XMS_MESSAGE_TYPE_TEXT:
+			<% if ($msgType ne 'text')
+			# $msgType is the type we expected to receive
+			{%>
+				logmsg=DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","text");
+				SPLAPPLOG(L_WARN, logmsg, "XMSSource");
+				ErrMsg<<logmsg;
+				<%	if (defined $operatorErrorPort ) { %>
+					sendOutputErrorMsg(ErrMsg);
+				<% }%>
+
+			<%}
+			else
+			{%>
+				logmsg = OBJ_UNSUPPORTED("<%=$access->getName()%>");
+				SPLAPPLOG(L_ERROR, logmsg, "XMSSource");
+				ErrMsg<<logmsg;
+				<%	if (defined $operatorErrorPort ) { %>
+					sendOutputErrorMsg(ErrMsg);
+				<% }%>
+
+			<%}%>
+			break;
+
+		case XMS_MESSAGE_TYPE_OBJECT:
+			<% if ($msgType ne 'object')
+			# $msgType is the type we expected to receive
+			{%>
+				logmsg=DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","object");
+				SPLAPPLOG(L_WARN, logmsg, "XMSSource");
+				ErrMsg<<logmsg;
+				<%	if (defined $operatorErrorPort ) { %>
+					sendOutputErrorMsg(ErrMsg);
+				<% }%>
+
+			<%} 
+			else
+			{%>
+				logmsg = TXT_UNSUPPORTED("<%=$access->getName()%>");
+				SPLAPPLOG(L_ERROR, logmsg, "XMSSource");
+				ErrMsg<<logmsg;
+				<%	if (defined $operatorErrorPort ) { %>
+					sendOutputErrorMsg(ErrMsg);
+				<% }%>
+
+			<%}%>
+			break;
+		case XMS_MESSAGE_TYPE_BASE:
+			<% if ($msgType ne 'none')
+			# $msgType is the type we expected to receive
+			{%>
+				logmsg = DISCARD_MSG_MISSING_BODY("<%=$msgType%>");
+				SPLAPPLOG(L_WARN, logmsg, "XMSSource");
+				<%	if (defined $operatorErrorPort ) { %>
+						ErrMsg<<logmsg;
+						sendOutputErrorMsg(ErrMsg);
+				<% }%>
+			<%}%>
+			break;
+
+		default:
+			SPLAPPLOG(L_WARN, DISCARD_MSG_UNRECOG_TYPE, "XMSSource");
+			ErrMsg<<"Discarding the message as it has an unrecognised type";
+			<%	if (defined $operatorErrorPort ) { %>
+				sendOutputErrorMsg(ErrMsg);
+			<% }%>
+
+
+		}
+	}
+	catch (xms::Exception & ex) {
+		if (ex.getErrorCode() == XMS_E_NOT_SET){
+			ErrMsg<<"Discarding the message as it has at least one missing attribute"<<ex.getErrorString();
+			<%	if (defined $operatorErrorPort ) { %>
+				sendOutputErrorMsg(ErrMsg);
+			<% }%>
+
+			SPLAPPLOG(L_WARN, DISCARD_MSG_MISSING_ATTR, "XMSSource");
+			
+
+		}
+		else
+		{
+			logmsg = UNABLE_PROCESS_MESSAGE(ex.getErrorString().c_str());
+			SPLAPPLOG(L_ERROR, logmsg, "XMSSource");
+
+			ErrMsg<<"Unable to process the incoming message, exception = "<<ex.getErrorString().c_str();
+			<%	if (defined $operatorErrorPort ) { %>
+			sendOutputErrorMsg(ErrMsg);
+			<% }%>
+
+			processException(ex);
+		}
+	}
+	catch (SPLRuntimeException& ex) {
+		// Streams runtime exception
+		logmsg = STREAMS_EXCEPTION(ex.what(),ex.getExplanation().c_str());
+		SPLAPPLOG(L_ERROR, logmsg, "XMSSource");
+
+		ErrMsg<<logmsg;
+		<%	if (defined $operatorErrorPort ) { %>
+			sendOutputErrorMsg(ErrMsg);
+		<% }%>
+	}
+
+	/*
+	 * Clean up and release the supplied xms::Message object.
+	 */
+
+	delete pMsg;
+	SPLAPPTRC(L_TRACE, "Exit: MsgListener onMessage", "XMSSource");
+}
+
+
+/*******************************************************************
+ * Function used to update performance counters.                   *
+ ******************************************************************/
+void MY_OPERATOR::updatePerformanceCounters() {
+	SPLAPPTRC(L_TRACE, "...Entry: updatePerformanceCounters", SPL_OPER_DBG);
+	nMessagesReadPC.setValue(nMessagesRead);
+	nMessagesDroppedPC.setValue(nMessagesDropped);
+	nConnectionAttemptsPC.setValue(nConnectionAttempts);
+	SPLAPPTRC(L_TRACE, "...Exit: updatePerformanceCounters", SPL_OPER_DBG);
+}
+
+
+<%SPL::CodeGen::implementationEpilogue($model);%>
