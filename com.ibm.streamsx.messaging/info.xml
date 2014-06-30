@@ -10,4 +10,9 @@
    <info:requiredProductVersion>3.2.0</info:requiredProductVersion>
  </info:identity>
  <info:dependencies/>
+ <info:resources>
+    <info:messageSet name="MessagingResource">
+    <info:lang default ="true">en_US/MessagingResource.xlf</info:lang> 
+    </info:messageSet>
+  </info:resources>
 </info:toolkitInfoModel>
