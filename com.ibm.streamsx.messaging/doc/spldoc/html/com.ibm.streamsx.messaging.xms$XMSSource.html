@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="com.ibm.streamsx.messaging.xms::XMSSource"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource"/>
+<link rel="stylesheet" type="text/css" href="../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../html/spldoc.css"/>
+<title>com.ibm.streamsx.messaging.xms::XMSSource</title>
+</head>
+<body id="spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource">
+
+
+<h1 class="title topictitle1">com.ibm.streamsx.messaging.xms::XMSSource</h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="toolkit.html" title="com.ibm.streamsx.messaging">
+com.ibm.streamsx.messaging
+</a>
+-&gt; <a class="xref" href="com.ibm.streamsx.messaging.xms$.html">com.ibm.streamsx.messaging.xms</a>-&gt; XMSSource</p>
+
+</div>
+
+<div class="section">
+
+<p class="p">The XMSSource operator subscribes to data from WebSphere MQ Queue or Topic.
+</p>
+
+</div>
+
+<div class="section splprimop">
+<object type="image/svg+xml" data="../image/com.ibm.streamsx.messaging.xms$XMSSource.svg" width="672" height="112">
+<span>Primitive operator image not displayed. Problem loading file: ../image/com.ibm.streamsx.messaging.xms$XMSSource.svg
+</span>
+</object>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
+
+<dl class="dl" compact="compact">
+ 
+  <dt class="dt dlterm">Ports</dt>
+
+  <dd class="dd">This operator has 0 input ports and 2 output ports.</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Windowing</dt>
+
+  <dd class="dd">This operator does not accept any windowing configurations.</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Parameters</dt>
+
+  <dd class="dd">This operator supports 7 parameters.
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource__parameter__connection">connection</a>, <a class="xref" href="#spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource__parameter__access">access</a>
+
+</p>
+
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource__parameter__reconnectionPolicy">reconnectionPolicy</a>, <a class="xref" href="#spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource__parameter__reconnectionBound">reconnectionBound</a>, <a class="xref" href="#spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource__parameter__period">period</a>, <a class="xref" href="#spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource__parameter__connectionDocument">connectionDocument</a>
+
+</p>
+</dd>
+
+ 
+ 
+  <dt class="dt dlterm">Metrics</dt>
+
+  <dd class="dd">This operator reports  3 metrics.</dd>
+
+ 
+</dl>
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Properties</h2>
+
+<dl class="dl" compact="compact">
+ 
+  <dt class="dt dlterm">Implementation</dt>
+
+  <dd class="dd">C++</dd>
+
+ 
+ 
+  <dt class="dt dlterm"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__providessinglethreadedexecutioncontext">Threading</a></dt>
+
+  <dd class="dd"><tt class="ph tt">Always</tt> - Operator always provides a single threaded execution context.</dd>
+
+ 
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__output_port_set">Output Ports</a></strong></p>
+ <dl class="dl">
+  
+   <dt class="dt dlterm">Ports (0)</dt>
+
+   <dd class="dd">
+
+<p class="p">The output port that submits a tuple for each message read successfully from MQ.
+</p>
+
+    <dl class="dl">
+      
+        <dt class="dt dlterm">Assignments</dt>
+
+        <dd class="dd">This operator allows any SPL expression of the correct type to be assigned to output attributes.</dd>
+
+      
+    </dl>
+
+    <p class="p"/>
+
+    <dl class="dl">
+     
+      <dt class="dt dlterm">Properties</dt>
+
+      <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__output_port_set__optional">Optional</a>: false
+     </li>
+
+   </ul>
+
+   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__output_port_set__tuplemutationallowed">TupleMutationAllowed</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__output_port_set__windowpunctuationoutputmode">WindowPunctuationOutputMode</a>: Free
+     </li>
+
+   </ul>
+
+</dd>
+     
+    </dl>
+
+    <p class="p"/>
+
+   </dd>
+
+  
+  
+   <dt class="dt dlterm">Ports (1)</dt>
+
+   <dd class="dd">
+
+<p class="p">An optional output port which will submit a tuple when an error occurs
+</p>
+
+    <dl class="dl">
+      
+        <dt class="dt dlterm">Assignments</dt>
+
+        <dd class="dd">This port set requires that assignments made to output attributes must evaluate at compile-time to a constant.</dd>
+
+      
+    </dl>
+
+    <p class="p"/>
+
+    <dl class="dl">
+     
+      <dt class="dt dlterm">Properties</dt>
+
+      <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__output_port_set__optional">Optional</a>: true
+     </li>
+
+   </ul>
+
+   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__output_port_set__tuplemutationallowed">TupleMutationAllowed</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__output_port_set__windowpunctuationoutputmode">WindowPunctuationOutputMode</a>: Free
+     </li>
+
+   </ul>
+
+</dd>
+     
+    </dl>
+
+    <p class="p"/>
+
+   </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
+This operator supports 7 parameters.<dl class="dl">
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource__parameter__reconnectionPolicy"><!-- --></a><tt class="ph tt">reconnectionPolicy</tt></dt>
+
+     <dd class="dd">
+<p class="p">Specifies the reconnection policy.The valid values are: NoRetry, InfiniteRetry and BoundedRetry.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: ReconnectionPolicy
+ (<tt class="ph tt">InfiniteRetry, NoRetry, BoundedRetry</tt>)     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: CustomLiteral
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource__parameter__reconnectionBound"><!-- --></a><tt class="ph tt">reconnectionBound</tt></dt>
+
+     <dd class="dd">
+<p class="p">Specifies the number of successive connections that will be attempted for this operator.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: uint32
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource__parameter__period"><!-- --></a><tt class="ph tt">period</tt></dt>
+
+     <dd class="dd">
+<p class="p"> The time period in seconds which the operator will wait before trying to reconnect
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource__parameter__initDelay"><!-- --></a><tt class="ph tt">initDelay</tt></dt>
+
+     <dd class="dd">
+<p class="p">Number of seconds to delay before starting to produce tuples
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: float64
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource__parameter__connection"><!-- --></a><tt class="ph tt">connection</tt></dt>
+
+     <dd class="dd">
+<p class="p">Specifies name of the connection specification containing an XMS element.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource__parameter__access"><!-- --></a><tt class="ph tt">access</tt></dt>
+
+     <dd class="dd">
+<p class="p">Specifies access specification name.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__com.ibm.streamsx.messaging.xms__XMSSource__parameter__connectionDocument"><!-- --></a><tt class="ph tt">connectionDocument</tt></dt>
+
+     <dd class="dd">
+<p class="p">Specifies the pathname of a file containing the connection and access specifications identified by the connection and access parameters. If the parameter is absent, the operator will use the default location filepath ./etc/connections.xml.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__codetemplate">Code Templates</a></strong></p>
+  <dl class="dl">
+    
+     <dt class="dt dlterm">XMSSource</dt>
+
+     <dd class="dd">
+       <pre class="pre codeblock">
+stream&lt;${streamType}&gt; ${streamName} = XMSSource()   {
+	      param
+            	connection : "${ConnectionSpecificationName}";
+                access : "${AccessSpecificationName}";
+          }
+      </pre>
+
+     <p class="p"/>
+
+     </dd>
+
+    
+  </dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__metrics">Metrics</a></strong></p>
+<dl class="dl">
+  
+    <dt class="dt dlterm"><tt class="ph tt">nMessagesRead</tt> - <a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">The number of messages read successfully.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+  
+    <dt class="dt dlterm"><tt class="ph tt">nMessagesDropped</tt> - <a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">The number of messages dropped.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+  
+    <dt class="dt dlterm"><tt class="ph tt">nConnectionAttempts</tt> - <a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">The number of connection attempts made before a successful connection.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__dependencies">Libraries</a></strong></p>
+<dl class="dl">
+ 
+  <dt class="dt dlterm"><tt class="ph tt"> IBM Message Service Client for C/C++ (XMS) libraries</tt>  </dt>
+
+<dd class="dd"/>
+  <dd class="dd"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>: 
+  </dd>
+
+  <dd class="dd"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__lib">Library Name</a>: <tt class="ph tt">gxi01l, gxi</tt></dd>
+
+  <dd class="dd"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">@XMS_HOME@/lib64</tt></dd>
+
+  <dd class="dd"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__includepath">Include Path</a>: <tt class="ph tt">@XMS_HOME@/tools/cpp/include, @XMS_HOME@/tools/c/include</tt></dd>
+
+ 
+ 
+  <dt class="dt dlterm"><tt class="ph tt">WebSphere MQ Client libraries</tt>  </dt>
+
+<dd class="dd"/>
+  <dd class="dd"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>: 
+  </dd>
+
+  <dd class="dd"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">@MQ_HOME@/lib64</tt></dd>
+
+  <dd class="dd"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__includepath">Include Path</a>: <tt class="ph tt">@MQ_HOME@/lib64</tt></dd>
+
+ 
+ 
+  <dt class="dt dlterm"><tt class="ph tt">Code that is common to both XMSSource and XMSSink is located in a directory ../Common relative to both of these operators.</tt>  </dt>
+
+<dd class="dd"/>
+  <dd class="dd"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>: 
+  </dd>
+
+  <dd class="dd"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">../Common</tt></dd>
+
+  <dd class="dd"><a class="xref" href="OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__includepath">Include Path</a>: <tt class="ph tt">../Common</tt></dd>
+
+ 
+</dl>
+
+</div>
+
+</div>
+
+
+</body>
+</html>
