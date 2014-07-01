@@ -918,7 +918,7 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 			<%}%>
 			break;
 		case XMS_MESSAGE_TYPE_BASE:
-			<% if ($msgType ne 'none')
+			<% if ($msgType ne 'empty')
 			# $msgType is the type we expected to receive
 			{%>
 				logmsg = DISCARD_MSG_MISSING_BODY("<%=$msgType%>");
@@ -927,7 +927,31 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 						ErrMsg<<logmsg;
 						sendOutputErrorMsg(ErrMsg);
 				<% }%>
+			<%}
+			else {			
+			 my $outputPort = $model->getOutputPortAt(0); 
+			 my $numAttrs = $outputPort->getNumberOfAttributes();
+	  		 my $assignments = "";
+    		 for (my $i = 0; $i < $numAttrs; ++$i) {
+    		 	my $attr = $outputPort->getAttributeAt($i);
+      			if($attr->hasAssignment()) {
+      		    my $expn = $attr->getAssignmentValue()->getCppExpression();
+				my $aName = $attr->getName();
+			%>
+				tuple.set_<%=$aName%>(<%=$expn%>);
+			<%}%> 
+      		<%
+      			}			
+			%>
+			
+			// Submit the tuple 
+			submit(tuple,0);
+			nMessagesRead++;
+			updatePerformanceCounters();
+			SPLAPPTRC(L_TRACE, "Tuple submitted by MsgListener onMessage", "XMSSource");
+			
 			<%}%>
+			
 			break;
 
 		default:
