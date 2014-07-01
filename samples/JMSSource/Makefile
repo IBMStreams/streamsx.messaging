@@ -2,7 +2,7 @@
 # others. All Rights Reserved.                        
 .PHONY: all clean
 
-SPLC_FLAGS = -a -z -t ../com.ibm.streamsx.messaging
+SPLC_FLAGS = -a -z -t ../../com.ibm.streamsx.messaging
 
 SPLC = $(STREAMS_INSTALL)/bin/sc
 
