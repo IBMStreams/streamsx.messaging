@@ -3,7 +3,6 @@
 Copyright (C)2014, International Business Machines Corporation and
 others. All Rights Reserved. 
 -->
-<!-- end_generated_IBM_copyright_prolog                               -->
 <info:toolkitInfoModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:info="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo">
   <info:identity>
     <info:name>XMSSourceMain</info:name>
