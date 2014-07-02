@@ -66,7 +66,7 @@ JMSSinkMain
 <p class="p">JMSSinkMain sample demonstrates how to send data to a messaging server using the JMSSink operator. 
 </p>
 
-<p class="p">This sample uses connects to a messaging server as specified in the connection  document located in ../etc/connections.xml.  The connection info, and the data schema for the message is defined in the connection document. 
+<p class="p">This sample connects to a messaging server as specified in the connection  document located in ../etc/connections.xml.  The connection info, and the data schema for the message is defined in the connection document. 
 </p>
 
 <p class="p">To connect to ActiveMQ: 
@@ -85,9 +85,9 @@ JMSSinkMain
 </p>
 
 <ul class="ul">
-<li class="li"> specify the binding file URL URL in the "provider_url" attribute of the connection specification named "wmq" </li>
+<li class="li"> specify the binding file URL in the "provider_url" attribute of the connection specification named "wmq" </li>
 
-<li class="li"> specify a valid destination identify in the "access_wmq" access specification </li>
+<li class="li"> specify a valid destination identity in the "access_wmq" access specification </li>
 
 <li class="li"> in the SPL sample, update the JMSSink operator to use the "wmq" connection </li>
 
