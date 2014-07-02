@@ -7,7 +7,7 @@ SPLC_FLAGS = -a -z -t ../../com.ibm.streamsx.messaging
 SPLC = $(STREAMS_INSTALL)/bin/sc
 
 SPL_CMD_ARGS ?=
-SPL_MAIN_COMPOSITE = JMSSourceMain
+SPL_MAIN_COMPOSITE = com.ibm.streamsx.messaging.sample::JMSSourceMain
 OUTPUT_DIR = output
 
 all: distributed
