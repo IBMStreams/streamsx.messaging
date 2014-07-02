@@ -2,7 +2,7 @@
 // * Copyright (C)2014, International Business Machines Corporation and *
 // * others. All Rights Reserved. *
 // ******************************************************************************* 
-namespace com.ibm.streamsx.messaging.sample ;
+namespace com.ibm.streamsx.messaging.sample.xms ;
 
 use com.ibm.streamsx.messaging.xms::* ;
 
