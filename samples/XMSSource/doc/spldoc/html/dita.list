@@ -1,12 +1,12 @@
-#Wed Jul 02 11:11:16 EDT 2014
+#Wed Jul 02 11:29:12 EDT 2014
 copytosourcelist=
-hreftargetslist=dita/com.ibm.streamsx.messaging.sample$XMSSourceMain$spl.xml,dita/toolkit.xml,dita/com.ibm.streamsx.messaging.sample$.xml
+hreftargetslist=dita/com.ibm.streamsx.messaging.sample.xms$.xml,dita/toolkit.xml,dita/com.ibm.streamsx.messaging.sample.xms$XMSSourceMain$spl.xml
 fullditatopicfile=fullditatopic.list
 fullditamapandtopicfile=fullditamapandtopic.list
-fullditatopiclist=dita/com.ibm.streamsx.messaging.sample$XMSSourceMain$spl.xml,dita/toolkit.xml,dita/com.ibm.streamsx.messaging.sample$.xml
-fullditamapandtopiclist=dita/com.ibm.streamsx.messaging.sample$XMSSourceMain$spl.xml,dita/toolkit.ditamap,dita/toolkit.xml,dita/com.ibm.streamsx.messaging.sample$.xml
+fullditatopiclist=dita/com.ibm.streamsx.messaging.sample.xms$.xml,dita/toolkit.xml,dita/com.ibm.streamsx.messaging.sample.xms$XMSSourceMain$spl.xml
+fullditamapandtopiclist=dita/toolkit.ditamap,dita/com.ibm.streamsx.messaging.sample.xms$.xml,dita/toolkit.xml,dita/com.ibm.streamsx.messaging.sample.xms$XMSSourceMain$spl.xml
 hrefditatopicfile=hrefditatopic.list
-hrefditatopiclist=dita/com.ibm.streamsx.messaging.sample$XMSSourceMain$spl.xml,dita/toolkit.xml,dita/com.ibm.streamsx.messaging.sample$.xml
+hrefditatopiclist=dita/com.ibm.streamsx.messaging.sample.xms$.xml,dita/toolkit.xml,dita/com.ibm.streamsx.messaging.sample.xms$XMSSourceMain$spl.xml
 user.input.file=dita/toolkit.ditamap
 subtargetsfile=subtargets.list
 fullditamapfile=fullditamap.list
@@ -23,11 +23,11 @@ conreflist=
 resourceonlyfile=resourceonly.list
 imagefile=image.list
 resourceonlylist=
-imagelist=image/com.ibm.streamsx.messaging.sample$XMSSourceMain.svg
+imagelist=image/com.ibm.streamsx.messaging.sample.xms$XMSSourceMain.svg
 htmlfile=html.list
 htmllist=
 canditopicsfile=canditopics.list
-canditopicslist=dita/com.ibm.streamsx.messaging.sample$XMSSourceMain$spl.xml,dita/toolkit.xml,dita/com.ibm.streamsx.messaging.sample$.xml
+canditopicslist=dita/com.ibm.streamsx.messaging.sample.xms$.xml,dita/toolkit.xml,dita/com.ibm.streamsx.messaging.sample.xms$XMSSourceMain$spl.xml
 keyreffile=keyref.list
 subjectschemefile=subjectscheme.list
 keyreflist=
