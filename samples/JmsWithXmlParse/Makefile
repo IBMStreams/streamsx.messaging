@@ -5,8 +5,7 @@
 
 #
 # Project Settings
-SPLC_IDE_WORKSPACE = /homes/chanskw/localWorkspaces/mqtt/
-SPLC_TOOLKIT_COM.IBM.STREAMSX.MESSAGING_0.7.0 = /homes/chanskw/git/streamsx.messaging/com.ibm.streamsx.messaging
+SPLC_TOOLKIT_COM.IBM.STREAMSX.MESSAGING_0.7.0 = ../../com.ibm.streamsx.messaging
 SPLC_TOOLKIT_PATH =  -t $(SPLC_TOOLKIT_COM.IBM.STREAMSX.MESSAGING_0.7.0)
 SPLC_OUTPUT_DIR = "output"
 SPLC_DATA_DIR = "data"
