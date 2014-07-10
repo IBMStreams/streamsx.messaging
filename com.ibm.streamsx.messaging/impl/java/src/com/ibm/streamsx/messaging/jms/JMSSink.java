@@ -392,6 +392,11 @@ public class JMSSink extends AbstractOperator {
 					getInput(0).getName(), nTruncatedInserts);
 
 			break;
+		case text:
+			mhandler = new TextMessageHandler(connectionDocumentParser.getNativeSchemaObjects());
+			break;
+		default:
+			throw new RuntimeException("No valid message class is specified.");
 		}
 
 	}

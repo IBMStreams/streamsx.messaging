@@ -9,7 +9,6 @@ use strict;
 use warnings;
 use SPL::CodeGen;
 
-
 my %XMStypeTable = (
 					"int8"=>"Byte",
   					"uint8"=>"Short",

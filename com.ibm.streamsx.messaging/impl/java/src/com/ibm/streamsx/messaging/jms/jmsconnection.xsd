@@ -33,6 +33,7 @@
       <enumeration value="wbe22"/>
       <enumeration value="xml"/>
       <enumeration value="empty"/>
+      <enumeration value="text"/>
     </restriction>
   </simpleType>
   

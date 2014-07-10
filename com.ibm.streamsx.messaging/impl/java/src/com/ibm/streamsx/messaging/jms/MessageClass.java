@@ -15,7 +15,8 @@ package com.ibm.streamsx.messaging.jms;
  * wbe22= JMS TextMessage (contains an XML document in the WebSphere 
  * Business old  wbe 2.2 format)
  * empty=An empty JMS Message
+ * text = JMS Text Message
 */
 enum MessageClass {
-	map, stream, bytes, xml, wbe, wbe22, empty;
+	map, stream, bytes, xml, wbe, wbe22, empty, text;
 }

@@ -25,7 +25,7 @@ import com.ibm.streams.operator.metrics.Metric;
 import com.ibm.streams.operator.types.Blob;
 
 //This class handles the wbe22 message type 
-class XMLTextMessageHandler extends TextMessageHandler {
+class XMLTextMessageHandler extends BaseXMLMessageHandler {
 	
 	// the document builder
 	private DocumentBuilder documentBuilder;

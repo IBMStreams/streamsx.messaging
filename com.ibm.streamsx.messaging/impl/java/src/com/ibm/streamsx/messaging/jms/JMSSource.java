@@ -354,6 +354,9 @@ public class JMSSource extends ProcessTupleProducer {
 				messageHandlerImpl = new EmptyMessageHandler(
 						connectionDocumentParser.getNativeSchemaObjects());
 				break;
+			case text:
+				messageHandlerImpl = new TextMessageHandler(connectionDocumentParser.getNativeSchemaObjects());
+				break;
 			default:
 				throw new RuntimeException("No valid message class is specified.");
 		}
