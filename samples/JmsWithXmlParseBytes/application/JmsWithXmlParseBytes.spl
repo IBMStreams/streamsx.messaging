@@ -1,0 +1,79 @@
+namespace application;
+
+// *******************************************************************************
+// * Copyright (C)2014, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// ******************************************************************************* 
+
+use com.ibm.streamsx.messaging.jms::*;
+
+composite JmsWithXmlParseBytes {
+param
+		expression<rstring> $connectionDoc : getSubmissionTimeValue("connectionDoc",
+			"../etc/connections.xml") ;
+		expression<rstring> $connection : getSubmissionTimeValue("connection",
+			"conn") ;
+		expression<rstring> $access : getSubmissionTimeValue("access",
+			"access_text") ;
+	type
+		ReferenceType = tuple<int32 quality, rstring book> ;
+		BookInfo = tuple<rstring title, list<rstring> authors, decimal32 price,
+			list<ReferenceType> references> ;
+	graph
+
+	// An spl.adapter::FileSource operator is configured to read in the XML from the file "catalog.xml" in 1K byte chunks and produce output
+	// tuples each containing a 1K "blob" of XML.  Other block sizes could be used if desired.
+		stream<blob xmlData> XML = FileSource()
+		{
+			param
+				file : "catalog.xml" ;
+				format : block ;
+				blockSize : 1024u ;
+		}
+
+		(stream<rstring xmlData> XmlAsRstring) as Functor_6 = Functor(XML)
+		{
+			output
+				XmlAsRstring : xmlData = convertFromBlob(XML.xmlData) ;
+		}
+		
+		() as JMSSink_4 = JMSSink(XmlAsRstring as inPort0Alias)
+		{
+			param
+				connectionDocument : $connectionDoc ;
+				connection : $connection ;
+				access : $access ;
+		}
+		
+		(stream<rstring xmlData> XmlFromMsgServer) as JMSSource_5 = JMSSource()
+		{
+			param
+				connectionDocument : $connectionDoc ;
+				connection : $connection ;
+				access : $access ;
+		}
+		
+
+		stream<BookInfo> Book = XMLParse(XmlFromMsgServer as inPort0Alias)
+		{
+			param
+				trigger : "/catalog/book" ;
+				parsing : permissive ;
+			output
+				Book : title = XPath("title/text()"), authors = XPathList("author/text()"),
+					price =(decimal32) XPath("@price"), references = XPathList("reference", {
+					quality =(int32) XPath("@quality"), book = XPath("book/text()") }) ;
+		}
+
+		() as Nill = FileSink(Book)
+		{
+			param
+				file : "actual.txt" ;
+				format : txt ;
+				flush : 1u ;
+		}
+
+	
+		
+
+}
