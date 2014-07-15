@@ -23,6 +23,7 @@ import com.ibm.streams.operator.metrics.Metric;
 import com.ibm.streams.operator.types.Blob;
 import com.ibm.streams.operator.types.RString;
 import com.ibm.streams.operator.types.Timestamp;
+import com.ibm.streams.operator.types.ValueFactory;
 
 //This class handles the JMS Bytes message type 
 class BytesMessageHandler extends JMSMessageHandlerImpl {
@@ -324,7 +325,12 @@ class BytesMessageHandler extends JMSMessageHandlerImpl {
 								tuple.setString(name, rstringData);
 							}
 								break;
+							case BLOB: {
+								Blob blob = ValueFactory.newBlob(b, 0, b.length);
+								tuple.setBlob(name, blob);
+								break;
 							}
+							} 
 
 						}
 					}

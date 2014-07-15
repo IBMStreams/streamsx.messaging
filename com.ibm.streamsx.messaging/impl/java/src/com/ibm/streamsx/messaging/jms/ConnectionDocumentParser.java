@@ -610,7 +610,13 @@ class ConnectionDocumentParser {
 								&& streamAttrMetaType != MetaType.XML) {
 
 							throw new ParseConnectionDocumentException(streamAttrName
-									+ " must be of type rstring or ustring");
+									+ " in spl schema must be of type rstring, ustring or xml");
+						}
+						
+						if (!nativeAttrType.equals("String"))
+						{
+							throw new ParseConnectionDocumentException("Attribute Name: " + nativeAttrName + " with type:"
+									+ nativeAttrType + " is invalid.  Attribute must be of type String.");
 						}
 					}
 				}
