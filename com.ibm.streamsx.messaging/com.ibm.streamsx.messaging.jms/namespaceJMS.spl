@@ -1,0 +1,44 @@
+/**
+* **Developing and running applications that use the operators in the JMS operators**
+* 
+* To create applications that use the JMS operators in the Messaging toolkit, you must set environment variables.  You must also configure either IBM InfoSphere Streams or the SPL compiler to be aware of the location of the toolkit. 
+* 
+* **Before you begin**
+* 
+* * Install IBM InfoSphere Streams and set the **STREAMS_INSTALL** environment variable to the InfoSphere Streams installation directory.  For example: `export STREAMS_INSTALL=Streams-Install-Directory`
+* * Install a supported version of WebSphere MQ Client, Apache ActiveMQ, XMS client, or MQTT client on the same machine as InfoSphere Streams.  WebSphere MQ Server might or might not be on the same machine.
+*   * Apache ActiveMQ
+*     * The `JMSSource` and `JMSink` operators support Apache ActiveMQ 5.7 4.
+*     * The Apache ActiveMQ libraries must be installed on same machine as IBM InfoSphere Streams because the `JMSSink` and `JMSSource` operators require the libraries that are installed with IBM InfoSphere Streams. However, the ActiveMQ instance to which a message is sent can be a different machine. You must set the **STREAMS_MESSAGING_AMQ_HOME** environment variable to the location where Apache ActiveMQ is installed. For example: 
+*         * `export STREAMS_MESSAGING_AMQ_HOME="/home/streamsuser/ApacheActiveMQ"`
+*   * WebSphere MQ Client 
+*     * If the messaging provider is WebSphere MQ, the WebSphere MQ Client 7.5 libraries for Java are required by the `JMSSource` and `JMSSink` operators.
+*     * The WebSphere MQ Client libraries must be installed on same machine as IBM InfoSphere Streams. You must set the **STREAMS_MESSAGING_WMQ_HOME** environment variable to the location where WebSphere MQ is installed. For example:
+*         * `export STREAMS_MESSAGING_WMQ_HOME="/opt/mqm"`
+*   * WebSphere MQ Server
+*     * The `JMSSource` and `JMSink` operators support WebSphere MQ v7.5. 
+
+* **Procedure**
+*
+* 1. Verify that the appropriate environment variables are set for the messaging systems that you use.
+*   * If you use `JMSSink` or `JMSSource` operators to connect to WebSphere MQ or Apache ActiveMQ systems, set **STREAMS_MESSAGING_WMQ_HOME** or **STREAMS_MESSAGING_AMQ_HOME** respectively.
+* 2. Develop your application. 
+* InfoSphere Streams Studio can help you create and debug SPL and SPL mixed-mode applications. To use the operators from the Messaging Toolkit, you must add the toolkit location.
+* To avoid the need to fully qualify the operators, add a use directive in your application. For example, you can add one of the following clauses in your SPL source file: 
+*    * `use com.ibm.streamsx.messaging.jms::\*;`
+*    * `use com.ibm.streams.streamsx.messaging.jms::JMSSSource;`
+*    * `use com.ibm.streams.streamsx.messaging.jms::JMSSink;`
+* 3. Build your application. 
+* You can use the **sc** command or Streams Studio.
+* To build the application in Streams Studio, you must add the toolkit location if you did not already do so.
+* To build the application from the command line, you must configure the SPL compiler to find the root directory of the toolkit. Use one of the following methods:
+*    * Set the **STREAMS_SPLPATH** environment variable to the root directory of a toolkit or multiple toolkits (using a colon (:) as a separator). For example:
+*       * `export STREAMS_SPLPATH=$STREAMS_INSTALL/toolkits/com.ibm.streamsx.messaging`
+*    * Specify the **-t** or **--spl-path** command parameter when you run the **sc** command. Note: These command parameters override the **STREAMS_SPLPATH** environment variable. For example:
+*       * `sc -t $STREAMS_INSTALL/toolkits/com.ibm.streamsx.messagin -M MyMain`
+* 6. Start the InfoSphere Streams instance. 
+* 7. Run the application. You can submit the application as a job by using the **streamtool submitjob** command or by using Streams Studio. 
+*/
+
+namespace com.ibm.streamsx.messaging.jms;
+
