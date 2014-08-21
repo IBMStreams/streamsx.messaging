@@ -26,38 +26,14 @@ The following figure shows how the JMSSource and JMSSink operators in the Messag
 {architecture_diagram_JMSadpaters.gif|This figure shows JMSSource and JMSSink operators that use Apache ActiveMQ and WebSphere MQ libraries to read and write from JMS providers.}
 
 The Messaging Toolkit operators must be configured to connect to messaging systems. This configuration information is specified in an XML document, called a connection specifications document. The connection specifications document is similar to but separate from the document that is used by the Database Toolkit.
-
-<!--**Software requirements for the Messaging Toolkit**
-
-The Messaging Toolkit has software dependencies that must be satisfied before you can run applications that use its operators.
-
-* Apache ActiveMQ
- * * The `JMSSource` and `JMSink` operators support Apache ActiveMQ 5.7 4.
- * * * The Apache ActiveMQ libraries must be installed on same machine as IBM InfoSphere Streams because the `JMSSink` and `JMSSource` operators require the libraries that are installed with IBM InfoSphere Streams. However, the ActiveMQ instance to which a message is sent can be a different machine. You must set the **STREAMS_MESSAGING_AMQ_HOME** environment variable to the location where Apache ActiveMQ is installed. For example, `export STREAMS_MESSAGING_AMQ_HOME="/home/streamsuser/ApacheActiveMQ"`.
-* MQTT client
-* * MQTT client 3.15 is required for `MQTTSource` and `MQTTSink` operators.
-* * **Note**: You can download the MQTT client from Fix Central ([http://www-933.ibm.com/support/fixcentral/swg/selectFixes?parent=ibm~middleware&product=ibm/WebSphere/WebSphere+MQ&release=7.5&platform=All&function=textSearch&text=MA9B]).
- * WebSphere MQ Client, WebSphere MQ Server
- * * The client is required by `XMSSource` and `XMSSink` operators. The server is supported by `XMSSource` and `XMSSink` operators. 
- * * * If IBM Message Service client for C/C++ version 2.0.1 is installed, WebSphere MQ 6.0 Refresh Pack 6.0.1.1 or later or WebSphere MQ 7.0 Fix Pack 7.0.0.1 or later are supported, with the exception of WebSphere MQ 7.1, which is not supported by XMS 2.0.1.
- * * * If IBM Message Service client for C/C++ version 2.0.2 is installed, WebSphere MQ 6.0.2 Fix Pack 11 or later 1, WebSphere MQ 7.0.1 Fix pack 7 or later, WebSphere MQ 7.1.0, or WebSphere MQ 7.5 is supported.
- * * * Note: If WebSphere MQ 7.1.0 is used, download and install the fix from IBM Support Portal ([http://www.ibm.com/support/docview.wss?uid=swg24007092]). If WebSphere MQ 7.5 is used, download and install the fix from IBM Support Portal ([http://www.ibm.com/support/docview.wss?uid=swg1IC91865]).
- * * * The WebSphere MQ Client libraries must be installed on same machine as IBM InfoSphere Streams. You must set the **MQ_HOME** environment variable to the installation location of the WebSphere MQ Client. If you are using a 64-bit version of Linux, then you also set the **LD_LIBRARY_PATH** environment variable to include the `lib` directories of your WebSphere MQ installation before you run your SPL applications. For example, the path must include `/opt/mqm/lib64`.
- * * If the messaging provider is WebSphere MQ, the WebSphere MQ client libraries for Java are required by the `JMSSource` and `JMSSink` operators.  The WebSphere MQ Server is supported by the `JMSSource` and `JMSSink` operators.
- * * * The supported versions are Websphere MQ Client 7.5 and WebSphere MQ v7.5.
- * * * The WebSphere MQ Client libraries must be installed on same machine as IBM InfoSphere Streams. You must set the **STREAMS_MESSAGING_WMQ_HOME** environment variable to the location where WebSphere MQ is installed. For example, `export STREAMS_MESSAGING_WMQ_HOME="/opt/mqm"`.
- * XMS client
- * * IBM Message Service client for C/C++ version 2.0.1 or IBM Message Service client for C/C++ version 2.0.22 is required for `XMSSource` and `XMSSink` operators.
- * * You can download the IBM Message Service client for C/C++ from IBM Support Portal ([http://www.ibm.com/support/docview.wss?uid=swg24007092]).
--->
 </info:description>
-   <info:version>0.7.0</info:version>
-   <info:requiredProductVersion>3.2.0</info:requiredProductVersion>
- </info:identity>
- <info:dependencies/>
- <info:resources>
-    <info:messageSet name="MessagingResource">
-    <info:lang default ="true">en_US/MessagingResource.xlf</info:lang> 
-    </info:messageSet>
-  </info:resources>
+<info:version>0.8.0</info:version>
+<info:requiredProductVersion>3.2.0</info:requiredProductVersion>
+</info:identity>
+<info:dependencies/>
+<info:resources>
+<info:messageSet name="MessagingResource">
+<info:lang default="true">en_US/MessagingResource.xlf</info:lang>
+</info:messageSet>
+</info:resources>
 </info:toolkitInfoModel>

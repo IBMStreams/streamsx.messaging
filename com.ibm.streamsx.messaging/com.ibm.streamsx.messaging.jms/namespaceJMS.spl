@@ -1,14 +1,15 @@
 /**
-* **Developing and running applications that use the operators in the JMS operators**
+* **Developing and running applications that use JMS operators**
 * 
 * To create applications that use the JMS operators in the Messaging toolkit, you must set environment variables.  You must also configure either IBM InfoSphere Streams or the SPL compiler to be aware of the location of the toolkit. 
 * 
 * **Before you begin**
 * 
-* * Install IBM InfoSphere Streams and set the **STREAMS_INSTALL** environment variable to the InfoSphere Streams installation directory.  For example: `export STREAMS_INSTALL=Streams-Install-Directory`
+* * Install IBM InfoSphere Streams and set the **STREAMS_INSTALL** environment variable to the InfoSphere Streams installation directory.  For example:
+*   * `export STREAMS_INSTALL=Streams-Install-Directory`
 * * Install a supported version of WebSphere MQ Client, Apache ActiveMQ, XMS client, or MQTT client on the same machine as InfoSphere Streams.  WebSphere MQ Server might or might not be on the same machine.
 *   * Apache ActiveMQ
-*     * The `JMSSource` and `JMSink` operators support Apache ActiveMQ 5.7 4.
+*     * The `JMSSource` and `JMSSink` operators support Apache ActiveMQ 5.7 4.
 *     * The Apache ActiveMQ libraries must be installed on same machine as IBM InfoSphere Streams because the `JMSSink` and `JMSSource` operators require the libraries that are installed with IBM InfoSphere Streams. However, the ActiveMQ instance to which a message is sent can be a different machine. You must set the **STREAMS_MESSAGING_AMQ_HOME** environment variable to the location where Apache ActiveMQ is installed. For example: 
 *         * `export STREAMS_MESSAGING_AMQ_HOME="/home/streamsuser/ApacheActiveMQ"`
 *   * WebSphere MQ Client 
@@ -16,8 +17,8 @@
 *     * The WebSphere MQ Client libraries must be installed on same machine as IBM InfoSphere Streams. You must set the **STREAMS_MESSAGING_WMQ_HOME** environment variable to the location where WebSphere MQ is installed. For example:
 *         * `export STREAMS_MESSAGING_WMQ_HOME="/opt/mqm"`
 *   * WebSphere MQ Server
-*     * The `JMSSource` and `JMSink` operators support WebSphere MQ v7.5. 
-
+*     * The `JMSSource` and `JMSSink` operators support WebSphere MQ v7.5. 
+*
 * **Procedure**
 *
 * 1. Verify that the appropriate environment variables are set for the messaging systems that you use.
@@ -26,7 +27,7 @@
 * InfoSphere Streams Studio can help you create and debug SPL and SPL mixed-mode applications. To use the operators from the Messaging Toolkit, you must add the toolkit location.
 * To avoid the need to fully qualify the operators, add a use directive in your application. For example, you can add one of the following clauses in your SPL source file: 
 *    * `use com.ibm.streamsx.messaging.jms::\*;`
-*    * `use com.ibm.streams.streamsx.messaging.jms::JMSSSource;`
+*    * `use com.ibm.streams.streamsx.messaging.jms::JMSSource;`
 *    * `use com.ibm.streams.streamsx.messaging.jms::JMSSink;`
 * 3. Build your application. 
 * You can use the **sc** command or Streams Studio.
@@ -38,6 +39,29 @@
 *       * `sc -t $STREAMS_INSTALL/toolkits/com.ibm.streamsx.messagin -M MyMain`
 * 6. Start the InfoSphere Streams instance. 
 * 7. Run the application. You can submit the application as a job by using the **streamtool submitjob** command or by using Streams Studio. 
+*
+*
+* **Conversions between JMS messages and tuples in IBM InfoSphere Streams**
+*
+* When you send data to or receive data from WebSphere MQ or an Apache Active MQ queue or topic by using `JMSSink` or `JMSSource` operators, IBM InfoSphere Streams must convert tuples to JMS messages, or vice-versa.
+*
+* The mapping between JMS messages and the InfoSphere Streams tuples is controlled by the <native_schema&ft; element and the message_class attribute of the <destination> element. The message_class determines the type of mapping that is performed and also specifies the type of JMS message that is output by the `JMSSink` operator or expected by the `JMSSource` operator. The <native_schema> element determines the attributes that are present in an output JMS message or are expected in an input JMS message.
+The general principles for the conversion of data between InfoSphere Streams tuples and JMS messages are as follows:
+*
+* * There is a one-to-one mapping between JMS messages and InfoSphere Streams tuples. The `JMSSource` operator produces one tuple for each JMS message that it receives. The `JMSSink` operator produces one JMS message for each tuple that it receives unless a runtime error occurs in which case the message might be discarded.
+* * The InfoSphere Streams tuples that are received by the `JMSSink` operator or are produced by the `JMSSource` operator conform to the InfoSphere Streams schema.
+* * JMS messages that are output by the `JMSSink` operator conform to the constraints defined by the <native_schema> element.
+* * The `JMSSource` operator accepts and processes any incoming messages that conform to the constraints defined by the <native_schema> element.
+*
+* Where possible, mismatches between the InfoSphere Streams schema and the information in the <native_schema> element, which would prevent successful mapping, are detected at run time. For example:
+* * If the <native_schema> element includes an attribute that is not present in the input stream for the `JMSSink` operator, the operator generates an error at run time. However, if there is an output stream attribute that is not present in the <native_schema> element, the output stream attribute gets the default value.
+* * If there is a mismatch between the date type of the attribute that is specified in the <native_schema> element and the data type of the attribute in the input or output stream for the operators, an error occurs at run time.
+* * If there are attributes in the input stream for the `JMSSink` operator that are not specified in the <native_schema> element, they are ignored.
+* * If there are attributes in the <native_schema> element that are not present in the output stream for the `JMSSource` operator, the values for those attributes are not copied into the output stream.
+* * The `JMSSink` operator might encounter values that have rstring, ustring, or blob data types that are longer than the length that is specified in the <native_schema> element. These values are truncated to fit the JMS message and a message is generated. For rstring or ustring types, the length is measured in bytes for the message class bytes and in characters for the map, stream, xml, wbe, and wbe22 message classes. For bytes message class, the truncation is in number of bytes and can lead to garbled values, which can result in a message that is not valid.
+    The JMSSink operator might encounter values that have rstring, ustring or blob data types and are shorter than the required length, as specified in the <native_schema> element. The String is padded with spaces and the blob is padded with null values to make it have the correct length. For rstring or ustring attribute values, length is measured in bytes for bytes message class and in characters for map, stream, xml, wbe, and wbe22 message classes. The String is padded with spaces and the blob is padded with null values only when the message class is bytes.
+
+
 */
 
 namespace com.ibm.streamsx.messaging.jms;
