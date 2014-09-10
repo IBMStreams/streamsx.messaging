@@ -1,17 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (C) 2010,2012-2014, International Business Machines Corporation -->
 <!-- All Rights Reserved                                                   -->
-<info:toolkitInfoModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:info="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo">
-  <info:identity>
-    <info:name>com.ibm.streamsx.messaging</info:name>
-    <info:description></info:description>
-    <info:version>0.8.0</info:version>
-    <info:requiredProductVersion>3.2.0</info:requiredProductVersion>
-  </info:identity>
-  <info:dependencies/>
-  <info:resources>
-    <info:messageSet name="MessagingResource">
-      <info:lang default="true">en_US/MessagingResource.xlf</info:lang>
-    </info:messageSet>
-  </info:resources>
+<info:toolkitInfoModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common"
+ xmlns:info="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo">
+ <info:identity>
+   <info:name>com.ibm.streamsx.messaging</info:name>
+   <info:description>
+The Messaging toolkit project is an open source IBM InfoSphere Streams toolkit project. It is focused on the development of operators and functions that help you use InfoSphere Streams to interact with messaging systems such as JMS, XMS, and MQTT. 
+
+The operators provide the ability for InfoSphere Streams applications to send and receive data from a queue or topic that is posted on WebSphere MQ, Apache ActiveMQ or MQ Telemetry Transport (MQTT) server.
+
+In particular, the XMSSource and XMSSink operators in the Messaging Toolkit use the standard XMS architecture and APIs to read and write data from WebSphere MQ 7.0, 7.1, and 7.5. The JMSource and JMSSink operators use the standard JMS architecture and JMS 1.1 APIs to read and write data from WebSphere MQ v7.5 and Apache ActiveMQ v5.7. The MQTTSource and MQTTSink operators use the MQTT architecture and APIs to read and write to MQTT 3.1.
+
+**Restriction**: The XMSSource, XMSSink, MQTTSource and MQTTSink operators in the Messaging Toolkit are not supported on POWER7 Systems. You must use x86_64 systems. The JMSource and JMSSink operators do not support reading and writing data from Apache Active MQ on POWER7 Systems.
+
+The following figure shows how the XMSSink and XMSSource operators in the Messaging Toolkit use standard XMS architecture and APIs. 
+{8751_dgm1.gif|This diagram illustrates the XMS APIs that are used to communicate between InfoSphere Streams, an XMS client, and a WebSphere MQ server.}
+
+For example:
+* The CreateProducer API creates a message producer to send messages to the specified destination.
+* The CreateConsumer API creates a message consumer for the specified destination.
+* The CreateConnection API creates a connection that uses a specified user identity. The specified user identifier and password are used to authenticate the application.
+
+The following figure shows how the JMSSource and JMSSink operators in the Messaging Toolkit use standard JMS architecture and APIs.
+{architecture_diagram_JMSadpaters.gif|This figure shows JMSSource and JMSSink operators that use Apache ActiveMQ and WebSphere MQ libraries to read and write from JMS providers.}
+
+The Messaging Toolkit operators must be configured to connect to messaging systems. This configuration information is specified in an XML document, called a connection specifications document. The connection specifications document is similar to but separate from the document that is used by the Database Toolkit.
+</info:description>
+<info:version>0.8.0</info:version>
+<info:requiredProductVersion>3.2.0</info:requiredProductVersion>
+</info:identity>
+<info:dependencies/>
+<info:resources>
+<info:messageSet name="MessagingResource">
+<info:lang default="true">en_US/MessagingResource.xlf</info:lang>
+</info:messageSet>
+</info:resources>
 </info:toolkitInfoModel>
