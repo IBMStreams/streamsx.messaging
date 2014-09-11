@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="namespaceXMS.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit__"/>
+<link rel="stylesheet" type="text/css" href="../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../html/spldoc.css"/>
+<title>namespaceXMS.spl</title>
+</head>
+<body id="spldoc_compilationunit__">
+
+
+<h1 class="title topictitle1">namespaceXMS.spl</h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="toolkit.html" title="com.ibm.streamsx.messaging">
+com.ibm.streamsx.messaging
+</a>
+-&gt; <a class="xref" href="com.ibm.streamsx.messaging.xms$.html">com.ibm.streamsx.messaging.xms</a>-&gt; namespaceXMS.spl</p>
+
+</div>
+
+<div class="section">
+
+<p class="p"><strong class="ph b">Developing and running applications that use XMS operators</strong> 
+</p>
+
+<p class="p">To create applications that use the XMS operators in the Messaging toolkit, you must set environment variables.  You must also configure either IBM InfoSphere Streams or the SPL compiler to be aware of the location of the toolkit.  
+</p>
+
+<p class="p"><strong class="ph b">Before you begin</strong> 
+</p>
+
+<ul class="ul">
+<li class="li"> Install IBM InfoSphere Streams and set the <strong class="ph b">STREAMS_INSTALL</strong> environment variable to the InfoSphere Streams installation directory.  For example:  
+<ul class="ul">
+<li class="li"> <tt class="ph tt">export STREAMS_INSTALL=Streams-Install-Directory</tt> </li>
+
+</ul>
+</li>
+
+<li class="li"> Install a supported version of WebSphere MQ Client, Apache ActiveMQ, XMS client, or MQTT client on the same machine as InfoSphere Streams.  WebSphere MQ Server might or might not be on the same machine. 
+<ul class="ul">
+<li class="li"> WebSphere MQ Client or WebSphere MQ Server 
+<ul class="ul">
+<li class="li"> If the IBM Message Service client for C/C++ version 2.0.1 is installed, use WebSphere MQ 6.0 Refresh Pack 6.0.1.1 or later 1 or WebSphere MQ 7.0 Fix Pack 7.0.0.1 or later, with the exception of WebSphere MQ 7.1, which is not supported by XMS 2.0.1. </li>
+
+<li class="li"> If IBM Message Service client for C/C++ version 2.0.2 is installed, use WebSphere MQ 6.0.2 Fix Pack 11 or later 1, WebSphere MQ 7.0.1 Fix pack 7 or later, WebSphere MQ 7.1.0, or WebSphere MQ 7.5. </li>
+
+<li class="li"> <strong class="ph b">Note</strong>: If you use WebSphere MQ 7.1.0, you must download and install the fix from IBM Support Portal (<a class="xref" href="http://www.ibm.com/support/docview.wss?uid=swg24007092">http://www.ibm.com/support/docview.wss?uid=swg24007092</a>). If you use WebSphere MQ 7.5, you must download and install the fix from IBM Support Portal (<a class="xref" href="http://www.ibm.com/support/docview.wss?uid=swg1IC91865">http://www.ibm.com/support/docview.wss?uid=swg1IC91865</a>). </li>
+
+</ul>
+</li>
+
+<li class="li"> XMS client 
+<ul class="ul">
+<li class="li"> The <tt class="ph tt">XMSSource</tt> and <tt class="ph tt">XMSSink</tt> operators support IBM Message Service client for C/C++ version 2.0.1 or IBM Message Service client for C/C++ version 2.0.2. </li>
+
+<li class="li"> You can download the IBM Message Service client for C/C++ from IBM Support Portal (<a class="xref" href="http://www.ibm.com/support/docview.wss?uid=swg24007092">http://www.ibm.com/support/docview.wss?uid=swg24007092</a>). </li>
+
+<li class="li"> The XMS client must be installed on same machine as IBM InfoSphere Streams. You must set the <strong class="ph b">XMS_HOME</strong> environment variable to the installation location of XMS Client. </li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+</ul>
+
+<p class="p"> <strong class="ph b">Procedure</strong> 
+</p>
+
+<ol class="ol">
+<li class="li"> Verify that the appropriate environment variables are set for the messaging systems that you use. 
+<ul class="ul">
+<li class="li"> If you use <tt class="ph tt">XMSSink</tt> or <tt class="ph tt">XMSSource</tt> operators to connect to WebSphere MQ messaging systems, set <strong class="ph b">XMS_HOME</strong>, <strong class="ph b">MQ_HOME</strong>, and <strong class="ph b">LD_LIBRARY_PATH</strong>. </li>
+
+</ul>
+</li>
+
+<li class="li"> Develop your application.  InfoSphere Streams Studio can help you create and debug SPL and SPL mixed-mode applications. To use the operators from the Messaging Toolkit, you must add the toolkit location. To avoid the need to fully qualify the operators, add a use directive in your application. For example, you can add one of the following clauses in your SPL source file:  
+<ul class="ul">
+<li class="li"> <tt class="ph tt">use com.ibm.streamsx.messaging.xms::*;</tt> </li>
+
+<li class="li"> <tt class="ph tt">use com.ibm.streams.streamsx.messaging.xms::XMSSource;</tt> </li>
+
+<li class="li"> <tt class="ph tt">use com.ibm.streams.streamsx.messaging.xms::XMSSink;</tt> </li>
+
+</ul>
+</li>
+
+<li class="li"> Build your application.  You can use the <strong class="ph b">sc</strong> command or Streams Studio. To build the application in Streams Studio, you must add the toolkit location if you did not already do so. To build the application from the command line, you must configure the SPL compiler to find the root directory of the toolkit. Use one of the following methods: 
+<ul class="ul">
+<li class="li"> Set the <strong class="ph b">STREAMS_SPLPATH</strong> environment variable to the root directory of a toolkit or multiple toolkits (using a colon (:) as a separator). For example: 
+<ul class="ul">
+<li class="li"> <tt class="ph tt">export STREAMS_SPLPATH=$STREAMS_INSTALL/toolkits/com.ibm.streamsx.messaging</tt> </li>
+
+</ul>
+</li>
+
+<li class="li"> Specify the <strong class="ph b">-t</strong> or <strong class="ph b">--spl-path</strong> command parameter when you run the <strong class="ph b">sc</strong> command. Note: These command parameters override the <strong class="ph b">STREAMS_SPLPATH</strong> environment variable. For example: 
+<ul class="ul">
+<li class="li"> <tt class="ph tt">sc -t $STREAMS_INSTALL/toolkits/com.ibm.streamsx.messagin -M MyMain</tt> </li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+<li class="li"> Start the InfoSphere Streams instance.  </li>
+
+<li class="li"> Run the application. You can submit the application as a job by using the <strong class="ph b">streamtool submitjob</strong> command or by using Streams Studio.  </li>
+
+</ol>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

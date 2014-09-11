@@ -1,0 +1,814 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="XMLRef.spl"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_compilationunit__"/>
+<link rel="stylesheet" type="text/css" href="../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../html/spldoc.css"/>
+<title>XMLRef.spl</title>
+</head>
+<body id="spldoc_compilationunit__">
+
+
+<h1 class="title topictitle1">XMLRef.spl</h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="toolkit.html" title="com.ibm.streamsx.messaging">
+com.ibm.streamsx.messaging
+</a>
+-&gt; <a class="xref" href="com.ibm.streamsx.messaging.jms$.html">com.ibm.streamsx.messaging.jms</a>-&gt; XMLRef.spl</p>
+
+</div>
+
+<div class="section">
+
+<p class="p"><strong class="ph b">Connection specifications document</strong> 
+</p>
+
+<p class="p">A connection specifications document is an XML document that describes how operators in the Messaging Toolkit connect to and access messaging systems. Each document contains a collection  of &lt;connection_specification&gt; elements and &lt;access_specification&gt; elements. 
+</p>
+
+<p class="p">The relationship between connection specifications and access specifications is many-to-many. Operators can connect to the same messaging system (one connection specification) and access * several different queues or topics from that service (many access specifications). For example, an operator can connect to a single queue or a single topic in the messaging system. Alternatively, operators can access equivalent data (one access specification) from several different messaging systems (many connection specifications), for example, accessing data from both a test system and a production system. 
+</p>
+
+<p class="p">When the SPL compiler encounters an operator declaration for an <tt class="ph tt">XMSSink</tt> and <tt class="ph tt">XMSSource</tt> operators, the compiler reads the connection specifications document that is named by <strong class="ph b">connectionDocument</strong> parameter for that operator. If this parameter is not specified, the operator looks for a <tt class="ph tt">../etc/connections.xml</tt> file, where the path is relative to the data  directory. The compiler checks that the document conforms to the semantic rules of the XML schema that is defined for these documents. The SPL compiler uses the information that is given in the connection and access specifications to configure the operator. The compiler does not attempt to connect to the messaging system or access its data to verify correct configuration at compile time. The operators have run-time checks to validate configuration; if the configuration is incorrect these checks might result in runtime failures, which are captured in the processing element logs. 
+</p>
+
+<p class="p">For <tt class="ph tt">MQTTSink</tt> and <tt class="ph tt">MQTTSource</tt> operators, the connection specifications document that is named by <strong class="ph b">connectionDocument</strong> parameter contains only a &lt;connection_specification&gt; element. It does not contain an &lt;access_specification&gt; element. The <strong class="ph b">connectionDocument</strong> parameter is not mandatory. You can specify the connection information as parameters to the operator. 
+</p>
+
+<p class="p">The <tt class="ph tt">JMSSource</tt> and <tt class="ph tt">JMSSink</tt> operators parse the connection specifications document that is named by <strong class="ph b">connectionDocument</strong> parameter at runtime. If this parameter is not specified, the operator looks for a <tt class="ph tt">../etc/connections.xml</tt> file, where the path is relative to the data directory. A valid connection specifications document consists of a connections root element which contains one &lt;connection_specifications&gt; element and one &lt;access_specifications&gt; element. These elements serve as containers for the connection specifications and access specifications. Here is an abridged example of a complete connection specifications document, with all &lt;connection_specification&gt; and &lt;access_specification&gt; elements omitted: 
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;st:connections xmlns:st="http://www.ibm.com/xmlns/prod/streams/adapters"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+&lt;connection_specifications&gt;
+	.
+	.
+	.
+&lt;/connection_specifications&gt;
+&lt;access_specifications&gt;
+	.
+	.
+	.
+&lt;/access_specifications&gt;
+&lt;/st:connections&gt;
+</pre>
+
+
+</div>
+
+<p class="p"> <strong class="ph b">Connection_specification element</strong> 
+</p>
+
+<p class="p">A &lt;connection_specifications&gt; element is a sequence of zero or more &lt;connection_specification&gt; elements. 
+</p>
+
+<p class="p">Each &lt;connection_specification&gt; element has a single attribute, name. This name value is used in the <strong class="ph b">connection</strong> parameter of Messaging Toolkit operators. 
+</p>
+
+<p class="p">A &lt;connection_specification&gt; element must have exactly one element. For the Messaging Toolkit, this element is an XMS, JMS, or a MQTT element. Use the  following &lt;connection_specification&gt; elements for each of the Messaging Toolkit operators: 
+</p>
+
+<ul class="ul">
+<li class="li"> XMS: <tt class="ph tt">XMSSink</tt> and <tt class="ph tt">XMSSource</tt> operators </li>
+
+<li class="li"> JMS: <tt class="ph tt">JMSSink</tt> and <tt class="ph tt">JMSSource</tt> operators </li>
+
+<li class="li"> MQTT: <tt class="ph tt">MQTTSink</tt> and <tt class="ph tt">MQTTSource</tt> operators </li>
+
+</ul>
+
+<p class="p"> <strong class="ph b">JMS element</strong>  
+</p>
+
+<p class="p">The &lt;JMS&gt; element specifies the information that is needed by the <tt class="ph tt">JMSSink</tt> and <tt class="ph tt">JMSSource</tt> operators to establish a connection to messaging system. The following example shows connection specification that contains a &lt;JMS&gt; element: 
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+&lt;connection_specifications&gt;
+	&lt;connection_specification name="amqConn"&gt;
+	&lt;JMS initial_context="org.apache.activemq.jndi.ActiveMQInitialContextFactory"
+		provider_url = "tcp://machinename.com:61616"
+		connection_factory = "ConnectionFactory"/&gt;
+		user="user1"
+		password="password1"
+	&lt;/connection_specification&gt;
+&lt;/connection_specifications&gt;
+</pre>
+
+
+</div>
+
+<p class="p"> The &lt;JMS&gt; element has the following attributes: 
+</p>
+
+<ul class="ul">
+<li class="li"> initial_context 
+<ul class="ul">
+<li class="li"> This mandatory attribute represents the class name of the factory class that creates an initial context. The following example shows the initial_context when the messaging provider is WebSphere MQ and it uses the <tt class="ph tt">.bindings</tt> file: <tt class="ph tt">com.sun.jndi.fscontext.RefFSContextFactory</tt> </li>
+
+<li class="li"> The following example shows the initial_context when the messaging provider is Apache ActiveMQ: <tt class="ph tt">org.apache.activemq.jndi.ActiveMQInitialContextFactory</tt> </li>
+
+</ul>
+</li>
+
+<li class="li"> provider_url 
+<ul class="ul">
+<li class="li"> This mandatory attribute is a URL that points to the directory service that contains the administered objects or the JNDI URL that stores the objects in the file system. The syntax of the URL varies based on the messaging provider. 
+<ul class="ul">
+<li class="li"> <tt class="ph tt">file:///homes/abc/xyz/wef</tt>: Use this format if your application sends data to or receive messages from a WebSphere MQ queue or topic. This format specifies that the administered objects are stored in a file called <tt class="ph tt">.bindings</tt>, which is in the <tt class="ph tt">/homes/abc/xyz/wef</tt> directory. </li>
+
+<li class="li"> <tt class="ph tt">tcp://machinename.com:61616</tt>: Use this format if your application sends data to or receives messages from Apache ActiveMQ. </li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+<li class="li"> connection_factory 
+<ul class="ul">
+<li class="li"> This mandatory attribute value is the name of the ConnectionFactory administered object. This administered object is within the directory service context that is specified by the initial_context attribute, and it is used to establish the connection. For applications that use Apache ActiveMQ, you can use the default administered object called ConnectionFactory. </li>
+
+</ul>
+</li>
+
+<li class="li"> user 
+<ul class="ul">
+<li class="li"> The value of the user attribute provides the user identification under which the connection to the messaging provider is attempted. This attribute is optional. </li>
+
+</ul>
+</li>
+
+<li class="li"> password 
+<ul class="ul">
+<li class="li"> The password attribute contains the authentication credentials (password) for the user ID. This attribute is optional. </li>
+
+</ul>
+</li>
+
+</ul>
+
+<p class="p"> <strong class="ph b">MQTT element</strong> 
+</p>
+
+<p class="p">The &lt;MQTT&gt; element specifies the information that is needed by the <tt class="ph tt">MQTTSink</tt> and <tt class="ph tt">MQTTSource</tt> operators to establish a connection with MQTT-based messaging systems. 
+</p>
+
+<p class="p">The following example shows a &lt;connection specification&gt; element that contains an &lt;MQTT&gt; element: 
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+&lt;connection_specifications&gt;
+	&lt;connection_specification name="mqttconn"&gt;
+	&lt;MQTT serverURI="ssl://hostname:1883" trustStore="../../etc/trustFile.pem"/&gt;
+	&lt;/connection_specification&gt;
+&lt;/connection_specifications&gt;
+</pre>
+
+
+</div>
+
+<p class="p"> The &lt;MQTT&gt; element has the following attributes: 
+</p>
+
+<ul class="ul">
+<li class="li"> serverURI 
+<ul class="ul">
+<li class="li"> This required attribute specifies the URI of the MQTT server that you want to connect to. The serverURI has the following format: <em class="ph i">protocol</em>://<em class="ph i">hostname or IP address</em>:<em class="ph i">portnumber</em> </li>
+
+<li class="li"> The supported protocols are SSL and TCP. By default, the protocol is set to <tt class="ph tt">tcp</tt>, and the operators use the TCP protocol to connect to an MQTT server. </li>
+
+<li class="li"> To use SSL authentication, set the protocol to ssl.  You must also specify a value for the following attributes based on the type of SSL authentication: 
+<ul class="ul">
+<li class="li"> For client SSL authentication, if a password is set for the keystore, set the keyStore and keyStorePassword attributes in the MQTT element. </li>
+
+<li class="li"> For server SSL authentication, set the trustStore attribute in teh MQTT element. </li>
+
+<li class="li"> For mutual SSL authentication, if a password is set for the keystore, set the trustStore, keyStore, and keyStorePassword attributes in the MQTT element. </li>
+
+</ul>
+</li>
+
+<li class="li"> If you do not set the appropriate attributes, a run-time error occurs.  </li>
+
+</ul>
+</li>
+
+<li class="li"> trustStore 
+<ul class="ul">
+<li class="li"> This optional attribute specifies the name of the truststore file, which is in PEM format. You can specify an absolute path or a path that is relative to the data directory. The operator supports PEM files that use base64 encoding. The truststore file must contain the public certificates of all the trusted MQTT servers. If the truststore does not contain a public certificate for an MQTT server, the connection to that server is terminated. </li>
+
+</ul>
+</li>
+
+<li class="li"> keyStore 
+<ul class="ul">
+<li class="li"> This optional attribute specifies the name of the keystore file, which is in PEM format. The keystore file must contain the public certificate and the private key of the MQTT server that you want to connect to. If the keystore file does not exist, the operator terminates. The location of the keystore file can be absolute path or a path that is relative to the data directory. </li>
+
+</ul>
+</li>
+
+<li class="li"> keyStorePassword 
+<ul class="ul">
+<li class="li"> This optional attribute specifies the password for the keystore file. This attribute is specified when the keyStore attribute is specified and the keystore file it is protected by a password. If the keyStorePassword is invalid the operator terminates. </li>
+
+</ul>
+</li>
+
+</ul>
+
+<p class="p"> <strong class="ph b">XMS element</strong> 
+</p>
+
+<p class="p">The &lt;XMS&gt; element specifies the information that is needed by the <tt class="ph tt">XMSSink</tt> and <tt class="ph tt">XMSSource</tt> operators to establish a connection to messaging system.  The &lt;XMS&gt; element does not actually contain the information; rather, it references an XMS or JMS administered object, which is held in an external directory service.  The information about how to make the connection is held in this administered object. 
+</p>
+
+<p class="p">Here is an example connection specification that contains an &lt;XMS&gt; element: 
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+&lt;connection_specification name="wbe"&gt;
+	&lt;XMS initial_context="file:///opt/InitialContext/" 
+		connection_factory="TestConFac" 
+		user="user1"
+		password="password1" /&gt;
+&lt;/connection_specification&gt;
+</pre>
+
+
+</div>
+
+<p class="p"> The &lt;XMS&gt; element has four attributes: 
+</p>
+
+<ul class="ul">
+<li class="li"> initial_context 
+<ul class="ul">
+<li class="li"> This mandatory attribute value is a URL that points to the directory service that contains the administered objects. It uses the reference JNDI implementation, which stores objects in the file system. The syntax of the URL can take two forms: 
+<ul class="ul">
+<li class="li"> <tt class="ph tt">file:///xxx/yyy/zzz</tt>: This format specifies that the JNDI objects are stored in a file that is called <tt class="ph tt">zzz</tt>, which is in the directory <tt class="ph tt">xxx/yyy</tt>. </li>
+
+<li class="li"> <tt class="ph tt">file:///xxx/yyy/</tt>: This format specifies that the JNDI objects are stored in a file that is called <tt class="ph tt">.bindings</tt>, which is in the directory <tt class="ph tt">xxx/yyy</tt>. By default, the MQExplorer tool puts its entries in a file called <tt class="ph tt">.bindings</tt>. </li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+<li class="li"> connection_factory 
+<ul class="ul">
+<li class="li"> This mandatory attribute value is the name of the ConnectionFactory administered object. In particular, it is the administered object within the directory service context that is specified by the initial_context attribute, and it is used to make the connection. </li>
+
+</ul>
+</li>
+
+<li class="li"> user 
+<ul class="ul">
+<li class="li"> This optional attribute value provides the user identification that is used to connect to the messaging provider.  </li>
+
+</ul>
+If this attribute is not specified, a NULL value is used for the corresponding parameter in the XMS connect() function call. </li>
+
+<li class="li"> password 
+<ul class="ul">
+<li class="li"> This optional attribute value provides the authentication credentials (password) for the user ID. If this attribute is not specified, a NULL value is used for the corresponding parameter in the XMS <tt class="ph tt">connect()</tt> function call. </li>
+
+</ul>
+</li>
+
+</ul>
+
+<p class="p"> <strong class="ph b">Access_specification element</strong> 
+</p>
+
+<p class="p">A sequence of one or more &lt;access_specification&gt; elements make up an &lt;access_specifications&gt; element.  In the Messaging Toolkit, the &lt;access_specification&gt; element includes a &lt;destination&gt; element. 
+</p>
+
+<p class="p">Each &lt;access_specification&gt; element has a single attribute, name. The name value can be specified in the access parameter of a Messaging Toolkit operator. 
+</p>
+
+<p class="p"><strong class="ph b">Note</strong>: The <tt class="ph tt">MQTTSource</tt> and <tt class="ph tt">MQTTSink</tt> operators do not support the &lt;access_specification&gt; element. 
+</p>
+
+<p class="p">In the Messaging Toolkit, an &lt;access_specification&gt; element has: 
+</p>
+
+<ul class="ul">
+<li class="li"> A &lt;destination&gt; element; </li>
+
+<li class="li"> One or more &lt;uses_connection&gt; elements; </li>
+
+<li class="li"> No more than one &lt;native_schema&gt; element. </li>
+
+</ul>
+
+<p class="p"> <strong class="ph b">Destination element</strong> 
+</p>
+
+<p class="p">The &lt;destination&gt; element specifies the queue or topic that is used by the Messaging Toolkit operators.  The element also specifies some parameters that control the behavior of the operator. 
+</p>
+
+<p class="p">For WebSphere MQ, the &lt;destination&gt; element does not actually contain this information,  instead it specifies the information indirectly by referencing an XMS or JMS administered object that is held in an external directory service.  For Apache ActiveMQ, the &lt;destination&gt; element can directly refer to a queue or a topic. 
+</p>
+
+<p class="p">The following example shows an access specification that contains a &lt;destination&gt; element for the WebSphere MQ messaging system: 
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+&lt;access_specifications&gt;
+	&lt;access_specification name="Outtrading22"&gt;
+		&lt;destination identifier="TestDestination2" delivery_mode="persistent"
+		message_class="stream"/&gt;
+		&lt;uses_connection connection="wbe2" /&gt;
+		&lt;native_schema&gt;
+			&lt;attribute name="cntr" type="Long"/&gt;
+		&lt;/native_schema&gt;
+	&lt;/access_specification&gt;
+&lt;/access_specifications&gt;
+</pre>
+
+
+</div>
+
+<p class="p"> The following example shows an access specification that contains a &lt;destination&gt; element that directly refers to an ActiveMQ queue: 
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+&lt;access_specifications&gt;
+	&lt;access_specification name="amqAccess"&gt;
+		&lt;destination identifier="dynamicQueues/MapQueue" 
+		delivery_mode="persistent" message_class="stream" /&gt;
+		&lt;uses_connection connection="amqConn"/&gt;
+		&lt;native_schema&gt;
+			&lt;attribute name="cntr" type="Long" /&gt;
+		&lt;/native_schema&gt;
+	&lt;/access_specification&gt;
+&lt;/access_specifications&gt;
+</pre>
+
+
+</div>
+
+<p class="p"> The &lt;destination&gt; element has three attributes: 
+</p>
+
+<ul class="ul">
+<li class="li"> identifier 
+<ul class="ul">
+<li class="li"> This attribute value is the name of the destination administered object that is used. In particular, it is an administered object within the directory service context that is specified by the initial_context attribute in the connection specification. The destination administered object can be either a JMS queue object or a JMS topic object. This attribute is required. </li>
+
+<li class="li"> If the messaging provider is Apache ActiveMQ, this attribute can represent the queue or topic that must be created when accessing the messaging provider. </li>
+
+</ul>
+</li>
+
+<li class="li"> delivery_mode 
+<ul class="ul">
+<li class="li"> This attribute value specifies the quality of service that is applied by the messaging provider, if it is not overridden by the messaging provider administration. The value can be persistent or non_persistent, as defined by the JMS specification. If this attribute is not specified, the default value is non_persistent. </li>
+
+</ul>
+</li>
+
+<li class="li"> message_class 
+<ul class="ul">
+<li class="li"> This attribute value specifies how a stream tuple is serialized into a WebSphere� MQ or an Apache ActiveMQ message. It operates with the &lt;native_schema&gt; element. The value can be: bytes, empty, map, stream, wbe, wbe22, or xml. </li>
+
+</ul>
+</li>
+
+</ul>
+
+<p class="p"> <strong class="ph b">Message class formats in the Messaging Toolkit</strong> 
+</p>
+
+<p class="p">The message class specifies the type of XMS or JMS message that is output or expected by the operators in the Messaging Toolkit.  It also affects how the message payload is converted to tuples or vice versa. 
+</p>
+
+<p class="p">The Messaging Toolkit supports the following values for the message_class attribute in the &lt;destination&gt; element: bytes, empty, map, stream, wbe, wbe22, and xml. 
+</p>
+
+<p class="p">When the message_class attribute value is <tt class="ph tt">bytes</tt>: 
+</p>
+
+<ul class="ul">
+<li class="li"> The <tt class="ph tt">XMSSink</tt> operator constructs an XMS BytesMessage. The <tt class="ph tt">JMSSink</tt> operator constructs a JMS BytesMessage. The BytesMessage is a stream of binary data that contains values that are taken from the input stream. The values are serialized into the message in the order  that is specified in the &lt;native_schema&gt; element and they use the data types from that element. 
+<ul class="ul">
+<li class="li"> <strong class="ph b">Note</strong>: The <tt class="ph tt">XMSSink</tt> operator can handle String and blob attributes that do not have lengths that are specified in the &lt;native_schema&gt; element.  The operator serializes such attributes directly into the BytesMessage, and uses the actual length of the attribute at run time.  For example, if the blob has three entries, then it uses up 3 bytes in the BytesMessage. If the &lt;native_schema&gt; element contains a length for a String  or blob attribute, then the <tt class="ph tt">XMSSink</tt> operator pads or truncates the run time attribute value to make it fit this length.  Blob attributes are padded with nulls and String attributes are padded with spaces. </li>
+
+<li class="li"> The <tt class="ph tt">JMSSink</tt> operator raises a runtime error if the &lt;native_schema&gt; element does not specify the length for all String and blob attributes or if a negative length other than -2 or -4 is specified. If the length is positive, the operator pads or truncates the run time attributes to make it fit this length.  Blob attributes are padded with null values and String attributes are padded with spaces. For String attributes, length is measured in number of bytes. </li>
+
+</ul>
+</li>
+
+<li class="li"> The <tt class="ph tt">XMSSource</tt> operator expects an XMS BytesMessage. The <tt class="ph tt">JMSSource</tt> operator expects a JMS BytesMessage. The BytesMessage contains the values of the elements that are listed in the &lt;native_schema&gt;.  The values of the elements must occur in the order that is specified in the &lt;native_schema&gt; element. The data types must match the types that are specified in the schema. If the data in the message is insufficient, the operator discards the entire message and logs a run time error. <strong class="ph b">Note</strong>: The &lt;native_schema&gt; element must specify the length of all the String and blob attributes, unless the attribute is the final attribute in the &lt;native_schema&gt; element. 
+<ul class="ul">
+<li class="li"> If the attribute is the final attribute in the &lt;native_schema&gt; element and a length is not specified, the operators assume that the attribute takes all the bytes that remain in the XMS message. </li>
+
+<li class="li"> For an <tt class="ph tt">XMSSource</tt> operator, if the attribute is not the final attribute in the &lt;native_schema&gt; element and a length is not specified, a compile-time error occurs. For a <tt class="ph tt">JMSSource</tt> operator, if the attribute is not the final attribute in the &lt;native_schema&gt; element and a length is not specified, a run-time error occurs. </li>
+
+<li class="li"> For an <tt class="ph tt">XMSSource</tt> operator, if the length of the &lt;attribute&gt; element is -2, -4 or -8, the operator assumes that the data that appears in the XMS message starts with a signed 2, 4, or 8-byte length field. This length field is an integer that is encoded in the same way as any other integer attribute in the message. If the length value is incomplete, negative, or absent from the message, or there are insufficient bytes remaining in the XMS message, the operator discards the entire message and logs a run-time error. </li>
+
+<li class="li"> For a <tt class="ph tt">JMSSource</tt> operator, if the length of the &lt;attribute&gt; element is -2 or -4, the operator assume that the data that appears in the JMS message starts with a signed 2 or 4-byte length field. This length field is an integer that is encoded in the same way as any other integer attribute in the message. If the length value is incomplete, negative, or absent from the message, or there are insufficient bytes remaining in the JMS message, the operator discards the entire message and logs a run-time error. </li>
+
+<li class="li"> If the length of the &lt;attribute&gt; element is non-negative, then the operators attempt to read exactly that number of bytes from the BytesMessage. If there are insufficient bytes remaining in the XMS or JMS message, the operators discard the entire message and logs a run-time error. </li>
+
+<li class="li"> For an <tt class="ph tt">XMSSource</tt> operator, if the length attribute value is not a supported value, a compile-time error occurs. For a <tt class="ph tt">JMSSource</tt> operator, if the length attribute value is not a supported value, a run-time error occurs. </li>
+
+</ul>
+</li>
+
+</ul>
+
+<p class="p"> When the message_class attribute value is <tt class="ph tt">empty</tt>: 
+</p>
+
+<ul class="ul">
+<li class="li"> The <tt class="ph tt">XMSSink</tt> operator construct an empty XMS message. The <tt class="ph tt">JMSSink</tt> operator construct an empty JMS message.  For example, you can use an empty XMS message to verify that your InfoSphere Streams application can connect to the WebSphere MQ server and that the message reaches its destination. <strong class="ph b">Note</strong>: This message_class value cannot be used with a &lt;native_schema&gt; element. </li>
+
+<li class="li"> The <tt class="ph tt">XMSSource</tt> operator expects an empty XMS message. It emits a tuple with attribute values that are assigned by the SPL program. This behavior is not supported if a &lt;native_schema&gt; element is defined or if there are any unassigned attributes.  The <tt class="ph tt">JMSSource</tt> operator expects an empty JMS message. </li>
+
+</ul>
+
+<p class="p"> When the message_class attribute value is <tt class="ph tt">map</tt>: 
+</p>
+
+<ul class="ul">
+<li class="li"> The <tt class="ph tt">XMSSink</tt> operator produces an XMS MapMessage. The <tt class="ph tt">JMSSink</tt> operator produces a JMS MapMessage. The MapMessage is a collection of name, type and value triplets. The triplets contain elements whose names and types are taken from the &lt;native_schema&gt; element. Their values are taken from the operator input stream. </li>
+
+<li class="li"> The <tt class="ph tt">XMSSource</tt> operator expects an XMS MapMessage that contains elements whose names and types appear in the &lt;native_schema&gt; element. The <tt class="ph tt">JMSSource</tt> operator expects a JMS MapMessage that contains elements whose names and types appear in the &lt;native_schema&gt; element. 
+<ul class="ul">
+<li class="li"> If the schema contains an attribute which is not present in the MapMessage, the operator discards the entire message and logs a run-time error. </li>
+
+<li class="li"> If the MapMessage contains an attribute whose type does not match the data type in the &lt;native_schema&gt;, the operators attempt to convert it using the standard XMS or JMS conversion rules. If this conversion fails, the entire message is discarded and an error message is logged. </li>
+
+<li class="li"> If the Map Message contains an attribute with a null value, the corresponding output stream attribute is set to the default value for its type. </li>
+
+<li class="li"> If the MapMessage contains attributes that are not listed in the &lt;native_schema&gt;, the attributes are ignored. </li>
+
+</ul>
+</li>
+
+</ul>
+
+<p class="p"> When the message_class attribute value is <tt class="ph tt">stream</tt>: 
+</p>
+
+<ul class="ul">
+<li class="li"> The <tt class="ph tt">XMSSink</tt> operator constructs an XMS StreamMessage. The <tt class="ph tt">JMSSink</tt> operator constructs a JMS StreamMessage. The StreamMessage is an ordered list of type and value pairs. The pairs contain values that are taken from the input stream. The values are serialized into the message in the order in which they are specified in the &lt;native_schema&gt; element. The values use the data types from the &lt;native_schema&gt; element. </li>
+
+<li class="li"> The <tt class="ph tt">XMSSource</tt> operator expects an XMS StreamMessage. The <tt class="ph tt">JMSSource</tt> operator expects a JMS StreamMessage. The StreamMessage contains the values of the elements that are listed in the &lt;native_schema&gt; element. The values must occur in the order that is specified in the &lt;native_schema&gt; element. The values must also have the data types that are specified in that schema. 
+<ul class="ul">
+<li class="li"> If the operator encounters an attribute in the StreamMessage that does not have the expected data type, it attempts to convert the attribute to the data type specified by the &lt;native_schema&gt; element. If they conversion fails, the operator discards the entire message and logs a run-time error. </li>
+
+<li class="li"> If the StreamMessage contains more attributes than the &lt;native_schema&gt;, the attributes are ignored and a tuple is emitted. </li>
+
+<li class="li"> If the StreamMessage does not contain enough attributes, the operator discards the entire message and logs a run-time error. </li>
+
+<li class="li"> If the StreamMessage contains an attribute with a null value, the corresponding output stream attribute is set to the default value for its type. </li>
+
+</ul>
+</li>
+
+</ul>
+
+<p class="p"> When the message_class attribute value is <tt class="ph tt">wbe</tt>: 
+</p>
+
+<ul class="ul">
+<li class="li"> The <tt class="ph tt">XMSSink</tt> operator constructs an XMS TextMessage. The <tt class="ph tt">JMSSink</tt> operator constructs a JMS TextMessage. The TextMessage contains an XML document in the WebSphere Business Events (WBE) event packet format. 
+<ul class="ul">
+<li class="li"> The XML document contains a single &lt;connector-bundle&gt; of type Event. The XML namespace is http://wbe.ibm.com/6.2/Event/<em class="ph i">xxx</em> where <em class="ph i">xxx</em> is the input stream name. The input port is used as the connector-bundle name attribute and also as a wrapper element that contains the stream attribute values.The XML document contains a field for each attribute that is listed in the &lt;native_schema&gt; element. </li>
+
+<li class="li"> <strong class="ph b">Restriction</strong>: The blob data type is not a supported when you use the wbe message class. </li>
+
+<li class="li"> The <tt class="ph tt">XMSSource</tt> and the <tt class="ph tt">JMSSource</tt> operators do not support the use of the wbe message_class attribute value. If the operators encounters a message of class wbe, the operators discard the message. </li>
+
+</ul>
+</li>
+
+</ul>
+
+<p class="p"> When the message_class attribute value is <tt class="ph tt">wbe22</tt>: 
+</p>
+
+<ul class="ul">
+<li class="li"> The <tt class="ph tt">XMSSink</tt> operator constructs an XMS TextMessage. The <tt class="ph tt">JMSSink</tt> operator constructs a JMS TextMessage. The TextMessage contains an XML document in the WebSphere Business Event 2.2 event packet format. 
+<ul class="ul">
+<li class="li"> The XML document contains a single "connector-object" (event). The input stream name is used for both the WBE event-name and event-object name. The document contains a field for each attribute that is listed in the &lt;native_schema&gt; element. </li>
+
+<li class="li"> <strong class="ph b">Restriction</strong>: The blob data type is not supported when you use the wbe22 message class. </li>
+
+</ul>
+</li>
+
+<li class="li"> The <tt class="ph tt">XMSSource</tt> and the <tt class="ph tt">JMSSource</tt> operators do not support the use of the wbe22 message_class attribute value. If the operators encounter a message of class wbe22, the operators discard the message. </li>
+
+</ul>
+
+<p class="p"> When the message_class attribute value is <tt class="ph tt">xml</tt>: 
+</p>
+
+<ul class="ul">
+<li class="li"> The <tt class="ph tt">XMSSink</tt> operator constructs an XMS message that contains a generic XML message. The <tt class="ph tt">JMSSink</tt> operator constructs a JMS message that contains a generic XML message. </li>
+
+<li class="li"> The <tt class="ph tt">XMSSource</tt> and <tt class="ph tt">JMSSource</tt> operators do not support the use of the xml message_class attribute value. If the operators encounter a message of class xml, it discards the message. </li>
+
+</ul>
+
+<p class="p"> If the operators encounter a message that does not match the message_class, the operators discard the message and log an error.  This situation happens, for example, when the message_class is set to map and the <tt class="ph tt">XMSSource</tt> operator encounters an XMS Stream message. 
+</p>
+
+<p class="p">The following is an example of the XML document that is generated for an input stream named StockCashMergerArbitrageStatus_T_SBC and a message_class value of wbe: 
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+&lt;connector 
+xmlns='http://wbe.ibm.com/6.2/Event/StockCashMergerArbitrageStatus_T_SBC' 
+name='System S' version='6.2'&gt;
+	&lt;connector-bundle 
+		name='StockCashMergerArbitrageStatus_T_SBC'
+		type='Event'&gt;
+	&lt;StockCashMergerArbitrageStatus_T_SBC'&gt;
+	&lt;date data-type='string'&gt;01-FEB-2005&lt;/date&gt;
+	&lt;time data-type='string'&gt;14:45:21.335&lt;/time&gt;
+	&lt;ratio data-type='real'&gt;0.747079&lt;/ratio&gt;
+	&lt;alertType data-type='string'&gt;IN&lt;/alertType&gt;
+	&lt;dayNum data-type='integer'&gt;12815&lt;/dayNum&gt;
+	&lt;flag data-type='boolean'&gt;true&lt;/flag&gt;
+	&lt;/StockCashMergerArbitrageStatus_T_SBC'&gt;
+	&lt;/connector-bundle&gt;
+&lt;/connector&gt;
+</pre>
+
+
+</div>
+
+<p class="p"> The following is an example of the XML document that is generated for an input stream named iport$0 and a message_class value of wbe22: 
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+&lt;connector name='System S' version='2.2'&gt;
+	&lt;connector-bundle 
+		name='iport$0' 
+		type='Event'&gt;
+		&lt;connector-object name='iport$0'&gt;
+			&lt;field name='uintdata'&gt;100&lt;/field&gt;
+			&lt;field name='somethingID'&gt;Yes&lt;/field&gt;
+			&lt;field name='somethingid'&gt;YesToo&lt;/field&gt;
+		&lt;/connector-object&gt;
+	&lt;/connector-bundle&gt;
+&lt;/connector&gt;
+</pre>
+
+
+</div>
+
+<p class="p"> <strong class="ph b">Uses_connection element</strong> 
+</p>
+
+<p class="p">A &lt;uses_connection&gt; element identifies a connection specification that can be used with the access specification. 
+</p>
+
+<div class="p">Here is an example of an abridged access specification that contains &lt;uses_connection&gt; elements: 
+<pre class="pre codeblock">
+&lt;access_specification name="PersonSink"&gt;
+    .
+    .
+&lt;uses_connection connection="testSysten" /&gt;
+&lt;uses_connection connection="productionSystem" /&gt;
+    .
+    .
+    .
+&lt;/access_specification&gt;
+</pre>
+
+
+</div>
+
+<p class="p"> The &lt;uses_connection&gt; element has a single attribute, connection, whose value is the name of a &lt;connection_specification&gt; element  in the same connection specifications document. An &lt;access_specification&gt; element must have at least one &lt;uses_connection&gt; element. 
+</p>
+
+<p class="p"><strong class="ph b">Native_schema element</strong> 
+</p>
+
+<p class="p">In the Messaging Toolkit, the &lt;native_schema&gt; element specifies the data attributes of the data that is received from or sent to WebSphere MQ or Apache ActiveMQ.  For example, the &lt;native_schema&gt; element identifies the attribute names, data types, and optionally their length. 
+</p>
+
+<div class="p">The following example is an abridged access specification that contains a &lt;native_schema&gt; element: 
+<pre class="pre codeblock">
+&lt;access_specification name="OutTrading"&gt;
+	&lt;destination identifier="TestDestination"
+		delivery_mode="persistent" message_class="map" /&gt;
+	.
+	.
+	.
+	&lt;native_schema&gt;
+  			&lt;attribute name="id" type="Int" /&gt;
+   			&lt;attribute name="fname" type="String" /&gt;
+		&lt;attribute name="lname" type="String" /&gt;
+	&lt;/native_schema&gt;
+&lt;/access_specification&gt;
+</pre>
+
+
+</div>
+
+<p class="p"> The &lt;native_schema&gt; element has no attributes; it has &lt;attribute&gt; elements. 
+</p>
+
+<p class="p"><strong class="ph b">Attribute element</strong> 
+</p>
+
+<p class="p">The &lt;attribute&gt; element specifies information about the attributes that are present in an output XMS or JMS message, or are expected in an input XMS or JMS message. 
+</p>
+
+<p class="p">The &lt;attribute&gt; element has three possible attributes: 
+</p>
+
+<ul class="ul">
+<li class="li"> name 
+<ul class="ul">
+<li class="li"> This mandatory attribute specifies the name by which the attribute is known in the message. The Messaging Toolkit operators use these identifiers exactly as specified to access data in the message.  For example, the operators do not change the case of the identifiers. </li>
+
+</ul>
+</li>
+
+<li class="li"> length 
+<ul class="ul">
+<li class="li"> The length attribute specifies the maximum length of the attribute. The length attribute is required only for String and Bytes data types. If the length attribute is specified for other data types, the <tt class="ph tt">JMSSink</tt> and <tt class="ph tt">JMSSource</tt> operators generate a run-time error,  and the <tt class="ph tt">XMSSink</tt> and <tt class="ph tt">XMSSource</tt> operators generate a compile-time error. For the length attribute, the operator handles data based on the message class and the data type: 
+<ul class="ul">
+<li class="li"> <tt class="ph tt">JMSSource</tt> 
+<ul class="ul">
+<li class="li"> If the message class is bytes and String data in the message is smaller than the length specified in the native schema, the message is discarded. </li>
+
+<li class="li"> For map and stream message classes, the length attribute has no significance. </li>
+
+<li class="li"> The Blob data type is not supported. </li>
+
+</ul>
+</li>
+
+<li class="li"> <tt class="ph tt">JMSSink</tt> 
+<ul class="ul">
+<li class="li"> If the message class is bytes and String data in the tuple is smaller than the length specified in the native schema, the String data is padded with spaces to fit the length. For other message classes, the String data is written as is. </li>
+
+<li class="li"> If the String data in the tuple is longer than the length specified in the native schema and the message class is either map, stream, bytes, xml, wbe, or wbe22, the String data is truncated. </li>
+
+<li class="li"> If the message class is bytes and Bytes data in the tuple is smaller than the length specified in the native schema, the Bytes data is padded with null values to fit the length. For other message classes, the Bytes data is written as is. </li>
+
+<li class="li"> If the Blob data in the tuple is longer that the length specified in the native schema and the message class is either map, stream, bytes, or xml, the Blob data is truncated. For message classes wbe and wbe22, Blob data type is not supported. </li>
+
+</ul>
+</li>
+
+<li class="li"> <tt class="ph tt">XMSSource</tt> 
+<ul class="ul">
+<li class="li"> If the message class is bytes and the String or Bytes data in the message is smaller than the length specified in the native schema, the message is discarded. </li>
+
+<li class="li"> If the message class is map or stream, the length attribute is ignored for String data. </li>
+
+<li class="li"> If the message class is map or stream and the Bytes data is in the message is smaller than the length specified in the native schema, the Bytes data is padded with null values to fit the length. </li>
+
+<li class="li"> If the message class is map or stream and the Bytes data is in the message is longer than the length specified in the native schema, the Bytes data is truncated to fit the length. </li>
+
+</ul>
+</li>
+
+<li class="li"> <tt class="ph tt">XMSSink</tt> 
+<ul class="ul">
+<li class="li"> If the message class is bytes and the String data in the tuple is smaller than the length specified in the native schema, the String data is padded with spaces to fit the length. For other message classes the String data is written as is. </li>
+
+<li class="li"> If the String data in the tuple is longer than the length specified in the native schema and the message class is either map, stream, bytes, or xml, the String data is a truncated. </li>
+
+<li class="li"> If the message class is bytes and the Bytes data in the tuple is smaller than the length specified in the native schema, the Bytes data is padded with null values to fit the length. For other message classes the Bytes data is written as is. </li>
+
+<li class="li"> If the Blob data in the tuple is longer than the length specified in the native schema and the message class is either map, stream, bytes, or xml, the Blob data is truncated. For message classes wbe and wbe22, Blob data is not supported. </li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+<li class="li"> type 
+<ul class="ul">
+<li class="li"> This mandatory attribute specifies the data type of the attribute. The following XMS data types and corresponding SPL types, which are listed in brackets, can be used in the access specifications for the <tt class="ph tt">XMSSink</tt> and <tt class="ph tt">XMSSource</tt> operators: 
+<ul class="ul">
+<li class="li"> Byte (int8) </li>
+
+<li class="li"> Short(uint8, int16) </li>
+
+<li class="li"> Int (uint16, int32) </li>
+
+<li class="li"> Long (uint32, int64) </li>
+
+<li class="li"> Float (float32) </li>
+
+</ul>
+
+<ul class="ul">
+<li class="li"> Double (float64) </li>
+
+<li class="li"> Boolean (boolean) 
+<ul class="ul">
+<li class="li"> Bytes (blob) <strong class="ph b">Note</strong>: The SPL type blob is not supported for message classes wbe and wbe22 by the <tt class="ph tt">XMSSink</tt> operator. </li>
+
+<li class="li"> String (rstring) </li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+</ul>
+
+<div class="p"> The following table lists the data types that can be used in the access specifications for the <tt class="ph tt">JMSSink</tt> and <tt class="ph tt">JMSSource</tt> operators.  It also lists the corresponding SPL types for each JMS type. 
+<pre class="pre codeblock">
+SPL type 	JMS type based on message class
+		map		stream		bytes		xml		wbe			wbe22
+==============================================================================================================
+int8		Byte		Byte		Byte		String		String			String
+uint8 		Byte 		Byte 		Byte 		String 		String			String
+int16 		Short 		Short 		Short 		String 		String			String
+uint16 		Short 		Short 		Short 		String 		String			String
+int32 		Int 		Int 		Int 		String 		String			String
+uint32 		Int 		Int 		Int 		String 		String			String
+int64 		Long 		Long 		Long 		String 		String			String
+uint64 		Long 		Long 		Long 		String 		String			String
+float32 	Float 		Float 		Float 		String 		String			String
+float64 	Double 		Double 		Double 		String 		String			String
+boolean 	Boolean 	Boolean 	Boolean 	String 		String			String
+blob* 		Bytes 		Bytes 		Bytes 		String		Not supported	Not supported
+rstring* 	String 		String 		Bytes 		String 		String			String
+decimal32 	String 		String 		Bytes 		String 		String			String
+decimal64 	String 		String 		Bytes 		String 		String			String
+decimal128 	String 		String 		Bytes 		String 		String			String
+timestamp*	String 		String 		Bytes 		String 		String			String
+ustring 	String 		String 		Bytes 		String 		String			String
+</pre>
+
+
+</div>
+
+<p class="p"> <strong class="ph b">NOTE</strong>:  
+</p>
+
+<ul class="ul">
+<li class="li"> The blob SPL type is not supported for message classes wbe and wbe22 by the <tt class="ph tt">JMSSink operator</tt>. The Blob data type is not supported by <tt class="ph tt">JMSSource</tt> operator. </li>
+
+<li class="li"> The information for the rstring SPL type assumes that you use UTF-8 encoding. </li>
+
+<li class="li"> The information for the timestamp SPL type assumes that you use the 1970 UNIX epoch. </li>
+
+</ul>
+
+<p class="p"> The following SPL data types are not supported by the Messaging Toolkit operators: 
+</p>
+
+<ul class="ul">
+<li class="li"> enum </li>
+
+<li class="li"> complexb </li>
+
+<li class="li"> composite types </li>
+
+<li class="li"> xml </li>
+
+</ul>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

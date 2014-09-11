@@ -11,12 +11,12 @@
 <meta name="abstract" content="com.ibm.streamsx.messaging"/>
 <meta name="description" content="com.ibm.streamsx.messaging"/>
 <meta name="DC.Format" content="XHTML"/>
-<meta name="DC.Identifier" content="spldoc_toolkit__toolkit__0.7.0"/>
+<meta name="DC.Identifier" content="spldoc_toolkit__toolkit__0.8.0"/>
 <link rel="stylesheet" type="text/css" href="../html/commonltr.css"/>
 <link rel="stylesheet" type="text/css" href="../html/spldoc.css"/>
 <title>IBMStreams com.ibm.streamsx.messaging Toolkit</title>
 </head>
-<body id="spldoc_toolkit__toolkit__0.7.0">
+<body id="spldoc_toolkit__toolkit__0.8.0">
 
 
 <h1 class="title topictitle1">IBMStreams com.ibm.streamsx.messaging Toolkit</h1>
@@ -27,11 +27,44 @@
 <div class="section"><h2 class="title sectiontitle splhead-1">General Information</h2>
 
 
+<p class="p">The Messaging toolkit project is an open source IBM InfoSphere Streams toolkit project. It is focused on the development of operators and functions that help you use InfoSphere Streams to interact with messaging systems such as JMS, XMS, and MQTT.  
+</p>
+
+<p class="p">The operators provide the ability for InfoSphere Streams applications to send and receive data from a queue or topic that is posted on WebSphere MQ, Apache ActiveMQ or MQ Telemetry Transport (MQTT) server. 
+</p>
+
+<p class="p">In particular, the XMSSource and XMSSink operators in the Messaging Toolkit use the standard XMS architecture and APIs to read and write data from WebSphere MQ 7.0, 7.1, and 7.5. The JMSource and JMSSink operators use the standard JMS architecture and JMS 1.1 APIs to read and write data from WebSphere MQ v7.5 and Apache ActiveMQ v5.7. The MQTTSource and MQTTSink operators use the MQTT architecture and APIs to read and write to MQTT 3.1. 
+</p>
+
+<p class="p"><strong class="ph b">Restriction</strong>: The XMSSource, XMSSink, MQTTSource and MQTTSink operators in the Messaging Toolkit are not supported on POWER7 Systems. You must use x86_64 systems. The JMSource and JMSSink operators do not support reading and writing data from Apache Active MQ on POWER7 Systems. 
+</p>
+
+<p class="p">The following figure shows how the XMSSink and XMSSource operators in the Messaging Toolkit use standard XMS architecture and APIs.  <br/><img class="image" src="file:///homes/hny7/chanskw/git/streamsx.messaging/com.ibm.streamsx.messaging/8751_dgm1.gif" alt="This diagram illustrates the XMS APIs that are used to communicate between InfoSphere Streams, an XMS client, and a WebSphere MQ server."/><br/> 
+</p>
+
+<p class="p">For example: 
+</p>
+
+<ul class="ul">
+<li class="li"> The CreateProducer API creates a message producer to send messages to the specified destination. </li>
+
+<li class="li"> The CreateConsumer API creates a message consumer for the specified destination. </li>
+
+<li class="li"> The CreateConnection API creates a connection that uses a specified user identity. The specified user identifier and password are used to authenticate the application. </li>
+
+</ul>
+
+<p class="p"> The following figure shows how the JMSSource and JMSSink operators in the Messaging Toolkit use standard JMS architecture and APIs. <br/><img class="image" src="file:///homes/hny7/chanskw/git/streamsx.messaging/com.ibm.streamsx.messaging/architecture_diagram_JMSadpaters.gif" alt="This figure shows JMSSource and JMSSink operators that use Apache ActiveMQ and WebSphere MQ libraries to read and write from JMS providers."/><br/> 
+</p>
+
+<p class="p">The Messaging Toolkit operators must be configured to connect to messaging systems. This configuration information is specified in an XML document, called a connection specifications document. The connection specifications document is similar to but separate from the document that is used by the Database Toolkit. 
+</p>
+
 <dl class="dl">
   
   <dt class="dt dlterm">Version</dt>
 
-  <dd class="dd">0.7.0</dd>
+  <dd class="dd">0.8.0</dd>
 
   
   
@@ -55,6 +88,16 @@
 <dl class="dl">
    
      <dt class="dt dlterm splpart"><a class="xref" href="com.ibm.streamsx.messaging.jms$.html">com.ibm.streamsx.messaging.jms</a></dt>
+
+  <dd class="dd">SPL Files
+       <ul class="sl simple">
+         <li class="sli"><a class="xref" href="com.ibm.streamsx.messaging.jms$XMLRef$spl.html">com.ibm.streamsx.messaging.jms/XMLRef.spl</a></li>
+
+         <li class="sli"><a class="xref" href="com.ibm.streamsx.messaging.jms$namespaceJMS$spl.html">com.ibm.streamsx.messaging.jms/namespaceJMS.spl</a></li>
+
+       </ul>
+
+   </dd>
 
    <dd class="dd">Operators
        <ul class="sl simple">
@@ -128,6 +171,14 @@
 
         
      <dt class="dt dlterm splpart"><a class="xref" href="com.ibm.streamsx.messaging.xms$.html">com.ibm.streamsx.messaging.xms</a></dt>
+
+  <dd class="dd">SPL Files
+       <ul class="sl simple">
+         <li class="sli"><a class="xref" href="com.ibm.streamsx.messaging.xms$namespaceXMS$spl.html">com.ibm.streamsx.messaging.xms/namespaceXMS.spl</a></li>
+
+       </ul>
+
+   </dd>
 
    <dd class="dd">Operators
        <ul class="sl simple">
