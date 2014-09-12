@@ -12,7 +12,6 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -77,7 +76,7 @@ public class MqttClientWrapper implements MqttCallback {
 
     	try {
 	    
-	    	String clientId = MqttAsyncClient.generateClientId();
+	    	String clientId = newClientId();
 
 			mqttClient = new MqttClient(this.brokerUri,clientId, dataStore);
 			mqttClient.setTimeToWait(COMMAND_TIMEOUT);
@@ -103,7 +102,7 @@ public class MqttClientWrapper implements MqttCallback {
 		
 		MemoryPersistence dataStore = new MemoryPersistence();
 
-		String clientId = MqttAsyncClient.generateClientId();
+		String clientId = newClientId();
 
 		TRACE.log(TraceLevel.INFO, "[Connect:]" + brokerUri); //$NON-NLS-1$
 		TRACE.log(TraceLevel.INFO, "[Connect:] reconnectBound:" + reconnectionBound); //$NON-NLS-1$
@@ -161,6 +160,10 @@ public class MqttClientWrapper implements MqttCallback {
 					+ brokerUri);
 		}
 
+	}
+
+	private String newClientId() {
+		return "streams" + System.nanoTime();		
 	}
 
 	/**
