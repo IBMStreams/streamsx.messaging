@@ -8,20 +8,20 @@ others. All Rights Reserved. *
                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 	<connection_specifications>
-		<connection_specification name="conn1">
+		<connection_specification name="activemq">
 			<JMS initial_context="org.apache.activemq.jndi.ActiveMQInitialContextFactory" provider_url = "tcp://activeMqHost:port" connection_factory="ConnectionFactory"/>
 		</connection_specification>
 	     
-		<connection_specification name="conn2">
+		<connection_specification name="wmq">
 			<JMS initial_context="com.sun.jndi.fscontext.RefFSContextFactory" provider_url = "file:///tmp/Bindings/" connection_factory="CONFAC"/>
 		</connection_specification>
 	</connection_specifications>
 
 
 	<access_specifications>
-		<access_specification name="access1">
+		<access_specification name="access_activemq">
 			<destination identifier="dynamicQueues/STREAMS.MapQueue" delivery_mode="persistent" message_class="map" />
-			<uses_connection connection="conn1"/>
+			<uses_connection connection="activemq"/>
 			<native_schema>
 				<attribute name="id" type="Int" />
 			      	<attribute name="fname" type="String" length="15" />
@@ -34,9 +34,9 @@ others. All Rights Reserved. *
 
 		</access_specification>
 
-		<access_specification name="access2">
+		<access_specification name="access_wmq">
 			<destination identifier="DEST" delivery_mode="persistent" message_class="map" />
-			<uses_connection connection="conn2"/>
+			<uses_connection connection="wmq"/>
 			<native_schema>
 				<attribute name="id" type="Int" />
 			      	<attribute name="fname" type="String" length="15" />

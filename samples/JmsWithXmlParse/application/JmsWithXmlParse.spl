@@ -1,0 +1,88 @@
+// *******************************************************************************
+// * Copyright (C)2014, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// ******************************************************************************* 
+
+namespace application ;
+
+use com.ibm.streamsx.messaging.jms::* ;
+
+/** Sample to demonstrate how to work with XML data using the JMS adapters
+ * 
+ * This sample uses the connection document from ../etc/connections.xml to
+ * connect to a JMS server.  Client may override using submission time parameters
+ * as desired.
+ * 
+ */
+composite JmsWithXmlParse
+{
+	param
+		expression<rstring> $connectionDoc : getSubmissionTimeValue("connectionDoc",
+			"../etc/connections.xml") ;
+		expression<rstring> $connection : getSubmissionTimeValue("connection",
+			"conn") ;
+		expression<rstring> $access : getSubmissionTimeValue("access",
+			"access_text") ;
+	type
+		ReferenceType = tuple<int32 quality, rstring book> ;
+		BookInfo = tuple<rstring title, list<rstring> authors, decimal32 price,
+			list<ReferenceType> references> ;
+	graph
+
+	// An spl.adapter::FileSource operator is configured to read in the XML from the file "catalog.xml" in 1K byte chunks and produce output
+	// tuples each containing a 1K "blob" of XML.  Other block sizes could be used if desired.
+		stream<blob xmlData> XML = FileSource()
+		{
+			param
+				file : "catalog.xml" ;
+				format : block ;
+				blockSize : 1024u ;
+		}
+
+		//  parse rstring as XML document
+		stream<BookInfo> X = XMLParse(FromJms)
+		{
+			param
+				trigger : "/catalog/book" ;
+				parsing : permissive ;
+			output
+				X : title = XPath("title/text()"), authors = XPathList("author/text()"),
+					price =(decimal32) XPath("@price"), references = XPathList("reference", {
+					quality =(int32) XPath("@quality"), book = XPath("book/text()") }) ;
+		}
+
+		// An spl.adapter::FileSink operator writes the results of the parsed XML to the output file Results.txt.
+		() as Nill = FileSink(X)
+		{
+			param
+				file : "Results.txt" ;
+				format : txt ;
+				flush : 1u ;
+		}
+
+		// send the xml message to JMS server
+		() as ToJms = JMSSink(Converted as inPort0Alias)
+		{
+			param
+				connectionDocument : $connectionDoc ;
+				connection : $connection ;
+				access : $access ;
+		}
+
+		// receive text message from JMS server
+		(stream<rstring xmlData> FromJms) = JMSSource()
+		{
+			param
+				connectionDocument : $connectionDoc ;
+				connection : $connection ;
+				access : $access ;
+		}
+
+		// convert blob data to rstring
+		(stream<rstring xmlData> Converted) = Functor(XML)
+		{
+			output
+				Converted : xmlData = convertFromBlob(XML.xmlData) ;
+		}
+
+}

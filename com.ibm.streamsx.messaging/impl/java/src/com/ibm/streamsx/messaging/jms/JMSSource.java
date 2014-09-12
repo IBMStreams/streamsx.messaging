@@ -39,7 +39,7 @@ public class JMSSource extends ProcessTupleProducer {
 	 * {@code Logger}. The {@code Logger} uses a
 	 */
 	private static Logger logger = Logger.getLogger(LoggerNames.LOG_FACILITY
-			+ "." + CLASS_NAME, "JMSMessages");
+			+ "." + CLASS_NAME, "com.ibm.streamsx.messaging.jms.JMSMessages");
 
 	// variable to hold the output port
 	private StreamingOutput<OutputTuple> dataOutputPort;
@@ -353,6 +353,9 @@ public class JMSSource extends ProcessTupleProducer {
 			case empty:
 				messageHandlerImpl = new EmptyMessageHandler(
 						connectionDocumentParser.getNativeSchemaObjects());
+				break;
+			case text:
+				messageHandlerImpl = new TextMessageHandler(connectionDocumentParser.getNativeSchemaObjects());
 				break;
 			default:
 				throw new RuntimeException("No valid message class is specified.");

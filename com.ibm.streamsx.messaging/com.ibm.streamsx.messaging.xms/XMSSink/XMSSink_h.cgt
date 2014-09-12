@@ -1,0 +1,104 @@
+<%
+#######################################################################
+# Copyright (C)2014, International Business Machines Corporation and  
+# others. All Rights Reserved.                                    
+#######################################################################                             
+%>
+
+
+
+#include <SPL/Runtime/Operator/OperatorMetrics.h>
+#include <SPL/Runtime/Common/Metric.h>
+
+
+<%SPL::CodeGen::headerPrologue($model);%>
+
+
+class MY_OPERATOR : public MY_BASE_OPERATOR 
+{
+
+public:
+
+	// Constructor
+	MY_OPERATOR();
+
+	// Destructor
+	virtual ~MY_OPERATOR();
+
+	// Tuple processing for non-mutating ports
+	void process(Tuple const & tuple, uint32_t port);
+
+private:
+
+	#include "XMSCommon.h"
+
+	//send the output to the error port if error port is specified
+	void sendOutputErrorMsg(ostringstream & ,Tuple const &);
+
+	// Members 
+	//To store the error message
+	ostringstream ErrMsg;
+
+	// Performance Metrics
+	SPL::int64 nTruncatedInserts;
+	Metric & nTruncatedInsertsPC;
+	SPL::int64 nFailedInserts;
+	Metric & nFailedInsertsPC;
+	SPL::int64 nConnectionAttempts;
+	Metric & nConnectionAttemptsPC;
+
+	void updatePerformanceCounters();
+	
+	boolean isErrorPortSpecified;
+	boolean isInitialConnectionFailure;
+	double periodVal;
+
+	/*******************************************************************
+	 * Class to help build the special XML format used for WBE messages *
+	 *******************************************************************/
+
+	class WBEMessage {
+		ostringstream result;
+		const char* evName;
+		SPL::boolean closed;
+	public:
+		WBEMessage (const char* eventName);
+		xms::String toString ();
+		void setString(const char* name, const rstring& value);
+		void setBoolean(const char* name, const xmsBOOL value);
+		void setByte(const char* name, const unsigned int value);
+		void setShort(const char* name, const xmsSHORT value);
+		void setInt(const char* name, const xmsINT value);
+		void setFloat(const char* name, const xmsFLOAT value);
+		void setDouble(const char* name, const xmsDOUBLE value);
+		void setLong(const char* name, const xmsLONG value);
+	};
+
+
+	/**********************************************************************
+	 * Class to help build a more general XML format used for XMS messages *
+	 **********************************************************************/
+
+	class XMLMessage {
+		ostringstream result;
+		ostringstream body;
+		xms::String evName;
+		SPL::boolean closed;
+	public:
+		XMLMessage ();
+		string toString ();
+		void setString(const char* name, const char* type, const rstring& value);
+		void setBoolean(const char* name, const char* type, const xmsBOOL value);
+		void setByte(const char* name, const char* type,const unsigned int value);
+		void setBytes(const char* name,const char* type,const xmsSBYTE* value, xmsINT length);
+		void setShort(const char* name, const char* type,const xmsSHORT value);
+		void setInt(const char* name, const char* type,const xmsINT value);
+		void setFloat(const char* name, const char* type,const xmsFLOAT value);
+		void setDouble(const char* name, const char* type,const xmsDOUBLE value);
+		void setLong(const char* name, const char* type,const xmsLONG value);
+	};
+
+};
+
+<%SPL::CodeGen::headerEpilogue($model);%>
+

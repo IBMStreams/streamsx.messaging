@@ -1,0 +1,305 @@
+<?xml version="1.0" ?>
+<!--  
+Copyright (C)2014, International Business Machines Corporation and  
+others. All Rights Reserved. 
+-->
+<operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
+  <cppOperatorModel>
+    <context>
+      <description>
+The `XMSSource` operator reads data from a WebSphere MQ queue or topic and creates tuples out of it.
+
+Each input WebSphere MQ message is converted to a separate tuple and sent to the output stream. A single message cannot contain multiple tuples.
+
+**Exceptions**
+
+The following list describes the common types of exceptions that can occur:
+ * Run-time errors that halt the operator execution.
+   * The `XMSSource` operator throws an exception and terminates in the following cases:
+     * During the initial connect attempt, the **reconnectionPolicy** is set to `NoRetry` and the operator does not have a successful connection, or during transient connection failures the **reconnectionPolicy** is set to `BoundedRetry` and the operator does not have a successful connection after the number of attempts that are specified in the **reconnectionBound** parameter. Successive data is lost.
+     * The queue name is unknown.
+     * The user is not an authorized user of the queue.
+     * The queue manager name is unknown.
+     * The operator is unable to connect to the host.
+     * The operator is unable to connect to the port.
+ * Run-time errors that cause a message to be dropped and an error message to be logged.
+   * The `XMSSource` operator throws an exception and discards the message in the following cases:
+     * A MapMessage does not contain the attributes that are specified in the native schema.
+     * A MapMessage contains attributes whose data type does not match the data type that is specified in the native schema and the conversion fails.
+     * A StreamMessage does not contain the attributes that are specified in the native schema.
+     * A StreamMessage contains attributes whose data type does not match the data type specified in the native schema and the conversion fails.
+     * A BytesMessage does not contain the attributes that are specified in the native schema.
+     * The operator encounters a message that does not match the message class that is specified in the native schema.
+     * When a negative length (-2, -4, or -8) is specified in the native schema for bytes and string data types and the message class is bytes, the operator expects that the XMS message starts with a 2, 4, or 8-byte length field. If there are insufficient bytes remaining in the XMS message, the operator discards the entire message and logs a run-time error.
+     * When a non-negative length is specified in the native schema for bytes and string, the operator attempts to read exactly that number of bytes from the BytesMessage. If there are insufficient bytes remaining in the XMS message, the operator discards the entire message and logs a run-time error.
+   * The discarded message is not sent to the WebSphere MQ queue or topic.
+ * Compile-time errors
+   * The `XMSSource` operator throws a compile-time error in the following cases:
+     * The message type is empty and a native schema is specified.
+     * The message type is bytes, stream, or map and a native schema attribute name or type does not match the name or type of the attribute in the output stream schema.
+     * An attribute appears twice in the native schema.
+     * An attribute of type string or bytes appears in the native schema without a **length** parameter.
+     * The `connections.xml` file does not conform to `connections.xsd`.
+     * The **connectionsDocument** parameter refers to a nonexistent connections file.
+     * The **connectionsDocument** parameter is not specified and there is no `connections.xml` file inside the `etc` directory.
+     * An invalid value is specified for the message class.
+     * The **access** parameter does not refer to an existing access element in the native schema.
+     * The **connection** parameter does not refer to an existing access element in the native schema.
+
+In all of these cases, the operator logs the exception in the console logs, as well as on the error output port, if applicable.
+
+Note:
+ * The `XMSSource` operator runs without considering the length value for all message classes for string and bytes data types when a length of -1 is specified; it does not throw an error at either compile time or run time.
+ * If the WebSphere MQ server goes down while the `XMSSource` operator is running and the **reconnectionPolicy** parameter is set to `BoundedRetry` or `InfiniteRetry`, the operator does not try to reconnect to WebSphere MQ. This problem occurs in XMSClient version 2.0.1 or lower.
+
+**Examples**
+
+The following example demonstrates the use of multiple `XMSSource` operators with different parameter combinations:
+
+	composite Main {
+	graph
+	//XMSSource Operator with connections.xml 
+	//defaulted to ./etc/connections.xml
+	stream &lt;int32 id, rstring fname, rstring lname&gt;
+	MyPersonNamesStream  = XMSSource(){
+		param 
+			connection: "wbe";
+			access: "OutTrading";
+	}    
+	
+	//XMSSource operator with fully 
+	//qualified name of connections.xml
+	stream &lt;int32 id, rstring fname, rstring lname&gt;
+	MyPersonNamesStream = XMSSource(){
+		param     
+			connectionDocument:"/home/streamsuser/connections/XMSconnections.xml";
+			connection: "wbe";  
+			access: "OutTrading";
+	}    
+	
+	//XMSSource Operator with the optional 
+	//error output port specified 
+	(stream &lt;int32 id, rstring fname, rstring lname&gt;; 
+	stream &lt;rstring errorMessage&gt; ErrorStream)  = XMSSource(){
+		param                     
+			connection: "wbe";
+			access: "OutTrading";
+	}    
+	
+	//XMSSource operator with the optional 
+	//initDelay and reconnectionPolicy specified
+	stream &lt;int32 id, rstring fname, rstring lname&gt;
+	MyPersonNamesStream = XMSSource(){
+		param     
+			connection: "wbe"; 
+			access: "OutTrading";
+			reconnectionPolicy: NoRetry;
+			initDelay: 10.0;
+	}
+	
+	//XMSSource operator with the optional period 
+	//and reconnectionPolicy specified
+	stream &lt;int32 id, rstring fname, rstring lname&gt; 
+	MyPersonNamesStream = XMSSource(){
+		param     
+			connection: "wbe"; 
+			access: "OutTrading"; 
+			reconnectionPolicy: InfiniteRetry;
+			period: 1.20;
+	}
+	// XMSSource operator with the reconnectionPolicy
+	//specified as BoundedRetry
+	stream &lt;int32 id, rstring fname, rstring lname&gt;
+	MyPersonNamesStream = XMSSource(){
+		param     
+			connection: "wbe"; 
+			access: "OutTrading"; 
+			reconnectionPolicy: BoundedRetry;
+			reconnectionBound: 2u;
+			period: 1.20;
+	}
+	}
+
+This example uses the same `connections.xml` that is provided in the example for the `XMSSink` operator.
+</description>
+	<iconUri size="16">XMSSource_16.gif</iconUri>
+      <iconUri size="32">XMSSource_32.gif</iconUri>
+      <metrics>
+        <metric>
+          <name>nMessagesRead</name>
+          <description>The number of messages read successfully.</description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>nMessagesDropped</name>
+          <description>The number of messages dropped.</description>
+          <kind>Counter</kind>
+        </metric>
+        <metric>
+          <name>nConnectionAttempts</name>
+          <description>The number of connection attempts that are made before a successful connection.</description>
+          <kind>Counter</kind>
+        </metric>
+      </metrics> 
+      <customLiterals>
+	 <enumeration>
+          <name>ReconnectionPolicy</name>
+          <value>InfiniteRetry</value>
+          <value>NoRetry</value>
+          <value>BoundedRetry</value>
+        </enumeration>
+      </customLiterals>
+      <libraryDependencies>
+        <library>
+          <cmn:description> IBM Message Service Client for C/C++ (XMS) libraries</cmn:description>
+          <cmn:managedLibrary>
+            <cmn:lib>gxi01l</cmn:lib>
+            <cmn:lib>gxi</cmn:lib>
+            <cmn:libPath>@XMS_HOME@/lib64</cmn:libPath>
+            <cmn:includePath>@XMS_HOME@/tools/cpp/include</cmn:includePath>
+            <cmn:includePath>@XMS_HOME@/tools/c/include</cmn:includePath>
+            <cmn:command></cmn:command>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description>WebSphere MQ Client libraries</cmn:description>
+          <cmn:managedLibrary>
+            <cmn:libPath>@MQ_HOME@/lib64</cmn:libPath>
+            <cmn:includePath>@MQ_HOME@/lib64</cmn:includePath>
+            <cmn:command></cmn:command>
+          </cmn:managedLibrary>
+        </library>
+        <library>
+          <cmn:description>Code that is common to both XMSSource and XMSSink is located in a directory ../Common relative to both of these operators.</cmn:description>
+          <cmn:managedLibrary>
+            <cmn:libPath>../Common</cmn:libPath>
+            <cmn:includePath>../Common</cmn:includePath>
+            <cmn:command></cmn:command>
+          </cmn:managedLibrary>
+        </library>
+      </libraryDependencies>
+      <providesSingleThreadedContext>Always</providesSingleThreadedContext>
+      <incrementalCompilationStrategy>ResultDependent</incrementalCompilationStrategy>
+      <allowCustomLogic>true</allowCustomLogic>
+      <codeTemplates>
+        <codeTemplate name="XMSSource">
+          <description>Basic XMSSource template</description>
+          <template>stream&lt;${streamType}&gt; ${streamName} = XMSSource()   {
+	      param
+            	connection : &quot;${ConnectionSpecificationName}&quot;;
+                access : &quot;${AccessSpecificationName}&quot;;
+          }</template>
+        </codeTemplate>
+      </codeTemplates>
+    </context>
+    <parameters>
+      <allowAny>false</allowAny>
+      <parameter>
+        <name>reconnectionPolicy</name>
+        <description>
+This is an optional parameter that specifies the reconnection policy. The valid values are `NoRetry`, `InfiniteRetry`, and `BoundedRetry`. If the parameter is not specified, the reconnection policy is set to `BoundedRetry` with a **reconnectionBound** of `5` and a **period** of 60 seconds.</description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>CustomLiteral</expressionMode>
+        <type>ReconnectionPolicy</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>reconnectionBound</name>
+        <description>
+This optional parameter specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the **reconnectionPolicy** parameter is specified and set to `BoundedRetry`, otherwise a compile-time error occurs. If the **reconnectionBound** parameter is specified and the **reconnectionPolicy** parameter is not set, a compile-time error occurs. The default value for the **reconnectionBound** parameter is `5`.</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>uint32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>period</name>
+        <description>
+This optional parameter specifies the time period in seconds the operator waits before it tries to reconnect. You can use this parameter only when the **reconnectionPolicy** parameter is specified, otherwise a compile-time error occurs. The default value for the **period** parameter is `60`.		
+</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>initDelay</name>
+        <description>
+This optional parameter specifies the number of seconds that the `XMSSource` operator delays before it starts to produce tuples. During the delay, the operator is blocked.</description>
+        <optional>true</optional>
+        <rewriteAllowed>true</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>float64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>connection</name>
+       <description>
+This mandatory parameter identifies the name of the connection specification that contains an XMS element.</description>
+        <optional>false</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>access</name>
+        <description>
+This mandatory parameter identifies the access specification name.</description>
+        <optional>false</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>connectionDocument</name>
+        <description>
+This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the **connection** and **access** parameters. If the parameter is specified, it must have exactly one value that is a string constant.  If the parameter is not specified, the operator uses the file that is in the default location `../etc/connections.xml`.</description>
+        <optional>true</optional>
+        <rewriteAllowed>false</rewriteAllowed>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+    </parameters>
+    <inputPorts/>
+    <outputPorts>
+      <outputPortSet>
+        <description>
+The `XMSSource` operator has one mandatory output port.
+
+If only the mandatory output port is specified, the operator submits a tuple for each message that is successfully read from WebSphere MQ. The mandatory output port is mutating and its punctuation mode is Free.</description>
+        <expressionMode>Expression</expressionMode>
+        <autoAssignment>false</autoAssignment>
+        <completeAssignment>false</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>-1</windowPunctuationInputPort>
+        <tupleMutationAllowed>true</tupleMutationAllowed>
+	 <cardinality>1</cardinality>
+        <optional>false</optional>
+      </outputPortSet>
+      <outputPortSet>
+        <description>
+The `XMSSource` operator has one optional output port. If both optional and mandatory output ports are specified, the operator:
+* Submits a tuple to the mandatory port for each message that is successfully read, and
+* Submits an error message to the optional output port if an error occurs.
+
+The optional output port is mutating and its punctuation mode is Free. Only one tuple is sent per failed tuple. The optional output port contains one attribute of type rstring, which contains the error message.</description>
+        <expressionMode>Constant</expressionMode>
+        <autoAssignment>false</autoAssignment>
+        <completeAssignment>false</completeAssignment>
+        <rewriteAllowed>true</rewriteAllowed>
+        <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
+        <windowPunctuationInputPort>-1</windowPunctuationInputPort>
+        <tupleMutationAllowed>true</tupleMutationAllowed>
+        <cardinality>1</cardinality>
+        <optional>true</optional>
+      </outputPortSet>
+    </outputPorts>
+  </cppOperatorModel>
+</operatorModel>

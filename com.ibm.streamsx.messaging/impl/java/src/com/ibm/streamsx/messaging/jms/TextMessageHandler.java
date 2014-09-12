@@ -1,86 +1,119 @@
 /*******************************************************************************
- * Copyright (C) 2013, 2014, International Business Machines Corporation
+ * Copyright (C) 2014, International Business Machines Corporation
  * All Rights Reserved
  *******************************************************************************/
-
 package com.ibm.streamsx.messaging.jms;
 
-import java.io.StringWriter;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Document;
 
 import com.ibm.streams.operator.OutputTuple;
-import com.ibm.streams.operator.metrics.Metric;
+import com.ibm.streams.operator.Tuple;
+import com.ibm.streams.operator.Type.MetaType;
+import com.ibm.streams.operator.types.RString;
+import com.ibm.streams.operator.types.ValueFactory;
+import com.ibm.streams.operator.types.XML;
 
-abstract class TextMessageHandler extends JMSMessageHandlerImpl {
+/**
+ * 
+ * Message handler for text message class.
+ * 
+ * For text message class, the following restrictions applies:
+ * * Text messages must be encoded in UTF-8.  For support of other encoding, use bytes message class.
+ * * When the text message class is specified in the connection document, the native
+ * schema must contain a single attribute of String.  
+ * * When the text message class is specified in the connection document, the input schema
+ * for JMSSource must contain a single attribute of type rstring, ustring or xml.
+ * When the text message class is specified in the connection document, the output schema
+ * for JMSSink must contain a single attribute of type rstring, ustring or xml.
+ *
+ */
+public class TextMessageHandler extends JMSMessageHandlerImpl {
 
-	// variable to hold event name, this is required for the wbe and wbe22
-	// message classes
-	protected final String eventName;
-	// Transformer variable required to convert to xml type
-	private Transformer transformer;
+	private int length;
 
-	// subroutine to construct the final xml ducument from the Document, it
-	// throws ParserConfigurationException and TransformerException
-	public String createFinalDocument(Document document)
-			throws TransformerException {
-		// ccreate the DOMSource
-		DOMSource source = new DOMSource(document);
-		// create the writer
-		StringWriter swriter = new StringWriter();
-		StreamResult result = new StreamResult(swriter);
+	public TextMessageHandler(List<NativeSchema> nsa) {
+		super(nsa);
 
-		// The transformer is not thread safe. From the documentation:
-		// An object of this class may not be used in multiple threads running
-		// concurrently. Different Transformers may be used concurrently by
-		// different threads.
-		// Hence synchronizing this
-		synchronized (transformer) {
-			transformer.transform(source, result);
+		if (nsa.size() == 1) {
+			NativeSchema nativeSchema = nsa.get(0);
+			length = nativeSchema.getLength();
 		}
-		return (swriter.toString());
 	}
 
-	// constructor
-	public TextMessageHandler(List<NativeSchema> nativeSchemaObjects,
-			String eventName) throws TransformerConfigurationException {
-		// call the base class constructor to initialize the native schema
-		// attributes.
-		super(nativeSchemaObjects);
-		// set the event name, this is required for the wbe and wbe22 message
-		// classes
-		this.eventName = eventName;
-		this.transformer = TransformerFactory.newInstance().newTransformer();
+	@Override
+	public Message convertTupleToMessage(Tuple tuple, Session session) throws JMSException,
+			UnsupportedEncodingException, ParserConfigurationException, TransformerException {
+
+		TextMessage textMessage;
+		synchronized (session) {
+			textMessage = session.createTextMessage();
+		}
+
+		MetaType attrType = tuple.getStreamSchema().getAttribute(0).getType().getMetaType();
+
+		String msgText = "";
+
+		if (attrType == MetaType.RSTRING || attrType == MetaType.USTRING) {
+			// use getObject to avoid copying of the tuple
+			Object tupleVal = tuple.getObject(0);
+			if (tupleVal instanceof RString) {
+				msgText = ((RString) tupleVal).getString();
+			} else if (tupleVal instanceof String) {
+				msgText = (String) tupleVal;
+			}
+		} else if (attrType == MetaType.XML) {
+			XML xmlValue = tuple.getXML(0);
+			msgText = xmlValue.toString();
+		}
+
+		// make sure message length is < the length specified in native schema
+		if (length > 0 && msgText.length() > length) {
+			msgText = msgText.substring(0, length);
+			nTruncatedInserts.increment();
+		}
+		textMessage.setText(msgText);
+
+		return textMessage;
 	}
 
-	// constructor
-	public TextMessageHandler(List<NativeSchema> nativeSchemaObjects,
-			String eventName, Metric nTruncatedInserts)
-			throws TransformerConfigurationException {
-		// call the base class constructor to initialize the native schema
-		// attributes.
-		super(nativeSchemaObjects, nTruncatedInserts);
-		// set the event name, this is required for the wbe and wbe22 message
-		// classes
-		this.eventName = eventName;
-		this.transformer = TransformerFactory.newInstance().newTransformer();
-	}
+	@Override
+	public MessageAction convertMessageToTuple(Message message, OutputTuple tuple) throws JMSException,
+			UnsupportedEncodingException {
 
-	// Currently we do not support the wbe, wbe22, xml message class for
-	// JMSSource so this subroutine will never be called
-	public MessageAction convertMessageToTuple(Message message,
-			OutputTuple tuple) throws JMSException {
-		// will not reach here
+		TextMessage textMessage = (TextMessage) message;
+
+		// make sure message length is < the length specified in native schema
+		String tupleStr = textMessage.getText();
+		if (length > 0 && tupleStr.length() > length) {
+			tupleStr = tupleStr.substring(0, length);
+		}
+
+		MetaType attrType = tuple.getStreamSchema().getAttribute(0).getType().getMetaType();
+
+		if (attrType == MetaType.RSTRING || attrType == MetaType.USTRING) {
+			tuple.setString(0, tupleStr);
+		} else if (attrType == MetaType.XML) {
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(tupleStr.getBytes());
+			try {
+				XML xmlValue = ValueFactory.newXML(inputStream);
+				tuple.setXML(0, xmlValue);
+			} catch (IOException e) {		
+				// unable to convert incoming string to xml value
+				// discard message and continue
+				return MessageAction.DISCARD_MESSAGE_MESSAGE_FORMAT_ERROR;
+			}
+		}
+
 		return MessageAction.SUCCESSFUL_MESSAGE;
 	}
 

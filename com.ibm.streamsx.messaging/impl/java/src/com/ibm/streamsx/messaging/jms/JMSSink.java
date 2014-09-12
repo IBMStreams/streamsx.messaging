@@ -44,7 +44,7 @@ public class JMSSink extends AbstractOperator {
 	 * {@code Logger}. The {@code Logger} uses a
 	 */
 	private static Logger logger = Logger.getLogger(LoggerNames.LOG_FACILITY
-			+ "." + CLASS_NAME, "JMSMessages");
+			+ "." + CLASS_NAME, "com.ibm.streamsx.messaging.jms.JMSMessages");
 
 	// Variables required by the optional error output port
 
@@ -392,6 +392,11 @@ public class JMSSink extends AbstractOperator {
 					getInput(0).getName(), nTruncatedInserts);
 
 			break;
+		case text:
+			mhandler = new TextMessageHandler(connectionDocumentParser.getNativeSchemaObjects());
+			break;
+		default:
+			throw new RuntimeException("No valid message class is specified.");
 		}
 
 	}

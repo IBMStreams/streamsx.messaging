@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog>
+  <book price="30.99">
+    <title>This is a long and boring title</title>
+    <author>John Smith</author>
+    <author>Howard Hughes</author>
+    <ignoredField>No one looks at me</ignoredField>
+    <reference quality="-1">
+      <book>The first reference</book>
+    </reference>
+    <reference quality="100">
+      <book>Another Book</book>
+    </reference>
+  </book>
+  <book price="9.99">
+    <title>BestSeller #1</title>
+    <author>Anonymous</author>
+    <author><![CDATA[This can have <><>; in it ]]></author>
+    <ignoredField>I mean it: no one looks at me</ignoredField>
+    <!-- No references -->
+  </book>
+</catalog>

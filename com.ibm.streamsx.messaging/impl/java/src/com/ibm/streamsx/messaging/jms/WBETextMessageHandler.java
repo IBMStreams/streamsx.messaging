@@ -22,7 +22,7 @@ import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.metrics.Metric;
 
 //This class handles the wbe22 message type 
-class WBETextMessageHandler extends TextMessageHandler {	
+class WBETextMessageHandler extends BaseXMLMessageHandler {	
 
 	// the document builder
 	private DocumentBuilder documentBuilder;

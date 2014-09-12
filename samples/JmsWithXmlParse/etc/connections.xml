@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (C)2014, International Business Machines Corporation and
+others. All Rights Reserved.
+-->
+
+<st:connections xmlns:st="http://www.ibm.com/xmlns/prod/streams/adapters"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<connection_specifications>
+		<connection_specification name="conn">
+			<JMS initial_context="org.apache.activemq.jndi.ActiveMQInitialContextFactory" provider_url = "tcp://activemqserver:port" connection_factory="ConnectionFactory"/>
+		</connection_specification>	    
+	</connection_specifications>
+
+
+	<access_specifications>
+		<access_specification name="access_text">
+			<destination identifier="dynamicQueues/STREAMS.txtQueue" delivery_mode="non_persistent" message_class="text" />
+			<uses_connection connection="conn"/>
+			<native_schema>
+				<attribute name="xmlData" type="String"/>	
+			</native_schema>
+		</access_specification>
+
+	</access_specifications>  
+</st:connections>
+

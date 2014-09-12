@@ -1,7 +1,5 @@
-<!--  
-Copyright (C)2014, International Business Machines Corporation and * 
-others. All Rights Reserved. *  
--->
+<!-- Copyright (C)2014, International Business Machines Corporation and * 
+	others. All Rights Reserved. * -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -11,13 +9,13 @@ others. All Rights Reserved. *
 	<version>1.0.0</version>
 	<name>com.ibm.streamsx.messaging</name>
 	<repositories>
-		 <repository>
+		<repository>
 			<id>apache.snapshots</id>
 			<url>http://repository.apache.org/content/repositories/snapshots/</url>
 		</repository>
 		<repository>
-			<id>repo.eclipse.org</id>
-			<url>https://repo.eclipse.org/content/repositories/paho-snapshots/</url>
+			<id>Eclipse Paho Repo snapshots</id>
+			<url>https://repo.eclipse.org/content/repositories/paho-snapshots</url>
 		</repository>
 	</repositories>
 	<properties>
@@ -36,7 +34,7 @@ others. All Rights Reserved. *
 					<groupId>com.sun.jdmk</groupId>
 					<artifactId>jmxtools</artifactId>
 				</exclusion>
- 				<exclusion>
+				<exclusion>
 					<groupId>javax.jms</groupId>
 					<artifactId>jms</artifactId>
 				</exclusion>
@@ -45,12 +43,12 @@ others. All Rights Reserved. *
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-client</artifactId>
-			<version>5.11-SNAPSHOT</version>			
+			<version>5.11-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.paho</groupId>
-			<artifactId>mqtt-client</artifactId>
-			<version>0.4.1-SNAPSHOT</version>			
+			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+			<version>1.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
