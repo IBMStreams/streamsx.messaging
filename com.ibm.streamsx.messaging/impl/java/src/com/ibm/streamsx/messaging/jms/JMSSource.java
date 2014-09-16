@@ -4,6 +4,7 @@
  *******************************************************************************/
 package com.ibm.streamsx.messaging.jms;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Logger;
@@ -116,7 +117,7 @@ public class JMSSource extends ProcessTupleProducer {
 	// If present, it must have exactly one value that is a String constant.
 	// If the parameter is absent, the operator will use the default location
 	// filepath ../etc/connections.xml (with respect to the data directory)
-	private String connectionDocument = "../etc/connections.xml";
+	private String connectionDocument = null;
 	// This optional parameter reconnectionBound specifies the number of
 	// successive connections that
 	// will be attempted for this operator.
@@ -183,9 +184,25 @@ public class JMSSource extends ProcessTupleProducer {
 	}
 
 	// Optional parameter connectionDocument
-	@Parameter(optional = true)
+	@Parameter(optional = true, description="Connection document containing connection information to connect to messaging servers.  If not specified, the connection document is assumed to be application_dir/etc/connections.xml.")
 	public void setConnectionDocument(String connectionDocument) {
 		this.connectionDocument = connectionDocument;
+	}
+	
+	public String getConnectionDocument() {
+		
+		if (connectionDocument == null)
+		{
+			connectionDocument = getOperatorContext().getPE().getApplicationDirectory() + "/etc/connections.xml";
+		}
+		
+		// if relative path, convert to absolute path
+		if (!connectionDocument.startsWith("/"))
+		{
+			connectionDocument = getOperatorContext().getPE().getApplicationDirectory() + File.separator + connectionDocument;
+		}
+		
+		return connectionDocument;
 	}
 
 	// Add the context checks
@@ -306,7 +323,7 @@ public class JMSSource extends ProcessTupleProducer {
 		// the operator throws a runtime error and abort
 
 		connectionDocumentParser.parseAndValidateConnectionDocument(
-				connectionDocument, connection, access, streamSchema, false);
+				getConnectionDocument(), connection, access, streamSchema, false);
 
 		// codepage parameter can come only if message class is bytes
 
