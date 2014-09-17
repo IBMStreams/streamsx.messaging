@@ -36,7 +36,7 @@
 *    * Set the **STREAMS_SPLPATH** environment variable to the root directory of a toolkit or multiple toolkits (using a colon (:) as a separator). For example:
 *       * `export STREAMS_SPLPATH=$STREAMS_INSTALL/toolkits/com.ibm.streamsx.messaging`
 *    * Specify the **-t** or **--spl-path** command parameter when you run the **sc** command. Note: These command parameters override the **STREAMS_SPLPATH** environment variable. For example:
-*       * `sc -t $STREAMS_INSTALL/toolkits/com.ibm.streamsx.messagin -M MyMain`
+*       * `sc -t $STREAMS_INSTALL/toolkits/com.ibm.streamsx.messaging -M MyMain`
 * 6. Start the InfoSphere Streams instance. 
 * 7. Run the application. You can submit the application as a job by using the **streamtool submitjob** command or by using Streams Studio. 
 *

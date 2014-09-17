@@ -15,7 +15,7 @@ In particular, the XMSSource and XMSSink operators in the Messaging Toolkit use 
 **Restriction**: The XMSSource, XMSSink, MQTTSource and MQTTSink operators in the Messaging Toolkit are not supported on POWER7 Systems. You must use x86_64 systems. The JMSource and JMSSink operators do not support reading and writing data from Apache Active MQ on POWER7 Systems.
 
 The following figure shows how the XMSSink and XMSSource operators in the Messaging Toolkit use standard XMS architecture and APIs. 
-{8751_dgm1.gif|This diagram illustrates the XMS APIs that are used to communicate between InfoSphere Streams, an XMS client, and a WebSphere MQ server.}
+{doc/images/8751_dgm1.gif|This diagram illustrates the XMS APIs that are used to communicate between InfoSphere Streams, an XMS client, and a WebSphere MQ server.}
 
 For example:
 * The CreateProducer API creates a message producer to send messages to the specified destination.
@@ -23,7 +23,7 @@ For example:
 * The CreateConnection API creates a connection that uses a specified user identity. The specified user identifier and password are used to authenticate the application.
 
 The following figure shows how the JMSSource and JMSSink operators in the Messaging Toolkit use standard JMS architecture and APIs.
-{architecture_diagram_JMSadpaters.gif|This figure shows JMSSource and JMSSink operators that use Apache ActiveMQ and WebSphere MQ libraries to read and write from JMS providers.}
+{doc/images/architecture_diagram_JMSadpaters.gif|This figure shows JMSSource and JMSSink operators that use Apache ActiveMQ and WebSphere MQ libraries to read and write from JMS providers.}
 
 The Messaging Toolkit operators must be configured to connect to messaging systems. This configuration information is specified in an XML document, called a connection specifications document. The connection specifications document is similar to but separate from the document that is used by the Database Toolkit.
 </info:description>
