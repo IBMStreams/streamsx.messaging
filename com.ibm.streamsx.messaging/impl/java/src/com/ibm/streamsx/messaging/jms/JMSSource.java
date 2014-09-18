@@ -116,7 +116,7 @@ public class JMSSource extends ProcessTupleProducer {
 	// file containing the connection information.
 	// If present, it must have exactly one value that is a String constant.
 	// If the parameter is absent, the operator will use the default location
-	// filepath ../etc/connections.xml (with respect to the data directory)
+	// filepath etc/connections.xml (with respect to the application directory)
 	private String connectionDocument = null;
 	// This optional parameter reconnectionBound specifies the number of
 	// successive connections that
