@@ -10,7 +10,7 @@ use com.ibm.streamsx.messaging.jms::* ;
  *  JMSSink operator.
  * 
  *  This sample connects to a messaging server as specified in the connection 
- *  document located in ../etc/connections.xml.  The connection info, and the
+ *  document located in ./etc/connections.xml.  The connection info, and the
  *  data schema for the message is defined in the connection document.
  * 
  *  To connect to ActiveMQ:

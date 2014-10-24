@@ -5,7 +5,7 @@
 
 package com.ibm.streamsx.messaging.kafka;
 
-
+import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,85 +24,99 @@ import com.ibm.streams.operator.model.Parameter;
 
 /**
  * Base operator for all the common functions
- *
+ * 
  */
-@Libraries({"opt/downloaded/*"})
+@Libraries({ "opt/downloaded/*" })
 public abstract class KafkaBaseOper extends AbstractOperator {
-	
-	protected Properties properties = new Properties(), finalProperties = new Properties();
+
+	protected Properties properties = new Properties(),
+			finalProperties = new Properties();
 	protected String propertiesFile = null;
 	protected AttributeHelper topicAH = new AttributeHelper("topic"),
-							keyAH = new AttributeHelper("key"),
-							messageAH =  new AttributeHelper("message");
+			keyAH = new AttributeHelper("key"),
+			messageAH = new AttributeHelper("message");
 	protected List<String> topics = new ArrayList<String>();
-	protected KafkaClient client= null;
-	private final Logger trace = Logger.getLogger(KafkaBaseOper.class.getCanonicalName());
-	
+	protected KafkaClient client = null;
+	private final Logger trace = Logger.getLogger(KafkaBaseOper.class
+			.getCanonicalName());
+
 	public void initialize(OperatorContext context) throws Exception {
 		super.initialize(context);
-		
-		if(propertiesFile != null) {
-			finalProperties.load(new FileReader(propertiesFile));
+
+		String propFile = getPropertiesFile();
+		if (propFile != null) {
+			finalProperties.load(new FileReader(propFile));
 		}
 		finalProperties.putAll(properties);
-		
-		if(finalProperties == null || finalProperties.isEmpty())
-			throw new Exception("Kafka connection properties must be specified.");
-		
+
+		if (finalProperties == null || finalProperties.isEmpty())
+			throw new Exception(
+					"Kafka connection properties must be specified.");
+
 	}
-	
-	public void initSchema (StreamSchema ss ) throws Exception {
+
+	public void initSchema(StreamSchema ss) throws Exception {
 		trace.log(TraceLevel.INFO, "Connection properties: " + finalProperties);
-		
-		Set<MetaType> supportedTypes =new HashSet<MetaType>();
+
+		Set<MetaType> supportedTypes = new HashSet<MetaType>();
 		supportedTypes.add(MetaType.RSTRING);
 		supportedTypes.add(MetaType.USTRING);
 		supportedTypes.add(MetaType.BLOB);
-		
+
 		keyAH.initialize(ss, false, supportedTypes);
 		messageAH.initialize(ss, true, supportedTypes);
-		
-		//blobs are not supported for topics
+
+		// blobs are not supported for topics
 		supportedTypes.remove(MetaType.BLOB);
 		topicAH.initialize(ss, false, supportedTypes);
-		
+
 		trace.log(TraceLevel.INFO, "Creating client");
 		client = new KafkaClient(topicAH, keyAH, messageAH, finalProperties);
 	}
-			
-	@Parameter(cardinality=-1, optional=true, 
-			description="Specify a Kafka property \\\"key=value\\\" form. " +
-					"This will override any property specified in the properties file.")
+
+	@Parameter(cardinality = -1, optional = true, description = "Specify a Kafka property \\\"key=value\\\" form. "
+			+ "This will override any property specified in the properties file.")
 	public void setKafkaProperty(List<String> values) {
-		for(String value : values) {
+		for (String value : values) {
 			int idx = value.indexOf("=");
-			if(idx == -1) 
-				throw new IllegalArgumentException("Invalid property: " + value + ", not in the key=value format");
+			if (idx == -1)
+				throw new IllegalArgumentException("Invalid property: " + value
+						+ ", not in the key=value format");
 			String name = value.substring(0, idx);
-			String v = value.substring(idx+1, value.length());
+			String v = value.substring(idx + 1, value.length());
 			properties.setProperty(name, v);
 		}
 	}
-	
-	@Parameter(optional=true,
-			description="Properties file containing kafka properties.")
+
+	@Parameter(optional = true, description = "Properties file containing kafka properties.  Properties file is recommended to be stored in the etc directory.  If a relative path is specified, the path is relative to the application directory.")
 	public void setPropertiesFile(String value) {
 		this.propertiesFile = value;
-	}	
-	
-	@Parameter(optional=true, 
-			description="Name of the attribute for the message. This attribute is required. Default is \\\"message\\\"")
+	}
+
+	public String getPropertiesFile() {
+
+		File file = new File(propertiesFile);
+		
+		// if the properties file is relative, the path is relative to the application directory
+		if (!file.isAbsolute())
+		{
+			propertiesFile = getOperatorContext().getPE().getApplicationDirectory().getAbsolutePath() + "/" +  propertiesFile;
+		}
+		return propertiesFile;
+	}
+
+	@Parameter(optional = true, description = "Name of the attribute for the message. This attribute is required. Default is \\\"message\\\"")
 	public void setMessageAttribute(String value) {
-		messageAH.setName (value);
+		messageAH.setName(value);
 	}
-	@Parameter(optional=true, description="Name of the attribute for the key. Default is \\\"key\\\"")
+
+	@Parameter(optional = true, description = "Name of the attribute for the key. Default is \\\"key\\\"")
 	public void setKeyAttribute(String value) {
-		keyAH.setName (value);
+		keyAH.setName(value);
 	}
-	
+
 	@Override
 	public void shutdown() {
 		client.shutdown();
 	}
 }
-

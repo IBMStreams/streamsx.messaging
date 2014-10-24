@@ -1,4 +1,4 @@
-<?xml version="1.0" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--  
 Copyright (C)2014, International Business Machines Corporation and  
 others. All Rights Reserved. 
@@ -60,60 +60,60 @@ The following example demonstrates the use of multiple `XMSSource` operators wit
 	graph
 	//XMSSource Operator with connections.xml 
 	//defaulted to ./etc/connections.xml
-	stream &lt;int32 id, rstring fname, rstring lname&gt;
+	stream &lt;int32 id, rstring fname, rstring lname>
 	MyPersonNamesStream  = XMSSource(){
 		param 
-			connection: "wbe";
-			access: "OutTrading";
+			connection: &quot;wbe&quot;;
+			access: &quot;OutTrading&quot;;
 	}    
 	
 	//XMSSource operator with fully 
 	//qualified name of connections.xml
-	stream &lt;int32 id, rstring fname, rstring lname&gt;
+	stream &lt;int32 id, rstring fname, rstring lname>
 	MyPersonNamesStream = XMSSource(){
 		param     
-			connectionDocument:"/home/streamsuser/connections/XMSconnections.xml";
-			connection: "wbe";  
-			access: "OutTrading";
+			connectionDocument:&quot;/home/streamsuser/connections/XMSconnections.xml&quot;;
+			connection: &quot;wbe&quot;;  
+			access: &quot;OutTrading&quot;;
 	}    
 	
 	//XMSSource Operator with the optional 
 	//error output port specified 
-	(stream &lt;int32 id, rstring fname, rstring lname&gt;; 
-	stream &lt;rstring errorMessage&gt; ErrorStream)  = XMSSource(){
+	(stream &lt;int32 id, rstring fname, rstring lname>; 
+	stream &lt;rstring errorMessage> ErrorStream)  = XMSSource(){
 		param                     
-			connection: "wbe";
-			access: "OutTrading";
+			connection: &quot;wbe&quot;;
+			access: &quot;OutTrading&quot;;
 	}    
 	
 	//XMSSource operator with the optional 
 	//initDelay and reconnectionPolicy specified
-	stream &lt;int32 id, rstring fname, rstring lname&gt;
+	stream &lt;int32 id, rstring fname, rstring lname>
 	MyPersonNamesStream = XMSSource(){
 		param     
-			connection: "wbe"; 
-			access: "OutTrading";
+			connection: &quot;wbe&quot;; 
+			access: &quot;OutTrading&quot;;
 			reconnectionPolicy: NoRetry;
 			initDelay: 10.0;
 	}
 	
 	//XMSSource operator with the optional period 
 	//and reconnectionPolicy specified
-	stream &lt;int32 id, rstring fname, rstring lname&gt; 
+	stream &lt;int32 id, rstring fname, rstring lname> 
 	MyPersonNamesStream = XMSSource(){
 		param     
-			connection: "wbe"; 
-			access: "OutTrading"; 
+			connection: &quot;wbe&quot;; 
+			access: &quot;OutTrading&quot;; 
 			reconnectionPolicy: InfiniteRetry;
 			period: 1.20;
 	}
 	// XMSSource operator with the reconnectionPolicy
 	//specified as BoundedRetry
-	stream &lt;int32 id, rstring fname, rstring lname&gt;
+	stream &lt;int32 id, rstring fname, rstring lname>
 	MyPersonNamesStream = XMSSource(){
 		param     
-			connection: "wbe"; 
-			access: "OutTrading"; 
+			connection: &quot;wbe&quot;; 
+			access: &quot;OutTrading&quot;; 
 			reconnectionPolicy: BoundedRetry;
 			reconnectionBound: 2u;
 			period: 1.20;
@@ -122,7 +122,7 @@ The following example demonstrates the use of multiple `XMSSource` operators wit
 
 This example uses the same `connections.xml` that is provided in the example for the `XMSSink` operator.
 </description>
-	<iconUri size="16">XMSSource_16.gif</iconUri>
+      <iconUri size="16">XMSSource_16.gif</iconUri>
       <iconUri size="32">XMSSource_32.gif</iconUri>
       <metrics>
         <metric>
@@ -140,9 +140,9 @@ This example uses the same `connections.xml` that is provided in the example for
           <description>The number of connection attempts that are made before a successful connection.</description>
           <kind>Counter</kind>
         </metric>
-      </metrics> 
+      </metrics>
       <customLiterals>
-	 <enumeration>
+        <enumeration>
           <name>ReconnectionPolicy</name>
           <value>InfiniteRetry</value>
           <value>NoRetry</value>
@@ -184,15 +184,17 @@ This example uses the same `connections.xml` that is provided in the example for
       <codeTemplates>
         <codeTemplate name="XMSSource">
           <description>Basic XMSSource template</description>
-          <template>stream&lt;${streamType}&gt; ${streamName} = XMSSource()   {
+          <template>stream&lt;${streamType}> ${streamName} = XMSSource()   {
 	      param
             	connection : &quot;${ConnectionSpecificationName}&quot;;
                 access : &quot;${AccessSpecificationName}&quot;;
           }</template>
         </codeTemplate>
       </codeTemplates>
+      <splExpressionTree param="true"/>
     </context>
     <parameters>
+      <description/>
       <allowAny>false</allowAny>
       <parameter>
         <name>reconnectionPolicy</name>
@@ -237,7 +239,7 @@ This optional parameter specifies the number of seconds that the `XMSSource` ope
       </parameter>
       <parameter>
         <name>connection</name>
-       <description>
+        <description>
 This mandatory parameter identifies the name of the connection specification that contains an XMS element.</description>
         <optional>false</optional>
         <rewriteAllowed>false</rewriteAllowed>
@@ -258,7 +260,7 @@ This mandatory parameter identifies the access specification name.</description>
       <parameter>
         <name>connectionDocument</name>
         <description>
-This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the **connection** and **access** parameters. If the parameter is specified, it must have exactly one value that is a string constant.  If the parameter is not specified, the operator uses the file that is in the default location `../etc/connections.xml`.</description>
+This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the **connection** and **access** parameters. If the parameter is specified, it must have exactly one value that is a string constant.  If the parameter is not specified, the operator uses the file that is in the default location `../etc/connections.xml`.  If a relative path is specified, the path is relative to the root of the application directory.</description>
         <optional>true</optional>
         <rewriteAllowed>false</rewriteAllowed>
         <expressionMode>AttributeFree</expressionMode>
@@ -280,7 +282,7 @@ If only the mandatory output port is specified, the operator submits a tuple for
         <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
         <windowPunctuationInputPort>-1</windowPunctuationInputPort>
         <tupleMutationAllowed>true</tupleMutationAllowed>
-	 <cardinality>1</cardinality>
+        <cardinality>1</cardinality>
         <optional>false</optional>
       </outputPortSet>
       <outputPortSet>

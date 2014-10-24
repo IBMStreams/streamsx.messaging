@@ -43,5 +43,11 @@ public class SPLDocConstants {
 	public static final String MQTTSINK_INPUTPORT1 = "Optional input ports";
 
 	public static final String MQTTSINK_INPUTPORT0 = "Port that ingests tuples.";
+	public static final String PARAM_CONNECTION_DESC = "Name of the connection specification of the MQTT element in the connection document.";
+	public static final String PARAM_CONNDOC_DESC = "Path to connection document.  If unspecified, default to applicationDir/etc/connections.xml.  If a relative path is specified, the path is relative to the application directory.";
+	public static final String PARAM_TRUSTORE_PW_DESC = "This optional parameter of type rstring specifies the truststore password.";
+	public static final String PARAM_KEYSTORE_PW_DESC = "This optional parameter of type rstring specifies keystore password.";
+	public static final String PARAM_KEYSTORE_DESC = "This optional parameter of type rstring specifies the file that contains the public and private key certificates of the MQTT client.  If a relative path is specified, the path is relative to the application directory.";
+	public static final String PARAM_TRUSTORE_DESC = "The parameter of type rstring specifies the name of the file that contains the public certificate of the trusted MQTT server.  If a relative path is specified, the path is relative to the application directory.";
 
 }
