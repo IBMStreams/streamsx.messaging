@@ -26,7 +26,7 @@ The following figure shows how the JMSSource and JMSSink operators in the Messag
 
 The Messaging Toolkit operators must be configured to connect to messaging systems. This configuration information is specified in an XML document, called a connection specifications document. The connection specifications document is similar to but separate from the document that is used by the Database Toolkit.
 </info:description>
-    <info:version>0.9.0</info:version>
+    <info:version>2.0.0</info:version>
     <info:requiredProductVersion>3.2.2</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>
