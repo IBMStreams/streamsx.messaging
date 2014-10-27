@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<map id="spldoc_map">
+<title>Toolkits</title>
+<topicref navtitle="Toolkits" locktitle="yes" href="toolkits/toolkits.xml" toc="yes" linking="normal">
+<topicref navtitle="Operators" locktitle="yes" href="toolkits/ix$Operator.xml" toc="yes" linking="none">
+</topicref>
+<topicref navtitle="KafkaConsumerSample 1.0.0" locktitle="yes" href="tk$KafkaConsumerSample/tk$KafkaConsumerSample.xml" toc="yes" linking="none">
+<topicref navtitle="Operators" locktitle="yes" href="tk$KafkaConsumerSample/ix$Operator.xml" toc="yes" linking="none">
+</topicref>
+<topicref navtitle="com.ibm.streamsx.messaging.sample.kafka" locktitle="yes" href="tk$KafkaConsumerSample/ns$com.ibm.streamsx.messaging.sample.kafka.xml" toc="yes" linking="none">
+<topicref navtitle="KafkaConsumerSample.spl" locktitle="yes" href="tk$KafkaConsumerSample/spl$com.ibm.streamsx.messaging.sample.kafka$KafkaConsumerSample.xml" toc="yes" linking="none">
+</topicref>
+</topicref>
+</topicref>
+</topicref>
+</map>
+

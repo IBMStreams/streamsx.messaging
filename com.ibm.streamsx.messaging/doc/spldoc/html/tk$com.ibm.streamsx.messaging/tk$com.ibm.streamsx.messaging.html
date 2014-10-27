@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="Toolkit com.ibm.streamsx.messaging 2.0.0"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_toolkit"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>Toolkit com.ibm.streamsx.messaging 2.0.0</title>
+</head>
+<body id="spldoc_toolkit">
+
+
+<h1 class="title topictitle1 spltoolkitname">Toolkit <tt class="ph tt">com.ibm.streamsx.messaging 2.0.0</tt></h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; com.ibm.streamsx.messaging 2.0.0</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">General Information</h2>
+
+
+<p class="p">The Messaging toolkit project is an open source IBM InfoSphere Streams toolkit project. It is focused on the development of operators and functions that help you use InfoSphere Streams to interact with messaging systems such as JMS, XMS, and MQTT. 
+</p>
+
+<p class="p">The operators provide the ability for InfoSphere Streams applications to send and receive data from a queue or topic that is posted on WebSphere MQ, Apache ActiveMQ or MQ Telemetry Transport (MQTT) server.
+</p>
+
+<p class="p">In particular, the XMSSource and XMSSink operators in the Messaging Toolkit use the standard XMS architecture and APIs to read and write data from WebSphere MQ 7.0, 7.1, and 7.5. The JMSource and JMSSink operators use the standard JMS architecture and JMS 1.1 APIs to read and write data from WebSphere MQ v7.5 and Apache ActiveMQ v5.7. The MQTTSource and MQTTSink operators use the MQTT architecture and APIs to read and write to MQTT 3.1.
+</p>
+
+<p class="p"><strong class="ph b">Restriction</strong>: The XMSSource, XMSSink, MQTTSource and MQTTSink operators in the Messaging Toolkit are not supported on POWER7 Systems. You must use x86_64 systems. The JMSource and JMSSink operators do not support reading and writing data from Apache Active MQ on POWER7 Systems.
+</p>
+
+<p class="p">The following figure shows how the XMSSink and XMSSource operators in the Messaging Toolkit use standard XMS architecture and APIs.  {file:doc/images/8751_dgm1.gif|This diagram illustrates the XMS APIs that are used to communicate between InfoSphere Streams, an XMS client, and a WebSphere MQ server.}
+</p>
+
+<div class="p">For example:
+<ul class="ul">
+<li class="li"> The CreateProducer API creates a message producer to send messages to the specified destination.</li>
+
+<li class="li"> The CreateConsumer API creates a message consumer for the specified destination.</li>
+
+<li class="li"> The CreateConnection API creates a connection that uses a specified user identity. The specified user identifier and password are used to authenticate the application.</li>
+
+</ul>
+
+</div>
+
+<p class="p">The following figure shows how the JMSSource and JMSSink operators in the Messaging Toolkit use standard JMS architecture and APIs. {file:doc/images/architecture_diagram_JMSadpaters.gif|This figure shows JMSSource and JMSSink operators that use Apache ActiveMQ and WebSphere MQ libraries to read and write from JMS providers.}
+</p>
+
+<p class="p">The Messaging Toolkit operators must be configured to connect to messaging systems. This configuration information is specified in an XML document, called a connection specifications document. The connection specifications document is similar to but separate from the document that is used by the Database Toolkit. 
+</p>
+
+<dl class="dl">
+  
+  <dt class="dt dlterm">Version</dt>
+
+  <dd class="dd">2.0.0</dd>
+
+  
+  
+  <dt class="dt dlterm">Required Product Version</dt>
+
+  <dd class="dd">3.2.2</dd>
+
+  
+  
+  <dt class="dt dlterm">Author</dt>
+
+  <dd class="dd">IBMStreams Open Source Community at GitHub - https://github.com/IBMStreams/streamsx.messaging</dd>
+
+  
+</dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Indexes</h2>
+  
+<dl class="dl">
+  <dt class="dt dlterm"><a class="xref" href="ix$Function.html">Functions</a></dt>
+<dd class="dd"/>
+
+  <dt class="dt dlterm"><a class="xref" href="ix$Operator.html">Operators</a></dt>
+<dd class="dd"/>
+
+  <dt class="dt dlterm"><a class="xref" href="ix$Type.html">Types</a></dt>
+<dd class="dd"/>
+
+</dl>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Namespaces</h2>
+  
+  <dl class="dl">
+    
+      <dt class="dt dlterm splpart"><a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a></dt>
+
+      <dd class="dd"><dl class="dl">
+        <dt class="dt dlterm">Operators</dt>
+
+        <dd class="dd"><ul class="sl simple">
+          <li class="sli"><a class="xref" href="op$com.ibm.streamsx.messaging.jms$JMSSink.html">JMSSink</a></li>
+
+          <li class="sli"><a class="xref" href="op$com.ibm.streamsx.messaging.jms$JMSSource.html">JMSSource</a></li>
+
+        </ul>
+</dd>
+
+      </dl>
+</dd>
+
+         
+      <dt class="dt dlterm splpart"><a class="xref" href="ns$com.ibm.streamsx.messaging.kafka.html">com.ibm.streamsx.messaging.kafka</a></dt>
+
+      <dd class="dd"><dl class="dl">
+        <dt class="dt dlterm">Operators</dt>
+
+        <dd class="dd"><ul class="sl simple">
+          <li class="sli"><a class="xref" href="op$com.ibm.streamsx.messaging.kafka$KafkaConsumer.html">KafkaConsumer</a></li>
+
+          <li class="sli"><a class="xref" href="op$com.ibm.streamsx.messaging.kafka$KafkaProducer.html">KafkaProducer</a></li>
+
+        </ul>
+</dd>
+
+      </dl>
+</dd>
+
+         
+      <dt class="dt dlterm splpart"><a class="xref" href="ns$com.ibm.streamsx.messaging.mqtt.html">com.ibm.streamsx.messaging.mqtt</a></dt>
+
+      <dd class="dd"><dl class="dl">
+        <dt class="dt dlterm">Operators</dt>
+
+        <dd class="dd"><ul class="sl simple">
+          <li class="sli"><a class="xref" href="op$com.ibm.streamsx.messaging.mqtt$MQTTSink.html">MQTTSink</a></li>
+
+          <li class="sli"><a class="xref" href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.html#spldoc_compilationunit__composite_operator__MQTTSinkUpdate">MQTTSinkUpdate</a></li>
+
+          <li class="sli"><a class="xref" href="op$com.ibm.streamsx.messaging.mqtt$MQTTSource.html">MQTTSource</a></li>
+
+          <li class="sli"><a class="xref" href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.html#spldoc_compilationunit__composite_operator__MQTTSourceUpdate">MQTTSourceUpdate</a></li>
+
+        </ul>
+</dd>
+
+      </dl>
+</dd>
+
+      <dd class="dd"><dl class="dl">
+        <dt class="dt dlterm">Functions</dt>
+
+        <dd class="dd"><ul class="sl simple">
+          <li class="sli"><a class="xref" href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.html#spldoc_compilationunit__function__newControlSignal.MQTTSourceUpdate.TopicsUpdateAction.list:.:rstring:.:.uint32">public MQTTSourceUpdate.ControlPortType newControlSignal(MQTTSourceUpdate.TopicsUpdateAction action, list&lt;rstring&gt; topics, uint32 qos)</a></li>
+
+        </ul>
+</dd>
+
+      </dl>
+</dd>
+
+      <dd class="dd"><dl class="dl">
+        <dt class="dt dlterm">Types</dt>
+
+        <dd class="dd"><ul class="sl simple">
+          <li class="sli"><a class="xref" href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.html#spldoc_compilationunit__composite_type__MQTTSinkUpdate.ControlPortType">MQTTSinkUpdate.ControlPortType</a></li>
+
+          <li class="sli"><a class="xref" href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.html#spldoc_compilationunit__composite_type__MQTTSourceUpdate.TopicsUpdateDesc">MQTTSourceUpdate.TopicsUpdateDesc</a></li>
+
+          <li class="sli"><a class="xref" href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.html#spldoc_compilationunit__composite_type__MQTTSourceUpdate.TopicsUpdateAction">MQTTSourceUpdate.TopicsUpdateAction</a></li>
+
+          <li class="sli"><a class="xref" href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.html#spldoc_compilationunit__composite_type__MQTTSourceUpdate.ControlPortType">MQTTSourceUpdate.ControlPortType</a></li>
+
+        </ul>
+</dd>
+
+      </dl>
+</dd>
+
+         
+      <dt class="dt dlterm splpart"><a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a></dt>
+
+      <dd class="dd"><dl class="dl">
+        <dt class="dt dlterm">Operators</dt>
+
+        <dd class="dd"><ul class="sl simple">
+          <li class="sli"><a class="xref" href="op$com.ibm.streamsx.messaging.xms$XMSSink.html">XMSSink</a></li>
+
+          <li class="sli"><a class="xref" href="op$com.ibm.streamsx.messaging.xms$XMSSource.html">XMSSource</a></li>
+
+        </ul>
+</dd>
+
+      </dl>
+</dd>
+
+     </dl>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

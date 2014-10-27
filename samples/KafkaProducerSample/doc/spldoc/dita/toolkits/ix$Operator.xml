@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="spldoc_index">
+<title>Operators: Toolkits</title>
+<refbody>
+<section>
+<p>
+<xref href="toolkits.xml">Toolkits</xref> &gt; Operators</p>
+</section>
+<section>
+<title outputclass="splhead-1">Operators</title>
+<dl>
+<dlentry>
+<dt><xref href="../tk$KafkaProducerSample/spl$com.ibm.streamsx.messaging.sample.kafka$KafkaProducerSample.xml#spldoc_compilationunit/composite_operator__KafkaProducerSample">KafkaProducerSample</xref></dt>
+<dd>Example of using a [KafkaProducer] This assumes that the topic has already been created</dd>
+</dlentry>
+</dl>
+</section>
+</refbody>
+</reference>
+

@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="spldoc_operator">
+<title>Operator <tt>XMSSource</tt></title>
+<refbody>
+<section>
+<p>
+<xref href="../toolkits/toolkits.xml">IBMStreams com.ibm.streamsx.messaging Toolkit</xref> &gt; <xref href="tk$com.ibm.streamsx.messaging.xml">com.ibm.streamsx.messaging 2.0.0</xref> &gt; <xref href="ns$com.ibm.streamsx.messaging.xms.xml">com.ibm.streamsx.messaging.xms</xref> &gt; XMSSource</p>
+</section>
+<section>
+
+<p>The <tt>XMSSource</tt> operator reads data from a WebSphere MQ queue or topic and creates tuples out of it.
+</p>
+<p>Each input WebSphere MQ message is converted to a separate tuple and sent to the output stream. A single message cannot contain multiple tuples.
+</p>
+<p><b>Exceptions</b>
+</p>
+<p>The following list describes the common types of exceptions that can occur:
+<ul>
+<li> Run-time errors that halt the operator execution.
+<ul>
+<li> The <tt>XMSSource</tt> operator throws an exception and terminates in the following cases:
+<ul>
+<li> During the initial connect attempt, the <b>reconnectionPolicy</b> is set to <tt>NoRetry</tt> and the operator does not have a successful connection, or during transient connection failures the <b>reconnectionPolicy</b> is set to <tt>BoundedRetry</tt> and the operator does not have a successful connection after the number of attempts that are specified in the <b>reconnectionBound</b> parameter. Successive data is lost.</li>
+<li> The queue name is unknown.</li>
+<li> The user is not an authorized user of the queue.</li>
+<li> The queue manager name is unknown.</li>
+<li> The operator is unable to connect to the host.</li>
+<li> The operator is unable to connect to the port.</li>
+</ul></li>
+</ul></li>
+<li> Run-time errors that cause a message to be dropped and an error message to be logged.
+<ul>
+<li> The <tt>XMSSource</tt> operator throws an exception and discards the message in the following cases:
+<ul>
+<li> A MapMessage does not contain the attributes that are specified in the native schema.</li>
+<li> A MapMessage contains attributes whose data type does not match the data type that is specified in the native schema and the conversion fails.</li>
+<li> A StreamMessage does not contain the attributes that are specified in the native schema.</li>
+<li> A StreamMessage contains attributes whose data type does not match the data type specified in the native schema and the conversion fails.</li>
+<li> A BytesMessage does not contain the attributes that are specified in the native schema.</li>
+<li> The operator encounters a message that does not match the message class that is specified in the native schema.</li>
+<li> When a negative length (-2, -4, or -8) is specified in the native schema for bytes and string data types and the message class is bytes, the operator expects that the XMS message starts with a 2, 4, or 8-byte length field. If there are insufficient bytes remaining in the XMS message, the operator discards the entire message and logs a run-time error.</li>
+<li> When a non-negative length is specified in the native schema for bytes and string, the operator attempts to read exactly that number of bytes from the BytesMessage. If there are insufficient bytes remaining in the XMS message, the operator discards the entire message and logs a run-time error.</li>
+</ul></li>
+<li> The discarded message is not sent to the WebSphere MQ queue or topic.</li>
+</ul></li>
+<li> Compile-time errors
+<ul>
+<li> The <tt>XMSSource</tt> operator throws a compile-time error in the following cases:
+<ul>
+<li> The message type is empty and a native schema is specified.</li>
+<li> The message type is bytes, stream, or map and a native schema attribute name or type does not match the name or type of the attribute in the output stream schema.</li>
+<li> An attribute appears twice in the native schema.</li>
+<li> An attribute of type string or bytes appears in the native schema without a <b>length</b> parameter.</li>
+<li> The <tt>connections.xml</tt> file does not conform to <tt>connections.xsd</tt>.</li>
+<li> The <b>connectionsDocument</b> parameter refers to a nonexistent connections file.</li>
+<li> The <b>connectionsDocument</b> parameter is not specified and there is no <tt>connections.xml</tt> file inside the <tt>etc</tt> directory.</li>
+<li> An invalid value is specified for the message class.</li>
+<li> The <b>access</b> parameter does not refer to an existing access element in the native schema.</li>
+<li> The <b>connection</b> parameter does not refer to an existing access element in the native schema.</li>
+</ul></li>
+</ul></li>
+</ul>
+</p>
+<p>In all of these cases, the operator logs the exception in the console logs, as well as on the error output port, if applicable.
+</p>
+<p>Note:
+<ul>
+<li> The <tt>XMSSource</tt> operator runs without considering the length value for all message classes for string and bytes data types when a length of -1 is specified; it does not throw an error at either compile time or run time.</li>
+<li> If the WebSphere MQ server goes down while the <tt>XMSSource</tt> operator is running and the <b>reconnectionPolicy</b> parameter is set to <tt>BoundedRetry</tt> or <tt>InfiniteRetry</tt>, the operator does not try to reconnect to WebSphere MQ. This problem occurs in XMSClient version 2.0.1 or lower.</li>
+</ul>
+</p>
+<p><b>Examples</b>
+</p>
+<p>The following example demonstrates the use of multiple <tt>XMSSource</tt> operators with different parameter combinations:
+</p>
+<p>
+<codeblock>
+<![CDATA[composite Main {
+graph
+//XMSSource Operator with connections.xml 
+//defaulted to ./etc/connections.xml
+stream <int32 id, rstring fname, rstring lname>
+MyPersonNamesStream  = XMSSource(){
+	param 
+		connection: "wbe";
+		access: "OutTrading";
+}    	
+
+//XMSSource operator with fully 
+//qualified name of connections.xml
+stream <int32 id, rstring fname, rstring lname>
+MyPersonNamesStream = XMSSource(){
+	param     
+		connectionDocument:"/home/streamsuser/connections/XMSconnections.xml";
+		connection: "wbe";  
+		access: "OutTrading";
+}    	
+
+//XMSSource Operator with the optional 
+//error output port specified 
+(stream <int32 id, rstring fname, rstring lname>; 
+stream <rstring errorMessage> ErrorStream)  = XMSSource(){
+	param                     
+		connection: "wbe";
+		access: "OutTrading";
+}    	
+
+//XMSSource operator with the optional 
+//initDelay and reconnectionPolicy specified
+stream <int32 id, rstring fname, rstring lname>
+MyPersonNamesStream = XMSSource(){
+	param     
+		connection: "wbe"; 
+		access: "OutTrading";
+		reconnectionPolicy: NoRetry;
+		initDelay: 10.0;
+}	
+
+//XMSSource operator with the optional period 
+//and reconnectionPolicy specified
+stream <int32 id, rstring fname, rstring lname> 
+MyPersonNamesStream = XMSSource(){
+	param     
+		connection: "wbe"; 
+		access: "OutTrading"; 
+		reconnectionPolicy: InfiniteRetry;
+		period: 1.20;
+}
+// XMSSource operator with the reconnectionPolicy
+//specified as BoundedRetry
+stream <int32 id, rstring fname, rstring lname>
+MyPersonNamesStream = XMSSource(){
+	param     
+		connection: "wbe"; 
+		access: "OutTrading"; 
+		reconnectionPolicy: BoundedRetry;
+		reconnectionBound: 2u;
+		period: 1.20;
+}
+}
+]]></codeblock>
+
+</p>
+<p>This example uses the same <tt>connections.xml</tt> that is provided in the example for the <tt>XMSSink</tt> operator. 
+</p>
+</section>
+<section outputclass="splprimop">
+<object type="image/svg+xml" data="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSource.svg" width="672" height="112">
+<desc>Primitive operator image not displayed. Problem loading file: ../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSource.svg
+</desc>
+</object>
+</section>
+<section>
+<title outputclass="splhead-1">Summary</title>
+<dl compact="yes">
+ <dlentry>
+  <dt>Ports</dt>
+  <dd>This operator has 0 input ports and 2 output ports.</dd>
+ </dlentry>
+ <dlentry>
+  <dt>Windowing</dt>
+  <dd>This operator does not accept any windowing configurations.</dd>
+ </dlentry>
+ <dlentry>
+  <dt>Parameters</dt>
+  <dd>This operator supports 7 parameters.
+<p> Required: 
+<xref href="#spldoc_operator/parameter__connection">connection</xref>, <xref href="#spldoc_operator/parameter__access">access</xref>
+
+</p>
+<p> Optional: 
+<xref href="#spldoc_operator/parameter__reconnectionPolicy">reconnectionPolicy</xref>, <xref href="#spldoc_operator/parameter__reconnectionBound">reconnectionBound</xref>, <xref href="#spldoc_operator/parameter__period">period</xref>, <xref href="#spldoc_operator/parameter__initDelay">initDelay</xref>, <xref href="#spldoc_operator/parameter__connectionDocument">connectionDocument</xref>
+
+</p></dd>
+ </dlentry>
+ <dlentry>
+  <dt>Metrics</dt>
+  <dd>This operator reports 3 metrics.</dd>
+ </dlentry>
+</dl></section>
+<section>
+<title outputclass="splhead-1">Properties</title>
+<dl compact="yes">
+ <dlentry>
+  <dt>Implementation</dt>
+  <dd>C++</dd>
+ </dlentry>
+ <dlentry>
+  <dt><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__providessinglethreadedexecutioncontext">Threading</xref></dt>
+  <dd><tt>Always</tt> - Operator always provides a single threaded execution context.</dd>
+ </dlentry>
+</dl>
+</section>
+<section>
+<p outputclass="splhead-1"><b><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/output_port_set">Output Ports</xref></b></p> <dl>
+  <dlentry>
+   <dt>Ports (0)</dt>
+   <dd>
+
+<p>The <tt>XMSSource</tt> operator has one mandatory output port.
+</p>
+<p>If only the mandatory output port is specified, the operator submits a tuple for each message that is successfully read from WebSphere MQ. The mandatory output port is mutating and its punctuation mode is Free.
+</p>
+    <dl>
+      <dlentry>
+        <dt>Assignments</dt>
+        <dd>This operator allows any SPL expression of the correct type to be assigned to output attributes.</dd>
+      </dlentry>
+    </dl>
+    <p></p>
+    <dl>
+     <dlentry>
+      <dt>Properties</dt>
+      <dd>   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/output_port_set__optional">Optional</xref>: false
+     </sli>
+   </sl>
+   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/output_port_set__tuplemutationallowed">TupleMutationAllowed</xref>: true
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/output_port_set__windowpunctuationoutputmode">WindowPunctuationOutputMode</xref>: Free
+     </sli>
+   </sl>
+</dd>     </dlentry>
+    </dl>
+    <p></p>
+   </dd>
+  </dlentry>
+  <dlentry>
+   <dt>Ports (1)</dt>
+   <dd>
+
+<p>The <tt>XMSSource</tt> operator has one optional output port. If both optional and mandatory output ports are specified, the operator:
+<ul>
+<li> Submits a tuple to the mandatory port for each message that is successfully read, and</li>
+<li> Submits an error message to the optional output port if an error occurs.</li>
+</ul>
+</p>
+<p>The optional output port is mutating and its punctuation mode is Free. Only one tuple is sent per failed tuple. The optional output port contains one attribute of type rstring, which contains the error message.
+</p>
+    <dl>
+      <dlentry>
+        <dt>Assignments</dt>
+        <dd>This port set requires that assignments made to output attributes must evaluate at compile-time to a constant.</dd>
+      </dlentry>
+    </dl>
+    <p></p>
+    <dl>
+     <dlentry>
+      <dt>Properties</dt>
+      <dd>   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/output_port_set__optional">Optional</xref>: true
+     </sli>
+   </sl>
+   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/output_port_set__tuplemutationallowed">TupleMutationAllowed</xref>: true
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/output_port_set__windowpunctuationoutputmode">WindowPunctuationOutputMode</xref>: Free
+     </sli>
+   </sl>
+</dd>     </dlentry>
+    </dl>
+    <p></p>
+   </dd>
+  </dlentry>
+</dl>
+</section>
+<section>
+<p outputclass="splhead-1"><b><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters">Parameters</xref></b></p>
+<dl>
+  <dlentry id="parameter__reconnectionPolicy">
+     <dt><tt>reconnectionPolicy</tt></dt>
+     <dd>
+<p>This is an optional parameter that specifies the reconnection policy. The valid values are <tt>NoRetry</tt>, <tt>InfiniteRetry</tt>, and <tt>BoundedRetry</tt>. If the parameter is not specified, the reconnection policy is set to <tt>BoundedRetry</tt> with a <b>reconnectionBound</b> of <tt>5</tt> and a <b>period</b> of 60 seconds.
+</p>
+  <dl>
+    <dlentry>
+     <dt>Properties</dt>
+     <dd>   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__type">Type</xref>: ReconnectionPolicy
+ (<tt>InfiniteRetry, NoRetry, BoundedRetry</tt>)     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__cardinality">Cardinality</xref>: 1
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__optional">Optional</xref>: true
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__expressionmode">ExpressionMode</xref>: CustomLiteral
+     </sli>
+   </sl>
+     <p></p>     </dd>
+    </dlentry>
+  </dl>
+     </dd>
+  </dlentry>
+  <dlentry id="parameter__reconnectionBound">
+     <dt><tt>reconnectionBound</tt></dt>
+     <dd>
+<p>This optional parameter specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the <b>reconnectionPolicy</b> parameter is specified and set to <tt>BoundedRetry</tt>, otherwise a compile-time error occurs. If the <b>reconnectionBound</b> parameter is specified and the <b>reconnectionPolicy</b> parameter is not set, a compile-time error occurs. The default value for the <b>reconnectionBound</b> parameter is <tt>5</tt>.
+</p>
+  <dl>
+    <dlentry>
+     <dt>Properties</dt>
+     <dd>   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__type">Type</xref>: uint32
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__cardinality">Cardinality</xref>: 1
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__optional">Optional</xref>: true
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__expressionmode">ExpressionMode</xref>: AttributeFree
+     </sli>
+   </sl>
+     <p></p>     </dd>
+    </dlentry>
+  </dl>
+     </dd>
+  </dlentry>
+  <dlentry id="parameter__period">
+     <dt><tt>period</tt></dt>
+     <dd>
+<p>This optional parameter specifies the time period in seconds the operator waits before it tries to reconnect. You can use this parameter only when the <b>reconnectionPolicy</b> parameter is specified, otherwise a compile-time error occurs. The default value for the <b>period</b> parameter is <tt>60</tt>.		 
+</p>
+  <dl>
+    <dlentry>
+     <dt>Properties</dt>
+     <dd>   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__type">Type</xref>: float64
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__cardinality">Cardinality</xref>: 1
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__optional">Optional</xref>: true
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__expressionmode">ExpressionMode</xref>: AttributeFree
+     </sli>
+   </sl>
+     <p></p>     </dd>
+    </dlentry>
+  </dl>
+     </dd>
+  </dlentry>
+  <dlentry id="parameter__initDelay">
+     <dt><tt>initDelay</tt></dt>
+     <dd>
+<p>This optional parameter specifies the number of seconds that the <tt>XMSSource</tt> operator delays before it starts to produce tuples. During the delay, the operator is blocked.
+</p>
+  <dl>
+    <dlentry>
+     <dt>Properties</dt>
+     <dd>   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__type">Type</xref>: float64
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__cardinality">Cardinality</xref>: 1
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__optional">Optional</xref>: true
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__expressionmode">ExpressionMode</xref>: AttributeFree
+     </sli>
+   </sl>
+     <p></p>     </dd>
+    </dlentry>
+  </dl>
+     </dd>
+  </dlentry>
+  <dlentry id="parameter__connection">
+     <dt><tt>connection</tt></dt>
+     <dd>
+<p>This mandatory parameter identifies the name of the connection specification that contains an XMS element.
+</p>
+  <dl>
+    <dlentry>
+     <dt>Properties</dt>
+     <dd>   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__type">Type</xref>: rstring
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__cardinality">Cardinality</xref>: 1
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__optional">Optional</xref>: false
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__expressionmode">ExpressionMode</xref>: AttributeFree
+     </sli>
+   </sl>
+     <p></p>     </dd>
+    </dlentry>
+  </dl>
+     </dd>
+  </dlentry>
+  <dlentry id="parameter__access">
+     <dt><tt>access</tt></dt>
+     <dd>
+<p>This mandatory parameter identifies the access specification name.
+</p>
+  <dl>
+    <dlentry>
+     <dt>Properties</dt>
+     <dd>   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__type">Type</xref>: rstring
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__cardinality">Cardinality</xref>: 1
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__optional">Optional</xref>: false
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__expressionmode">ExpressionMode</xref>: AttributeFree
+     </sli>
+   </sl>
+     <p></p>     </dd>
+    </dlentry>
+  </dl>
+     </dd>
+  </dlentry>
+  <dlentry id="parameter__connectionDocument">
+     <dt><tt>connectionDocument</tt></dt>
+     <dd>
+<p>This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the <b>connection</b> and <b>access</b> parameters. If the parameter is specified, it must have exactly one value that is a string constant.  If the parameter is not specified, the operator uses the file that is in the default location <tt>../etc/connections.xml</tt>.  If a relative path is specified, the path is relative to the root of the application directory.
+</p>
+  <dl>
+    <dlentry>
+     <dt>Properties</dt>
+     <dd>   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__type">Type</xref>: rstring
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__cardinality">Cardinality</xref>: 1
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__optional">Optional</xref>: true
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__expressionmode">ExpressionMode</xref>: AttributeFree
+     </sli>
+   </sl>
+     <p></p>     </dd>
+    </dlentry>
+  </dl>
+     </dd>
+  </dlentry>
+</dl>
+</section>
+<section>
+<p outputclass="splhead-1"><b><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__codetemplate">Code Templates</xref></b></p>  <dl>
+    <dlentry>
+     <dt>XMSSource</dt>
+     <dd>
+       <codeblock>
+<![CDATA[stream<${streamType}> ${streamName} = XMSSource()   {
+	      param
+            	connection : "${ConnectionSpecificationName}";
+                access : "${AccessSpecificationName}";
+          }]]>
+      </codeblock>
+     <p></p>
+     </dd>
+    </dlentry>
+  </dl>
+</section>
+<section>
+<p outputclass="splhead-1"><b><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__metrics">Metrics</xref></b></p><dl>
+  <dlentry>
+    <dt><tt>nMessagesRead</tt> - <xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__metrics_kind_counter">Counter</xref></dt>
+    <dd>
+
+<p>The number of messages read successfully.
+</p>
+     <p></p>
+     </dd>
+  </dlentry>
+  <dlentry>
+    <dt><tt>nMessagesDropped</tt> - <xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__metrics_kind_counter">Counter</xref></dt>
+    <dd>
+
+<p>The number of messages dropped.
+</p>
+     <p></p>
+     </dd>
+  </dlentry>
+  <dlentry>
+    <dt><tt>nConnectionAttempts</tt> - <xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__metrics_kind_counter">Counter</xref></dt>
+    <dd>
+
+<p>The number of connection attempts that are made before a successful connection.
+</p>
+     <p></p>
+     </dd>
+  </dlentry>
+</dl>
+</section>
+<section>
+<p outputclass="splhead-1"><b><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__dependencies">Libraries</xref></b></p><dl>
+ <dlentry>
+  <dt><tt> IBM Message Service Client for C/C++ (XMS) libraries</tt>  </dt>
+<dd/>  <dd><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__dependencies__managedlibrary__command">Command</xref>: 
+  </dd>
+  <dd><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__dependencies__managedlibrary__lib">Library Name</xref>: <tt>gxi01l, gxi</tt></dd>
+  <dd><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__dependencies__managedlibrary__libpath">Library Path</xref>: <tt>@XMS_HOME@/lib64</tt></dd>
+  <dd><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__dependencies__managedlibrary__includepath">Include Path</xref>: <tt>@XMS_HOME@/tools/cpp/include, @XMS_HOME@/tools/c/include</tt></dd>
+ </dlentry>
+ <dlentry>
+  <dt><tt>WebSphere MQ Client libraries</tt>  </dt>
+<dd/>  <dd><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__dependencies__managedlibrary__command">Command</xref>: 
+  </dd>
+  <dd><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__dependencies__managedlibrary__libpath">Library Path</xref>: <tt>@MQ_HOME@/lib64</tt></dd>
+  <dd><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__dependencies__managedlibrary__includepath">Include Path</xref>: <tt>@MQ_HOME@/lib64</tt></dd>
+ </dlentry>
+ <dlentry>
+  <dt><tt>Code that is common to both XMSSource and XMSSink is located in a directory ../Common relative to both of these operators.</tt>  </dt>
+<dd/>  <dd><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__dependencies__managedlibrary__command">Command</xref>: 
+  </dd>
+  <dd><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__dependencies__managedlibrary__libpath">Library Path</xref>: <tt>../Common</tt></dd>
+  <dd><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__dependencies__managedlibrary__includepath">Include Path</xref>: <tt>../Common</tt></dd>
+ </dlentry>
+</dl>
+</section>
+</refbody>
+</reference>
+
