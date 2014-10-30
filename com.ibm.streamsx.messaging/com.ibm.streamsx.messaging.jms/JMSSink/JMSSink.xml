@@ -43,9 +43,10 @@ The following list describes the common types of exceptions that can occur:
     * The environment variables **STREAMS_MESSAGING_WMQ_HOME** and **STREAMS_MESSAGING_AMQ_HOME** are not set to the locations where the WMQ and AMQ libraries are installed.
 
 		
-**Examples**
++ Examples
 
-The following example show the use of multiple JMSSink operators with different parameter combinations:
+This example show the use of multiple JMSSink operators with different parameter combinations.
+
 
 	composite Main {
 	graph

@@ -47,9 +47,10 @@ The following types of exceptions can occur:
      * The **reconnectionBound** parameter is specified, but the **reconnectionPolicy** parameter is not specified.
      * The environment variables **STREAMS_MESSAGING_WMQ_HOME** and **STREAMS_MESSAGING_AMQ_HOME** are not set to the locations where the WMQ and AMQ libraries are installed.
 
-**Examples**
++ Examples
 
-The following example shows the use of multiple `JMSSource` operators with different parameter combinations:
+This example shows the use of multiple `JMSSource` operators with different parameter combinations.
+
 
 	composite Main {
 	graph
