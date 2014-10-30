@@ -53,7 +53,7 @@ The following example shows the use of multiple `JMSSource` operators with diffe
 
 	composite Main {
 	graph
-	// JMSSource operator with the default ../etc/connections.xml(relative to the data directory)
+	// JMSSource operator with the default etc/connections.xml(relative to the application directory)
 	// connections document
 	stream &lt;int32 id, rstring fname, rstring lname&gt;
 	MyPersonNamesStream  = JMSSource()
@@ -220,7 +220,7 @@ This mandatory parameter identifies the name of the connection specification tha
 	  <parameter>
 	  <name>connectionDocument</name>
         <description>
-This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the **connection** and **access** parameters. If this parameter is not specified, the operator uses the file that is in the default location `../etc/connections.xml`.</description>
+This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the **connection** and **access** parameters. If this parameter is not specified, the operator uses the file that is in the default location `./etc/connections.xml`.</description>
         <optional>true</optional>
         <type>rstring</type>
         <cardinality>1</cardinality>

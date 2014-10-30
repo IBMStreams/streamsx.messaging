@@ -86,7 +86,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		return connection;
 	}
 
-	@Parameter(name = PARAMNAME_CONNECTION, description = "Name of the connection specification of the MQTT element in the connection document.", optional = true)
+	@Parameter(name = PARAMNAME_CONNECTION, description = SPLDocConstants.PARAM_CONNECTION_DESC, optional = true)
 	public void setConnection(String connection) {
 		this.connection = connection;
 	}
@@ -95,7 +95,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		return connectionDocument;
 	}
 
-	@Parameter(name = PARAMNAME_CONNDOC, description = "Path to connection document.  If unspecified, default to ../etc/connections.xml", optional = true)
+	@Parameter(name = PARAMNAME_CONNDOC, description = SPLDocConstants.PARAM_CONNDOC_DESC, optional = true)
 	public void setConnectionDocument(String connectionDocument) {
 		this.connectionDocument = connectionDocument;
 	}
@@ -115,18 +115,18 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 			// if connection document is not specified, default to
 			// ../etc/connections.xml
 			if (connDoc == null) {
-				File dataDirectory = getOperatorContext().getPE()
-						.getDataDirectory();
-				connDoc = dataDirectory.getAbsolutePath()
-						+ "/../etc/connections.xml"; //$NON-NLS-1$
+				File appDir = getOperatorContext().getPE()
+						.getApplicationDirectory();
+				connDoc = appDir.getAbsolutePath()
+						+ "/etc/connections.xml"; //$NON-NLS-1$
 			}
 
 			// convert from relative path to absolute path is necessary
 			if (!connDoc.startsWith("/")) //$NON-NLS-1$
 			{
-				File dataDirectory = getOperatorContext().getPE()
-						.getDataDirectory();
-				connDoc = dataDirectory.getAbsolutePath() + "/" + connDoc; //$NON-NLS-1$
+				File appDir = getOperatorContext().getPE()
+						.getApplicationDirectory();
+				connDoc = appDir.getAbsolutePath() + "/" + connDoc; //$NON-NLS-1$
 			}
 
 			try {
@@ -211,7 +211,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		return toAbsolute(trustStore);
 	}
 
-	@Parameter(name = PARAMNAME_TRUST_STORE, optional = true, description = "The parameter of type rstring specifies the name of the file that contains the public certificate of the trusted MQTT server")
+	@Parameter(name = PARAMNAME_TRUST_STORE, optional = true, description = SPLDocConstants.PARAM_TRUSTORE_DESC)
 	public void setTrustStore(String trustStore) {
 		this.trustStore = trustStore;
 	}
@@ -220,7 +220,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		return toAbsolute(keyStore);
 	}
 
-	@Parameter(name = PARAMNAME_KEY_STORE, optional = true, description = "This optional parameter of type rstring specifies the file that contains the public and private key certificates of the MQTT client.")
+	@Parameter(name = PARAMNAME_KEY_STORE, optional = true, description = SPLDocConstants.PARAM_KEYSTORE_DESC)
 	public void setKeyStore(String keyStore) {
 		this.keyStore = keyStore;
 	}
@@ -229,7 +229,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		return keyStorePassword;
 	}
 
-	@Parameter(name = PARAMNAME_KEY_STORE_PASSWORD, optional = true, description = "This optional parameter of type rstring specifies keystore password.")
+	@Parameter(name = PARAMNAME_KEY_STORE_PASSWORD, optional = true, description = SPLDocConstants.PARAM_KEYSTORE_PW_DESC)
 	public void setKeyStorePassword(String keyStorePassword) {
 		this.keyStorePassword = keyStorePassword;
 	}
@@ -238,7 +238,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		return trustStorePassword;
 	}
 
-	@Parameter(name = PARAMNAME_TRUST_STORE_PASSWORD, optional = true, description = "This optional parameter of type rstring specifies the truststore password.")
+	@Parameter(name = PARAMNAME_TRUST_STORE_PASSWORD, optional = true, description = SPLDocConstants.PARAM_TRUSTORE_PW_DESC)
 	public void setTrustStorePassword(String trustStorePassword) {
 		this.trustStorePassword = trustStorePassword;
 	}
@@ -295,8 +295,8 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	protected String toAbsolute(String path) {
 		if (path != null && !path.startsWith("/")) //$NON-NLS-1$
 		{
-			File dataDir = getOperatorContext().getPE().getDataDirectory();
-			return dataDir.getAbsolutePath() + "/" + path; //$NON-NLS-1$
+			File appDir = getOperatorContext().getPE().getApplicationDirectory();
+			return appDir.getAbsolutePath() + "/" + path; //$NON-NLS-1$
 		}
 		return path;
 	}

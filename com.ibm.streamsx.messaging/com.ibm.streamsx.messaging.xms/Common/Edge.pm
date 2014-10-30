@@ -34,7 +34,7 @@ sub connectionSetup {
     my $connDocName;
     my $connDocParam = $model->getParameterByName('connectionDocument');
     if (defined $connDocParam) {
-        my $quotedConnDoc = $connDocParam->getValueAt(0)->getSPLExpression();
+        my $quotedConnDoc = SPL::CodeGen::compileTimeExpression($model, $connDocParam->getValueAt(0)); 
         @splitted = split(/"/, $quotedConnDoc);
         if (@splitted != 2) {       
             SPL::CodeGen::exitln("Value of parameter \'connectionDocument\' has unexpected format: $quotedConnDoc");

@@ -1,4 +1,4 @@
-<?xml version="1.0" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--  
 Copyright (C)2014, International Business Machines Corporation and  
 others. All Rights Reserved. 
@@ -51,7 +51,7 @@ The following example demonstrates the use of multiple `XMSSink` operators with 
 
 	composite Main{
 	graph
-	stream &lt;int32 id, rstring fname, rstring lname&gt;
+	stream &lt;int32 id, rstring fname, rstring lname>
 	MyPersonNamesStream=Beacon()
 	{
 		param
@@ -62,8 +62,8 @@ The following example demonstrates the use of multiple `XMSSink` operators with 
 	() as MySink1=XMSSink(MyPersonNamesStream)
 	{
 		param
-			connection: "wbe";
-			access: "OutTrading";
+			connection: &quot;wbe&quot;;
+			access: &quot;OutTrading&quot;;
 	}
 	
 	//XMSSink Operator with the fully qualified 
@@ -71,28 +71,28 @@ The following example demonstrates the use of multiple `XMSSink` operators with 
 	() as MySink2=XMSSink(MyPersonNamesStream)
 	{
 		param
-			connectionDocument:"/home/streamsuser/connections/XMSconnections.xml";
-			connection: "wbe";
-			access: "OutTrading";
+			connectionDocument:&quot;/home/streamsuser/connections/XMSconnections.xml&quot;;
+			connection: &quot;wbe&quot;;
+			access: &quot;OutTrading&quot;;
 	}
 	
 	//XMSSink Operator with optional 
 	//output error port specified
 	stream &lt;tuple&lt;int32 id, rstring fname, 
-	rstring lname&gt;inTuple, rstring errorMessage&gt;
+	rstring lname>inTuple, rstring errorMessage>
 	MySink3 = XMSSink(MyPersonNamesStream)
 	{
 		param
-			connection: "wbe";
-			access: "OutTrading";
+			connection: &quot;wbe&quot;;
+			access: &quot;OutTrading&quot;;
 	}
 	//XMSSink Operator with reconnectionPolicy 
 	//specified as NoRetry
 	() as  MySink4 = XMSSink( MyPersonNamesStream ) 
 	{
 		param
-			connection: "wbe";
-			access: "OutTrading";
+			connection: &quot;wbe&quot;;
+			access: &quot;OutTrading&quot;;
 			reconnectionPolicy: NoRetry;
 	}
 	
@@ -101,8 +101,8 @@ The following example demonstrates the use of multiple `XMSSink` operators with 
 	() as MySink5 = XMSSink( MyPersonNamesStream )
 	{
 		param
-			connection: "wbe";
-			access: "OutTrading";
+			connection: &quot;wbe&quot;;
+			access: &quot;OutTrading&quot;;
 			reconnectionPolicy: InfiniteRetry;
 			period: 1.20;
 	}
@@ -111,8 +111,8 @@ The following example demonstrates the use of multiple `XMSSink` operators with 
 	() as MySink6 = XMSSink( MyPersonNamesStream )
 	{
 		param
-			connection: "wbe";
-			access: "OutTrading";
+			connection: &quot;wbe&quot;;
+			access: &quot;OutTrading&quot;;
 			reconnectionPolicy: BoundedRetry;
 			reconnectionBound: 2u;
 			period: 1.20;
@@ -121,31 +121,31 @@ The following example demonstrates the use of multiple `XMSSink` operators with 
 
 The following is a sample `connections.xml` file:
 
-	&lt;st:connections xmlns:st="http://www.ibm.com/xmlns/prod/streams/adapters"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
-	&lt;connection_specifications&gt;
-		&lt;connection_specification name="wbe"&gt;
-			&lt;XMS initial_context="file:///opt/InitialContext/" 
-			connection_factory="TestConFac"  /&gt;
-		&lt;/connection_specification&gt;
-	&lt;/connection_specifications&gt;
+	&lt;st:connections xmlns:st=&quot;http://www.ibm.com/xmlns/prod/streams/adapters&quot;
+	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;>
+	&lt;connection_specifications>
+		&lt;connection_specification name=&quot;wbe&quot;>
+			&lt;XMS initial_context=&quot;file:///opt/InitialContext/&quot; 
+			connection_factory=&quot;TestConFac&quot;  />
+		&lt;/connection_specification>
+	&lt;/connection_specifications>
 	
-	&lt;access_specifications&gt;
-		&lt;access_specification name="OutTrading"&gt;
-  			&lt;destination identifier="TestDestination" 
-			delivery_mode="persistent" message_class="map" /&gt;
-  			&lt;uses_connection connection="wbe"/&gt;
-			&lt;native_schema&gt;
-				&lt;attribute name="id" type="Int"/&gt;
-				&lt;attribute name="fname" type="String"/&gt;
-				&lt;attribute name="lname" type="String"/&gt;
-			&lt;/native_schema&gt;
-		&lt;/access_specification&gt;
-	&lt;/access_specifications&gt;
-	&lt;/st:connections&gt;	
+	&lt;access_specifications>
+		&lt;access_specification name=&quot;OutTrading&quot;>
+  			&lt;destination identifier=&quot;TestDestination&quot; 
+			delivery_mode=&quot;persistent&quot; message_class=&quot;map&quot; />
+  			&lt;uses_connection connection=&quot;wbe&quot;/>
+			&lt;native_schema>
+				&lt;attribute name=&quot;id&quot; type=&quot;Int&quot;/>
+				&lt;attribute name=&quot;fname&quot; type=&quot;String&quot;/>
+				&lt;attribute name=&quot;lname&quot; type=&quot;String&quot;/>
+			&lt;/native_schema>
+		&lt;/access_specification>
+	&lt;/access_specifications>
+	&lt;/st:connections>	
 </description>
-	<iconUri size="16">XMSSink_16.gif</iconUri>
-	<iconUri size="32">XMSSink_32.gif</iconUri>
+      <iconUri size="16">XMSSink_16.gif</iconUri>
+      <iconUri size="32">XMSSink_32.gif</iconUri>
       <metrics>
         <metric>
           <name>nTruncatedInserts</name>
@@ -213,6 +213,7 @@ The following is a sample `connections.xml` file:
         }</template>
         </codeTemplate>
       </codeTemplates>
+      <splExpressionTree param="true"/>
     </context>
     <parameters>
       <allowAny>false</allowAny>
@@ -270,7 +271,7 @@ This mandatory parameter identifies the access specification name.</description>
       <parameter>
         <name>connectionDocument</name>
         <description>
-This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the **connection** and **access** parameters. If the parameter is specified, it must have exactly one value that is a string constant.  If the parameter is not specified, the operator uses the file that is in the default location `../etc/connections.xml`.		
+This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the **connection** and **access** parameters. If the parameter is specified, it must have exactly one value that is a string constant.  If the parameter is not specified, the operator uses the file that is in the default location `../etc/connections.xml`.  If a relative path is specified, the path is relative to the root of the applicaiton directory.		
 </description>
         <optional>true</optional>
         <rewriteAllowed>false</rewriteAllowed>

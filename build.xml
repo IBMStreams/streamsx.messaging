@@ -116,6 +116,7 @@
 			<arg value="${tktitle}" />
 			<arg value="--directory" />
 			<arg value="${tkdir}" />
+			<arg value="--copy-image-files" />
 		</exec>
 	</target>
 

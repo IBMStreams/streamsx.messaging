@@ -27,7 +27,7 @@ composite KafkaProducerSample
 
 		() as KafkaSinkOp = KafkaProducer(OutputStream) {
 			param
-				propertiesFile : "producer.properties";
+				propertiesFile : "etc/producer.properties";
 		}
 
 }

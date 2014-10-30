@@ -10,7 +10,7 @@ use com.ibm.streamsx.messaging.jms::*;
 composite JmsWithXmlParseBytes {
 param
 		expression<rstring> $connectionDoc : getSubmissionTimeValue("connectionDoc",
-			"../etc/connections.xml") ;
+			"./etc/connections.xml") ;
 		expression<rstring> $connection : getSubmissionTimeValue("connection",
 			"conn") ;
 		expression<rstring> $access : getSubmissionTimeValue("access",
