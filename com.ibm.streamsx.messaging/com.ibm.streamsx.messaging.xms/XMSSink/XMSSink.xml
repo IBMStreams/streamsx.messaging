@@ -45,9 +45,9 @@ In all of these cases, the operator logs the exception in the console logs. The 
 
 Note: The `XMSSink` operator runs without considering the length value for all message classes for string and bytes data types when a negative length of -1 is provided; it does not throw an error at either compile time or run time.
 
-**Examples**
++ Examples
 
-The following example demonstrates the use of multiple `XMSSink` operators with different parameter combinations and an optional error output port:
+This example demonstrates the use of multiple `XMSSink` operators with different parameter combinations and an optional error output port.
 
 	composite Main{
 	graph
@@ -123,25 +123,25 @@ The following is a sample `connections.xml` file:
 
 	&lt;st:connections xmlns:st=&quot;http://www.ibm.com/xmlns/prod/streams/adapters&quot;
 	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;>
-	&lt;connection_specifications>
-		&lt;connection_specification name=&quot;wbe&quot;>
-			&lt;XMS initial_context=&quot;file:///opt/InitialContext/&quot; 
-			connection_factory=&quot;TestConFac&quot;  />
+	  &lt;connection_specifications>
+	    &lt;connection_specification name=&quot;wbe&quot;>
+	      &lt;XMS initial_context=&quot;file:///opt/InitialContext/&quot; 
+	        connection_factory=&quot;TestConFac&quot;  />
 		&lt;/connection_specification>
-	&lt;/connection_specifications>
+	  &lt;/connection_specifications>
 	
-	&lt;access_specifications>
-		&lt;access_specification name=&quot;OutTrading&quot;>
-  			&lt;destination identifier=&quot;TestDestination&quot; 
-			delivery_mode=&quot;persistent&quot; message_class=&quot;map&quot; />
-  			&lt;uses_connection connection=&quot;wbe&quot;/>
-			&lt;native_schema>
-				&lt;attribute name=&quot;id&quot; type=&quot;Int&quot;/>
-				&lt;attribute name=&quot;fname&quot; type=&quot;String&quot;/>
-				&lt;attribute name=&quot;lname&quot; type=&quot;String&quot;/>
-			&lt;/native_schema>
+	  &lt;access_specifications>
+	    &lt;access_specification name=&quot;OutTrading&quot;>
+	      &lt;destination identifier=&quot;TestDestination&quot; 
+	      delivery_mode=&quot;persistent&quot; message_class=&quot;map&quot; />
+	      &lt;uses_connection connection=&quot;wbe&quot;/>
+	      &lt;native_schema>
+	        &lt;attribute name=&quot;id&quot; type=&quot;Int&quot;/>
+	        &lt;attribute name=&quot;fname&quot; type=&quot;String&quot;/>
+	        &lt;attribute name=&quot;lname&quot; type=&quot;String&quot;/>
+	      &lt;/native_schema>
 		&lt;/access_specification>
-	&lt;/access_specifications>
+	  &lt;/access_specifications>
 	&lt;/st:connections>	
 </description>
       <iconUri size="16">XMSSink_16.gif</iconUri>
