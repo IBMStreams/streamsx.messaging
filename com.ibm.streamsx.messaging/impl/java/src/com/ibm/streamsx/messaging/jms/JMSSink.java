@@ -140,6 +140,15 @@ public class JMSSink extends AbstractOperator {
 	// If not specified, the default value is 60.0. It must appear only when the
 	// reconnectionPolicy parameter is specified
 	private double period = 60.0;
+	
+	// This optional parameter maxMessageSendRetries specifies the number of successive 
+	// retry that will be attempted for a message in case of failure on message send.
+	// Default is 0.
+	private int maxMessageSendRetries = 0;
+
+	// This optional parameter messageSendRetryDelay specifies the time to wait before 
+	// next delivery attempt. Default is 0 milliseconds
+	private long messageSendRetryDelay = 0;
 
 	// Declaring the JMSMEssagehandler,
 	private JMSMessageHandlerImpl mhandler;
@@ -182,6 +191,18 @@ public class JMSSink extends AbstractOperator {
 	@Parameter(optional = true)
 	public void setPeriod(double period) {
 		this.period = period;
+	}
+	
+	// Optional parameter maxMessageRetries
+	@Parameter(optional = true)
+	public void setMaxMessageSendRetries(int maxMessageSendRetries) {
+		this.maxMessageSendRetries = maxMessageSendRetries;
+	}
+
+	// Optional parameter messageRetryDelay
+	@Parameter(optional = true)
+	public void setMessageSendRetryDelay(long messageSendRetryDelay) {
+		this.messageSendRetryDelay = messageSendRetryDelay;
 	}
 
 	// Optional parameter connectionDocument
@@ -295,16 +316,40 @@ public class JMSSink extends AbstractOperator {
 			}
 
 		}
+		
+		// maxMessageSendRetries can not be negative number if present
+		if(context.getParameterNames().contains("maxMessageSendRetries")) {
+			if(Integer.parseInt(context.getParameterValues("maxMessageSendRetries").get(0)) < 0) {
+				logger.log(LogLevel.ERROR, "MESSAGE_RESEND_NEG", new Object[] {"maxMessageSendRetries"});
+				checker.setInvalidContext(
+						"maxMessageSendRetries value {0} should be zero or greater than zero", 
+						new String[] {context.getParameterValues("maxMessageSendRetries").get(0)});
+			}
+			
+		}
+		
+		// messageSendRetryDelay can not be negative number if present
+		if(context.getParameterNames().contains("messageSendRetryDelay")) {
+			if(Long.parseLong(context.getParameterValues("messageSendRetryDelay").get(0)) < 0) {
+				logger.log(LogLevel.ERROR, "MESSAGE_RESEND_NEG", new Object[] {"messageSendRetryDelay"});
+				checker.setInvalidContext(
+						"messageSendRetryDelay value {0} should be zero or greater than zero", 
+						new String[] {context.getParameterValues("messageSendRetryDelay").get(0)});
+			}
+		}
 	}
 
 	// add compile time check for either period or reconnectionBound to be
 	// present only when reconnectionPolicy is present
+	// and messageRetryDelay to be present only when maxMessageRetriesis present
 	@ContextCheck(compile = true)
 	public static void checkParameters(OperatorContextChecker checker) {
 		checker.checkDependentParameters("period", "reconnectionPolicy");
 		checker.checkDependentParameters("reconnectionBound",
 				"reconnectionPolicy");
-
+		
+		checker.checkDependentParameters("maxMessageSendRetries", "messageSendRetryDelay");
+		checker.checkDependentParameters("messageSendRetryDelay", "maxMessageSendRetries");
 	}
 
 	@Override
@@ -353,8 +398,8 @@ public class JMSSink extends AbstractOperator {
 		// The jmsConnectionHelper will throw a runtime error and abort the
 		// application in case of errors.
 		jmsConnectionHelper = new JMSConnectionHelper(reconnectionPolicy,
-				reconnectionBound, period, true,
-				connectionDocumentParser.getDeliveryMode(),
+				reconnectionBound, period, true, maxMessageSendRetries, 
+				messageSendRetryDelay, connectionDocumentParser.getDeliveryMode(),
 				nReconnectionAttempts, nFailedInserts, logger);
 		jmsConnectionHelper.createAdministeredObjects(
 				connectionDocumentParser.getInitialContextFactory(),
