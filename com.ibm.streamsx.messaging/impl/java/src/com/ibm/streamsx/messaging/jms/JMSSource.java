@@ -142,7 +142,7 @@ public class JMSSource extends ProcessTupleProducer {
 	// If not specified, the default value is 60.0. It must appear only when the
 	// reconnectionPolicy parameter is specified
 	private double period = 60.0;
-
+	
 	// Declaring the JMSMEssagehandler,
 	private JMSMessageHandlerImpl messageHandlerImpl;
 
@@ -282,6 +282,7 @@ public class JMSSource extends ProcessTupleProducer {
 								.get(0).trim() });
 			}
 		}
+		
 	}
 
 	// add check for reconnectionPolicy is present if either period or
@@ -291,7 +292,6 @@ public class JMSSource extends ProcessTupleProducer {
 		checker.checkDependentParameters("period", "reconnectionPolicy");
 		checker.checkDependentParameters("reconnectionBound",
 				"reconnectionPolicy");
-
 	}
 
 	@Override
@@ -340,8 +340,8 @@ public class JMSSource extends ProcessTupleProducer {
 		// connection
 		// isProducer, false implies Consumer
 		jmsConnectionHelper = new JMSConnectionHelper(reconnectionPolicy,
-				reconnectionBound, period, false,
-				connectionDocumentParser.getDeliveryMode(),
+				reconnectionBound, period, false, 0,
+				0, connectionDocumentParser.getDeliveryMode(),
 				nReconnectionAttempts, logger);
 		jmsConnectionHelper.createAdministeredObjects(
 				connectionDocumentParser.getInitialContextFactory(),

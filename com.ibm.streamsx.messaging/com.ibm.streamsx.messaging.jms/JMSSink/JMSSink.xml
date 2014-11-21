@@ -30,7 +30,7 @@ The following list describes the common types of exceptions that can occur:
     * An invalid value is specified for the message_class attribute of the access specification.
     * A negative length is specified for a string or blob data types in the native schema for a map, stream, xml, wbe, or wbe22 message class.
     * A negative length other than -2 or -4 is specified for a string/blob data type in the native_schema for a bytes message class.
-    * The message_class attribute is empty, but the &lt;native_schema&gt; element is not empty.
+    * The message_class attribute is empty, but the &lt;native_schema> element is not empty.
  * Runtime errors that cause a message to be dropped and an error message to be logged.
   * The `JMSink` operator throws an exception and discards the message in the following cases. The trace and log information for these exceptions is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
     *  The data being written is longer than the maximum message length specified in the queue. The discarded message is not sent to the WebSphere MQ or Apache Active MQ queue or topic.
@@ -51,7 +51,7 @@ This example show the use of multiple JMSSink operators with different parameter
 	composite Main {
 	graph
 	
-	stream &lt;int32 id, rstring fname, rstring lname&gt;
+	stream &lt;int32 id, rstring fname, rstring lname>
 	MyPersonNamesStream  = Beacon()
 	{
 	param
@@ -63,52 +63,52 @@ This example show the use of multiple JMSSink operators with different parameter
 	() as  MySink1 = JMSSink( MyPersonNamesStream )
 	{
 	param
-		connection : "amqConn";	
-		access     : "amqAccess";
+		connection : &quot;amqConn&quot;;	
+		access     : &quot;amqAccess&quot;;
 	}
 	
 	// JMSSink operator with fully qualified name of connections document
 	() as  MySink2 = JMSSink( MyPersonNamesStream )
 	{
 	param
-		connectionDocument   : "/home/streamsuser/connections/JMSconnections.xml";
-		connection           : "amqConn";
-		access               : "amqAccess";
+		connectionDocument   : &quot;/home/streamsuser/connections/JMSconnections.xml&quot;;
+		connection           : &quot;amqConn&quot;;
+		access               : &quot;amqAccess&quot;;
 	}
 	
 	// JMSSink operator with optional output error port specified
-	stream &lt;tuple&lt; int32 id, rstring fname, rstring lname&gt; inTuple, rstring errorMessage&gt;
+	stream &lt;tuple&lt; int32 id, rstring fname, rstring lname> inTuple, rstring errorMessage>
 	MySink3  = JMSSink(MyPersonNamesStream )
 	{
 	param
-		connection : "amqConn";	
-		access     : "amqAccess";
+		connection : &quot;amqConn&quot;;	
+		access     : &quot;amqAccess&quot;;
 	}
 	// JMSSink operator with reconnectionPolicy specified as  NoRetry
 	() as  MySink4 = JMSSink( MyPersonNamesStream )
 	{
 	param
-		connection         : "amqConn";
-		access             : "amqAccess";
-		reconnectionPolicy : "NoRetry";
+		connection         : &quot;amqConn&quot;;
+		access             : &quot;amqAccess&quot;;
+		reconnectionPolicy : &quot;NoRetry&quot;;
 	}
 	
 	// JMSSink operator with optional period and reconnectionPolicy specified
 	() as  MySink5 = JMSSink( MyPersonNamesStream )
 	{
 	param
-		connection: "amqConn";	
-		access: "amqAccess";
-		reconnectionPolicy : "InfiniteRetry";
+		connection: &quot;amqConn&quot;;	
+		access: &quot;amqAccess&quot;;
+		reconnectionPolicy : &quot;InfiniteRetry&quot;;
 		period: 1.20;
 	}
 	// JMSSink operator with reconnectionPolicy specified as BoundedRetry
 	() as  MySink6 = JMSSink( MyPersonNamesStream )
 	{
 	param
-		connection: "amqConn";	
-		access: "amqAccess"; 
-		reconnectionPolicy : "BoundedRetry";
+		connection: &quot;amqConn&quot;;	
+		access: &quot;amqAccess&quot;; 
+		reconnectionPolicy : &quot;BoundedRetry&quot;;
 		reconnectionBound : 2;
 		period: 1.20;
 	}
@@ -116,38 +116,38 @@ This example show the use of multiple JMSSink operators with different parameter
 
 The following example shows a sample connections.xml file:
 
-	&lt;st:connections 	xmlns:st="http://www.ibm.com/xmlns/prod/streams/adapters"
-						xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+	&lt;st:connections 	xmlns:st=&quot;http://www.ibm.com/xmlns/prod/streams/adapters&quot;
+						xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;>
 	
-	&lt;connection_specifications&gt;
-		&lt;connection_specification name="amqConn"&gt;
-		 &lt;JMS initial_context="org.apache.activemq.jndi.ActiveMQInitialContextFactory"
-			provider_url = "tcp://machine1.com:61616"
-			connection_factory="ConnectionFactory"/&gt;
-		&lt;/connection_specification&gt;
-	&lt;/connection_specifications&gt;
+	&lt;connection_specifications>
+		&lt;connection_specification name=&quot;amqConn&quot;>
+		 &lt;JMS initial_context=&quot;org.apache.activemq.jndi.ActiveMQInitialContextFactory&quot;
+			provider_url = &quot;tcp://machine1.com:61616&quot;
+			connection_factory=&quot;ConnectionFactory&quot;/>
+		&lt;/connection_specification>
+	&lt;/connection_specifications>
 	
-	&lt;access_specifications&gt;
-		&lt;access_specification name="amqAccess"&gt;
-			&lt;destination identifier="dynamicQueues/MapQueue" message_class="bytes" /&gt;
-				&lt;uses_connection connection="amqConn"/&gt;
-				&lt;native_schema&gt;
-					&lt;attribute name="id" type="Int" /&gt;
-					&lt;attribute name="fname" type="Bytes" length="15" /&gt;
-					&lt;attribute name="lname" type="Bytes" length="20" /&gt;
-					&lt;attribute name="age" type="Int" /&gt;
-					&lt;attribute name="gender" type="Bytes" length="1" /&gt;
-					&lt;attribute name="score" type="Float" /&gt;
-					&lt;attribute name="total" type="Double" /&gt;
-				&lt;/native_schema&gt;
-		&lt;/access_specification&gt;
-	&lt;/access_specifications&gt;
-	&lt;/st:connections&gt;
+	&lt;access_specifications>
+		&lt;access_specification name=&quot;amqAccess&quot;>
+			&lt;destination identifier=&quot;dynamicQueues/MapQueue&quot; message_class=&quot;bytes&quot; />
+				&lt;uses_connection connection=&quot;amqConn&quot;/>
+				&lt;native_schema>
+					&lt;attribute name=&quot;id&quot; type=&quot;Int&quot; />
+					&lt;attribute name=&quot;fname&quot; type=&quot;Bytes&quot; length=&quot;15&quot; />
+					&lt;attribute name=&quot;lname&quot; type=&quot;Bytes&quot; length=&quot;20&quot; />
+					&lt;attribute name=&quot;age&quot; type=&quot;Int&quot; />
+					&lt;attribute name=&quot;gender&quot; type=&quot;Bytes&quot; length=&quot;1&quot; />
+					&lt;attribute name=&quot;score&quot; type=&quot;Float&quot; />
+					&lt;attribute name=&quot;total&quot; type=&quot;Double&quot; />
+				&lt;/native_schema>
+		&lt;/access_specification>
+	&lt;/access_specifications>
+	&lt;/st:connections>
 </description>
       <iconUri size="16">JMSSink_16.gif</iconUri>
-	  <iconUri size="32">JMSSink_32.gif</iconUri>
-	  <metrics>
-      	<metric>
+      <iconUri size="32">JMSSink_32.gif</iconUri>
+      <metrics>
+        <metric>
           <name>nTruncatedInserts</name>
           <description docHref="">
 The number of tuples that had truncated attributes when they were converted to a message.</description>
@@ -175,7 +175,7 @@ The number of reconnection attempts that are made before a successful connection
           <cmn:description>Java operator class library</cmn:description>
           <cmn:managedLibrary>
             <cmn:libPath>../../impl/java/bin</cmn:libPath>
-            <cmn:libPath>../../impl/lib/com.ibm.streamsx.messaging.jar</cmn:libPath>              
+            <cmn:libPath>../../impl/lib/com.ibm.streamsx.messaging.jar</cmn:libPath>
           </cmn:managedLibrary>
         </library>
       </libraryDependencies>
@@ -208,7 +208,6 @@ This is an optional parameter that specifies the reconnection policy. The valid 
         <type>rstring</type>
         <cardinality>1</cardinality>
       </parameter>
-      
       <parameter>
         <name>reconnectionBound</name>
         <description>
@@ -251,7 +250,23 @@ This optional parameter specifies the path name of the file that contains the co
         <type>rstring</type>
         <cardinality>1</cardinality>
       </parameter>
-     </parameters>
+      <parameter>
+        <name>maxMessageSendRetries</name>
+        <description>
+This optional parameter maxMessageSendRetries specifies the number of successive retry that will be attempted for a message in case of failure on message send. By default, this number is zero, i.e no retry will be attempted.</description>
+        <optional>true</optional>
+        <type>int32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>messageSendRetryDelay</name>
+        <description>
+This optional parameter messageSendRetryDelay specifies the time in millisecond to wait before next delivery attempt. If parameter maxMessageSendRetries is specified, then you must also specify a value for this parameter</description>
+        <optional>true</optional>
+        <type>int64</type>
+        <cardinality>1</cardinality>
+      </parameter>
+    </parameters>
     <inputPorts>
       <inputPortSet>
         <description>
