@@ -292,8 +292,6 @@ public class JMSSource extends ProcessTupleProducer {
 		checker.checkDependentParameters("period", "reconnectionPolicy");
 		checker.checkDependentParameters("reconnectionBound",
 				"reconnectionPolicy");
-
-		checker.checkDependentParameters("maxMessageReceiveRetries", "messageReceiveRetryDelay");
 	}
 
 	@Override

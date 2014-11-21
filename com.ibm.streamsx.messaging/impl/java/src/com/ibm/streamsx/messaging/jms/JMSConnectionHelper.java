@@ -310,52 +310,39 @@ class JMSConnectionHelper {
 			InterruptedException {
 
 		boolean res = false;
-		try {
-			// try to send the message
-			synchronized (getSession()) {
-				getProducer().send(message);
-				res = true;
-			}
-		}
-
-		catch (JMSException e) {
+		int count = 0;
 		
-			// error has occurred, log error and try sending message again
-			logger.log(LogLevel.WARN, "ERROR_DURING_SEND", new Object[] { e.toString() });
-			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
+		do {
 			
-			// Recreate the connection objects if we don't have any (this
-			// could happen after a connection failure)
-			setConnect(null);
-			createConnection();
-			
-			// Retry sending message
-			for(int i=0; i<maxMessageRetries; i++) {
+			try {
 				
-				logger.log(LogLevel.INFO, "ATTEMPT_TO_RESEND_MESSAGE", new Object[] { i });
-				// retry sending the message
-				try {
-					synchronized (getSession()) {
-						getProducer().send(message);
-						res = true;
-						break;
-					}
-				}
-				catch (JMSException e1) {
-					// if re-send fails, logs the error
-					logger.log(LogLevel.WARN, "ERROR_DRUING_RESEND", new Object[] { i, e1.toString() });
-					logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
-					
-					// Recreate the connection objects if we don't have any (this
-					// could happen after a connection failure)
-					setConnect(null);
-					createConnection();
-					
+				// This is retry, wait before retry
+				if(count > 0) {
+					logger.log(LogLevel.INFO, "ATTEMPT_TO_RESEND_MESSAGE", new Object[] { count });
 					// Wait for a while before next delivery attempt
 					Thread.sleep(messageRetryDelay);
 				}
+				// try to send the message
+				synchronized (getSession()) {
+					getProducer().send(message);
+					res = true;
+					
+				}
 			}
-		}
+			catch (JMSException e) {
+				// error has occurred, log error and try sending message again
+				logger.log(LogLevel.WARN, "ERROR_DURING_SEND", new Object[] { e.toString() });
+				logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
+				
+				// Recreate the connection objects if we don't have any (this
+				// could happen after a connection failure)
+				setConnect(null);
+				createConnection();
+			}
+			
+			count++;
+			
+		} while(count < maxMessageRetries && !res);
 		
 		if(!res) {
 			nFailedInserts.incrementValue(1);
