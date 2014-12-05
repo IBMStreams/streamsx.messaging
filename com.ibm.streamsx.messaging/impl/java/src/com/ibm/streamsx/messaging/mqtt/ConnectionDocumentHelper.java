@@ -125,14 +125,34 @@ class ConnectionDocumentHelper {
 							String keyStorePassword = getAttributeValue(
 									attributes, "keyStorePassword"); //$NON-NLS-1$
 							String trustStorePassword = getAttributeValue(attributes, "trustStorePassword"); //$NON-NLS-1$
-
+							String userID = getAttributeValue(attributes, "userID");
+							String password = getAttributeValue(attributes, "password");
+							
+							int keepAliveInterval;
+							try {
+								keepAliveInterval = Integer.parseInt(getAttributeValue(attributes, "keepAliveInterval"));
+							} catch (NumberFormatException e) {
+								keepAliveInterval = 0;
+							}
+							
+							long commandTimeout;
+							try {
+								commandTimeout = Long.parseLong(getAttributeValue(attributes, "commandTimeout"));
+							} catch (NumberFormatException e) {
+								commandTimeout = 0L;
+							}
+							
 							if (!serverUriStr.isEmpty()) {
 								ConnectionSpecification specObj = new ConnectionSpecification();
 								specObj.setServerUri(serverUriStr)
 										.setTrustStore(trustStore)
 										.setKeyStore(keyStore)
 										.setKeyStorePassword(keyStorePassword)
-										.setTrustStorePassword(trustStorePassword);
+										.setTrustStorePassword(trustStorePassword)
+										.setUserID(userID)
+										.setPassword(password)
+										.setKeepAliveInterval(keepAliveInterval)
+										.setCommandTimeout(commandTimeout);
 
 								connSpecMap.put(name, specObj);
 							}

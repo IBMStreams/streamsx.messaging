@@ -35,6 +35,12 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	public static final String PARAMNAME_CONNECTION = "connection"; //$NON-NLS-1$
 	public static final String PARAMNAME_SERVER_URI = "serverURI"; //$NON-NLS-1$
 	public static final String PARAMNAME_ERROR_OUT_ATTR_NAME = "errorOutAttrName"; //$NON-NLS-1$
+	
+	public static final String PARAMNAME_CLIENT_ID = "clientID"; //$NON-NLS-1$
+	public static final String PARAMNAME_USER_ID = "userID"; //$NON-NLS-1$
+	public static final String PARAMNAME_PASSWORD = "password"; //$NON-NLS-1$
+	public static final String PARAMNAME_COMMAND_TIMEOUT = "commandTimeout"; //$NON-NLS-1$
+	public static final String PARAMNAME_KEEP_ALIVE = "keepAliveInterval"; //$NON-NLS-1$
 
 	static Logger TRACE = Logger.getLogger(AbstractMqttOperator.class);
 
@@ -48,6 +54,13 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	private String trustStorePassword;
 	private String keyStore;
 	private String keyStorePassword;
+	
+	private String clientID;
+	private String userID;
+	private String password;
+	
+	private long commandTimeout = -1L;
+	private int keepAliveInterval = -1;
 
 	public AbstractMqttOperator() {
 		super();
@@ -70,7 +83,21 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 				PARAMNAME_SERVER_URI);
 		checker.checkDependentParameters(PARAMNAME_CONNDOC,
 				PARAMNAME_CONNECTION);
+		
+		checker.checkDependentParameters(PARAMNAME_USER_ID, PARAMNAME_PASSWORD);
+		checker.checkDependentParameters(PARAMNAME_PASSWORD, PARAMNAME_USER_ID);
 
+	}
+	
+	@ContextCheck(compile=false)
+	public static void runtimeCheckParameterValue(OperatorContextChecker checker) {
+		
+		validateStringNotNullOrEmpty(checker, PARAMNAME_CLIENT_ID);
+    	validateStringNotNullOrEmpty(checker, PARAMNAME_USER_ID);
+    	validateStringNotNullOrEmpty(checker, PARAMNAME_PASSWORD);
+    	
+    	validateNumber(checker, PARAMNAME_COMMAND_TIMEOUT, 0, Long.MAX_VALUE);
+    	validateNumber(checker, PARAMNAME_KEEP_ALIVE, 0, Integer.MAX_VALUE);
 	}
 
 	@Parameter(name = PARAMNAME_SERVER_URI, description = SPLDocConstants.MQTTSRC_PARAM_SERVERIURI_DESC, optional = true)
@@ -142,6 +169,10 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 					String keyStore = connectionSpecification.getKeyStore();
 					String keyStorePw = connectionSpecification
 							.getKeyStorePassword();
+					String userID = connectionSpecification.getUserID();
+					String password = connectionSpecification.getPassword();
+					int keepAliveInterval = connectionSpecification.getKeepAliveInterval();
+					long commandTimeout = connectionSpecification.getCommandTimeout();
 
 					if (getTrustStore() == null)
 						setTrustStore(trustStore);
@@ -154,6 +185,14 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 
 					if (getTrustStorePassword() == null)
 						setTrustStorePassword(trustStorePw);
+					if (getUserID() == null)
+						setUserID(userID);
+					if (getPassword() == null) 
+						setPassword(password);
+					if(getKeepAliveInterval() == -1)
+						setKeepAliveInterval(keepAliveInterval);
+					if(this.getCommandTimeout() == -1L)
+						this.setCommandTimeout(commandTimeout);
 				} else {
 					TRACE.log(
 							TraceLevel.ERROR,
@@ -241,6 +280,61 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	@Parameter(name = PARAMNAME_TRUST_STORE_PASSWORD, optional = true, description = SPLDocConstants.PARAM_TRUSTORE_PW_DESC)
 	public void setTrustStorePassword(String trustStorePassword) {
 		this.trustStorePassword = trustStorePassword;
+	}
+	
+    public String getClientID() {
+		return clientID;
+	}
+
+    @Parameter(name=PARAMNAME_CLIENT_ID, description="All clients connected to the same server must have a unique ID. This optional parameter allows user to specify a client id or the operator will generate one for you", optional=true)
+	public void setClientID(String clientID) {
+		this.clientID = clientID;
+	}
+
+    public String getUserID() {
+		return userID;
+	}
+
+	@Parameter(name=PARAMNAME_USER_ID, description="This optional parameter sets the user name to use for the connection. Must be specified when password parameter is used, or compile time error will occur", optional=true)
+	public void setUserID(String userID) {
+		this.userID = userID;
+	}
+	
+	public String getPassword() {
+		return password;
+	}
+
+	@Parameter(name=PARAMNAME_PASSWORD, description="This optional parameter sets the password to use for the connection. Must be specified when userID parameter is used, or compile time error will occur", optional=true)
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public long getCommandTimeout() {
+		return commandTimeout;
+	}
+
+	@Parameter(name=PARAMNAME_COMMAND_TIMEOUT, description="This optional parameter is used to specify maximum time in millisecond to wait for an MQTT action to complete instead of waiting until a specific action to finish such as message publish action. A value of 0 will wait until the action finishes and not timeout, negative number will cause a runtime error. By default, the operator will not timeout", optional=true)
+	public void setCommandTimeout(long commandTimeout) {
+		this.commandTimeout = commandTimeout;
+	}
+
+	public int getKeepAliveInterval() {
+		return keepAliveInterval;
+	}
+
+	@Parameter(name=PARAMNAME_KEEP_ALIVE, description="This optional parameter, measured in seconds, sets the maximum time interval between messages sent or received. It enables the client to detect if the server is no longer available. By default, keepalive processing is disabled. A number that is greater than 0 will enable it. Negative number will cause a runtime error.", optional=true)
+	public void setKeepAliveInterval(int keepAliveInterval) {
+		this.keepAliveInterval = keepAliveInterval;
+	}
+
+	protected static void validateStringNotNullOrEmpty(OperatorContextChecker checker, String parameterName) {
+		if ((checker.getOperatorContext().getParameterNames().contains(parameterName))) {
+			String value = checker.getOperatorContext().getParameterValues(parameterName).get(0);
+			
+			if(value == null || value.trim().length() == 0) {
+				checker.setInvalidContext(Messages.getString("Error_AbstractMqttOperator.11"), new Object[] {parameterName});
+			}
+		}
 	}
 
 	protected static void validateNumber(OperatorContextChecker checker,
