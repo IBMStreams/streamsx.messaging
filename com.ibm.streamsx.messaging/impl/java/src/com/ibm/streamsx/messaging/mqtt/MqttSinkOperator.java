@@ -335,6 +335,11 @@ public class MqttSinkOperator extends AbstractMqttOperator {
        mqttWrapper.setBrokerUri(getServerUri());
        mqttWrapper.setReconnectionBound(getReconnectionBound());
        mqttWrapper.setPeriod(getPeriod());
+       mqttWrapper.setUserID(getUserID());
+       mqttWrapper.setPassword(getPassword());
+       mqttWrapper.setClientID(getClientID());
+       mqttWrapper.setCommandTimeout(getCommandTimeout());
+       mqttWrapper.setKeepAliveInterval(getKeepAliveInterval());
        
        setupSslProperties(mqttWrapper);
        // do not connect here... connection is done on the publish thread when a message
