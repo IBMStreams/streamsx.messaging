@@ -32,10 +32,13 @@ import com.ibm.streams.operator.logging.LoggerNames;
 import com.ibm.streams.operator.metrics.Metric;
 import com.ibm.streams.operator.model.CustomMetric;
 import com.ibm.streams.operator.model.Parameter;
+import com.ibm.streams.operator.state.Checkpoint;
+import com.ibm.streams.operator.state.ConsistentRegionContext;
+import com.ibm.streams.operator.state.StateHandler;
 
 //The JMSSink operator publishes data from Streams to a JMS Provider queue or a topic.
 
-public class JMSSink extends AbstractOperator {
+public class JMSSink extends AbstractOperator implements StateHandler{
 
 	private static final String CLASS_NAME = "com.ibm.streamsx.messaging.jms.JMSSink";
 
@@ -276,6 +279,15 @@ public class JMSSink extends AbstractOperator {
 			}
 		}
 	}
+	
+	@ContextCheck(compile = true, runtime = false)
+	public static void checkCompileTimeConsistentRegion(OperatorContextChecker checker) {
+		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
+		
+		if(consistentRegionContext != null && consistentRegionContext.isStartOfRegion()) {
+			checker.setInvalidContext("JMSSink operator can not be placed at start of a consistent region.", new String[] {});
+		}
+	}
 
 	/*
 	 * The method checkParametersRuntime validates that the reconnection policy
@@ -360,6 +372,8 @@ public class JMSSink extends AbstractOperator {
 		super.initialize(context);
 		
 		JmsClasspathUtil.setupClassPaths(context);
+		
+		context.registerStateHandler(this);
 		
 		/*
 		 * Set appropriate variables if the optional error output port is
@@ -515,5 +529,35 @@ public class JMSSink extends AbstractOperator {
 		// close the connection.
 		super.shutdown();
 		jmsConnectionHelper.closeConnection();
+	}
+
+	@Override
+	public void close() throws IOException {
+		logger.log(LogLevel.INFO, "StateHandler Close");
+	}
+
+	@Override
+	public void checkpoint(Checkpoint checkpoint) throws Exception {
+		logger.log(LogLevel.INFO, "checkpoint " + checkpoint.getSequenceId());
+	}
+
+	@Override
+	public void drain() throws Exception {
+		logger.log(LogLevel.INFO, "Drain... ");
+	}
+
+	@Override
+	public void reset(Checkpoint checkpoint) throws Exception {
+		logger.log(LogLevel.INFO, "Reset to checkpoint " + checkpoint.getSequenceId());
+	}
+
+	@Override
+	public void resetToInitialState() throws Exception {
+		logger.log(LogLevel.INFO, "Reset to initial state");
+	}
+
+	@Override
+	public void retireCheckpoint(long id) throws Exception {
+		logger.log(LogLevel.INFO, "Retire checkpoint");		
 	}
 }

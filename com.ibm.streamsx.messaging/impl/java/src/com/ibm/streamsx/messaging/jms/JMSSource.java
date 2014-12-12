@@ -28,6 +28,7 @@ import com.ibm.streams.operator.metrics.Metric;
 import com.ibm.streams.operator.model.CustomMetric;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.samples.patterns.ProcessTupleProducer;
+import com.ibm.streams.operator.state.ConsistentRegionContext;
 
 //The JMSSource operator converts a message JMS queue or topic to stream
 public class JMSSource extends ProcessTupleProducer {	
@@ -207,6 +208,14 @@ public class JMSSource extends ProcessTupleProducer {
 
 	// Add the context checks
 
+	@ContextCheck(compile = true)
+	public static void checkInConsistentRegion(OperatorContextChecker checker) {
+		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
+		
+		if(consistentRegionContext != null && consistentRegionContext.isStartOfRegion()) {
+			checker.setInvalidContext("JMSSource operator can not participate in a consistent region.", new String[] {});
+		}
+	}
 	/*
 	 * The method checkErrorOutputPort validates that the stream on error output
 	 * port contains the mandatory attribute of type rstring which will contain
