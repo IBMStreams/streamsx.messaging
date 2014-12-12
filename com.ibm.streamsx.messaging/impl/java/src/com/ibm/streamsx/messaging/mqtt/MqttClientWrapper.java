@@ -42,10 +42,7 @@ public class MqttClientWrapper implements MqttCallback {
 	private long period = 5000;
 	private int reconnectionBound = 5;
 	private String clientID;
-	private String userID;
-	private String password;
 	private long commandTimeout;
-	private int keepAliveInterval;
  
 	private boolean shutdown; 
 	
@@ -53,15 +50,13 @@ public class MqttClientWrapper implements MqttCallback {
 
     	conOpt = new MqttConnectOptions();
     	conOpt.setCleanSession(true);
-    	conOpt.setKeepAliveInterval(0);
     	
     	callBackListeners = new ArrayList<MqttCallback>();
 	}
 	
 	public void setKeepAliveInterval(int keepAliveInterval) {
-		this.keepAliveInterval = keepAliveInterval;
-		if(this.keepAliveInterval >= 0) {
-			conOpt.setKeepAliveInterval(this.keepAliveInterval);
+		if(keepAliveInterval >= 0) {
+			conOpt.setKeepAliveInterval(keepAliveInterval);
 		}
 	}
 
@@ -74,16 +69,14 @@ public class MqttClientWrapper implements MqttCallback {
 	}
 
 	public void setUserID(String userID) {
-		this.userID = userID;
-		if(this.userID != null && this.userID.trim().length() > 0) {
-			conOpt.setUserName(this.userID);
+		if(userID != null && userID.trim().length() > 0) {
+			conOpt.setUserName(userID);
 		}
 	}
 	
 	public void setPassword(String password) {
-		this.password = password;
-		if(this.password != null && this.password.trim().length() > 0) {
-			conOpt.setPassword(this.password.toCharArray());
+		if(password != null && password.trim().length() > 0) {
+			conOpt.setPassword(password.toCharArray());
 		}
 	}
 	
@@ -146,7 +139,10 @@ public class MqttClientWrapper implements MqttCallback {
 		String uriToConnect = brokerUri;
 		mqttClient = new MqttClient(uriToConnect, clientId, dataStore);
 		
-		mqttClient.setTimeToWait(commandTimeout);
+		if(this.commandTimeout != IMqttConstants.UNINITIALIZED_COMMAND_TIMEOUT) {
+			mqttClient.setTimeToWait(commandTimeout);
+		}
+		
 		mqttClient.setCallback(this);
 
 		if (reconnectionBound > 0) {

@@ -59,8 +59,8 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	private String userID;
 	private String password;
 	
-	private long commandTimeout = -1L;
-	private int keepAliveInterval = -1;
+	private long commandTimeout = IMqttConstants.UNINITIALIZED_COMMAND_TIMEOUT;
+	private int keepAliveInterval = IMqttConstants.UNINITIALIZED_KEEP_ALIVE_INTERVAL;
 
 	public AbstractMqttOperator() {
 		super();
@@ -189,9 +189,9 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 						setUserID(userID);
 					if (getPassword() == null) 
 						setPassword(password);
-					if(getKeepAliveInterval() == -1)
+					if(getKeepAliveInterval() == IMqttConstants.UNINITIALIZED_KEEP_ALIVE_INTERVAL && keepAliveInterval > IMqttConstants.UNINITIALIZED_KEEP_ALIVE_INTERVAL )
 						setKeepAliveInterval(keepAliveInterval);
-					if(this.getCommandTimeout() == -1L)
+					if(this.getCommandTimeout() == IMqttConstants.UNINITIALIZED_COMMAND_TIMEOUT && commandTimeout > IMqttConstants.UNINITIALIZED_COMMAND_TIMEOUT)
 						this.setCommandTimeout(commandTimeout);
 				} else {
 					TRACE.log(
@@ -286,7 +286,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		return clientID;
 	}
 
-    @Parameter(name=PARAMNAME_CLIENT_ID, description="All clients connected to the same server must have a unique ID. This optional parameter allows user to specify a client id or the operator will generate one for you", optional=true)
+    @Parameter(name=PARAMNAME_CLIENT_ID, description = SPLDocConstants.MQTT_PARAM_CLIENT_ID_DESC, optional=true)
 	public void setClientID(String clientID) {
 		this.clientID = clientID;
 	}
@@ -295,7 +295,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		return userID;
 	}
 
-	@Parameter(name=PARAMNAME_USER_ID, description="This optional parameter sets the user name to use for the connection. Must be specified when password parameter is used, or compile time error will occur", optional=true)
+	@Parameter(name=PARAMNAME_USER_ID, description = SPLDocConstants.MQTT_PARAM_USER_ID_DESC, optional=true)
 	public void setUserID(String userID) {
 		this.userID = userID;
 	}
@@ -304,7 +304,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		return password;
 	}
 
-	@Parameter(name=PARAMNAME_PASSWORD, description="This optional parameter sets the password to use for the connection. Must be specified when userID parameter is used, or compile time error will occur", optional=true)
+	@Parameter(name=PARAMNAME_PASSWORD, description = SPLDocConstants.MQTT_PARAM_PASSWORD_DESC, optional=true)
 	public void setPassword(String password) {
 		this.password = password;
 	}
@@ -313,7 +313,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		return commandTimeout;
 	}
 
-	@Parameter(name=PARAMNAME_COMMAND_TIMEOUT, description="This optional parameter is used to specify maximum time in millisecond to wait for an MQTT action to complete instead of waiting until a specific action to finish such as message publish action. A value of 0 will wait until the action finishes and not timeout, negative number will cause a runtime error. By default, the operator will not timeout", optional=true)
+	@Parameter(name=PARAMNAME_COMMAND_TIMEOUT, description = SPLDocConstants.MQTT_PARAM_COMMAND_TIMEOUT_DESC, optional=true)
 	public void setCommandTimeout(long commandTimeout) {
 		this.commandTimeout = commandTimeout;
 	}
@@ -322,7 +322,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		return keepAliveInterval;
 	}
 
-	@Parameter(name=PARAMNAME_KEEP_ALIVE, description="This optional parameter, measured in seconds, sets the maximum time interval between messages sent or received. It enables the client to detect if the server is no longer available. By default, keepalive processing is disabled. A number that is greater than 0 will enable it. Negative number will cause a runtime error.", optional=true)
+	@Parameter(name=PARAMNAME_KEEP_ALIVE, description = SPLDocConstants.MQTT_PARAM_KEEP_ALIVE_INTERVAL_DESC, optional=true)
 	public void setKeepAliveInterval(int keepAliveInterval) {
 		this.keepAliveInterval = keepAliveInterval;
 	}

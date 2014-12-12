@@ -132,14 +132,14 @@ class ConnectionDocumentHelper {
 							try {
 								keepAliveInterval = Integer.parseInt(getAttributeValue(attributes, "keepAliveInterval"));
 							} catch (NumberFormatException e) {
-								keepAliveInterval = 0;
+								keepAliveInterval = IMqttConstants.UNINITIALIZED_KEEP_ALIVE_INTERVAL;
 							}
 							
 							long commandTimeout;
 							try {
 								commandTimeout = Long.parseLong(getAttributeValue(attributes, "commandTimeout"));
 							} catch (NumberFormatException e) {
-								commandTimeout = 0L;
+								commandTimeout = IMqttConstants.UNINITIALIZED_COMMAND_TIMEOUT;
 							}
 							
 							if (!serverUriStr.isEmpty()) {

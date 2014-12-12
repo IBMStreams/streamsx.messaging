@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.log4j.Logger;
+import org.eclipse.paho.client.mqttv3.MqttException;
 
 import com.ibm.streams.operator.Attribute;
 import com.ibm.streams.operator.OperatorContext;
@@ -188,9 +189,16 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 				}				
 				catch (Exception e) {
 					// do not rethrow exception, log and keep going
-					String errorMsg = Messages.getString("Error_MqttSinkOperator.2"); //$NON-NLS-1$
-					TRACE.log(TraceLevel.ERROR, errorMsg, e); 
-					submitToErrorPort(errorMsg);
+					if(e instanceof MqttException && ((MqttException) e).getReasonCode() == MqttException.REASON_CODE_CLIENT_TIMEOUT ) {
+						// defected a command timeout
+						TRACE.log(TraceLevel.WARN, Messages.getString("Warning_MqttSinkOperator.0")); //$NON-NLS-1$
+					}
+					else {
+						String errorMsg = Messages.getString("Error_MqttSinkOperator.2"); //$NON-NLS-1$
+						TRACE.log(TraceLevel.ERROR, errorMsg, e); 
+						submitToErrorPort(errorMsg);
+					}
+					
 				}
 			}			
 		}
