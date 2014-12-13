@@ -13,6 +13,10 @@ The `JMSSink` operator creates messages from InfoSphere Streams tuples and write
 
 The incoming tuple from InfoSphere Streams can contain one or more attributes, each of which can be of the following data types: int8, uint8, int16, uint16, int32, uint32, int64, uint64, float32, float64, boolean, blob, rstring, decimal32, decimal64, decimal128, ustring, or timestamp. The input tuple is serialized into a JMS message. For the `JMSSink` operator, the following message classes are supported: map, stream, bytes, xml, wbe, wbe22, and empty. The type of message is specified as the value of the message_class attribute in the connection specifications document.
 
+**Behavior in a consistent region**
+
+JMSSink operator can be an operator within the reachability graph of a consistent region. It cannot be the start of a consistent region.
+
 **Exceptions**
 
 The following list describes the common types of exceptions that can occur:

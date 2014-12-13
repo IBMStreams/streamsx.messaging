@@ -17,6 +17,10 @@ The `JMSSource` operator reads data from a WebSphere MQ or an Apache Active MQ q
 
 The `JMSSource` operator converts each WebSphere MQ or Apache Active MQ message to a separate tuple and sends it to the output stream. A single message is converted into a single tuple.
 
+**Behavior in a consistent region**
+
+JMSSource operator is not supported in a consistent region.
+
 **Exceptions**
 
 The following types of exceptions can occur:
