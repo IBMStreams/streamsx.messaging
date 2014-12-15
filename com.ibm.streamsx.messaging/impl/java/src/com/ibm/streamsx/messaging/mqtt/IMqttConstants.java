@@ -19,5 +19,7 @@ public interface IMqttConstants {
 	public static final String SSL_KEY_STORE = "com.ibm.ssl.keyStore";
 	public static final String SSL_TRUST_STORE = "com.ibm.ssl.trustStore";
 	static final String SSK_TRUST_STORE_PASSWORD = "com.ibm.ssl.trustStorePassword";
+	public static final long UNINITIALIZED_COMMAND_TIMEOUT = -1L;
+	public static final int UNINITIALIZED_KEEP_ALIVE_INTERVAL = -1;
 	
 }
