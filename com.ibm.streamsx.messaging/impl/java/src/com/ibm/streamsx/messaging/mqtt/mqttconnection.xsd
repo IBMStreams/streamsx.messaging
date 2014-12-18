@@ -22,6 +22,22 @@
 			   <attribute name="keyStore" type="anyURI"/>
 			   <attribute name="keyStorePassword" type="string"/>
 			   <attribute name="trustStorePassword" type="string"/>
+			   <attribute name="userID" type="string"/>
+			   <attribute name="password" type="string"/>
+			   <attribute name="keepAliveInterval">
+			      <simpleType>
+                     <restriction base="integer">
+          			    <minInclusive value="0"/>
+     				 </restriction>
+                  </simpleType>
+			   </attribute>
+			   <attribute name="commandTimeout">
+			      <simpleType>
+                     <restriction base="long">
+          			    <minInclusive value="0"/>
+     				 </restriction>
+                  </simpleType>
+			   </attribute>
                       </complexType>
                     </element>
                   </choice>

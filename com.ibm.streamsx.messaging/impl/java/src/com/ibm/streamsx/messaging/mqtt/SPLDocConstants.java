@@ -50,4 +50,11 @@ public class SPLDocConstants {
 	public static final String PARAM_KEYSTORE_DESC = "This optional parameter of type rstring specifies the file that contains the public and private key certificates of the MQTT client.  If a relative path is specified, the path is relative to the application directory.";
 	public static final String PARAM_TRUSTORE_DESC = "The parameter of type rstring specifies the name of the file that contains the public certificate of the trusted MQTT server.  If a relative path is specified, the path is relative to the application directory.";
 
+	// Common SPL Documnetation
+	public static final String MQTT_PARAM_CLIENT_ID_DESC = "All clients connected to the same server must have a unique ID. This optional parameter allows user to specify a client id or the operator will generate one for you";
+    public static final String MQTT_PARAM_USER_ID_DESC = "This optional parameter sets the user name to use for the connection. Must be specified when password parameter is used, or compile time error will occur";
+    public static final String MQTT_PARAM_PASSWORD_DESC = "This optional parameter sets the password to use for the connection. Must be specified when userID parameter is used, or compile time error will occur";
+    public static final String MQTT_PARAM_COMMAND_TIMEOUT_DESC = "This optional parameter is used to specify maximum time in millisecond to wait for an MQTT action to complete instead of waiting until a specific action to finish such as message publish action. A value of 0 will wait until the action finishes and not timeout, negative number will cause a runtime error. By default, the operator will not timeout";
+    public static final String MQTT_PARAM_KEEP_ALIVE_INTERVAL_DESC = "This optional parameter, measured in seconds, sets the maximum time interval between messages sent or received. It enables the client to detect if the server is no longer available. By default, it is set to 60 seconds. A value of 0 will disable it. Negative number will cause a runtime error.";
+    
 }
