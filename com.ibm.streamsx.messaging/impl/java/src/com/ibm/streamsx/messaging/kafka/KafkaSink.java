@@ -18,12 +18,17 @@ import com.ibm.streams.operator.model.InputPortSet;
 import com.ibm.streams.operator.model.InputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
+import com.ibm.streams.operator.state.ConsistentRegionContext;
 
 @InputPorts(@InputPortSet(cardinality=1, optional=false, 
 	description="The tuples arriving on this port are expected to contain three attributes \\\"key\\\", \\\"topic\\\" and \\\"message\\\". " +
 			"Out of these \\\"message\\\", is a required attribute."))
-@PrimitiveOperator(name="KafkaProducer", description=KafkaSink.DESC)
+@PrimitiveOperator(name=KafkaSink.OPER_NAME, description=KafkaSink.DESC)
 public class KafkaSink extends KafkaBaseOper {
+	
+	
+	static final String OPER_NAME =  "KafkaProducer";
+	
 	private static final Logger trace = Logger.getLogger(KafkaSink.class.getName());
 
 	
@@ -43,7 +48,19 @@ public class KafkaSink extends KafkaBaseOper {
 		return checker.checkExcludedParameters("topic", "topicAttribute") &&
 			   checker.checkExcludedParameters("topicAttribute", "topic");
 	}
-	
+
+	//consistent region checks
+	@ContextCheck(compile = true)
+	public static void checkInConsistentRegion(OperatorContextChecker checker) {
+		ConsistentRegionContext consistentRegionContext = 
+				checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
+		
+		if(consistentRegionContext != null && consistentRegionContext.isStartOfRegion()) {
+			checker.setInvalidContext( OPER_NAME + " operator cannot be placed at the start of consistent region.", 
+					new String[] {});
+		}
+	}
+
 	@Override
 	public void initialize(OperatorContext context)
 			throws Exception {
@@ -87,6 +104,8 @@ public class KafkaSink extends KafkaBaseOper {
 			"The broker is assumed to be already configured and running. " +
 			"The incoming stream can have three attributes: topic, key and message. " +
 			"The message is a required attribute. If the key attribute is not specified, the message is used as the key. " +
-			"A topic can be specified as either an input stream attribute or as a parameter. "
+			"A topic can be specified as either an input stream attribute or as a parameter." +
+			"\\n\\n** Behavior in a Consistent Region **" + 
+			"\\nThis operator cannot be placed at the start of a consistent region."
 			;
 }
