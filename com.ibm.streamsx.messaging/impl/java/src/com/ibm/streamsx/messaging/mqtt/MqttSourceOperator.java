@@ -29,6 +29,7 @@ import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.Tuple;
+import com.ibm.streams.operator.Type;
 import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.log4j.TraceLevel;
@@ -156,6 +157,22 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 	    			checker.checkAttributeType(streamSchema.getAttribute(outAttributeName), MetaType.RSTRING, MetaType.USTRING);
 	    	}
     	}
+    	
+    	if(checker.getOperatorContext().getParameterNames().contains("dataAttributeName")) { //$NON-NLS-1$
+    		
+    		List<String> parameterValues = checker.getOperatorContext().getParameterValues("dataAttributeName"); //$NON-NLS-1$
+    		String dataAttributeName = parameterValues.get(0);
+    		List<StreamingOutput<OutputTuple>> outputPorts = checker.getOperatorContext().getStreamingOutputs();
+    		if (outputPorts.size() > 0) 
+    		{
+    			StreamingOutput<OutputTuple> outputPort = outputPorts.get(0);
+	    		StreamSchema streamSchema = outputPort.getStreamSchema();
+	    		boolean check = checker.checkRequiredAttributes(streamSchema, dataAttributeName);
+	    		if (check)
+	    			checker.checkAttributeType(streamSchema.getAttribute(dataAttributeName), MetaType.RSTRING, MetaType.BLOB );
+    		}
+    	}
+    	
     }
     
     @ContextCheck(compile=true, runtime=false)
@@ -164,23 +181,22 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 		
 		if (outputPorts.size() > 0)
 		{
-			StreamingOutput<OutputTuple> dataPort = outputPorts.get(0);
-			StreamSchema streamSchema = dataPort.getStreamSchema();
-			Set<String> attributeNames = streamSchema.getAttributeNames();
-
-			boolean blobFound = false;
-			for (String attrName : attributeNames) {
-				Attribute attr = streamSchema.getAttribute(attrName);
+			
+			// if user is not specifying dataAttributeName attribute, then we check if stream schema contains default data attribute
+			if(!checker.getOperatorContext().getParameterNames().contains("dataAttributeName")) { //$NON-NLS-1$
 				
-				if (attr.getType().getMetaType().equals(MetaType.BLOB))
-				{
-					blobFound = true;
-					break;
-				}				
-			}
-			if (!blobFound)
-			{
-				checker.setInvalidContext(Messages.getString("Error_MqttSourceOperator.0"), new Object[]{}); //$NON-NLS-1$
+				StreamingOutput<OutputTuple> dataPort = outputPorts.get(0);
+				StreamSchema streamSchema = dataPort.getStreamSchema();
+				
+				Attribute data = streamSchema.getAttribute("data");
+				
+				// the default data attribute must be present and must be either BLOB or RSTRING
+				if(data != null) {
+					checker.checkAttributeType(data, MetaType.RSTRING, MetaType.BLOB );
+				}
+				else {
+					checker.setInvalidContext(Messages.getString("Error_MqttSourceOperator.0"), new Object[]{}); //$NON-NLS-1$
+				}
 			}
 		}
 		
@@ -461,16 +477,10 @@ public class MqttSourceOperator extends AbstractMqttOperator {
      */
     private void produceTuples() throws Exception  {
     	StreamSchema streamSchema = getOutput(0).getStreamSchema();
-		int attributeCount = streamSchema.getAttributeCount();
-		int blobAttrIndex=0;
-		for (int i=0; i<attributeCount; i++)
-		{
-			if (streamSchema.getAttribute(i).getType().getMetaType().equals(MetaType.BLOB))
-			{
-				blobAttrIndex = i;
-				break;
-			}
-		}
+		String dataAttributeName = this.getDataAttributeName() == null ? "data" : this.getDataAttributeName();
+		
+		int dataAttrIndex = streamSchema.getAttributeIndex(dataAttributeName);
+		Type.MetaType dataAttributeType = streamSchema.getAttribute(dataAttributeName).getType().getMetaType();
 		
         while (!shutdown)
         {
@@ -480,8 +490,13 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 			StreamingOutput<OutputTuple> outputPort = getOutput(0);
 			OutputTuple tuple = outputPort.newTuple();
 			
-			tuple.setBlob(blobAttrIndex, ValueFactory.newBlob(blob));
-			
+			if(dataAttributeType.equals(Type.MetaType.BLOB)) {
+				tuple.setBlob(dataAttrIndex, ValueFactory.newBlob(blob));
+			}
+			else { // it should be RSTRING type
+				tuple.setString(dataAttrIndex, new String(blob));
+			}
+
 			if (topicOutAttrName != null)
 			{
 				tuple.setString(topicOutAttrName, record.topic);

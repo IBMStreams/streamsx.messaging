@@ -56,5 +56,5 @@ public class SPLDocConstants {
     public static final String MQTT_PARAM_PASSWORD_DESC = "This optional parameter sets the password to use for the connection. Must be specified when userID parameter is used, or compile time error will occur";
     public static final String MQTT_PARAM_COMMAND_TIMEOUT_DESC = "This optional parameter is used to specify maximum time in millisecond to wait for an MQTT action to complete instead of waiting until a specific action to finish such as message publish action. A value of 0 will wait until the action finishes and not timeout, negative number will cause a runtime error. By default, the operator will not timeout";
     public static final String MQTT_PARAM_KEEP_ALIVE_INTERVAL_DESC = "This optional parameter, measured in seconds, sets the maximum time interval between messages sent or received. It enables the client to detect if the server is no longer available. By default, it is set to 60 seconds. A value of 0 will disable it. Negative number will cause a runtime error.";
-    
+    public static final String MQTT_PARAM_DATA_ATTRIBUTE_DESC = "This optional parameter specifies the name of the attribute that is used to hold actual content of message, if not specified, default data attribute name is data";
 }

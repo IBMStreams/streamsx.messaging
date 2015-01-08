@@ -1,4 +1,19 @@
 namespace com.ibm.streamsx.messaging.mqtt;
+
+/** 
+ *  Minimum Input/Output Stream Schema type for MQTT operators 
+ *  * data - attribute stores actual content of message in blob format for both input and output port 
+ */ 
+
+type MQTTBlobMsg = blob data;
+
+/** 
+ *  Minimum Input/Output Stream Schema type for MQTT operators 
+ *  * data - attribute stores actual content of message in rstring format for both input and output port 
+ */ 
+type MQTTRStringMsg = rstring data;
+
+
 /*
 * Composite that defines types to be used to update MQTTSource operator using control port
 */
