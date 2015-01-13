@@ -10,10 +10,11 @@ args=-t ../../com.ibm.streamsx.messaging
 ns=com.ibm.streamsx.messaging.kafka.tests
 outputdir=./output
 
-tests=BasicFunctionTestMain ProducerTopicTestFailMain
+tests=BasicFunctionTestMain BasicFunctionBlobTestMain ConsumerGroupTestMain ConsumerMultiGroupTestMain ProducerTopicTestFailMain ConsistentRegionProducerFailMain ConsistentRegionConsumerFailMain
 
 rntest=./scripts/testRunner.sh
 ftest=./scripts/expectFail.sh
+pwd=${PWD}
 
 all: ${tests}
 	@echo "Tests Passed"
@@ -22,11 +23,11 @@ compile: ${tests}
 
 %TestMain:
 	${sc} -T ${args} --output-directory ${outputdir}/$@ -M ${ns}::$@
-	${rntest} ${outputdir}/$@/bin/standalone ${ns}::$@.producerProperties=producer.properties ${ns}::$@.consumerProperties=consumer.properties
+	${rntest} ${outputdir}/$@/bin/standalone ${ns}::$@.producerProperties=${pwd}/data/producer.properties ${ns}::$@.consumerProperties=${pwd}/data/consumer.properties
 
 
 %FailMain:
-	${ftest} ${sc} -T ${args} --output-directory ${outputdir}/$@ -M ${ns}::$@ 
+	${ftest} ${sc} ${args} --output-directory ${outputdir}/$@ -M ${ns}::$@ 
 
 clean:
 	rm -rf ${outputdir}

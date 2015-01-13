@@ -1,3 +1,7 @@
+/*******************************************************************************
+ * Copyright (C) 2014, International Business Machines Corporation
+ * All Rights Reserved
+ *******************************************************************************/
 namespace com.ibm.streamsx.messaging.kafka.tests;
 
 composite ProducerTopicTestFailMain {
