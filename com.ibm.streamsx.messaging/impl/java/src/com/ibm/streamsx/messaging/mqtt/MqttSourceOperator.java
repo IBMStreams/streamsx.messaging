@@ -209,6 +209,11 @@ public class MqttSourceOperator extends AbstractMqttOperator {
         setupSslProperties(mqttWrapper);
         
         mqttWrapper.setBrokerUri(getServerUri());
+        mqttWrapper.setUserID(getUserID());
+        mqttWrapper.setPassword(getPassword());
+        mqttWrapper.setClientID(getClientID());
+        mqttWrapper.setCommandTimeout(getCommandTimeout());
+        mqttWrapper.setKeepAliveInterval(getKeepAliveInterval());
         
         /*
          * Create the thread for producing tuples. 

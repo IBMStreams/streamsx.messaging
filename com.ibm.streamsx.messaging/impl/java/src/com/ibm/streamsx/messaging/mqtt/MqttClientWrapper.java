@@ -41,6 +41,8 @@ public class MqttClientWrapper implements MqttCallback {
 	private ArrayList<MqttCallback> callBackListeners;
 	private long period = 5000;
 	private int reconnectionBound = 5;
+	private String clientID;
+	private long commandTimeout;
  
 	private boolean shutdown; 
 	
@@ -48,9 +50,34 @@ public class MqttClientWrapper implements MqttCallback {
 
     	conOpt = new MqttConnectOptions();
     	conOpt.setCleanSession(true);
-    	conOpt.setKeepAliveInterval(0);
     	
     	callBackListeners = new ArrayList<MqttCallback>();
+	}
+	
+	public void setKeepAliveInterval(int keepAliveInterval) {
+		if(keepAliveInterval >= 0) {
+			conOpt.setKeepAliveInterval(keepAliveInterval);
+		}
+	}
+
+	public void setCommandTimeout(long commandTimeout) {
+		this.commandTimeout = commandTimeout;
+	}
+
+	public void setClientID(String clientID) {
+		this.clientID = clientID;
+	}
+
+	public void setUserID(String userID) {
+		if(userID != null && userID.trim().length() > 0) {
+			conOpt.setUserName(userID);
+		}
+	}
+	
+	public void setPassword(String password) {
+		if(password != null && password.trim().length() > 0) {
+			conOpt.setPassword(password.toCharArray());
+		}
 	}
 	
 	public void setBrokerUri(String brokerUri) throws URISyntaxException {
@@ -101,8 +128,9 @@ public class MqttClientWrapper implements MqttCallback {
 		this.period = period;
 		
 		MemoryPersistence dataStore = new MemoryPersistence();
-
-		String clientId = newClientId();
+		
+		String clientId = (this.clientID != null) ? this.clientID : newClientId();
+		
 
 		TRACE.log(TraceLevel.INFO, "[Connect:]" + brokerUri); //$NON-NLS-1$
 		TRACE.log(TraceLevel.INFO, "[Connect:] reconnectBound:" + reconnectionBound); //$NON-NLS-1$
@@ -111,6 +139,11 @@ public class MqttClientWrapper implements MqttCallback {
 		String uriToConnect = brokerUri;
 		mqttClient = new MqttClient(uriToConnect, clientId, dataStore);
 		
+		if(this.commandTimeout != IMqttConstants.UNINITIALIZED_COMMAND_TIMEOUT) {
+			mqttClient.setTimeToWait(commandTimeout);
+		}
+		
+		mqttClient.setCallback(this);
 
 		if (reconnectionBound > 0) {
 			// Bounded retry
@@ -149,9 +182,7 @@ public class MqttClientWrapper implements MqttCallback {
 			}
 		}
 		if (mqttClient.isConnected()) {			
-			TRACE.log(TraceLevel.INFO, "[Connect Success:]" + brokerUri); //$NON-NLS-1$
-			
-			mqttClient.setCallback(this);			
+			TRACE.log(TraceLevel.INFO, "[Connect Success:]" + brokerUri); //$NON-NLS-1$			
 			
 			// clear when connected
 			clearPendingBrokerUri();
@@ -253,7 +284,9 @@ public class MqttClientWrapper implements MqttCallback {
     
     public void addCallBack(MqttCallback callback)
     {
-    	callBackListeners.add(callback);
+    	if(!callBackListeners.contains(callback)) {
+    		callBackListeners.add(callback);
+    	}
     }
     
     public void removeCallBack(MqttCallback callback)

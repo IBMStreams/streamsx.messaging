@@ -65,6 +65,11 @@ class JMSConnectionHelper {
 	private String userPrincipal = null;
 	private String userCredential = null;
 	
+	// Max number of retries on message send
+	private final int maxMessageRetries;
+
+	// Time to wait before try to resend failed message
+	private final long messageRetryDelay;
 
 	// procedure to detrmine if there exists a valid connection or not
 	private boolean isConnectValid() {
@@ -122,6 +127,7 @@ class JMSConnectionHelper {
 	// JMSSource
 	JMSConnectionHelper(ReconnectionPolicies reconnectionPolicy,
 			int reconnectionBound, double period, boolean isProducer,
+			int maxMessageRetry, long messageRetryDelay,
 			String deliveryMode, Metric nReconnectionAttempts, Logger logger) {
 		this.reconnectionPolicy = reconnectionPolicy;
 		this.reconnectionBound = reconnectionBound;
@@ -130,16 +136,18 @@ class JMSConnectionHelper {
 		this.deliveryMode = deliveryMode;
 		this.logger = logger;
 		this.nReconnectionAttempts = nReconnectionAttempts;
+		this.maxMessageRetries = maxMessageRetry;
+		this.messageRetryDelay = messageRetryDelay;
 	}
 
 	// This constructor sets the parameters required to create a connection for
 	// JMSSink
 	JMSConnectionHelper(ReconnectionPolicies reconnectionPolicy,
 			int reconnectionBound, double period, boolean isProducer,
-			String deliveryMode, Metric nReconnectionAttempts,
-			Metric nFailedInserts, Logger logger) {
+			int maxMessageRetry, long messageRetryDelay, String deliveryMode, 
+			Metric nReconnectionAttempts, Metric nFailedInserts, Logger logger) {
 		this(reconnectionPolicy, reconnectionBound, period, isProducer,
-				deliveryMode, nReconnectionAttempts, logger);
+			 maxMessageRetry, messageRetryDelay, deliveryMode, nReconnectionAttempts, logger);
 		this.nFailedInserts = nFailedInserts;
 
 	}
@@ -299,32 +307,48 @@ class JMSConnectionHelper {
 	// nFailedInserts if the send fails
 
 	boolean sendMessage(Message message) throws ConnectionException,
-			InterruptedException, JMSException {
+			InterruptedException {
 
-		try {
-			// try to send the message
-			synchronized (getSession()) {
-				getProducer().send(message);
+		boolean res = false;
+		int count = 0;
+		
+		do {
+			
+			try {
+				
+				// This is retry, wait before retry
+				if(count > 0) {
+					logger.log(LogLevel.INFO, "ATTEMPT_TO_RESEND_MESSAGE", new Object[] { count });
+					// Wait for a while before next delivery attempt
+					Thread.sleep(messageRetryDelay);
+				}
+				// try to send the message
+				synchronized (getSession()) {
+					getProducer().send(message);
+					res = true;
+					
+				}
 			}
-		}
-
-		catch (JMSException e) {
-			// error has occurred, we need to update the nFailedInserts metric
-			setConnect(null);
-			logger.log(LogLevel.WARN, "ERROR_DURING_SEND",
-					new Object[] { e.toString() });
-			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
+			catch (JMSException e) {
+				// error has occurred, log error and try sending message again
+				logger.log(LogLevel.WARN, "ERROR_DURING_SEND", new Object[] { e.toString() });
+				logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
+				
+				// Recreate the connection objects if we don't have any (this
+				// could happen after a connection failure)
+				setConnect(null);
+				createConnection();
+			}
+			
+			count++;
+			
+		} while(count < maxMessageRetries && !res);
+		
+		if(!res) {
 			nFailedInserts.incrementValue(1);
-			// Recreate the connection objects if we don't have any (this
-			// could happen after a connection failure)
-			createConnection();
-			// retry sending the mesage
-			synchronized (getSession()) {
-				getProducer().send(message);
-			}
-			return false;
 		}
-		return true;
+		
+		return res;
 	}
 
 	// this subroutine receives messages from a message consumer
