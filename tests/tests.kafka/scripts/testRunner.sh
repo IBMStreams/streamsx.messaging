@@ -8,15 +8,25 @@
 #
 
 ex=$@
+tm=$(date +%Y%m%d%H%M%S)
+logfile="./testlogs/$tm"
 
 if [ -z "$ex" ]; then
-		echo "No executable found"
-		exit 1
+    echo "No executable found"
+    exit 1
 fi
 
-ret=$($ex | grep ERROR)
+mkdir -p ./testlogs
+
+$ex > $logfile 2>&1
+ret=$(grep ERROR $logfile)
+
 
 if [ ! -z "$ret" ]; then
-		echo "ERROR: Test Failed"
-		exit 1
+    echo "ERROR: Test Failed"
+    cat $logfile
+    exit 1
+else 
+    echo "Test Passed"
+    rm -f $logfile
 fi

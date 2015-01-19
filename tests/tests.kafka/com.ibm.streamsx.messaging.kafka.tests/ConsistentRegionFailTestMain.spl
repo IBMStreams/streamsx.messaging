@@ -1,0 +1,43 @@
+//
+// *******************************************************************************
+// * Copyright (C)2014, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************
+//
+namespace com.ibm.streamsx.messaging.kafka.tests;
+
+composite ConsistentRegionConsumerFailMain {
+type
+	MyType = rstring topic, rstring key, rstring message;
+graph
+	@consistent(trigger=periodic, period=10.0)
+	stream<MyType> KafkaMessageStream = com.ibm.streamsx.messaging.kafka::KafkaConsumer() {
+	  param
+		topic : "mytopic";
+		threadsPerTopic : 1;
+		propertiesFile : "kafka.properties";
+	}
+	() as SinkOp = FileSink(KafkaMessageStream) {
+	   param
+		file : "somefile.dat";
+	}
+	() as JCPOp = JobControlPlane() {}
+}
+
+composite ConsistentRegionProducerFailMain {
+
+graph
+
+	stream<rstring topic, rstring message> KafkaStream = FileSource() {
+		param
+			file : "somefile";
+	} 
+	@consistent(trigger=periodic, period=10.0)
+	() as SinkOp	= com.ibm.streamsx.messaging.kafka::KafkaProducer(KafkaStream) {
+		param
+			propertiesFile : "kafka.properties";
+			topicAttribute : "topic";
+			topic : "mytopic";
+	}
+	() as JCPOp = JobControlPlane() {}
+}
