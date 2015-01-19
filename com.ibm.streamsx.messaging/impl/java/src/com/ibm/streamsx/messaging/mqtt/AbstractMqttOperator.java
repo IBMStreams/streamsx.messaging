@@ -41,6 +41,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	public static final String PARAMNAME_PASSWORD = "password"; //$NON-NLS-1$
 	public static final String PARAMNAME_COMMAND_TIMEOUT = "commandTimeout"; //$NON-NLS-1$
 	public static final String PARAMNAME_KEEP_ALIVE = "keepAliveInterval"; //$NON-NLS-1$
+	public static final String PARAMNAME_DATA_ATTRIBUTE_NAME = "dataAttributeName"; //$NON-NLS-1$
 
 	static Logger TRACE = Logger.getLogger(AbstractMqttOperator.class);
 
@@ -58,6 +59,8 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	private String clientID;
 	private String userID;
 	private String password;
+	
+	private String dataAttributeName;
 	
 	private long commandTimeout = IMqttConstants.UNINITIALIZED_COMMAND_TIMEOUT;
 	private int keepAliveInterval = IMqttConstants.UNINITIALIZED_KEEP_ALIVE_INTERVAL;
@@ -220,7 +223,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		String keyStore = getKeyStore();
 		String keyStorePw = getKeyStorePassword();
 
-		if (trustStore != null && keyStore != null) {
+		if (trustStore != null || keyStore != null) {
 			Properties sslProperties = new Properties();
 
 			if (trustStore != null) {
@@ -240,7 +243,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 
 			if (trustStorePw != null) {
 				sslProperties.setProperty(
-						IMqttConstants.SSK_TRUST_STORE_PASSWORD, keyStorePw);
+						IMqttConstants.SSK_TRUST_STORE_PASSWORD, trustStorePw);
 			}
 			client.setSslProperties(sslProperties);
 		}
@@ -325,6 +328,15 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	@Parameter(name=PARAMNAME_KEEP_ALIVE, description = SPLDocConstants.MQTT_PARAM_KEEP_ALIVE_INTERVAL_DESC, optional=true)
 	public void setKeepAliveInterval(int keepAliveInterval) {
 		this.keepAliveInterval = keepAliveInterval;
+	}
+
+	public String getDataAttributeName() {
+		return dataAttributeName;
+	}
+    
+	@Parameter(name=PARAMNAME_DATA_ATTRIBUTE_NAME, description = SPLDocConstants.MQTT_PARAM_DATA_ATTRIBUTE_DESC, optional=true)
+	public void setDataAttributeName(String dataAttributeName) {
+		this.dataAttributeName = dataAttributeName;
 	}
 
 	protected static void validateStringNotNullOrEmpty(OperatorContextChecker checker, String parameterName) {
