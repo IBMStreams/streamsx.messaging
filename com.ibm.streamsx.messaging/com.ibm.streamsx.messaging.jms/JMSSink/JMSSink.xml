@@ -9,25 +9,38 @@
   <javaOperatorModel>
     <context>
       <description>
-The `JMSSink` operator creates messages from InfoSphere Streams tuples and writes the messages to a WebSphere MQ or an Apache Active MQ queue or topic.
+The `JMSSink` operator creates messages from InfoSphere Streams tuples
+and writes the messages to a WebSphere MQ or an Apache Active MQ queue or topic.
 
-The incoming tuple from InfoSphere Streams can contain one or more attributes, each of which can be of the following data types: int8, uint8, int16, uint16, int32, uint32, int64, uint64, float32, float64, boolean, blob, rstring, decimal32, decimal64, decimal128, ustring, or timestamp. The input tuple is serialized into a JMS message. For the `JMSSink` operator, the following message classes are supported: map, stream, bytes, xml, wbe, wbe22, and empty. The type of message is specified as the value of the message_class attribute in the connection specifications document.
+The incoming tuple from InfoSphere Streams can contain one or more attributes, each of which can be of the following data types:
+int8, uint8, int16, uint16, int32, uint32, int64, uint64, float32, float64, boolean, blob, rstring, decimal32,
+decimal64, decimal128, ustring, or timestamp. The input tuple is serialized into a JMS message.
+For the `JMSSink` operator, the following message classes are supported:
+map, stream, bytes, xml, wbe, wbe22, and empty.
+The type of message is specified as the value of the message_class attribute in the connection specifications document.
 
-**Behavior in a consistent region**
+# Behavior in a consistent region
 
-JMSSink operator can be an operator within the reachability graph of a consistent region. It cannot be the start of a consistent region.
+The `JMSSink` operator can be an operator within the reachability graph of a consistent region.
+It cannot be the start of a consistent region.
 
-**Exceptions**
+# Exceptions
 
 The following list describes the common types of exceptions that can occur:
- * Runtime errors that halt the operator execution.
-  * The `JMSSink` operator throws an exception and terminates in the following cases. For some exceptions, the trace and log information is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
-    * During the initial connection attempt or during transient reconnection failures, if the **reconnectionPolicy** is set to `NoRetry` and the operator does not have a successful connection, or the **reconnectionPolicy** is set to `BoundedRetry` and the operator does not have a successful connection after the number of attempts that are specified in the **reconnectionBound** parameter. Successive data is lost.
+ * Run time errors that halt the operator execution.
+  * The `JMSSink` operator throws an exception and terminates in the following cases.
+    For some exceptions, the trace and log information is logged in the console logs
+    and also output to the optional output port if the application is configured to use the optional port.
+    * During the initial connection attempt or during transient reconnection failures,
+      if the **reconnectionPolicy** is set to `NoRetry` and the operator does not have a successful connection,
+      or the **reconnectionPolicy** is set to `BoundedRetry` and the operator does not have a successful connection
+      after the number of attempts that are specified in the **reconnectionBound** parameter. Successive data is lost.
     * The queue name is unknown.
     * The queue manager name is unknown.
     * The operator is unable to connect to the host.
     * The operator is unable to connect o the port.
-    * There is a mismatch between the data type of one or more attributes in the native schema and the data type of attributes in the input stream.
+    * There is a mismatch between the data type of one or more attributes in the native schema
+      and the data type of attributes in the input stream.
     * One or more native schema attributes do not have a matching attribute in the input stream schema.
     * The **connectionsDocument** parameter refers to an file that does not exist.
     * The **connectionsDocument** parameter is not specified and the `connections.xml` file is not present in the default location.
@@ -35,22 +48,27 @@ The following list describes the common types of exceptions that can occur:
     * A negative length is specified for a string or blob data types in the native schema for a map, stream, xml, wbe, or wbe22 message class.
     * A negative length other than -2 or -4 is specified for a string/blob data type in the native_schema for a bytes message class.
     * The message_class attribute is empty, but the &lt;native_schema> element is not empty.
- * Runtime errors that cause a message to be dropped and an error message to be logged.
-  * The `JMSink` operator throws an exception and discards the message in the following cases. The trace and log information for these exceptions is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
-    *  The data being written is longer than the maximum message length specified in the queue. The discarded message is not sent to the WebSphere MQ or Apache Active MQ queue or topic.
-    * The **reconnectionBound** parameter is specified, but the **reconnectionPolicy** parameter is set to a value other than `BoundedRetry`.
- * Compile-time errors.
-  * The `JMSink` operator throws a compile-time error in the following cases. The trace and log information for these exceptions is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
+ * Run time errors that cause a message to be dropped and an error message to be logged.
+  * The `JMSink` operator throws an exception and discards the message in the following cases.
+    The trace and log information for these exceptions is logged in the console logs
+    and also output to the optional output port if the application is configured to use the optional port.
+    *  The data being written is longer than the maximum message length specified in the queue.
+       The discarded message is not sent to the WebSphere MQ or Apache Active MQ queue or topic.
+    * The **reconnectionBound** parameter is specified, but the **reconnectionPolicy** parameter
+      is set to a value other than `BoundedRetry`.
+ * Compile time errors.
+  * The `JMSink` operator throws a compile time error in the following cases.
+    The trace and log information for these exceptions is logged in the console logs
+    and also output to the optional output port if the application is configured to use the optional port.
     * The mandatory parameters, connection and access are not specified.
     * The **period** parameter is specified, but the **reconnectionPolicy** parameter is not specified.
     * The **reconnectionBound** parameter is specified, but the **reconnectionPolicy** parameter is not specified.
-    * The environment variables **STREAMS_MESSAGING_WMQ_HOME** and **STREAMS_MESSAGING_AMQ_HOME** are not set to the locations where the WMQ and AMQ libraries are installed.
+    * The environment variables **STREAMS_MESSAGING_WMQ_HOME** and **STREAMS_MESSAGING_AMQ_HOME**
+      are not set to the locations where the WMQ and AMQ libraries are installed.
 
-		
 + Examples
 
 This example show the use of multiple JMSSink operators with different parameter combinations.
-
 
 	composite Main {
 	graph
@@ -160,7 +178,8 @@ The number of tuples that had truncated attributes when they were converted to a
         <metric>
           <name>nFailedInserts</name>
           <description docHref="">
-The number of failed inserts to the WebSphere MQ or the Apache ActiveMQ. Failed insertions can occur when a message is dropped because of a runtime error.</description>
+The number of failed inserts to the WebSphere MQ or the Apache ActiveMQ.
+Failed insertions can occur when a message is dropped because of a run time error.</description>
           <kind>Counter</kind>
         </metric>
         <metric>
@@ -199,7 +218,9 @@ The number of reconnection attempts that are made before a successful connection
       <parameter>
         <name>codepage</name>
         <description>
-This optional parameter specifies the code page of the target system that is used to convert ustring for a Bytes message type. If this parameter is specified, it must have exactly one value, which is a String constant. If the parameter is not specified, the operator uses the default value of UTF8.</description>
+This optional parameter specifies the code page of the target system that is used to convert ustring for a Bytes message type.
+If this parameter is specified, it must have exactly one value, which is a String constant.
+If the parameter is not specified, the operator uses the default value of UTF8.</description>
         <optional>true</optional>
         <type>rstring</type>
         <cardinality>1</cardinality>
@@ -207,7 +228,10 @@ This optional parameter specifies the code page of the target system that is use
       <parameter>
         <name>reconnectionPolicy</name>
         <description>
-This is an optional parameter that specifies the reconnection policy. The valid values are `NoRetry`, `InfiniteRetry`, and `BoundedRetry`. If the parameter is not specified, the reconnection policy is set to `BoundedRetry` with a **reconnectionBound** of `5` and a **period** of 60 seconds.</description>
+This is an optional parameter that specifies the reconnection policy.
+The valid values are `NoRetry`, `InfiniteRetry`, and `BoundedRetry`.
+If the parameter is not specified, the reconnection policy is set to `BoundedRetry` with a **reconnectionBound** of `5`
+and a **period** of 60 seconds.</description>
         <optional>true</optional>
         <type>rstring</type>
         <cardinality>1</cardinality>
@@ -215,7 +239,11 @@ This is an optional parameter that specifies the reconnection policy. The valid 
       <parameter>
         <name>reconnectionBound</name>
         <description>
-This optional parameter of type int32 specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the **reconnectionPolicy** parameter is specified and set to `BoundedRetry`, otherwise a runtime error occurs. If the **reconnectionBound** parameter is specified and the **reconnectionPolicy** parameter is not set, a compile-time error occurs. The default value for the **reconnectionBound** parameter is `5`.
+This optional parameter of type int32 specifies the number of successive connections that are attempted for an operator.
+You can use this parameter only when the **reconnectionPolicy** parameter is specified and set to `BoundedRetry`,
+otherwise a run time error occurs.
+If the **reconnectionBound** parameter is specified and the **reconnectionPolicy** parameter is not set,
+a compile time error occurs. The default value for the **reconnectionBound** parameter is `5`.
 </description>
         <optional>true</optional>
         <type>int32</type>
@@ -224,7 +252,9 @@ This optional parameter of type int32 specifies the number of successive connect
       <parameter>
         <name>period</name>
         <description>
-This parameter specifies the time period in seconds the operator waits before it tries to reconnect. It is an optional parameter of type float64. You can use this parameter only when the **reconnectionPolicy** parameter is specified, otherwise a compile-time error occurs. The default value for the **period** parameter is `60`.		
+This parameter specifies the time period in seconds the operator waits before it tries to reconnect.
+It is an optional parameter of type float64. You can use this parameter only when the **reconnectionPolicy** parameter is specified,
+otherwise a compile time error occurs. The default value for the **period** parameter is `60`.		
 </description>
         <optional>true</optional>
         <type>float64</type>
@@ -249,7 +279,9 @@ This mandatory parameter identifies the name of the connection specification tha
       <parameter>
         <name>connectionDocument</name>
         <description>
-This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the connection and access parameters. If the parameter is not specified, the operator uses the file that is in the default location `../etc/connections.xml`.</description>
+This optional parameter specifies the path name of the file that contains the connection and access specifications,
+which are identified by the connection and access parameters.
+If the parameter is not specified, the operator uses the file that is in the default location `../etc/connections.xml`.</description>
         <optional>true</optional>
         <type>rstring</type>
         <cardinality>1</cardinality>
@@ -257,7 +289,9 @@ This optional parameter specifies the path name of the file that contains the co
       <parameter>
         <name>maxMessageSendRetries</name>
         <description>
-This optional parameter maxMessageSendRetries specifies the number of successive retry that will be attempted for a message in case of failure on message send. By default, this number is zero, i.e no retry will be attempted.</description>
+This optional parameter specifies the number of successive retries that are attempted for a message
+if a failure occurs when the message is sent. 
+The default value is zero; no retries are attempted.</description>
         <optional>true</optional>
         <type>int32</type>
         <cardinality>1</cardinality>
@@ -265,7 +299,8 @@ This optional parameter maxMessageSendRetries specifies the number of successive
       <parameter>
         <name>messageSendRetryDelay</name>
         <description>
-This optional parameter messageSendRetryDelay specifies the time in millisecond to wait before next delivery attempt. If parameter maxMessageSendRetries is specified, then you must also specify a value for this parameter</description>
+This optional parameter specifies the time in milliseconds to wait before the next delivery attempt.
+If the **maxMessageSendRetries** is specified, you must also specify a value for this parameter.</description>
         <optional>true</optional>
         <type>int64</type>
         <cardinality>1</cardinality>
@@ -274,8 +309,8 @@ This optional parameter messageSendRetryDelay specifies the time in millisecond 
     <inputPorts>
       <inputPortSet>
         <description>
-The JMSSink operator is configurable with a single input port. 
-This input port is a data port and is required. The input port is non-mutating and its punctuation mode is Oblivious.		
+The `JMSSink` operator is configurable with a single input port. 
+This input port is a data port and is required. The input port is non-mutating and its punctuation mode is Oblivious.
 </description>
         <windowingMode>NonWindowed</windowingMode>
         <windowPunctuationInputMode>Oblivious</windowPunctuationInputMode>
@@ -286,7 +321,12 @@ This input port is a data port and is required. The input port is non-mutating a
     <outputPorts>
       <outputPortSet>
         <description>
-The JMSSink operator is configurable with an optional output port that submits the error message and the tuple(optional) that caused this error. The optional output port is mutating and its punctuation mode is Free. This optional error output port contains an optional first attribute that contains the input tuple that caused the error and a second attribute of type rstring that contains the error message. Only one error message is sent for each failed tuple.</description>
+The `JMSSink` operator is configurable with an optional output port that submits the error message
+and the tuple(optional) that caused this error.
+The optional output port is mutating and its punctuation mode is Free.
+This optional error output port contains an optional first attribute that contains the input tuple
+that caused the error and a second attribute of type rstring that contains the error message.
+Only one error message is sent for each failed tuple.</description>
         <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
         <windowPunctuationInputPort>-1</windowPunctuationInputPort>
         <cardinality>1</cardinality>
