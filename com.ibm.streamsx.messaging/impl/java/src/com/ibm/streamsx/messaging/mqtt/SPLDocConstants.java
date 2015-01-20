@@ -7,7 +7,10 @@ package com.ibm.streamsx.messaging.mqtt;
 public class SPLDocConstants {
 
 	// SPL Documentation for MQTTSource
-	static final String MQTTSRC_OP_DESCRIPTION = "Java Operator MqttSourceOperator";
+	static final String MQTTSRC_OP_DESCRIPTION = "Java Operator MqttSourceOperator. \\n\\n" 
+			                                   + "**Behavior in a consistent region** \\n\\n"
+			                                   + "MQTTSource operator does not support consistent region. Connect MQTTSource operator to an ReplayableStart operator to achieve tuple reply, "
+			                                   + "it is recomended to set messageQueueSize attribute of MQTTSource operator to 1 when it is connected ReplayableStart operator.";
 	static final String MQTTSRC_OUTPUT_PORT_1 = "Optional error output ports.  The error output port is expected to have a single attribute of rstring or ustring.";
 	static final String MQTTSRC_OUPUT_PORT_0 = "Port that produces tuples.";
 	static final String MQTTSRC_INPUT_PORT0 = "Optional input ports";
@@ -18,9 +21,14 @@ public class SPLDocConstants {
 	static final String MQTTSRC_PARAM_SERVERIURI_DESC = "Server to subscribe messages from.";
 	static final String MQTTSRC_PARAM_QOS_DESC = "List of qos for topic subscriptions";
 	static final String MQTTSRC_PARAM_TOPICS_DESC = "List of topics to subscribe to.";
+	static final String MQTTSRC_PARAM_MESSAGE_SIZE_DESC = "Specify size of internal buffer for queueing incoming tuples. By default, internal buffer can hold up to 50 tuples.";
 
 	// SPL Documnetation for MQTTSink
-	static final String MQTTSINK_OP_DESCRIPTION = "MQTTSink operator publishes messages to MQTT Provider";
+	static final String MQTTSINK_OP_DESCRIPTION = "MQTTSink operator publishes messages to MQTT Provider. \\n\\n"
+			                                    + "**Behavior in a consistent region** \\n\\n"
+			                                    + "MQTTSink operator can be an operator within the reachability graph of a consistent region, but it can not be placed at start of a consistent region. "
+			                                    + "Having a control port in a consistent region is not supported.  The control information may not be replayed, persisted and restored correctly. "
+			                                    + "You may need to manually replay the control signals to bring the operator back to a consistent state.";
 
 	static final String MQTTSINK_PARAM_QOS_ATTR_NAME_DESC = "Attribute name that contains the qos to publish the message with.  This parameter is mutually exclusive with the \\\"qos\\\" parameter.";
 

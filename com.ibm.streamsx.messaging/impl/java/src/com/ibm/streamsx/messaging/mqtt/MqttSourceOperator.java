@@ -44,6 +44,8 @@ import com.ibm.streams.operator.model.OutputPortSet.WindowPunctuationOutputMode;
 import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
+import com.ibm.streams.operator.state.ConsistentRegionContext;
+import com.ibm.streams.operator.types.RString;
 import com.ibm.streams.operator.types.ValueFactory;
 import com.ibm.streamsx.messaging.mqtt.MqttClientRequest.MqttClientRequestType;
 
@@ -83,6 +85,8 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 	private long period = IMqttConstants.DEFAULT_RECONNECTION_PERIOD;
 	private MqttClientWrapper mqttWrapper;
 	private boolean shutdown = false;
+	
+	private int messageQueueSize = IMqttConstants.MQTTSRC_DEFAULT_QUEUE_SIZE;
 	
 	private ArrayBlockingQueue<MqttMessageRecord> messageQueue;
 	private ArrayBlockingQueue<MqttClientRequest> clientRequestQueue;
@@ -127,6 +131,17 @@ public class MqttSourceOperator extends AbstractMqttOperator {
     	
     };
 
+    @ContextCheck(compile=true)
+	public static void checkConsistentRegion(OperatorContextChecker checker) {
+		
+		// check if this operator is within a consistent region
+		OperatorContext oContext = checker.getOperatorContext();
+		ConsistentRegionContext cContext = oContext.getOptionalContext(ConsistentRegionContext.class);
+		
+		if(cContext != null) {
+			checker.setInvalidContext("WARNING: The following operator is not supported in a consistent region: [MQTTSource]. The operator does not checkpoint or reset its internal state. If an application failure occurs, the operator might produce unexpected results even if it is part of a consistent region.", new String[] {});
+		}
+	}
     
     @ContextCheck(compile=false)
     public  static void runtimeChecks(OperatorContextChecker checker) {
@@ -134,6 +149,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
     	validateNumber(checker, "period", 0, Long.MAX_VALUE); //$NON-NLS-1$
     	validateNumber(checker, "qos", 0, 2); //$NON-NLS-1$
     	validateNumber(checker, "reconnectionBound", -1, Long.MAX_VALUE); //$NON-NLS-1$
+    	validateNumber(checker, "messageQueueSize", 1, Integer.MAX_VALUE); //$NON-NLS-1$
     	
     	List<String> topicValues = checker.getOperatorContext().getParameterValues("topics"); //$NON-NLS-1$
     	List<String> qosValues = checker.getOperatorContext().getParameterValues("qos"); //$NON-NLS-1$
@@ -216,7 +232,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
         super.initialize(context);
         Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " initializing in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         
-        messageQueue = new ArrayBlockingQueue<MqttSourceOperator.MqttMessageRecord>(50);
+        messageQueue = new ArrayBlockingQueue<MqttSourceOperator.MqttMessageRecord>(getMessageQueueSize());
         clientRequestQueue = new ArrayBlockingQueue<MqttClientRequest>(20);
         
         mqttWrapper = new MqttClientWrapper();
@@ -362,15 +378,15 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 			} catch (URISyntaxException e1) {
 				String errorMsg = Messages.getString("Error_MqttSourceOperator.27", e1.getLocalizedMessage()); //$NON-NLS-1$
 				TRACE.log(TraceLevel.ERROR, errorMsg,e1);
-				submitToErrorPort(errorMsg);
+				submitToErrorPort(errorMsg, null);
 			} catch (MqttException e) {				
 				String errorMsg = Messages.getString("Error_MqttSourceOperator.25", e.getLocalizedMessage()); //$NON-NLS-1$
 				TRACE.log(TraceLevel.ERROR, errorMsg,e);
-				submitToErrorPort(errorMsg);
+				submitToErrorPort(errorMsg, null);
 			} catch (RuntimeException e) {
 				String errorMsg = Messages.getString("Error_MqttSourceOperator.26", e.getLocalizedMessage()); //$NON-NLS-1$
 				TRACE.log(TraceLevel.ERROR, errorMsg,e);
-				submitToErrorPort(errorMsg);
+				submitToErrorPort(errorMsg, null);
 				
 				// rethrow connect exception to cause the operator to exit
 				if (e instanceof MqttClientConnectException)
@@ -477,10 +493,16 @@ public class MqttSourceOperator extends AbstractMqttOperator {
      */
     private void produceTuples() throws Exception  {
     	StreamSchema streamSchema = getOutput(0).getStreamSchema();
-		String dataAttributeName = this.getDataAttributeName() == null ? "data" : this.getDataAttributeName();
+		String dataAttributeName = this.getDataAttributeName() == null ? IMqttConstants.MQTT_DEFAULT_DATA_ATTRIBUTE_NAME : this.getDataAttributeName();
 		
 		int dataAttrIndex = streamSchema.getAttributeIndex(dataAttributeName);
 		Type.MetaType dataAttributeType = streamSchema.getAttribute(dataAttributeName).getType().getMetaType();
+		
+		boolean isBlob = false;
+		if(dataAttributeType.equals(MetaType.BLOB))
+			isBlob = true;
+		else if (dataAttributeType.equals(MetaType.RSTRING))
+			isBlob = false;
 		
         while (!shutdown)
         {
@@ -490,11 +512,11 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 			StreamingOutput<OutputTuple> outputPort = getOutput(0);
 			OutputTuple tuple = outputPort.newTuple();
 			
-			if(dataAttributeType.equals(Type.MetaType.BLOB)) {
+			if(isBlob) {
 				tuple.setBlob(dataAttrIndex, ValueFactory.newBlob(blob));
 			}
 			else { // it should be RSTRING type
-				tuple.setString(dataAttrIndex, new String(blob));
+				tuple.setObject(dataAttrIndex, new RString(blob));
 			}
 
 			if (topicOutAttrName != null)
@@ -568,7 +590,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 								String errorMsg = Messages.getString("Error_MqttSourceOperator.3"); //$NON-NLS-1$
 								
 								TRACE.log(TraceLevel.ERROR,errorMsg);
-								submitToErrorPort(errorMsg);								
+								submitToErrorPort(errorMsg, null);								
 							}
 							else if (serverUriStr.toLowerCase().equals(getServerUri().toLowerCase())){
 
@@ -622,7 +644,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 							String errorMsg = Messages.getString("Error_MqttSourceOperator.24", reqTopics.toString(), signalQos); //$NON-NLS-1$
 							
 							TRACE.log(TraceLevel.ERROR,errorMsg);
-							submitToErrorPort(errorMsg);	
+							submitToErrorPort(errorMsg, null);	
 						}
 					}
 				}
@@ -636,7 +658,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 
 			TRACE.log(TraceLevel.ERROR,errorMsg); //$NON-NLS-1$
 						
-			submitToErrorPort(errorMsg);
+			submitToErrorPort(errorMsg, null);
 		}
 	}
 
@@ -716,7 +738,15 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 		return period;
 	}
 	
-	
+	public int getMessageQueueSize() {
+		return messageQueueSize;
+	}
+    
+	@Parameter(name="messageQueueSize", description=SPLDocConstants.MQTTSRC_PARAM_MESSAGE_SIZE_DESC, optional=true)
+	public void setMessageQueueSize(int messageQueueSize) {
+		this.messageQueueSize = messageQueueSize;
+	}
+
 	@Override
 	protected StreamingOutput<OutputTuple> getErrorOutputPort() {
 		return getErrorPortFromContext(getOperatorContext());

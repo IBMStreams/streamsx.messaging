@@ -22,14 +22,14 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 
 import com.ibm.streams.operator.Attribute;
 import com.ibm.streams.operator.OperatorContext;
-import com.ibm.streams.operator.OutputTuple;
-import com.ibm.streams.operator.StreamingOutput;
-import com.ibm.streams.operator.Type;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
+import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingData.Punctuation;
 import com.ibm.streams.operator.StreamingInput;
+import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.Tuple;
+import com.ibm.streams.operator.Type;
 import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.log4j.TraceLevel;
@@ -44,7 +44,11 @@ import com.ibm.streams.operator.model.OutputPortSet.WindowPunctuationOutputMode;
 import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
+import com.ibm.streams.operator.state.Checkpoint;
+import com.ibm.streams.operator.state.ConsistentRegionContext;
+import com.ibm.streams.operator.state.StateHandler;
 import com.ibm.streams.operator.types.Blob;
+import com.ibm.streams.operator.types.RString;
 
 /**
  * Class for an operator that consumes tuples and does not produce an output stream. 
@@ -74,7 +78,7 @@ description=SPLDocConstants.MQTTSINK_OP_DESCRIPTION)
 		@OutputPortSet(description = SPLDocConstants.MQTTSINK_OUTPUT_PORT0, cardinality = 1, optional = true, windowPunctuationOutputMode = WindowPunctuationOutputMode.Free) })
 @Libraries(value = {"opt/downloaded/*"} )
 @Icons(location16="icons/MQTTSink_16.gif", location32="icons/MQTTSink_32.gif")
-public class MqttSinkOperator extends AbstractMqttOperator {
+public class MqttSinkOperator extends AbstractMqttOperator implements StateHandler{
 	 
 	static Logger TRACE = Logger.getLogger(MqttSinkOperator.class);
 	
@@ -90,8 +94,24 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 	
 	private ArrayBlockingQueue<Tuple> tupleQueue;
 	private boolean shutdown;
+	
+	private ConsistentRegionContext crContext;
+	
+	private Object drainLock = new Object();
 
 	private Thread publishThread;
+	
+	private InitialState initState;
+	
+	private boolean isRelaunching;
+	
+	private class InitialState {
+		String initialServerUri;
+		
+		private InitialState() {
+			initialServerUri = getServerUri();
+		}
+	}
 	
 	private class PublishRunnable implements Runnable {
 
@@ -99,10 +119,16 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 		public void run() {
 			
 			StreamSchema streamSchema = getInput(0).getStreamSchema();
-			String dataAttributeName = getDataAttributeName() == null ? "data" : getDataAttributeName();
+			String dataAttributeName = getDataAttributeName() == null ? IMqttConstants.MQTT_DEFAULT_DATA_ATTRIBUTE_NAME : getDataAttributeName();
 			
 			int dataAttrIndex = streamSchema.getAttributeIndex(dataAttributeName);
 			Type.MetaType dataAttributeType = streamSchema.getAttribute(dataAttributeName).getType().getMetaType();
+			
+			boolean isBlob = false;
+			if(dataAttributeType.equals(MetaType.BLOB))
+				isBlob = true;
+			else if (dataAttributeType.equals(MetaType.RSTRING))
+				isBlob = false;
 			
 			while (!shutdown)
 			{
@@ -138,14 +164,26 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 						// to avoid unnecessary method call overhead
 						if (pubTopic != null && pubTopic.length() > 0
 							&& msgQos >= 0 && msgQos < 3){
-							byte[] byteArray = getData(tuple, dataAttrIndex, dataAttributeType);
+							byte[] byteArray;
+							if(isBlob) {
+								Blob blockMsg = tuple.getBlob(dataAttrIndex);
+						        InputStream inputStream = blockMsg.getInputStream();
+						        int length = (int) blockMsg.getLength();
+						        byteArray = new byte[length];
+						        inputStream.read(byteArray, 0, length);
+							}
+							else {
+								RString rstringObj = (RString)tuple.getObject(dataAttrIndex);
+								byteArray = rstringObj.getData();
+							}
+							
 					        mqttWrapper.publish(pubTopic, msgQos, byteArray, retain);
 						}
 						else
 						{
 							String errorMsg = Messages.getString("Error_MqttSinkOperator.0", pubTopic, msgQos); //$NON-NLS-1$
 							TRACE.log(TraceLevel.ERROR, errorMsg); 
-							submitToErrorPort(errorMsg);
+							submitToErrorPort(errorMsg, crContext);
 						}
 					}
 					else
@@ -161,7 +199,7 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 						if (!connected)
 						{
 							String errorMsg = Messages.getString("Error_MqttSinkOperator.1", getServerUri()); //$NON-NLS-1$
-							submitToErrorPort(errorMsg);
+							submitToErrorPort(errorMsg, crContext);
 							throw new RuntimeException(errorMsg); 
 						}
 						
@@ -169,14 +207,26 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 						// to avoid unnecessary method call overhead
 						if (pubTopic != null && pubTopic.length() > 0
 								&& msgQos >= 0 && msgQos < 3){
-					        byte[] byteArray = getData(tuple, dataAttrIndex, dataAttributeType);
+							byte[] byteArray;
+							if(isBlob) {
+								Blob blockMsg = tuple.getBlob(dataAttrIndex);
+						        InputStream inputStream = blockMsg.getInputStream();
+						        int length = (int) blockMsg.getLength();
+						        byteArray = new byte[length];
+						        inputStream.read(byteArray, 0, length);
+							}
+							else {
+								RString rstringObj = (RString)tuple.getObject(dataAttrIndex);
+								byteArray = rstringObj.getData();
+							}
+					        
 					        mqttWrapper.publish(pubTopic, msgQos, byteArray, retain);
 						}
 						else
 						{
 							String errorMsg = Messages.getString("Error_MqttSinkOperator.0", pubTopic, msgQos); //$NON-NLS-1$
 							TRACE.log(TraceLevel.ERROR, errorMsg); //$NON-NLS-1$
-							submitToErrorPort(errorMsg);
+							submitToErrorPort(errorMsg, crContext);
 						}
 					}
 				} 
@@ -197,31 +247,24 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 					else {
 						String errorMsg = Messages.getString("Error_MqttSinkOperator.2"); //$NON-NLS-1$
 						TRACE.log(TraceLevel.ERROR, errorMsg, e); 
-						submitToErrorPort(errorMsg);
+						submitToErrorPort(errorMsg, crContext);
 					}
 					
+				}
+				finally {
+                    if(crContext != null) {
+						
+						// if internal buffer has been cleared, notify waiting thread.
+						if(tupleQueue.peek() == null) {
+							synchronized(drainLock) {
+								drainLock.notifyAll();
+							}
+						}
+					}
 				}
 			}			
 		}
 		
-		private byte[] getData(Tuple tuple, int dataAttrIndex, Type.MetaType dataAttributeType) throws IOException {
-			byte[] byteArray;
-			
-			if(dataAttributeType.equals(MetaType.BLOB)) {
-				Blob blockMsg = tuple.getBlob(dataAttrIndex);
-		        InputStream inputStream = blockMsg.getInputStream();
-		        int length = (int) blockMsg.getLength();
-		        byteArray = new byte[length];
-		        inputStream.read(byteArray, 0, length);
-			}
-			else { // assume attribute type is rstring
-				String stringMsg = tuple.getString(dataAttrIndex);
-				byteArray = stringMsg.getBytes();
-			}
-			
-			return byteArray;
-		}
-
 		private boolean validateConnection() throws MqttClientConnectException{
 			if (!mqttWrapper.isConnected())
 			{
@@ -238,12 +281,12 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 				} catch (URISyntaxException e) {
 					String errorMsg = Messages.getString(Messages.getString("Error_MqttSinkOperator.22")); //$NON-NLS-1$
 					TRACE.log(TraceLevel.ERROR, errorMsg, e);
-					submitToErrorPort(errorMsg);	
+					submitToErrorPort(errorMsg, crContext);	
 					throw new RuntimeException(e);
 				} catch (Exception e) {
 					String errorMsg = Messages.getString(Messages.getString("Error_MqttSinkOperator.22")); //$NON-NLS-1$
 					TRACE.log(TraceLevel.ERROR, errorMsg, e);
-					submitToErrorPort(errorMsg);			
+					submitToErrorPort(errorMsg, crContext);			
 					
 					if (e instanceof MqttClientConnectException)
 					{
@@ -254,6 +297,22 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 			
 			return mqttWrapper.isConnected();
 		}		
+	}
+	
+	@ContextCheck(compile=true)
+	public static void checkConsistentRegion(OperatorContextChecker checker) {
+		
+		// check if this operator is placed at start of a consistent region
+		OperatorContext oContext = checker.getOperatorContext();
+		ConsistentRegionContext cContext = oContext.getOptionalContext(ConsistentRegionContext.class);
+		
+		if(cContext != null) {
+			TRACE.warn("Warning: Having a control port in a consistent region is not supported.  The control information may not be replayed, persisted and restored correctly.  You may need to manually replay the control signals to bring the operator back to a consistent state.");
+			
+			if(cContext.isStartOfRegion()) {
+				checker.setInvalidContext("ERROR: The following operator cannot be the start of a consistent region: [MQTTSink].", null);
+			}
+		}
 	}
 	
 	@ContextCheck(compile=true, runtime=false)
@@ -355,6 +414,8 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 		super.initialize(context);
         Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " initializing in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         
+        crContext = context.getOptionalContext(ConsistentRegionContext.class);
+        
        tupleQueue = new ArrayBlockingQueue<Tuple>(50);
         
        mqttWrapper = new MqttClientWrapper();       
@@ -369,6 +430,12 @@ public class MqttSinkOperator extends AbstractMqttOperator {
        mqttWrapper.setKeepAliveInterval(getKeepAliveInterval());
        
        setupSslProperties(mqttWrapper);
+       
+       if(crContext != null) {
+    	   initState = new InitialState();
+       }
+       
+       initRelaunching(context);
        // do not connect here... connection is done on the publish thread when a message
        // is ready to be published
 	} 
@@ -398,6 +465,11 @@ public class MqttSinkOperator extends AbstractMqttOperator {
      */
     @Override
     public void process(StreamingInput<Tuple> stream, Tuple tuple)  throws Exception {
+    	
+    	if(isRelaunching()) {
+    		TRACE.log(TraceLevel.DEBUG, "Operator is re-launching, disgard incoming tuple " + tuple.toString());
+    	    return;
+    	}
     	
     	// if data port
     	if (stream.getPortNumber() == 0)
@@ -456,7 +528,7 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 		} catch (Exception e) {
 			String errorMsg = Messages.getString("Error_MqttSinkOperator.21", tuple.toString()); //$NON-NLS-1$
 			TRACE.log(TraceLevel.ERROR, errorMsg); //$NON-NLS-1$
-			submitToErrorPort(errorMsg);
+			submitToErrorPort(errorMsg, crContext);
 		}
 	}
     
@@ -568,5 +640,89 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 			return streamingOutputs.get(0);
 		}
 		return null;
+	}
+
+	@Override
+	public void close() throws IOException {
+		TRACE.log(TraceLevel.DEBUG, "StateHandler close");
+	}
+
+	@Override
+	public void checkpoint(Checkpoint checkpoint) throws Exception {
+		TRACE.log(TraceLevel.DEBUG, "Checkpoint " + checkpoint.getSequenceId());
+		
+		String currentServerUri = this.getServerUri();
+		checkpoint.getOutputStream().writeObject(currentServerUri);
+		
+	}
+
+	@Override
+	public void drain() throws Exception {
+		TRACE.log(TraceLevel.DEBUG, "Drain pending tuples...");
+
+		if(tupleQueue.peek() != null) {
+			synchronized(drainLock) {
+				if(tupleQueue.peek() != null) {
+					drainLock.wait(IMqttConstants.CONSISTENT_REGION_DRAIN_WAIT_TIME);
+					if(tupleQueue.peek() != null) {
+						throw new Exception(Messages.getString("Error_MqttSinkOperator.3"));
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public void reset(Checkpoint checkpoint) throws Exception {
+		TRACE.log(TraceLevel.DEBUG, "Reset to checkpoint " + checkpoint.getSequenceId());
+		
+		resetServerUri((String) checkpoint.getInputStream().readObject());
+		resetRelaunching();
+	}
+
+	@Override
+	public void resetToInitialState() throws Exception {
+		TRACE.log(TraceLevel.DEBUG, "Reset to initial state");
+		
+		if(initState != null && initState.initialServerUri != null) {
+			resetServerUri(initState.initialServerUri);
+		}
+		resetRelaunching();
+	}
+
+	@Override
+	public void retireCheckpoint(long id) throws Exception {
+		TRACE.log(TraceLevel.DEBUG, "Retire checkpoint" + id);	
+	}
+	
+	private void resetServerUri(String serverUri) {
+		
+		// if current server uri is not same as the uri saved in last checkpoint
+		// then we want to set it as pending broker uri.
+		if(!getServerUri().equals(serverUri)) {
+			mqttWrapper.setPendingBrokerUri(serverUri);
+		}
+	}
+	
+	private void initRelaunching(OperatorContext opContext) {
+		TRACE.log(TraceLevel.DEBUG, "Relaunching set to true");		 
+
+		isRelaunching = false; 
+		 		if (crContext != null ) 
+		 		{ 
+		 			int relaunchCount = opContext.getPE().getRelaunchCount(); 
+					if (relaunchCount > 0) { 
+						isRelaunching = true; 
+		 			} 
+	 		} 
+	}
+	
+	private void resetRelaunching() {
+		TRACE.log(TraceLevel.DEBUG, "Relaunching set to false"); 
+		isRelaunching = false; 
+	}
+	
+	private boolean isRelaunching() {
+		return isRelaunching;
 	}
 }
