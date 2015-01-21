@@ -1,0 +1,250 @@
+/*******************************************************************************
+ * Copyright (C) 2014, International Business Machines Corporation
+ * All Rights Reserved
+ *******************************************************************************/
+namespace com.ibm.streamsx.messaging.kafka.tests;
+
+//create a consumer group...only one message should be received
+composite ConsumerGroupTestMain {
+	param
+		expression <rstring> $topic : getSubmissionTimeValue("topic", "kafkatesttopicgroup");
+		expression <rstring> $prodProps : getSubmissionTimeValue("producerProperties");
+		expression <rstring> $consProps : getSubmissionTimeValue("consumerProperties");
+		
+	type
+		MyType = rstring topic, rstring key, rstring message;
+		
+	graph
+		
+		stream<rstring bogus> BeaconStream = Beacon() {
+			param
+				initDelay : 3.0;
+				iterations : 3u;
+				
+			output BeaconStream : bogus = "bogus";
+		}
+		stream<rstring bogus> BeaconVerifierStream = Beacon()	{
+			param
+				initDelay : 15.0;
+				iterations : 1u;
+				
+			output BeaconVerifierStream : bogus = "bogus";
+		}
+		
+		stream<MyType> MessageStream = Custom(BeaconStream; FinalStream) {
+			logic state : {
+				mutable int32 counter = 0;
+			}
+			onTuple BeaconStream : {
+				submit({topic = $topic, key = "key_" + (rstring)counter , message="Message_" + (rstring)counter},
+				MessageStream);
+				counter++;
+			}
+			onPunct BeaconStream : {
+				submit(currentPunct(), MessageStream);
+			}
+			onPunct FinalStream : {
+				submit(currentPunct(), MessageStream);
+			}
+		}
+	
+		() as SinkOp = com.ibm.streamsx.messaging.kafka::KafkaProducer(MessageStream) {
+		param
+				propertiesFile : $prodProps;
+				kafkaProperty : "serializer.class=kafka.serializer.StringEncoder";				
+		}
+	
+		@parallel(width=3)
+		stream<MyType> KafkaMessageStream = 
+			com.ibm.streamsx.messaging.kafka::KafkaConsumer() {
+		param
+			topic : $topic;
+			threadsPerTopic : 1;
+			propertiesFile : $consProps;
+			kafkaProperty : "group.id=mygroup";
+		}
+		
+		stream<rstring bogus> FinalStream = Custom(MessageStream; KafkaMessageStream; BeaconVerifierStream) {
+		logic 
+			state : {
+			mutable set<MyType> inputs ;
+			mutable set<MyType> outputs ;
+			mutable boolean streamEnded = false;
+			}
+			onPunct MessageStream : {
+				streamEnded = true;
+				if(size(inputs) == 0 && size(outputs) == 0 && streamEnded) {
+					shutdownPE();
+				}
+			}
+			onTuple MessageStream : {
+				log(Sys.info,"Appending: "+ (rstring)MessageStream);
+				insertM(inputs, MessageStream);
+	
+			}
+			onTuple KafkaMessageStream : {
+				log(Sys.info,"Appending: "+ (rstring)KafkaMessageStream);
+				insertM(outputs, KafkaMessageStream);
+			}
+			onTuple BeaconVerifierStream : {
+			
+				if( size(inputs) != size(outputs)) {
+					log(Sys.error,"ERROR Count not verified for input: " + (rstring)size(inputs) + ", output: " + (rstring)size(outputs));
+					shutdownPE();
+				}
+				for(MyType i in inputs) {
+					if( !has(outputs, i)) {
+						log(Sys.error,"ERROR Input message not found in output: " + (rstring)i);
+						shutdownPE();
+					}
+				}
+				shutdownPE();
+			}
+			
+		}		
+}
+
+//create a consumer group...many messages should be received for a single sent message
+composite ConsumerMultiGroupTestMain {
+	param
+		expression <rstring> $topic : getSubmissionTimeValue("topic", "kafkatesttopicmultigroup");
+		expression <rstring> $prodProps : getSubmissionTimeValue("producerProperties");
+		expression <rstring> $consProps : getSubmissionTimeValue("consumerProperties");
+		
+		expression<int32> $msgCount : 3; //3 messages., one per group
+		expression<int32> $totMessages : 3; 
+		
+	type
+		MyType = rstring topic, rstring key, rstring message;
+		
+	graph
+		
+		stream<rstring bogus> BeaconStream = Beacon()
+		{
+			param
+				initDelay : 3.0;
+				iterations : (uint32)$totMessages;
+				
+			output BeaconStream : bogus = "bogus";
+		}
+		stream<rstring bogus> BeaconVerifierStream = Beacon()	{
+			param
+				initDelay : 15.0;
+				iterations : 1u;
+				
+			output BeaconVerifierStream : bogus = "bogus";
+		}
+		stream<MyType> MessageStream = Custom(BeaconStream; FinalStream) {
+			logic state : {
+				mutable int32 counter = 0;
+			}
+			onTuple BeaconStream : {
+				submit({topic = $topic, key = "key_" + (rstring)counter , message="Message_" + (rstring)counter},
+				MessageStream);
+				counter++;
+			}
+			onPunct BeaconStream : {
+				submit(currentPunct(), MessageStream);
+			}
+			onPunct FinalStream : {
+				submit(currentPunct(), MessageStream);
+			}
+		}
+	
+		() as SinkOp = com.ibm.streamsx.messaging.kafka::KafkaProducer(MessageStream) {
+		param
+				propertiesFile : $prodProps;
+				kafkaProperty : "serializer.class=kafka.serializer.StringEncoder";				
+		}
+	
+		@parallel(width=3)
+		stream<MyType> KafkaMessageStream = 
+			com.ibm.streamsx.messaging.kafka::KafkaConsumer() {
+		param
+			topic : $topic;
+			threadsPerTopic : 1;
+			propertiesFile : $consProps;
+			kafkaProperty : "group.id=mygroup_" + (rstring)getChannel();
+		}
+		
+		stream<rstring bogus> FinalStream = Custom(MessageStream; KafkaMessageStream; BeaconVerifierStream) {
+		logic 
+			state : {
+			mutable set<MyType> inputs ;
+			mutable map<MyType, int32 > countMap;
+			mutable boolean streamEnded = false;
+			}
+			onPunct MessageStream : {
+				streamEnded = true;
+				if(size(countMap) == $totMessages && size(inputs) == $totMessages && streamEnded) {
+					mutable boolean verified = true; 
+					for(MyType i in inputs) {
+						if(countMap[i] != $msgCount) {
+							verified = false;
+							break;
+						}
+					}
+					if(verified) {
+						shutdownPE();
+					}
+				}
+			}
+			onTuple MessageStream : {
+				insertM(inputs, MessageStream);
+				if(size(countMap) == $totMessages && size(inputs) == $totMessages && streamEnded) {
+					mutable boolean verified = true; 
+					for(MyType i in inputs) {
+						if(countMap[i] != $msgCount) {
+							verified = false;
+							break;
+						}
+					}
+					if(verified) {
+						shutdownPE();
+					}
+				}
+			}
+			onTuple KafkaMessageStream : {
+				if(has(countMap,KafkaMessageStream)){
+					countMap[KafkaMessageStream]++;
+				}
+				else {
+					insertM(countMap,KafkaMessageStream, 1);
+				}
+				if(size(countMap) == $totMessages && size(inputs) == $totMessages && streamEnded) {
+					mutable boolean verified = true; 
+					for(MyType i in inputs) {
+						if(countMap[i] != $msgCount) {
+							verified = false;
+							break;
+						}
+					}
+					if(verified) {
+						shutdownPE();
+					}
+				}
+			}
+			
+			onTuple BeaconVerifierStream : {
+				mutable boolean verified = false; 
+				if(size(countMap) == $totMessages && size(inputs) == $totMessages && streamEnded) {
+					verified = true;
+					for(MyType i in inputs) {
+						if(countMap[i] != $msgCount) {
+							log(Sys.error,"ERROR Count not verified for message: " + (rstring)i + ", count: " + (rstring)countMap[i]);
+							verified = false;
+							break;
+						}
+					}
+				}
+				if(!verified) {
+					log(Sys.error,"ERROR Unable to verify all messages, inputSize " + (rstring)size(inputs) + ", outputSize: " 
+					+ (rstring)size(countMap));
+				}
+				shutdownPE();
+				
+			}
+			
+		}
+		
+}

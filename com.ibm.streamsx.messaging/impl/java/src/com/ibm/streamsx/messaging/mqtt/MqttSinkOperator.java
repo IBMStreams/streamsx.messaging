@@ -7,6 +7,7 @@
 package com.ibm.streamsx.messaging.mqtt;
 
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Thread.State;
 import java.net.URISyntaxException;
@@ -23,6 +24,7 @@ import com.ibm.streams.operator.Attribute;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamingOutput;
+import com.ibm.streams.operator.Type;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingData.Punctuation;
@@ -95,6 +97,13 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 
 		@Override
 		public void run() {
+			
+			StreamSchema streamSchema = getInput(0).getStreamSchema();
+			String dataAttributeName = getDataAttributeName() == null ? "data" : getDataAttributeName();
+			
+			int dataAttrIndex = streamSchema.getAttributeIndex(dataAttributeName);
+			Type.MetaType dataAttributeType = streamSchema.getAttribute(dataAttributeName).getType().getMetaType();
+			
 			while (!shutdown)
 			{
 				// publish tuple in the background thread
@@ -129,11 +138,7 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 						// to avoid unnecessary method call overhead
 						if (pubTopic != null && pubTopic.length() > 0
 							&& msgQos >= 0 && msgQos < 3){
-							Blob blockMsg = tuple.getBlob(0);
-					        InputStream inputStream = blockMsg.getInputStream();
-					        int length = (int) blockMsg.getLength();
-					        byte[] byteArray = new byte[length];
-					        inputStream.read(byteArray, 0, length);
+							byte[] byteArray = getData(tuple, dataAttrIndex, dataAttributeType);
 					        mqttWrapper.publish(pubTopic, msgQos, byteArray, retain);
 						}
 						else
@@ -164,11 +169,7 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 						// to avoid unnecessary method call overhead
 						if (pubTopic != null && pubTopic.length() > 0
 								&& msgQos >= 0 && msgQos < 3){
-							Blob blockMsg = tuple.getBlob(0);
-					        InputStream inputStream = blockMsg.getInputStream();
-					        int length = (int) blockMsg.getLength();
-					        byte[] byteArray = new byte[length];
-					        inputStream.read(byteArray, 0, length);
+					        byte[] byteArray = getData(tuple, dataAttrIndex, dataAttributeType);
 					        mqttWrapper.publish(pubTopic, msgQos, byteArray, retain);
 						}
 						else
@@ -201,6 +202,24 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 					
 				}
 			}			
+		}
+		
+		private byte[] getData(Tuple tuple, int dataAttrIndex, Type.MetaType dataAttributeType) throws IOException {
+			byte[] byteArray;
+			
+			if(dataAttributeType.equals(MetaType.BLOB)) {
+				Blob blockMsg = tuple.getBlob(dataAttrIndex);
+		        InputStream inputStream = blockMsg.getInputStream();
+		        int length = (int) blockMsg.getLength();
+		        byteArray = new byte[length];
+		        inputStream.read(byteArray, 0, length);
+			}
+			else { // assume attribute type is rstring
+				String stringMsg = tuple.getString(dataAttrIndex);
+				byteArray = stringMsg.getBytes();
+			}
+			
+			return byteArray;
 		}
 
 		private boolean validateConnection() throws MqttClientConnectException{
@@ -270,6 +289,9 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 	    	
 	    	checkInputAttribute(checker, "qosAttributeName", MetaType.INT32); //$NON-NLS-1$
 	    	checkInputAttribute(checker, "topicAttributeName", MetaType.RSTRING, MetaType.USTRING); //$NON-NLS-1$
+	    	
+	    	checkInputAttribute(checker, "dataAttributeName", MetaType.RSTRING, MetaType.BLOB); //$NON-NLS-1$
+	    	
 	    }
 
 	private static void checkInputAttribute(OperatorContextChecker checker, String parameterName, MetaType... validTypes) {
@@ -280,8 +302,8 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 			List<StreamingInput<Tuple>> inputPorts = checker.getOperatorContext().getStreamingInputs();
 			if (inputPorts.size() > 0)
 			{
-				StreamingInput<Tuple> outputPort = inputPorts.get(0);
-				StreamSchema streamSchema = outputPort.getStreamSchema();
+				StreamingInput<Tuple> inputPort = inputPorts.get(0);
+				StreamSchema streamSchema = inputPort.getStreamSchema();
 				boolean check = checker.checkRequiredAttributes(streamSchema, attributeName);
 				if (check)
 					checker.checkAttributeType(streamSchema.getAttribute(attributeName), validTypes);
@@ -295,28 +317,25 @@ public class MqttSinkOperator extends AbstractMqttOperator {
 		
 		if (inputPorts.size() > 0)
 		{
-			StreamingInput<Tuple> dataPort = inputPorts.get(0);
-			StreamSchema streamSchema = dataPort.getStreamSchema();
-			Set<String> attributeNames = streamSchema.getAttributeNames();
-
-			boolean blobFound = false;
-			for (String attrName : attributeNames) {
-				Attribute attr = streamSchema.getAttribute(attrName);
-				
-				if (attr.getType().getMetaType().equals(MetaType.BLOB))
-				{
-					blobFound = true;
-					break;
-				}				
+			// if user is not specifying dataAttributeName attribute, then we check if stream schema contains default data attribute
+			if(!checker.getOperatorContext().getParameterNames().contains("dataAttributeName")) { //$NON-NLS-1$
+							
+				StreamingInput<Tuple> dataPort = inputPorts.get(0);
+			    StreamSchema streamSchema = dataPort.getStreamSchema();
+							
+			    Attribute data = streamSchema.getAttribute("data");
+							
+			    // the default data attribute must be present and must be either BLOB or RSTRING
+			    if(data != null) {
+			    	checker.checkAttributeType(data, MetaType.RSTRING, MetaType.BLOB );
+			    }
+			    else {
+				    checker.setInvalidContext(Messages.getString("Error_MqttSinkOperator.5"), new Object[]{}); //$NON-NLS-1$
+			    }
 			}
-			if (!blobFound)
-			{
-				checker.setInvalidContext(Messages.getString("Error_MqttSinkOperator.5"), new Object[]{}); //$NON-NLS-1$
-			}
+			
 		}
 		//TODO:  check control input port
-		
-		
 	}
 	
 	@ContextCheck(compile = true, runtime = false)

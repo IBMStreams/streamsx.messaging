@@ -9,7 +9,7 @@
   <info:dependencies>
     <info:toolkit>
       <common:name>com.ibm.streamsx.messaging</common:name>
-      <common:version>[1.0.0,2.0.0)</common:version>
+      <common:version>[2.0.0,3.0.0)</common:version>
     </info:toolkit>
   </info:dependencies>
 </info:toolkitInfoModel>
