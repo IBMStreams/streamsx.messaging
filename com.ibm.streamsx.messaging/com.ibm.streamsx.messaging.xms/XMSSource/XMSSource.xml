@@ -6,7 +6,7 @@ others. All Rights Reserved.
 <operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
   <cppOperatorModel>
     <context>
-      <description>
+      <description docHref="doc/${nl}/spldoc/html/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSource.html">
 The `XMSSource` operator reads data from a WebSphere MQ queue or topic and creates tuples out of it.
 
 Each input WebSphere MQ message is converted to a separate tuple and sent to the output stream. 

@@ -6,7 +6,7 @@ others. All Rights Reserved.
 <operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
   <cppOperatorModel>
     <context>
-      <description>
+      <description docHref="doc/${nl}/spldoc/html/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSink.html">
 The `XMSSink` operator takes messages from IBM InfoSphere Streams and can send them to a WebSphere MQ queue or topic.
 
 The incoming tuple from InfoSphere Streams can be one or many of the following data types:

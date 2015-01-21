@@ -12,7 +12,7 @@
   xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
   <javaOperatorModel>
     <context> 
-      <description>
+      <description docHref="doc/${nl}/spldoc/html/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSource.html">
 The `JMSSource` operator reads data from a WebSphere MQ or an Apache Active MQ queue
 or a topic and creates tuples from the read data. 
 
