@@ -80,6 +80,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 	// Parameters 
 	private List<String> paramTopics; 
 	private List<Integer> paramQos;
+	private List<String> paramQosStr;
 	private String topicOutAttrName;
 	private int reconnectionBound = IMqttConstants.DEFAULT_RECONNECTION_BOUND;		// default 5, 0 = no retry, -1 = infinite retry
 	private long period = IMqttConstants.DEFAULT_RECONNECTION_PERIOD;
@@ -132,6 +133,12 @@ public class MqttSourceOperator extends AbstractMqttOperator {
     };
 
     @ContextCheck(compile=true)
+    public static void checkQosQosStrExclusive(OperatorContextChecker checker) {
+    	checker.checkExcludedParameters("qos", "qosStr");
+    	checker.checkExcludedParameters("qosStr", "qos");
+    }
+    
+    @ContextCheck(compile=true)
 	public static void checkConsistentRegion(OperatorContextChecker checker) {
 		
 		// check if this operator is within a consistent region
@@ -139,7 +146,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 		ConsistentRegionContext cContext = oContext.getOptionalContext(ConsistentRegionContext.class);
 		
 		if(cContext != null) {
-			checker.setInvalidContext("WARNING: The following operator is not supported in a consistent region: [MQTTSource]. The operator does not checkpoint or reset its internal state. If an application failure occurs, the operator might produce unexpected results even if it is part of a consistent region.", new String[] {});
+			checker.setInvalidContext("WARNING: The following operator is not supported in a consistent region: MQTTSource. The operator does not checkpoint or reset its internal state. If an application failure occurs, the operator might produce unexpected results even if it is part of a consistent region.", new String[] {});
 		}
 	}
     
@@ -150,11 +157,15 @@ public class MqttSourceOperator extends AbstractMqttOperator {
     	validateNumber(checker, "qos", 0, 2); //$NON-NLS-1$
     	validateNumber(checker, "reconnectionBound", -1, Long.MAX_VALUE); //$NON-NLS-1$
     	validateNumber(checker, "messageQueueSize", 1, Integer.MAX_VALUE); //$NON-NLS-1$
+    	validateCommaSeparatedNumber(checker, "qosStr", 0, 2);
     	
-    	List<String> topicValues = checker.getOperatorContext().getParameterValues("topics"); //$NON-NLS-1$
-    	List<String> qosValues = checker.getOperatorContext().getParameterValues("qos"); //$NON-NLS-1$
+    	int topicsCount = getCommaSeparatedParamNumber(checker, "topics"); //$NON-NLS-1$
+    	int qosTotalCount = getCommaSeparatedParamNumber(checker, "qos") + getCommaSeparatedParamNumber(checker, "qosStr"); //$NON-NLS-1$
     	
-    	if (qosValues.size() > 0 && topicValues.size() != qosValues.size())
+    	//List<String> topicValues = checker.getOperatorContext().getParameterValues("topics"); //$NON-NLS-1$
+    	//List<String> qosValues = checker.getOperatorContext().getParameterValues("qos"); //$NON-NLS-1$
+    	
+    	if (qosTotalCount > 0 && topicsCount != qosTotalCount)
     	{
     		checker.setInvalidContext(Messages.getString("Error_MqttSourceOperator.5"), new Object[] {}); //$NON-NLS-1$
     	}
@@ -188,6 +199,48 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 	    			checker.checkAttributeType(streamSchema.getAttribute(dataAttributeName), MetaType.RSTRING, MetaType.BLOB );
     		}
     	}
+    	
+    }
+    
+    // There are parameters such as qosStr allows comma separated value to be specified.
+    // i.e "0, 1", this method will parse the comma separated string value and parse it to 
+    // a number to verify if the parsed number is within the min/max range.
+    private static void validateCommaSeparatedNumber(OperatorContextChecker checker, String paramName, long min, long max) {
+    	try {
+			List<String> paramValues = checker.getOperatorContext().getParameterValues(paramName);
+			for (String paramValue : paramValues) {
+				
+				String[] paramStrVal = paramValue.split(IMqttConstants.COMMA);
+				
+				for(String strVal : paramStrVal) {
+					Long longVal = Long.valueOf(strVal.trim());
+
+					if (longVal.longValue() > max || longVal.longValue() < min) {
+						checker.setInvalidContext(
+								Messages.getString("Error_AbstractMqttOperator.0"), //$NON-NLS-1$
+								new Object[] { paramName, min, max });
+					}
+				}
+				
+			}
+		} catch (NumberFormatException e) {
+			checker.setInvalidContext(
+					Messages.getString("Error_AbstractMqttOperator.1"), //$NON-NLS-1$
+					new Object[] { paramName });
+		}
+    }
+    
+    private static int getCommaSeparatedParamNumber(OperatorContextChecker checker, String paramName) {
+    	int count = 0;
+    	List<String> paramValues = checker.getOperatorContext().getParameterValues(paramName);
+    	
+    	for(String paramStrValue : paramValues) {
+    		String[] parsedParamStrValue = paramStrValue.split(IMqttConstants.COMMA);
+    		
+    		count += parsedParamStrValue.length;
+    	}
+    	
+    	return count;
     	
     }
     
@@ -688,7 +741,14 @@ public class MqttSourceOperator extends AbstractMqttOperator {
     @Parameter(name="topics", description=SPLDocConstants.MQTTSRC_PARAM_TOPICS_DESC, optional=false, cardinality=-1)
 	public void setTopics(List<String> topics) {
 		this.paramTopics = new ArrayList<String>();
-		paramTopics.addAll(topics);
+		
+		for(String csTopics : topics) {
+			String[] topic = csTopics.split(IMqttConstants.COMMA);
+			
+			for(String aTopic : topic) {
+				paramTopics.add(aTopic.trim());
+			}
+		}
 	}
 
     @Parameter(name="qos", description=SPLDocConstants.MQTTSRC_PARAM_QOS_DESC, optional=true, cardinality=-1)
@@ -709,6 +769,31 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 			qosArray[i] = paramQos.get(i);
 		}
 		return qosArray;
+	}
+
+	public List<String> getParamQosStr() {
+		return paramQosStr;
+	}
+     
+	@Parameter(name="qosStr", description=SPLDocConstants.MQTTSRC_PARAM_QOS_STR_DESC, optional=true, cardinality=-1)
+	public void setParamQosStr(List<String> paramQosStr) {
+		
+		if(this.paramQos == null) {
+			this.paramQos = new ArrayList<Integer>();
+		}
+		
+		for(String aQosList : paramQosStr) {
+			String[] qosString = aQosList.split(IMqttConstants.COMMA);
+			
+			for(String aQos : qosString) {
+				try {
+					paramQos.add(Integer.parseInt(aQos.trim()));
+				} catch (NumberFormatException e) {
+					// this should not happen as runtime check should have taken care of invalid number.
+				}
+			}
+		}
+		
 	}
 
 	@Parameter(name="topicOutAttrName", description=SPLDocConstants.MQTTSRC_PARAM_TOPICATTRNAME_DESC, optional=true)
