@@ -3,8 +3,11 @@
 The IBMStreams/streamsx.messaging toolkit project is an open source Streams toolkit project focused on the development of operators and functions that extend IBM InfoSphere Streams ability to interact with messaging systems.
 
 Check out our newest operators KafkaProducer and KafkaConsumer!
+
 http://ibmstreams.github.io/streamsx.messaging/com.ibm.streamsx.messaging/doc/spldoc/html/index.html
+
 https://github.com/IBMStreams/streamsx.messaging/tree/master/samples/KafkaProducerSample
+
 https://github.com/IBMStreams/streamsx.messaging/tree/master/samples/KafkaConsumerSample
 
 
