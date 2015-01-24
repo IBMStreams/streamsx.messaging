@@ -24,4 +24,5 @@ public interface IMqttConstants {
 	public static final int UNINITIALIZED_KEEP_ALIVE_INTERVAL = -1;
 	public static final long CONSISTENT_REGION_DRAIN_WAIT_TIME = 180000;
 	public static final String MQTT_DEFAULT_DATA_ATTRIBUTE_NAME = "data";
+	public static final String COMMA = ",";
 }
