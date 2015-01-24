@@ -9,6 +9,5 @@ Check out our newest operators KafkaProducer and KafkaConsumer!
 Messaging Toolkit for Streams 3.2.2 Beta now Available!
 * https://github.com/IBMStreams/streamsx.messaging/releases
 
-
- To get started with working with this toolkit:
+To get started with working with this toolkit:
 * https://github.com/IBMStreams/streamsx.messaging/wiki/Getting-Started-with-Toolkit-Development
