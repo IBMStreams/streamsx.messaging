@@ -212,8 +212,8 @@ public class JMSSource extends ProcessTupleProducer {
 	public static void checkInConsistentRegion(OperatorContextChecker checker) {
 		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
 		
-		if(consistentRegionContext != null && consistentRegionContext.isStartOfRegion()) {
-			checker.setInvalidContext("JMSSource operator can not participate in a consistent region.", new String[] {});
+		if(consistentRegionContext != null) {
+			checker.setInvalidContext("The following operator cannot be in a consistent region: JMSSource", new String[] {});
 		}
 	}
 	/*

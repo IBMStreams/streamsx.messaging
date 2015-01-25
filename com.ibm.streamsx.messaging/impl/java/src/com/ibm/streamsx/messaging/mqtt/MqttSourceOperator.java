@@ -146,7 +146,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 		ConsistentRegionContext cContext = oContext.getOptionalContext(ConsistentRegionContext.class);
 		
 		if(cContext != null) {
-			checker.setInvalidContext("WARNING: The following operator is not supported in a consistent region: MQTTSource. The operator does not checkpoint or reset its internal state. If an application failure occurs, the operator might produce unexpected results even if it is part of a consistent region.", new String[] {});
+			checker.setInvalidContext("The following operator cannot be in a consistent region: MQTTSource", new String[] {});
 		}
 	}
     

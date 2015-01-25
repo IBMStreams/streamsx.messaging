@@ -311,11 +311,11 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 			
 			// if there is a control port, a warning message is issued as control port is not supported in a consistent region
 			if(inputPorts.size() > 1) {
-				TRACE.warn("Warning: Having a control port in a consistent region is not supported.  The control information may not be replayed, persisted and restored correctly.  You may need to manually replay the control signals to bring the operator back to a consistent state.");
+				TRACE.warn("Having a control port in a consistent region is not supported. The control information may not be replayed, persisted and restored correctly.  You may need to manually replay the control signals to bring the operator back to a consistent state.");
 			}
 			
 			if(cContext.isStartOfRegion()) {
-				checker.setInvalidContext("ERROR: The following operator cannot be the start of a consistent region: MQTTSink.", null);
+				checker.setInvalidContext("The following operator cannot be the start of a consistent region: MQTTSink.", null);
 			}
 		}
 	}
