@@ -145,6 +145,13 @@ using namespace std;
 
 <%SPL::CodeGen::implementationPrologue($model);%>
 
+<%
+    ### Consistent region ERROR message ###
+    my $crContext = $model->getContext()->getOptionalContext("ConsistentRegion");
+    if($crContext) {
+        SPL::CodeGen::exitln("The following operator cannot be in a consistent region: XMSSource");
+    }
+%>
 
 // Constructor
 MY_OPERATOR::MY_OPERATOR(): nMessagesReadPC( getContext().getMetrics().getCustomMetricByName("nMessagesRead")),nMessagesDroppedPC( getContext().getMetrics().getCustomMetricByName("nMessagesDropped")),nConnectionAttemptsPC( getContext().getMetrics().getCustomMetricByName("nConnectionAttempts"))

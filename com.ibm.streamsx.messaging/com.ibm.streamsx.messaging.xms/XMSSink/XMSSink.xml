@@ -11,6 +11,10 @@ The `XMSSink` operator takes messages from IBM InfoSphere Streams and can send t
 
 The incoming tuple from InfoSphere Streams can be one or many of the following data types: int8, uint8, int16, uint16, int32, uint32, int64, float32, float64, boolean, blob, or rstring. The input tuple is serialized into a WebSphere MQ message either as a map, stream, bytes, xml, wbe, or wbe22 message, according to the value of the message_class attribute in the connection specifications document. An additional empty value can be specified in the message_class attribute, in which case the operator constructs an empty JMS or XMS message. This message class cannot be used with a native schema.
 
+**Consistent Region Behavior**
+
+The `XMSSink` operator supports consistent region. This operator can be part of a consistent region but cannot be at start of a consistent region.
+
 **Exceptions**
 
 The following list describes the common types of exceptions that can occur:

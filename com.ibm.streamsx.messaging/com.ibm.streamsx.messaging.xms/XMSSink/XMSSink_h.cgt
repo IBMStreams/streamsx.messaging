@@ -10,11 +10,21 @@
 #include <SPL/Runtime/Operator/OperatorMetrics.h>
 #include <SPL/Runtime/Common/Metric.h>
 
+<%
+   my $isInConsistentRegion = 
+     $model->getContext()->getOptionalContext("ConsistentRegion");
+   my @includes;
+   if ($isInConsistentRegion) {
+     push @includes, "#include <SPL/Runtime/Operator/State/StateHandler.h>";
+  }
+%>
 
 <%SPL::CodeGen::headerPrologue($model);%>
 
-
 class MY_OPERATOR : public MY_BASE_OPERATOR 
+<%if ($isInConsistentRegion) {%>
+, StateHandler
+<%}%>
 {
 
 public:
@@ -27,6 +37,15 @@ public:
 
 	// Tuple processing for non-mutating ports
 	void process(Tuple const & tuple, uint32_t port);
+	
+<%if ($isInConsistentRegion) {%>
+    // Callbacks from StateHandler.h
+    virtual void checkpoint(Checkpoint & ckpt);
+    virtual void reset(Checkpoint & ckpt);
+    virtual void resetToInitialState();
+    virtual void drain();
+    virtual void retireCheckpoint(int64_t id);
+<%}%> 
 
 private:
 
@@ -52,6 +71,10 @@ private:
 	boolean isErrorPortSpecified;
 	boolean isInitialConnectionFailure;
 	double periodVal;
+	
+<%if ($isInConsistentRegion) {%>
+    ConsistentRegionContext *_crContext;
+<%}%> 
 
 	/*******************************************************************
 	 * Class to help build the special XML format used for WBE messages *
