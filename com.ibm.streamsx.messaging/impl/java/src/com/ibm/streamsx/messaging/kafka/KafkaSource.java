@@ -13,6 +13,7 @@ import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.logging.TraceLevel;
+import com.ibm.streams.operator.model.Icons;
 import com.ibm.streams.operator.model.OutputPortSet;
 import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
@@ -22,6 +23,7 @@ import com.ibm.streams.operator.state.ConsistentRegionContext;
 @OutputPorts(@OutputPortSet(cardinality=1, optional=false, 
 	description="Messages received from Kafka are sent on this output port."))
 @PrimitiveOperator(name=KafkaSource.OPER_NAME, description=KafkaSource.DESC)
+@Icons(location16="icons/KafkaConsumer_16.gif", location32="icons/KafkaConsumer_32.gif")
 public class KafkaSource extends KafkaBaseOper {
 
 	static final String OPER_NAME = "KafkaConsumer";
