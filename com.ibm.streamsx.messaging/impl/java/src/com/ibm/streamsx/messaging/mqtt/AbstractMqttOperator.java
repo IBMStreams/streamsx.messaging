@@ -24,6 +24,7 @@ import com.ibm.streams.operator.log4j.LogLevel;
 import com.ibm.streams.operator.log4j.LoggerNames;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.Parameter;
+import com.ibm.streams.operator.state.ConsistentRegionContext;
 
 public abstract class AbstractMqttOperator extends AbstractOperator {
 
@@ -41,6 +42,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	public static final String PARAMNAME_PASSWORD = "password"; //$NON-NLS-1$
 	public static final String PARAMNAME_COMMAND_TIMEOUT = "commandTimeout"; //$NON-NLS-1$
 	public static final String PARAMNAME_KEEP_ALIVE = "keepAliveInterval"; //$NON-NLS-1$
+	public static final String PARAMNAME_DATA_ATTRIBUTE_NAME = "dataAttributeName"; //$NON-NLS-1$
 
 	static Logger TRACE = Logger.getLogger(AbstractMqttOperator.class);
 
@@ -58,6 +60,8 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	private String clientID;
 	private String userID;
 	private String password;
+	
+	private String dataAttributeName;
 	
 	private long commandTimeout = IMqttConstants.UNINITIALIZED_COMMAND_TIMEOUT;
 	private int keepAliveInterval = IMqttConstants.UNINITIALIZED_KEEP_ALIVE_INTERVAL;
@@ -220,7 +224,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		String keyStore = getKeyStore();
 		String keyStorePw = getKeyStorePassword();
 
-		if (trustStore != null && keyStore != null) {
+		if (trustStore != null || keyStore != null) {
 			Properties sslProperties = new Properties();
 
 			if (trustStore != null) {
@@ -240,7 +244,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 
 			if (trustStorePw != null) {
 				sslProperties.setProperty(
-						IMqttConstants.SSK_TRUST_STORE_PASSWORD, keyStorePw);
+						IMqttConstants.SSK_TRUST_STORE_PASSWORD, trustStorePw);
 			}
 			client.setSslProperties(sslProperties);
 		}
@@ -327,6 +331,15 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		this.keepAliveInterval = keepAliveInterval;
 	}
 
+	public String getDataAttributeName() {
+		return dataAttributeName;
+	}
+    
+	@Parameter(name=PARAMNAME_DATA_ATTRIBUTE_NAME, description = SPLDocConstants.MQTT_PARAM_DATA_ATTRIBUTE_DESC, optional=true)
+	public void setDataAttributeName(String dataAttributeName) {
+		this.dataAttributeName = dataAttributeName;
+	}
+
 	protected static void validateStringNotNullOrEmpty(OperatorContextChecker checker, String parameterName) {
 		if ((checker.getOperatorContext().getParameterNames().contains(parameterName))) {
 			String value = checker.getOperatorContext().getParameterValues(parameterName).get(0);
@@ -400,7 +413,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	 */
 	abstract protected StreamingOutput<OutputTuple> getErrorOutputPort();
 	
-	protected void submitToErrorPort(String errorMsg) {
+	protected void submitToErrorPort(String errorMsg, ConsistentRegionContext crContext) {
 		StreamingOutput<OutputTuple> errorOutputPort = getErrorOutputPort();
 		if (errorOutputPort != null) {
 			OutputTuple errorTuple = errorOutputPort.newTuple();
@@ -408,10 +421,17 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 			errorTuple.setString(0, errorMsg);
 
 			try {
+				if(crContext != null) {
+					crContext.acquirePermit();
+				}
 				errorOutputPort.submit(errorTuple);
 			} catch (Exception e) {
 				TRACE.log(TraceLevel.ERROR,
 						Messages.getString("Error_AbstractMqttOperator.10"), e); //$NON-NLS-1$
+			} finally {
+				if(crContext != null) {
+					crContext.releasePermit();
+				}
 			}
 		}
 	}

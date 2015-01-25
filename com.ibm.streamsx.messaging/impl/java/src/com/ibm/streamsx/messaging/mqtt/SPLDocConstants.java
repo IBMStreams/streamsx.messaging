@@ -7,7 +7,10 @@ package com.ibm.streamsx.messaging.mqtt;
 public class SPLDocConstants {
 
 	// SPL Documentation for MQTTSource
-	static final String MQTTSRC_OP_DESCRIPTION = "Java Operator MqttSourceOperator";
+	static final String MQTTSRC_OP_DESCRIPTION = "Java Operator MqttSourceOperator. \\n\\n" 
+			                                   + "**Behavior in a consistent region** \\n\\n"
+			                                   + "MQTTSource operator does not support consistent region. Connect MQTTSource operator to an ReplayableStart operator to achieve tuple reply, "
+			                                   + "it is recomended to set messageQueueSize attribute of MQTTSource operator to 1 when it is connected ReplayableStart operator.";
 	static final String MQTTSRC_OUTPUT_PORT_1 = "Optional error output ports.  The error output port is expected to have a single attribute of rstring or ustring.";
 	static final String MQTTSRC_OUPUT_PORT_0 = "Port that produces tuples.";
 	static final String MQTTSRC_INPUT_PORT0 = "Optional input ports";
@@ -16,11 +19,17 @@ public class SPLDocConstants {
 	static final String MQTTSRC_PARAM_TOPICATTRNAME_DESC = "Output attribute on output data stream to assign message topic to.";
 	static final String MQTTSRC_PARAM_ERRORATTRNAME_DESC = "Output attribute on optional error output port to assign error message to.";
 	static final String MQTTSRC_PARAM_SERVERIURI_DESC = "Server to subscribe messages from.";
-	static final String MQTTSRC_PARAM_QOS_DESC = "List of qos for topic subscriptions";
-	static final String MQTTSRC_PARAM_TOPICS_DESC = "List of topics to subscribe to.";
+	static final String MQTTSRC_PARAM_QOS_DESC = "List of qos for topic subscriptions, this attribute is mutually exclusive with qosStr attribute.";
+	static final String MQTTSRC_PARAM_QOS_STR_DESC = "List of qos in string format for topic subscriptions. Multiple comma separated qos value can be specified, for example \\\"0, 1\\\". This attribute is mutually exclusive with qos attribute.";
+	static final String MQTTSRC_PARAM_TOPICS_DESC = "List of topics to subscribe to. Multiple comma separated topics can be specified, for example \\\"topic1, topic2\\\"";
+	static final String MQTTSRC_PARAM_MESSAGE_SIZE_DESC = "Specify size of internal buffer for queueing incoming tuples. By default, internal buffer can hold up to 50 tuples.";
 
 	// SPL Documnetation for MQTTSink
-	static final String MQTTSINK_OP_DESCRIPTION = "MQTTSink operator publishes messages to MQTT Provider";
+	static final String MQTTSINK_OP_DESCRIPTION = "MQTTSink operator publishes messages to MQTT Provider. \\n\\n"
+			                                    + "**Behavior in a consistent region** \\n\\n"
+			                                    + "MQTTSink operator can be an operator within the reachability graph of a consistent region, but it can not be placed at start of a consistent region. "
+			                                    + "Having a control port in a consistent region is not supported.  The control information may not be replayed, persisted and restored correctly. "
+			                                    + "You may need to manually replay the control signals to bring the operator back to a consistent state.";
 
 	static final String MQTTSINK_PARAM_QOS_ATTR_NAME_DESC = "Attribute name that contains the qos to publish the message with.  This parameter is mutually exclusive with the \\\"qos\\\" parameter.";
 
@@ -56,5 +65,5 @@ public class SPLDocConstants {
     public static final String MQTT_PARAM_PASSWORD_DESC = "This optional parameter sets the password to use for the connection. Must be specified when userID parameter is used, or compile time error will occur";
     public static final String MQTT_PARAM_COMMAND_TIMEOUT_DESC = "This optional parameter is used to specify maximum time in millisecond to wait for an MQTT action to complete instead of waiting until a specific action to finish such as message publish action. A value of 0 will wait until the action finishes and not timeout, negative number will cause a runtime error. By default, the operator will not timeout";
     public static final String MQTT_PARAM_KEEP_ALIVE_INTERVAL_DESC = "This optional parameter, measured in seconds, sets the maximum time interval between messages sent or received. It enables the client to detect if the server is no longer available. By default, it is set to 60 seconds. A value of 0 will disable it. Negative number will cause a runtime error.";
-    
+    public static final String MQTT_PARAM_DATA_ATTRIBUTE_DESC = "This optional parameter specifies the name of the attribute that is used to hold actual content of message, if not specified, default data attribute name is data";
 }

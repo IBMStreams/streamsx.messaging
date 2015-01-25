@@ -6,30 +6,39 @@ others. All Rights Reserved.
 <operatorModel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ibm.com/xmlns/prod/streams/spl/operator" xmlns:cmn="http://www.ibm.com/xmlns/prod/streams/spl/common" xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
   <cppOperatorModel>
     <context>
-      <description>
+      <description docHref="doc/${nl}/spldoc/html/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSink.html">
 The `XMSSink` operator takes messages from IBM InfoSphere Streams and can send them to a WebSphere MQ queue or topic.
 
-The incoming tuple from InfoSphere Streams can be one or many of the following data types: int8, uint8, int16, uint16, int32, uint32, int64, float32, float64, boolean, blob, or rstring. The input tuple is serialized into a WebSphere MQ message either as a map, stream, bytes, xml, wbe, or wbe22 message, according to the value of the message_class attribute in the connection specifications document. An additional empty value can be specified in the message_class attribute, in which case the operator constructs an empty JMS or XMS message. This message class cannot be used with a native schema.
+The incoming tuple from InfoSphere Streams can be one or many of the following data types:
+int8, uint8, int16, uint16, int32, uint32, int64, float32, float64, boolean, blob, or rstring.
+The input tuple is serialized into a WebSphere MQ message either as a map, stream, bytes, xml, wbe, or wbe22 message,
+according to the value of the message_class attribute in the connection specifications document.
+An additional empty value can be specified in the message_class attribute, in which case the operator constructs an empty JMS or XMS message.
+This message class cannot be used with a native schema.
 
-**Exceptions**
+# Exceptions
 
 The following list describes the common types of exceptions that can occur:
  * Run-time errors that halt the operator execution.
    * The `XMSSink` operator throws an exception and terminates in the following cases:
-     * During the initial connect attempt, the **reconnectionPolicy** is set to `NoRetry` and the operator does not have a successful connection, or during transient connection failures the **reconnectionPolicy** is set to `BoundedRetry` and the operator does not have a successful connection after the number of attempts that are specified in the **reconnectionBound** parameter. Successive data is lost.
+     * During the initial connect attempt, the **reconnectionPolicy** is set to `NoRetry`
+       and the operator does not have a successful connection, or during transient connection failures
+       the **reconnectionPolicy** is set to `BoundedRetry` and the operator does not have a successful connection
+       after the number of attempts that are specified in the **reconnectionBound** parameter. Successive data is lost.
      * The queue name is unknown.
      * The user is not an authorized user of the queue.
      * The queue manager name is unknown.
      * The operator is unable to connect to the host.
      * The operator is unable to connect to the port.
- * Run-time errors that cause the message to be dropped and an error message to be logged
+ * Run time errors that cause the message to be dropped and an error message to be logged.
    * The `XMSSink` operator throws an exception and discards the message in the following circumstances:
      * The data that is being written is longer than the maximum message length specified in the queue in WebSphere MQ.
    * The discarded message is not sent to the WebSphere MQ queue or topic.
- * Compile-time errors
+ * Compile time errors
    * The `XMSSink` operator throws a compile-time error in the following cases:
      * A native schema is specified and the message class is empty.
-     * There is a mismatch between the data type of one or more attributes in the native schema and the data type of attributes in the input stream.
+     * There is a mismatch between the data type of one or more attributes in the native schema
+       and the data type of attributes in the input stream.
      * One or more native schema attributes do not have a matching attribute in the input stream schema.
      * The `connections.xml` file does not conform to `connections.xsd`.
      * The **connectionsDocument** parameter refers to a nonexistent connections file.
@@ -41,9 +50,12 @@ The following list describes the common types of exceptions that can occur:
      * A negative length is specified for a string or blob attribute in the native schema for a map, stream, xml, wbe, or wbe22 message class.
      * A negative length other than -2, -4, or -8 is specified for a string or blob attribute in the native schema for a bytes message class.
 
-In all of these cases, the operator logs the exception in the console logs. The information about the exception is also sent to the optional error output port, unless it is a run-time error that halts the operator or a compile-time error.
+In all of these cases, the operator logs the exception in the console logs.
+The information about the exception is also sent to the optional error output port,
+unless it is a run time error that halts the operator or a compile time error.
 
-Note: The `XMSSink` operator runs without considering the length value for all message classes for string and bytes data types when a negative length of -1 is provided; it does not throw an error at either compile time or run time.
+**Note**: The `XMSSink` operator runs without considering the length value for all message classes
+for string and bytes data types when a negative length of -1 is provided; it does not throw an error at either compile time or run time.
 
 + Examples
 
@@ -154,7 +166,9 @@ The following is a sample `connections.xml` file:
         </metric>
         <metric>
           <name>nFailedInserts</name>
-          <description>The number of failed inserts to the WebSphere MQ.  Failed insertions can occur when a message is dropped because of a run-time error.</description>
+          <description>
+The number of failed inserts to the WebSphere MQ.
+Failed insertions can occur when a message is dropped because of a run time error.</description>
           <kind>Counter</kind>
         </metric>
         <metric>
@@ -220,7 +234,10 @@ The following is a sample `connections.xml` file:
       <parameter>
         <name>reconnectionPolicy</name>
         <description>
-This is an optional parameter that specifies the reconnection policy. The valid values are `NoRetry`, `InfiniteRetry`, and `BoundedRetry`. If the parameter is not specified, the reconnection policy is set to `BoundedRetry` with a **reconnectionBound** of `5` and a **period** of 60 seconds.</description>
+This is an optional parameter that specifies the reconnection policy.
+The valid values are `NoRetry`, `InfiniteRetry`, and `BoundedRetry`.
+If the parameter is not specified, the reconnection policy is set to `BoundedRetry`
+with a **reconnectionBound** of `5` and a **period** of 60 seconds.</description>
         <optional>true</optional>
         <rewriteAllowed>false</rewriteAllowed>
         <expressionMode>CustomLiteral</expressionMode>
@@ -230,7 +247,11 @@ This is an optional parameter that specifies the reconnection policy. The valid 
       <parameter>
         <name>reconnectionBound</name>
         <description>
-This optional parameter specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the **reconnectionPolicy** parameter is specified and set to `BoundedRetry`, otherwise a compile-time error occurs. If the **reconnectionBound** parameter is specified and the **reconnectionPolicy** parameter is not set, a compile-time error occurs. The default value for the **reconnectionBound** parameter is `5`.</description>
+This optional parameter specifies the number of successive connections that are attempted for an operator.
+You can use this parameter only when the **reconnectionPolicy** parameter is specified and set to `BoundedRetry`,
+otherwise a compile time error occurs.
+If the **reconnectionBound** parameter is specified and the **reconnectionPolicy** parameter is not set,
+a compile time error occurs. The default value for the **reconnectionBound** parameter is `5`.</description>
         <optional>true</optional>
         <rewriteAllowed>true</rewriteAllowed>
         <expressionMode>AttributeFree</expressionMode>
@@ -240,7 +261,9 @@ This optional parameter specifies the number of successive connections that are 
       <parameter>
         <name>period</name>
         <description>
-This optional parameter specifies the time period in seconds the operator waits before it tries to reconnect. You can use this parameter only when the **reconnectionPolicy** parameter is specified, otherwise a compile-time error occurs. The default value for the **period** parameter is `60`.		
+This optional parameter specifies the time period in seconds the operator waits before it tries to reconnect.
+You can use this parameter only when the **reconnectionPolicy** parameter is specified,
+otherwise a compile time error occurs. The default value for the **period** parameter is `60`.
 </description>
         <optional>true</optional>
         <rewriteAllowed>true</rewriteAllowed>
@@ -271,7 +294,11 @@ This mandatory parameter identifies the access specification name.</description>
       <parameter>
         <name>connectionDocument</name>
         <description>
-This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the **connection** and **access** parameters. If the parameter is specified, it must have exactly one value that is a string constant.  If the parameter is not specified, the operator uses the file that is in the default location `../etc/connections.xml`.  If a relative path is specified, the path is relative to the root of the applicaiton directory.		
+This optional parameter specifies the path name of the file that contains the connection and access specifications,
+which are identified by the **connection** and **access** parameters.
+If the parameter is specified, it must have exactly one value that is a string constant.
+If the parameter is not specified, the operator uses the file that is in the default location `../etc/connections.xml`.
+If a relative path is specified, the path is relative to the root of the application directory.
 </description>
         <optional>true</optional>
         <rewriteAllowed>false</rewriteAllowed>
@@ -299,7 +326,8 @@ The input port is non-mutating and its punctuation mode is Oblivious.
 The `XMSSink` operator is configurable with an optional port that submits a tuple when an error occurs. 
 The optional port is mutating and its punctuation mode is Free.
 
-The error output port contains an optional first attribute which contains the input tuple that caused the error and a second attribute of type rstring that details the error message. Only one error message is sent per failed tuple.
+The error output port contains an optional first attribute which contains the input tuple that caused the error
+and a second attribute of type rstring that details the error message. Only one error message is sent per failed tuple.
 </description>
         <expressionMode>Constant</expressionMode>
         <autoAssignment>false</autoAssignment>
