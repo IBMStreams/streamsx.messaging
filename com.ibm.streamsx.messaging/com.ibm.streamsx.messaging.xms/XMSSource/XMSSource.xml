@@ -16,10 +16,6 @@ A single message cannot contain multiple tuples.
 
 The `XMSSource` operator cannot paticipate in a consistent region.
 
-**Consistent Region Behavior**
-
-The `XMSSource` operator cannot paticipate in a consistent region.
-
 **Exceptions**
 
 The following list describes the common types of exceptions that can occur:
