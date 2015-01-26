@@ -19,10 +19,6 @@ This message class cannot be used with a native schema.
 **Consistent Region Behavior**
 The `XMSSink` operator supports consistent region. This operator can be part of a consistent region but cannot be at start of a consistent region.
 
-**Consistent Region Behavior**
-
-The `XMSSink` operator supports consistent region. This operator can be part of a consistent region but cannot be at start of a consistent region.
-
 **Exceptions**
 
 The following list describes the common types of exceptions that can occur:
