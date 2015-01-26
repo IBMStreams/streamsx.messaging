@@ -1,0 +1,44 @@
+/**
+ * **Conversions between XMS messages and tuples in IBM InfoSphere Streams**
+ *
+ * When you send data to or receive messages from a WebSphere MQ queue or topic by using `XMSSink` or `XMSSource` operators,
+ * IBM InfoSphere Streams must convert the XMS message to a tuple, or vice versa.
+ * 
+ * The mapping between the XMS message payload and the InfoSphere Streams tuple is controlled by the <native_schema> element
+ * and the message_class attribute in the <destination> element. The message_class determines the type of mapping that is performed
+ * and also specifies the type of XMS message that is output (by the `XMSSink` operator) or expected (by the `XMSSource` operator).
+ * The <native_schema> element determines the attributes that are present in an output XMS message or are expected in an input XMS message.
+ * 
+ * The general principles for the conversion of data between InfoSphere Streams tuples and XMS messages are as follows:
+ * * There is a one-to-one mapping between XMS messages and InfoSphere Streams tuples. 
+ *   The `XMSSource` operator produces one tuple for each XMS message that it receives. 
+ *   The `XMSSink` operator produces one XMS message for each tuple that it receives, unless a run time error occurs.
+ * * The InfoSphere Streams tuples that are received by the `XMSSink` operator or are produced by the `XMSSource` operator
+ *   conform to the InfoSphere Streams schema.
+ * * XMS messages that are output by the `XMSSink` operator conform to the constraints expressed by the <native_schema> element.
+ * * The `XMSSource` operator accepts and processes any incoming messages that conform to the information in the <native_schema> element.
+ *
+ * Where possible, mismatches between the InfoSphere Streams schema and the information in the <native_schema> element, 
+ * which would prevent successful mapping, are detected at compile time. For example:
+ * * If the <native_schema> element includes an attribute that is not present in the input stream for the `XMSSink` operator, 
+ *   the operator generates an error at compile time. 
+ *   Similarly, if there is an output stream attribute that is not present in the <native_schema> element, 
+ *   the `XMSSource` operator generates a compile-time error.
+ * * If there is a mismatch between the date type of the attribute that is specified in the <native_schema> element
+ *   and the data type of the attribute in the input or output stream for the operators, an error occurs at compile time.
+ * * If there are attributes in the input stream for the `XMSSink` operator that are not specified in the <native_schema> element,
+ *   they are ignored.
+ * * If there are attributes in the <native_schema> element that are not present in the output stream for the `XMSSource` operator, 
+ *   the values for those attributes are not copied into the output stream.
+ * 
+ * There are, however, some mismatches that can be detected only at run time. For example:
+ * * The `XMSSink` operator might encounter values that have rstring, ustring, or blob data types and are longer than the length
+ *   that is specified in the <native_schema> element. These values are truncated to fit and a message is generated.
+ * * The `XMSSink` operator might encounter values that have rstring, ustring, or blob data types and are shorter than the required length,
+ *   as specified in the <native_schema> element. The String is padded with spaces and the blob is padded with null values
+ *   to make it have the correct length. This situation is applicable for rstring or ustring attribute values,
+ *   where length is measured in bytes for bytes message class.
+*/
+
+namespace com.ibm.streamsx.messaging.xms;
+

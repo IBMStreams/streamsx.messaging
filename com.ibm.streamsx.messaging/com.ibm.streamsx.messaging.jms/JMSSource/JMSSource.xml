@@ -12,49 +12,70 @@
   xsi:schemaLocation="http://www.ibm.com/xmlns/prod/streams/spl/operator operatorModel.xsd">
   <javaOperatorModel>
     <context> 
-      <description>
-The `JMSSource` operator reads data from a WebSphere MQ or an Apache Active MQ queue or a topic and creates tuples from the read data. 
+      <description docHref="doc/${nl}/spldoc/html/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSource.html">
+The `JMSSource` operator reads data from a WebSphere MQ or an Apache Active MQ queue
+or a topic and creates tuples from the read data. 
 
-The `JMSSource` operator converts each WebSphere MQ or Apache Active MQ message to a separate tuple and sends it to the output stream. A single message is converted into a single tuple.
+The `JMSSource` operator converts each WebSphere MQ or Apache Active MQ message to a separate tuple
+and sends it to the output stream. A single message is converted into a single tuple.
 
-**Behavior in a consistent region**
+# Behavior in a consistent region
 
-JMSSource operator is not supported in a consistent region.
+The `JMSSource` operator is not supported in a consistent region.
 
-**Exceptions**
+# Exceptions
 
 The following types of exceptions can occur:
- * Runtime errors that halt the operator execution.
-   * The JMSSource operator throws an exception and terminates in the following cases. For some exceptions, the trace and log information is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
-     * During the initial connection attempt or during transient reconnection failures, if the **reconnectionPolicy** is set to `NoRetry` and the operator does not have a successful connection, or the **reconnectionPolicy** is set to `BoundedRetry` and the operator does not have a successful connection after the number of attempts that are specified in the **reconnectionBound** parameter. Successive data is lost.
+ * Run time errors that halt the operator execution.
+   * The JMSSource operator throws an exception and terminates in the following cases.
+     For some exceptions, the trace and log information is logged in the console logs
+     and also output to the optional output port if the application is configured to use the optional port.
+     * During the initial connection attempt or during transient reconnection failures,
+       if the **reconnectionPolicy** is set to `NoRetry` and the operator does not have a successful connection,
+       or the **reconnectionPolicy** is set to `BoundedRetry` and the operator does not have a successful connection
+       after the number of attempts that are specified in the **reconnectionBound** parameter. Successive data is lost.
      * The queue name is unknown.
      * The queue manager name is unknown.
      * The operator is unable to connect to the host or the port.
      * A MapMessage, StreamMessage, or BytesMessage does not contain the attributes that are specified in the native schema.
-     * A MapMessage or StreamMessage contains attributes whose data type does not match the data type that is specified in the native schema and the conversion fails.
-     * The message_class attribute in the access specification is bytes, stream, or map, and the name and type attributes of the &lt;native_schema&gt; element do not match the name and type attribute in the output stream schema.
-     * When the message_class attribute is bytes and in the &lt;native_schema&gt; element, the type attribute is string or bytes and the length attribute is missing.
+     * A MapMessage or StreamMessage contains attributes whose data type does not match the data type
+       that is specified in the native schema and the conversion fails.
+     * The message_class attribute in the access specification is bytes, stream, or map, and the name
+       and type attributes of the &lt;native_schema&gt; element do not match the name and type attribute in the output stream schema.
+     * When the message_class attribute is bytes and in the &lt;native_schema&gt; element,
+       the type attribute is string or bytes and the length attribute is missing.
      * An invalid value is specified for the message_class attribute of the access specification.
      * If an attribute occurs more than once in the &lt;native_schema&gt; element.
      * The **connectionsDocument** parameter refers to an file that does not exist.
      * The **connectionsDocument** parameter is not specified and the `connections.xml` file is not present in the default location.
- * Runtime errors that cause a message to be dropped and an error message to be logged.
-   * The `JMSSource` operator throws an exception and discards the message in the following cases. The trace and log information for these exceptions is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
+ * Run time errors that cause a message to be dropped and an error message to be logged.
+   * The `JMSSource` operator throws an exception and discards the message in the following cases.
+     The trace and log information for these exceptions is logged in the console logs
+     and also output to the optional output port if the application is configured to use the optional port.
      * The `JMSSource` operator reads a message that does not match the message class in the &lt;native_schema&gt; element.
-     * When a negative length (-2 or -4) is specified in the native schema for bytes and string data types and the message class is bytes, the operator expects the JMS message to start with a 2 or 4-byte length field. If there are insufficient bytes remaining in the JMS message, the operator discards the entire message and logs a runtime error.
-     * When a non-negative length is specified in the native schema for bytes and string, the operator attempts to read exactly that number of bytes from the BytesMessage. If there are insufficient bytes remaining in the JMS message, the operator discards the entire message and logs a run time error.
-     * The **reconnectionBound** parameter is specified, but the **reconnectionPolicy** parameter is set to a value other than `BoundedRetry`.
- * Compile-time errors.
-   * The `JMSSource` operator throws a compile-time error in the following cases. The trace and log information for these exceptions is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
+     * When a negative length (-2 or -4) is specified in the native schema for bytes and string data types
+       and the message class is bytes, the operator expects the JMS message to start with a 2 or 4-byte length field.
+       If there are insufficient bytes remaining in the JMS message,
+       the operator discards the entire message and logs a run time error.
+     * When a non-negative length is specified in the native schema for bytes and string,
+       the operator attempts to read exactly that number of bytes from the BytesMessage.
+       If there are insufficient bytes remaining in the JMS message,
+       the operator discards the entire message and logs a run time error.
+     * The **reconnectionBound** parameter is specified, but the **reconnectionPolicy** parameter is set
+       to a value other than `BoundedRetry`.
+ * Compile time errors.
+   * The `JMSSource` operator throws a compile time error in the following cases.
+     The trace and log information for these exceptions is logged in the console logs
+     and also output to the optional output port if the application is configured to use the optional port.
      * The mandatory parameters, **connection** and **access** are not specified.
      * The **period** parameter is specified but the **reconnectionPolicy** parameter is not specified.
      * The **reconnectionBound** parameter is specified, but the **reconnectionPolicy** parameter is not specified.
-     * The environment variables **STREAMS_MESSAGING_WMQ_HOME** and **STREAMS_MESSAGING_AMQ_HOME** are not set to the locations where the WMQ and AMQ libraries are installed.
+     * The environment variables **STREAMS_MESSAGING_WMQ_HOME** and **STREAMS_MESSAGING_AMQ_HOME** are not set
+       to the locations where the WMQ and AMQ libraries are installed.
 
 + Examples
 
 This example shows the use of multiple `JMSSource` operators with different parameter combinations.
-
 
 	composite Main {
 	graph
@@ -169,7 +190,9 @@ This example shows the use of multiple `JMSSource` operators with different para
     <parameter>
         <name>codepage</name>
         <description>
-This optional parameter specifies the code page of the target system that is used to convert ustring for a Bytes message type. If this parameter is specified, it must have exactly one value, which is a String constant. If the parameter is not specified, the operator uses the default value of UTF8. </description>
+This optional parameter specifies the code page of the target system that is used to convert ustring for a Bytes message type.
+If this parameter is specified, it must have exactly one value, which is a String constant.
+If the parameter is not specified, the operator uses the default value of UTF8. </description>
         <optional>true</optional>
         <type>rstring</type>
         <cardinality>1</cardinality>
@@ -177,7 +200,10 @@ This optional parameter specifies the code page of the target system that is use
 	  <parameter>
         <name>reconnectionPolicy</name>
         <description>
-This is an optional parameter that specifies the reconnection policy. The valid values are `NoRetry`, `InfiniteRetry`, and `BoundedRetry`. If the parameter is not specified, the reconnection policy is set to `BoundedRetry` with a **reconnectionBound** of `5` and a **period** of 60 seconds.</description>
+This is an optional parameter that specifies the reconnection policy.
+The valid values are `NoRetry`, `InfiniteRetry`, and `BoundedRetry`.
+If the parameter is not specified, the reconnection policy is set to `BoundedRetry` with a **reconnectionBound** of `5`
+and a **period** of 60 seconds.</description>
         <optional>true</optional>
         <type>rstring</type>
         <cardinality>1</cardinality>
@@ -185,7 +211,11 @@ This is an optional parameter that specifies the reconnection policy. The valid 
       <parameter>
         <name>reconnectionBound</name>
         <description>
-This optional parameter specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the **reconnectionPolicy** parameter is specified and set to `BoundedRetry`, otherwise a runtime error occurs. If the **reconnectionBound** parameter is specified and the **reconnectionPolicy** parameter is not set, a compile-time error occurs. The default value for the **reconnectionBound** parameter is `5`.</description>
+This optional parameter specifies the number of successive connections that are attempted for an operator.
+You can use this parameter only when the **reconnectionPolicy** parameter is specified and set to `BoundedRetry`,
+otherwise a run time error occurs. If the **reconnectionBound** parameter is specified
+and the **reconnectionPolicy** parameter is not set, a compile time error occurs.
+The default value for the **reconnectionBound** parameter is `5`.</description>
         <optional>true</optional>
         <type>int32</type>
         <cardinality>1</cardinality>
@@ -193,7 +223,9 @@ This optional parameter specifies the number of successive connections that are 
       <parameter>
         <name>period</name>
         <description>
-This optional parameter specifies the time period in seconds the operator waits before it tries to reconnect. You can use this parameter only when the **reconnectionPolicy** parameter is specified, otherwise a compile-time error occurs. The default value for the **period** parameter is `60`.</description>
+This optional parameter specifies the time period in seconds the operator waits before it tries to reconnect.
+You can use this parameter only when the **reconnectionPolicy** parameter is specified,
+otherwise a compile time error occurs. The default value for the **period** parameter is `60`.</description>
         <optional>true</optional>
         <type>float64</type>
         <cardinality>1</cardinality>
@@ -201,7 +233,8 @@ This optional parameter specifies the time period in seconds the operator waits 
       <parameter>
         <name>initDelay</name>
         <description>
-This optional parameter specifies the number of seconds that the `JMSSource` operator delays before it starts to produce tuples. During the delay, the operator is blocked.</description>
+This optional parameter specifies the number of seconds that the `JMSSource` operator delays before it starts to produce tuples.
+During the delay, the operator is blocked.</description>
         <optional>true</optional>
         <type>int64</type>
         <cardinality>1</cardinality>
@@ -225,7 +258,9 @@ This mandatory parameter identifies the name of the connection specification tha
 	  <parameter>
 	  <name>connectionDocument</name>
         <description>
-This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the **connection** and **access** parameters. If this parameter is not specified, the operator uses the file that is in the default location `./etc/connections.xml`.</description>
+This optional parameter specifies the path name of the file that contains the connection and access specifications,
+which are identified by the **connection** and **access** parameters.
+If this parameter is not specified, the operator uses the file that is in the default location `./etc/connections.xml`.</description>
         <optional>true</optional>
         <type>rstring</type>
         <cardinality>1</cardinality>
@@ -236,7 +271,10 @@ This optional parameter specifies the path name of the file that contains the co
     <outputPorts>
 	  <outputPortSet>
         <description>
-The `JMSSource` operator has one mandatory output and one optional output port. If only the mandatory output port is specified, the operator submits a tuple for each message that is successfully read from the messaging provider. The mandatory output port is mutating and its punctuation mode is Free.</description>
+The `JMSSource` operator has one mandatory output and one optional output port.
+If only the mandatory output port is specified, the operator submits a tuple for each message
+that is successfully read from the messaging provider.
+The mandatory output port is mutating and its punctuation mode is Free.</description>
         <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
         <windowPunctuationInputPort>-1</windowPunctuationInputPort>
         <cardinality>1</cardinality>
@@ -246,7 +284,11 @@ The `JMSSource` operator has one mandatory output and one optional output port. 
         <description>
 The `JMSSource` operator has one optional output port, which submits tuples when an error occurs.
 		
-If both optional and mandatory output ports are specified, the operator submits a tuple to the mandatory port for each message that is read successfully and a tuple to the optional port if an error occurs when reading a message. The tuple submitted to the optional port contains an error message for each message that could not be read successfully. The optional output port has a single attribute of type rstring that contains this error message. The optional output port is mutating and its punctuation mode is Free.</description>
+If both optional and mandatory output ports are specified, the operator submits a tuple to the mandatory port
+for each message that is read successfully and a tuple to the optional port if an error occurs when reading a message.
+The tuple submitted to the optional port contains an error message for each message that could not be read successfully.
+The optional output port has a single attribute of type rstring that contains this error message.
+The optional output port is mutating and its punctuation mode is Free.</description>
         <windowPunctuationOutputMode>Free</windowPunctuationOutputMode>
         <windowPunctuationInputPort>-1</windowPunctuationInputPort>
         <cardinality>1</cardinality>

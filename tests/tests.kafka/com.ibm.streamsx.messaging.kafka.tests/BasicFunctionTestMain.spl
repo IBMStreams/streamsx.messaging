@@ -1,8 +1,12 @@
+/*******************************************************************************
+ * Copyright (C) 2014, International Business Machines Corporation
+ * All Rights Reserved
+ *******************************************************************************/
 namespace com.ibm.streamsx.messaging.kafka.tests;
 
 composite BasicFunctionTestMain {
 	param
-		expression <rstring> $topic : getSubmissionTimeValue("topic", "kafkatesttopic");
+		expression <rstring> $topic : getSubmissionTimeValue("topic", "kafkatesttopicbasic1");
 		expression <rstring> $prodProps : getSubmissionTimeValue("producerProperties");
 		expression <rstring> $consProps : getSubmissionTimeValue("consumerProperties");
 		
@@ -24,7 +28,7 @@ composite BasicFunctionTestMain {
 				mutable int32 counter = 0;
 			}
 			onTuple BeaconStream : {
-				submit({topic = "kafkatesttopic", key = "key_" + (rstring)counter , message="Message_" + (rstring)counter},
+				submit({topic = $topic, key = "key_" + (rstring)counter , message="Message_" + (rstring)counter},
 				MessageStream);
 				counter++;
 			}
@@ -39,6 +43,7 @@ composite BasicFunctionTestMain {
 		() as SinkOp = com.ibm.streamsx.messaging.kafka::KafkaProducer(MessageStream) {
 		param
 				propertiesFile : $prodProps;
+				kafkaProperty : "serializer.class=kafka.serializer.StringEncoder";				
 		}
 	
 		stream<MyType> KafkaMessageStream = 
@@ -47,6 +52,7 @@ composite BasicFunctionTestMain {
 			topic : $topic;
 			threadsPerTopic : 1;
 			propertiesFile : $consProps;
+			kafkaProperty : "group.id=mygroup";
 		}
 		
 		stream<rstring bogus> FinalStream = Custom(MessageStream; KafkaMessageStream) {
@@ -112,3 +118,120 @@ composite BasicFunctionTestMain {
 		}
 		
 }
+
+
+composite BasicFunctionBlobTestMain {
+	param
+		expression <rstring> $topic : getSubmissionTimeValue("topic", "kafkatesttopicbasic2");
+		expression <rstring> $prodProps : getSubmissionTimeValue("producerProperties");
+		expression <rstring> $consProps : getSubmissionTimeValue("consumerProperties");
+		
+	type
+		MyType = rstring topic, blob key, blob message;
+		
+	graph
+		
+		stream<rstring bogus> BeaconStream = Beacon()
+		{
+			param
+				initDelay : 3.0;
+				iterations : 3u;
+				
+			output BeaconStream : bogus = "bogus";
+		}
+		stream<MyType> MessageStream = Custom(BeaconStream; FinalStream) {
+			logic state : {
+				mutable int32 counter = 0;
+			}
+			onTuple BeaconStream : {
+				submit({topic = $topic, 
+					key = convertToBlob("key_" + (rstring)counter) , message=convertToBlob("Message_" + (rstring)counter)},
+				MessageStream);
+				counter++;
+			}
+			onPunct BeaconStream : {
+				submit(currentPunct(), MessageStream);
+			}
+			onPunct FinalStream : {
+				submit(currentPunct(), MessageStream);
+			}
+		}
+	
+		() as SinkOp = com.ibm.streamsx.messaging.kafka::KafkaProducer(MessageStream) {
+			param
+				propertiesFile : $prodProps;
+		}
+	
+		stream<MyType> KafkaMessageStream = 
+			com.ibm.streamsx.messaging.kafka::KafkaConsumer() {
+		param
+			topic : $topic;
+			threadsPerTopic : 1;
+			propertiesFile : $consProps;
+			kafkaProperty : "group.id=mygroup";
+		}
+		
+		stream<rstring bogus> FinalStream = Custom(MessageStream; KafkaMessageStream) {
+		logic 
+			state : {
+			mutable set<MyType> inputs ;
+			mutable set<MyType> outputs ;
+			mutable boolean streamEnded = false;
+			}
+			onPunct MessageStream : {
+				streamEnded = true;
+				if(size(inputs) == 0 && size(outputs) == 0 && streamEnded) {
+					shutdownPE();
+				}
+			}
+			onTuple MessageStream : {
+				if(size(outputs) > 0) {	
+					log(Sys.info,(rstring)MessageStream);
+					
+					if(!has(outputs, MessageStream)) {
+						log(Sys.error,"ERROR Does not match: " + (rstring)MessageStream);
+						shutdownPE();
+					}
+					else {
+						log(Sys.info,"Matches: " + (rstring)MessageStream);
+						removeM(outputs, MessageStream);
+					}
+					
+				}
+				else {
+					log(Sys.info,"Appending: "+ (rstring)MessageStream);
+					insertM(inputs, MessageStream);
+				}
+				if(size(inputs) == 0 && size(outputs) == 0 && streamEnded) {
+					shutdownPE();
+				}
+			}
+			onTuple KafkaMessageStream : {
+				if(size(inputs) > 0) {					
+					log(Sys.info,(rstring)KafkaMessageStream);
+				
+					if(!has(inputs, KafkaMessageStream)) {
+						log(Sys.error,"ERROR Does not match: " + (rstring)KafkaMessageStream);
+						shutdownPE();
+					}
+					else {
+						log(Sys.info,"Matches: " + (rstring)KafkaMessageStream);
+						removeM(inputs, KafkaMessageStream);
+					}
+					
+				}
+				else {
+					log(Sys.info,"Appending: "+ (rstring)KafkaMessageStream);
+					insertM(outputs, KafkaMessageStream);
+				}
+				
+				if(size(inputs) == 0 && size(outputs) == 0 && streamEnded) {
+					shutdownPE();
+				}
+				
+			}
+			
+		}
+		
+}
+
