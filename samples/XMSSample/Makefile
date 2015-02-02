@@ -3,7 +3,9 @@
                 
 .PHONY: all clean
 
-SPLC_FLAGS = -a -z -t ../../com.ibm.streamsx.messaging
+STREAMS_MESSAGING_TOOLKIT ?= ../../com.ibm.streamsx.messaging
+
+SPLC_FLAGS ?= -a -t ${STREAMS_MESSAGING_TOOLKIT}
 
 SPLC = $(STREAMS_INSTALL)/bin/sc
 
