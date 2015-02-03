@@ -58,14 +58,16 @@
 		<path refid="cp.ext.libs" />
 	</path>
 	
-	<target name="all" depends="jar, cpp"/>
-	
-	<target name="cpp">
-		<exec executable="${spl-mt}" failonerror="true">
-			<arg value="-i"/>
-			<arg value="."/>
-	    </exec>
-	</target>
+	<target name="all" depends="toolkit"/>
+
+     <target name="toolkit" depends="jar">
+         <echo message="Tookit to index: ${basedir}"/>
+         <exec executable="${spl-mt}">
+             <arg value="--directory"/>
+             <arg value="${basedir}"/>
+             <arg value="-m"/>
+         </exec>
+     </target>
 
 	<target name="cpp-clean">
 		<exec executable="${spl-mt}"  failonerror="true">
