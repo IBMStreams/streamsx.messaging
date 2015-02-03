@@ -1,0 +1,65 @@
+// *******************************************************************************
+// * Copyright (C)2014, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************                               
+namespace com.ibm.streamsx.messaging.sample.jms;
+
+use com.ibm.streamsx.messaging.jms::* ;
+
+/** JMSSample demonstrates how to send/read data to/from a messaging server using the
+ *  JMSSink and JMSSource operator.
+ * 
+ *  This sample connects to a messaging server as specified in the connection 
+ *  document located in ./etc/connections.xml.  The connection info, and the
+ *  data schema for the message is defined in the connection document.
+ * 
+ *  To connect to ActiveMQ:
+ *  * specify the ActiveMQ server's URL in the "provider_url" attribute of the connection specification named "activemq"
+ *  * in the SPL sample, update the JMSSink operator to use the "activemq" connection
+ *  * in the SPL sample, update the JMSSink operator to use the "access_activemq" access 
+ * 
+ *  To connect to to Websphere MQ:
+ *  * specify the binding file URL in the "provider_url" attribute of the connection specification named "wmq"
+ *  * specify a valid destination identity in the "access_wmq" access specification
+ *  * in the SPL sample, update the JMSSink operator to use the "wmq" connection
+ *  * in the SPL sample, update the JMSSink operator to use the "access_wmq" access    
+ * 
+ */
+
+composite JMSSample {
+    type
+		PersonSchema = int32 id, rstring fname, rstring lname, int32 age,
+			rstring gender, float32 score, float64 total ;
+	graph
+
+		stream<PersonSchema> inputData = FileSource()
+		{
+			param
+				file : "testdata.csv" ;
+				format : csv ;
+				initDelay : 1.0 ;
+		}
+
+		() as mySink = JMSSink(inputData)
+		{
+			param
+				connection : "activemq" ;
+				access : "access_activemq" ;
+		}
+		
+		stream<PersonSchema> myInputStream = JMSSource()
+		{
+			param
+				connection : "activemq" ;
+				access : "access_activemq" ;
+				initDelay : 2l ;
+		}
+		
+		() as myInputSink = FileSink(myInputStream)
+		{
+			param
+				file : "persons.dat" ;
+				format : csv ;
+				quoteStrings : false ;
+		}
+}
