@@ -73,10 +73,10 @@ public class KafkaSource extends KafkaBaseOper {
 	}	
 
 	public static final String DESC = 
-			"This operator acts as a Kafka consumer recieving messages for one or more topics. " +
+			"This operator acts as a Kafka consumer receiving messages for one or more topics. " +
 			"Note that there may be multiple threads receiving messages depending on the configuration specified. " +
 			"Ordering of messages is not guaranteed." + 
-			"\\n\\n** Behavior in a Consistent Region **" + 
+			"\\n\\n**Behavior in a Consistent Region**" + 
 			"\\nThis operator cannot be used inside a consistent region."
 			;
 
