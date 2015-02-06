@@ -18,7 +18,7 @@ public class SPLDocConstants {
 	static final String MQTTSRC_PARAM_RECONN_BOUND_DESC = "Reconnection bound, 0 for no retry, n for n number of retries, -1 for inifinite retry.";
 	static final String MQTTSRC_PARAM_TOPICATTRNAME_DESC = "Output attribute on output data stream to assign message topic to.";
 	static final String MQTTSRC_PARAM_ERRORATTRNAME_DESC = "Output attribute on optional error output port to assign error message to.";
-	static final String MQTTSRC_PARAM_SERVERIURI_DESC = "Server to subscribe messages from.";
+	static final String MQTTSRC_PARAM_SERVERIURI_DESC = "The URI of the server to subscribe messages from";
 	static final String MQTTSRC_PARAM_QOS_DESC = "List of qos for topic subscriptions, this attribute is mutually exclusive with qosStr attribute.";
 	static final String MQTTSRC_PARAM_QOS_STR_DESC = "List of qos in string format for topic subscriptions. Multiple comma separated qos value can be specified, for example \\\"0, 1\\\". This attribute is mutually exclusive with qos attribute.";
 	static final String MQTTSRC_PARAM_TOPICS_DESC = "List of topics to subscribe to. Multiple comma separated topics can be specified, for example \\\"topic1, topic2\\\"";
