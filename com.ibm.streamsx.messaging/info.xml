@@ -26,6 +26,9 @@ The `KafkaProvider` and `KafkaConsumer` operators supports Kafka v0.8.1.1.
 **Restriction**: The `XMSSource`, `XMSSink`, operators in the Messaging Toolkit
 are not supported on POWER7 or POWER 8 Systems. You must use x86_64 systems. 
 
+**Restriction**: The `XMSSource`, `XMSSink`, operators in the Messaging Toolkit
+are not supported on RHEL 7 platforms.
+
 The following figure shows how the `XMSSink` and `XMSSource` operators in the Messaging Toolkit use standard XMS architecture and APIs. 
 {doc/images/8751_dgm1.gif|This diagram illustrates the XMS APIs that are used to communicate between InfoSphere Streams, an XMS client, and a WebSphere MQ server.}
 
