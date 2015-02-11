@@ -107,7 +107,7 @@ public class KafkaSink extends KafkaBaseOper {
 			"The incoming stream can have three attributes: topic, key and message. " +
 			"The message is a required attribute. If the key attribute is not specified, the message is used as the key. " +
 			"A topic can be specified as either an input stream attribute or as a parameter." +
-			"\\n\\n** Behavior in a Consistent Region **" + 
-			"\\nThis operator is stateless and can participate in a consistent region.  This operator cannot be placed at the start of a consistent region."
+			"\\n\\n**Behavior in a Consistent Region**" + 
+			"\\nThis operator can participate in a consistent region.  This operator cannot be placed at the start of a consistent region."
 			;
 }
