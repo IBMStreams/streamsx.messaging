@@ -54,9 +54,6 @@ In all of these cases, the operator logs the exception in the console logs.
 The information about the exception is also sent to the optional error output port,
 unless it is a run time error that halts the operator or a compile time error.
 
-**Note**: The `XMSSink` operator runs without considering the length value for all message classes
-for string and bytes data types when a negative length of -1 is provided; it does not throw an error at either compile time or run time.
-
 + Examples
 
 This example demonstrates the use of multiple `XMSSink` operators with different parameter combinations and an optional error output port.
