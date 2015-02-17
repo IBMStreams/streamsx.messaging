@@ -16,7 +16,10 @@ according to the value of the message_class attribute in the connection specific
 An additional empty value can be specified in the message_class attribute, in which case the operator constructs an empty JMS or XMS message.
 This message class cannot be used with a native schema.
 
-# Exceptions
+**Consistent Region Behavior**
+The `XMSSink` operator supports consistent region. This operator can be part of a consistent region but cannot be at start of a consistent region.
+
+**Exceptions**
 
 The following list describes the common types of exceptions that can occur:
  * Run-time errors that halt the operator execution.

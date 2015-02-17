@@ -285,7 +285,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
 		
 		if(consistentRegionContext != null && consistentRegionContext.isStartOfRegion()) {
-			checker.setInvalidContext("JMSSink operator can not be placed at start of a consistent region.", new String[] {});
+			checker.setInvalidContext("The following operator cannot be the start of a consistent region: JMSSink", new String[] {});
 		}
 	}
 

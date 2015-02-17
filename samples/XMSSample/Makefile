@@ -1,5 +1,6 @@
-# Copyright (C)2014, International Business Machines Corporation and  
-# others. All Rights Reserved.                        
+# Copyright (C)2014, International Business Machines Corporation and
+# others. All Rights Reserved.       
+                
 .PHONY: all clean
 
 STREAMS_MESSAGING_TOOLKIT ?= ../../com.ibm.streamsx.messaging
@@ -9,7 +10,7 @@ SPLC_FLAGS ?= -a -t ${STREAMS_MESSAGING_TOOLKIT}
 SPLC = $(STREAMS_INSTALL)/bin/sc
 
 SPL_CMD_ARGS ?=
-SPL_MAIN_COMPOSITE = application::JmsWithXmlParse
+SPL_MAIN_COMPOSITE = com.ibm.streamsx.messaging.sample.xms::XMSSample
 OUTPUT_DIR = output
 
 all: distributed

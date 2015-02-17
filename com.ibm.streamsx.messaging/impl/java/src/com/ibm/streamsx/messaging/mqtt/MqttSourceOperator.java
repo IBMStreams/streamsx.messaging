@@ -44,6 +44,8 @@ import com.ibm.streams.operator.model.OutputPortSet.WindowPunctuationOutputMode;
 import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
+import com.ibm.streams.operator.state.ConsistentRegionContext;
+import com.ibm.streams.operator.types.RString;
 import com.ibm.streams.operator.types.ValueFactory;
 import com.ibm.streamsx.messaging.mqtt.MqttClientRequest.MqttClientRequestType;
 
@@ -78,11 +80,14 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 	// Parameters 
 	private List<String> paramTopics; 
 	private List<Integer> paramQos;
+	private List<String> paramQosStr;
 	private String topicOutAttrName;
 	private int reconnectionBound = IMqttConstants.DEFAULT_RECONNECTION_BOUND;		// default 5, 0 = no retry, -1 = infinite retry
 	private long period = IMqttConstants.DEFAULT_RECONNECTION_PERIOD;
 	private MqttClientWrapper mqttWrapper;
 	private boolean shutdown = false;
+	
+	private int messageQueueSize = IMqttConstants.MQTTSRC_DEFAULT_QUEUE_SIZE;
 	
 	private ArrayBlockingQueue<MqttMessageRecord> messageQueue;
 	private ArrayBlockingQueue<MqttClientRequest> clientRequestQueue;
@@ -127,6 +132,23 @@ public class MqttSourceOperator extends AbstractMqttOperator {
     	
     };
 
+    @ContextCheck(compile=true)
+    public static void checkQosQosStrExclusive(OperatorContextChecker checker) {
+    	checker.checkExcludedParameters("qos", "qosStr");
+    	checker.checkExcludedParameters("qosStr", "qos");
+    }
+    
+    @ContextCheck(compile=true)
+	public static void checkConsistentRegion(OperatorContextChecker checker) {
+		
+		// check if this operator is within a consistent region
+		OperatorContext oContext = checker.getOperatorContext();
+		ConsistentRegionContext cContext = oContext.getOptionalContext(ConsistentRegionContext.class);
+		
+		if(cContext != null) {
+			checker.setInvalidContext("The following operator cannot be in a consistent region: MQTTSource", new String[] {});
+		}
+	}
     
     @ContextCheck(compile=false)
     public  static void runtimeChecks(OperatorContextChecker checker) {
@@ -134,11 +156,16 @@ public class MqttSourceOperator extends AbstractMqttOperator {
     	validateNumber(checker, "period", 0, Long.MAX_VALUE); //$NON-NLS-1$
     	validateNumber(checker, "qos", 0, 2); //$NON-NLS-1$
     	validateNumber(checker, "reconnectionBound", -1, Long.MAX_VALUE); //$NON-NLS-1$
+    	validateNumber(checker, "messageQueueSize", 1, Integer.MAX_VALUE); //$NON-NLS-1$
+    	validateCommaSeparatedNumber(checker, "qosStr", 0, 2);
     	
-    	List<String> topicValues = checker.getOperatorContext().getParameterValues("topics"); //$NON-NLS-1$
-    	List<String> qosValues = checker.getOperatorContext().getParameterValues("qos"); //$NON-NLS-1$
+    	int topicsCount = getCommaSeparatedParamNumber(checker, "topics"); //$NON-NLS-1$
+    	int qosTotalCount = getCommaSeparatedParamNumber(checker, "qos") + getCommaSeparatedParamNumber(checker, "qosStr"); //$NON-NLS-1$
     	
-    	if (qosValues.size() > 0 && topicValues.size() != qosValues.size())
+    	//List<String> topicValues = checker.getOperatorContext().getParameterValues("topics"); //$NON-NLS-1$
+    	//List<String> qosValues = checker.getOperatorContext().getParameterValues("qos"); //$NON-NLS-1$
+    	
+    	if (qosTotalCount > 0 && topicsCount != qosTotalCount)
     	{
     		checker.setInvalidContext(Messages.getString("Error_MqttSourceOperator.5"), new Object[] {}); //$NON-NLS-1$
     	}
@@ -172,6 +199,48 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 	    			checker.checkAttributeType(streamSchema.getAttribute(dataAttributeName), MetaType.RSTRING, MetaType.BLOB );
     		}
     	}
+    	
+    }
+    
+    // There are parameters such as qosStr allows comma separated value to be specified.
+    // i.e "0, 1", this method will parse the comma separated string value and parse it to 
+    // a number to verify if the parsed number is within the min/max range.
+    private static void validateCommaSeparatedNumber(OperatorContextChecker checker, String paramName, long min, long max) {
+    	try {
+			List<String> paramValues = checker.getOperatorContext().getParameterValues(paramName);
+			for (String paramValue : paramValues) {
+				
+				String[] paramStrVal = paramValue.split(IMqttConstants.COMMA);
+				
+				for(String strVal : paramStrVal) {
+					Long longVal = Long.valueOf(strVal.trim());
+
+					if (longVal.longValue() > max || longVal.longValue() < min) {
+						checker.setInvalidContext(
+								Messages.getString("Error_AbstractMqttOperator.0"), //$NON-NLS-1$
+								new Object[] { paramName, min, max });
+					}
+				}
+				
+			}
+		} catch (NumberFormatException e) {
+			checker.setInvalidContext(
+					Messages.getString("Error_AbstractMqttOperator.1"), //$NON-NLS-1$
+					new Object[] { paramName });
+		}
+    }
+    
+    private static int getCommaSeparatedParamNumber(OperatorContextChecker checker, String paramName) {
+    	int count = 0;
+    	List<String> paramValues = checker.getOperatorContext().getParameterValues(paramName);
+    	
+    	for(String paramStrValue : paramValues) {
+    		String[] parsedParamStrValue = paramStrValue.split(IMqttConstants.COMMA);
+    		
+    		count += parsedParamStrValue.length;
+    	}
+    	
+    	return count;
     	
     }
     
@@ -216,7 +285,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
         super.initialize(context);
         Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " initializing in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         
-        messageQueue = new ArrayBlockingQueue<MqttSourceOperator.MqttMessageRecord>(50);
+        messageQueue = new ArrayBlockingQueue<MqttSourceOperator.MqttMessageRecord>(getMessageQueueSize());
         clientRequestQueue = new ArrayBlockingQueue<MqttClientRequest>(20);
         
         mqttWrapper = new MqttClientWrapper();
@@ -362,15 +431,15 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 			} catch (URISyntaxException e1) {
 				String errorMsg = Messages.getString("Error_MqttSourceOperator.27", e1.getLocalizedMessage()); //$NON-NLS-1$
 				TRACE.log(TraceLevel.ERROR, errorMsg,e1);
-				submitToErrorPort(errorMsg);
+				submitToErrorPort(errorMsg, null);
 			} catch (MqttException e) {				
 				String errorMsg = Messages.getString("Error_MqttSourceOperator.25", e.getLocalizedMessage()); //$NON-NLS-1$
 				TRACE.log(TraceLevel.ERROR, errorMsg,e);
-				submitToErrorPort(errorMsg);
+				submitToErrorPort(errorMsg, null);
 			} catch (RuntimeException e) {
 				String errorMsg = Messages.getString("Error_MqttSourceOperator.26", e.getLocalizedMessage()); //$NON-NLS-1$
 				TRACE.log(TraceLevel.ERROR, errorMsg,e);
-				submitToErrorPort(errorMsg);
+				submitToErrorPort(errorMsg, null);
 				
 				// rethrow connect exception to cause the operator to exit
 				if (e instanceof MqttClientConnectException)
@@ -477,10 +546,16 @@ public class MqttSourceOperator extends AbstractMqttOperator {
      */
     private void produceTuples() throws Exception  {
     	StreamSchema streamSchema = getOutput(0).getStreamSchema();
-		String dataAttributeName = this.getDataAttributeName() == null ? "data" : this.getDataAttributeName();
+		String dataAttributeName = this.getDataAttributeName() == null ? IMqttConstants.MQTT_DEFAULT_DATA_ATTRIBUTE_NAME : this.getDataAttributeName();
 		
 		int dataAttrIndex = streamSchema.getAttributeIndex(dataAttributeName);
 		Type.MetaType dataAttributeType = streamSchema.getAttribute(dataAttributeName).getType().getMetaType();
+		
+		boolean isBlob = false;
+		if(dataAttributeType.equals(MetaType.BLOB))
+			isBlob = true;
+		else if (dataAttributeType.equals(MetaType.RSTRING))
+			isBlob = false;
 		
         while (!shutdown)
         {
@@ -490,11 +565,11 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 			StreamingOutput<OutputTuple> outputPort = getOutput(0);
 			OutputTuple tuple = outputPort.newTuple();
 			
-			if(dataAttributeType.equals(Type.MetaType.BLOB)) {
+			if(isBlob) {
 				tuple.setBlob(dataAttrIndex, ValueFactory.newBlob(blob));
 			}
 			else { // it should be RSTRING type
-				tuple.setString(dataAttrIndex, new String(blob));
+				tuple.setObject(dataAttrIndex, new RString(blob));
 			}
 
 			if (topicOutAttrName != null)
@@ -568,7 +643,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 								String errorMsg = Messages.getString("Error_MqttSourceOperator.3"); //$NON-NLS-1$
 								
 								TRACE.log(TraceLevel.ERROR,errorMsg);
-								submitToErrorPort(errorMsg);								
+								submitToErrorPort(errorMsg, null);								
 							}
 							else if (serverUriStr.toLowerCase().equals(getServerUri().toLowerCase())){
 
@@ -622,7 +697,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 							String errorMsg = Messages.getString("Error_MqttSourceOperator.24", reqTopics.toString(), signalQos); //$NON-NLS-1$
 							
 							TRACE.log(TraceLevel.ERROR,errorMsg);
-							submitToErrorPort(errorMsg);	
+							submitToErrorPort(errorMsg, null);	
 						}
 					}
 				}
@@ -636,7 +711,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 
 			TRACE.log(TraceLevel.ERROR,errorMsg); //$NON-NLS-1$
 						
-			submitToErrorPort(errorMsg);
+			submitToErrorPort(errorMsg, null);
 		}
 	}
 
@@ -666,7 +741,14 @@ public class MqttSourceOperator extends AbstractMqttOperator {
     @Parameter(name="topics", description=SPLDocConstants.MQTTSRC_PARAM_TOPICS_DESC, optional=false, cardinality=-1)
 	public void setTopics(List<String> topics) {
 		this.paramTopics = new ArrayList<String>();
-		paramTopics.addAll(topics);
+		
+		for(String csTopics : topics) {
+			String[] topic = csTopics.split(IMqttConstants.COMMA);
+			
+			for(String aTopic : topic) {
+				paramTopics.add(aTopic.trim());
+			}
+		}
 	}
 
     @Parameter(name="qos", description=SPLDocConstants.MQTTSRC_PARAM_QOS_DESC, optional=true, cardinality=-1)
@@ -687,6 +769,31 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 			qosArray[i] = paramQos.get(i);
 		}
 		return qosArray;
+	}
+
+	public List<String> getParamQosStr() {
+		return paramQosStr;
+	}
+     
+	@Parameter(name="qosStr", description=SPLDocConstants.MQTTSRC_PARAM_QOS_STR_DESC, optional=true, cardinality=-1)
+	public void setParamQosStr(List<String> paramQosStr) {
+		
+		if(this.paramQos == null) {
+			this.paramQos = new ArrayList<Integer>();
+		}
+		
+		for(String aQosList : paramQosStr) {
+			String[] qosString = aQosList.split(IMqttConstants.COMMA);
+			
+			for(String aQos : qosString) {
+				try {
+					paramQos.add(Integer.parseInt(aQos.trim()));
+				} catch (NumberFormatException e) {
+					// this should not happen as runtime check should have taken care of invalid number.
+				}
+			}
+		}
+		
 	}
 
 	@Parameter(name="topicOutAttrName", description=SPLDocConstants.MQTTSRC_PARAM_TOPICATTRNAME_DESC, optional=true)
@@ -716,7 +823,15 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 		return period;
 	}
 	
-	
+	public int getMessageQueueSize() {
+		return messageQueueSize;
+	}
+    
+	@Parameter(name="messageQueueSize", description=SPLDocConstants.MQTTSRC_PARAM_MESSAGE_SIZE_DESC, optional=true)
+	public void setMessageQueueSize(int messageQueueSize) {
+		this.messageQueueSize = messageQueueSize;
+	}
+
 	@Override
 	protected StreamingOutput<OutputTuple> getErrorOutputPort() {
 		return getErrorPortFromContext(getOperatorContext());

@@ -9,51 +9,51 @@
 	<version>1.0.0</version>
 	<name>com.ibm.streamsx.messaging</name>
 	<repositories>
-		<repository>
-			<id>apache.snapshots</id>
-			<url>http://repository.apache.org/content/repositories/snapshots/</url>
-		</repository>
-		<repository>
-			<id>Eclipse Paho Repo snapshots</id>
-			<url>https://repo.eclipse.org/content/repositories/paho-snapshots</url>
-		</repository>
+	  <repository>
+	    <id>apache.snapshots</id>
+	    <url>http://repository.apache.org/content/repositories/snapshots/</url>
+	  </repository>
+	  <repository>
+	    <id>Eclipse Paho Repo releases</id>
+	    <url>https://repo.eclipse.org/content/repositories/paho-releases</url>
+	  </repository>
 	</repositories>
 	<properties>
 	</properties>
 	<dependencies>
-		<dependency>
-			<groupId>org.apache.kafka</groupId>
-			<artifactId>kafka_2.8.0</artifactId>
-			<version>0.8.1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun.jmx</groupId>
-					<artifactId>jmxri</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.jdmk</groupId>
-					<artifactId>jmxtools</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.jms</groupId>
-					<artifactId>jms</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-client</artifactId>
-			<version>5.11-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.paho</groupId>
-			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
-		</dependency>
+	  <dependency>
+	    <groupId>org.apache.kafka</groupId>
+	    <artifactId>kafka_2.8.0</artifactId>
+	    <version>0.8.1.1</version>
+	    <exclusions>
+	      <exclusion>
+		<groupId>com.sun.jmx</groupId>
+		<artifactId>jmxri</artifactId>
+	      </exclusion>
+	      <exclusion>
+		<groupId>com.sun.jdmk</groupId>
+		<artifactId>jmxtools</artifactId>
+	      </exclusion>
+	      <exclusion>
+		<groupId>javax.jms</groupId>
+		<artifactId>jms</artifactId>
+	      </exclusion>
+	    </exclusions>
+	  </dependency>
+	  <dependency>
+	    <groupId>org.apache.activemq</groupId>
+	    <artifactId>activemq-client</artifactId>
+	    <version>5.11-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+	    <groupId>org.eclipse.paho</groupId>
+	    <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+	    <version>1.0.1</version>
+	  </dependency>
 	</dependencies>
 	<build>
-		<sourceDirectory>.</sourceDirectory>
-		<plugins>
-		</plugins>
+	  <sourceDirectory>.</sourceDirectory>
+	  <plugins>
+	  </plugins>
 	</build>
 </project>
