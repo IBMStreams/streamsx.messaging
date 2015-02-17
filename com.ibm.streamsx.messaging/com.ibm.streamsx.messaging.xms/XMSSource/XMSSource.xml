@@ -12,11 +12,11 @@ The `XMSSource` operator reads data from a WebSphere MQ queue or topic and creat
 Each input WebSphere MQ message is converted to a separate tuple and sent to the output stream. 
 A single message cannot contain multiple tuples.
 
-**Consistent Region Behavior**
+# Behavior in a consistent region
 
-The `XMSSource` operator cannot paticipate in a consistent region.
+The `XMSSource` operator cannot participate in a consistent region.
 
-**Exceptions**
+# Exceptions
 
 The following list describes the common types of exceptions that can occur:
  * Run time errors that halt the operator execution.
@@ -49,7 +49,7 @@ The following list describes the common types of exceptions that can occur:
        If there are insufficient bytes remaining in the XMS message,
        the operator discards the entire message and logs a run time error.
    * The discarded message is not sent to the WebSphere MQ queue or topic.
- * Compile-time errors
+ * Compile time errors
    * The `XMSSource` operator throws a compile-time error in the following cases:
      * The message type is empty and a native schema is specified.
      * The message type is bytes, stream, or map and a native schema attribute name or type does not match
@@ -66,14 +66,13 @@ The following list describes the common types of exceptions that can occur:
 In all of these cases, the operator logs the exception in the console logs, as well as on the error output port, if applicable.
 
 **Note**:
- * The `XMSSource` operator runs without considering the length value for all message classes
-   for string and bytes data types when a length of -1 is specified;
-   it does not throw an error at either compile time or run time.
  * If the WebSphere MQ server goes down while the `XMSSource` operator is running
    and the **reconnectionPolicy** parameter is set to `BoundedRetry` or `InfiniteRetry`,
    the operator does not try to reconnect to WebSphere MQ. This problem occurs in XMSClient version 2.0.1 or lower
 
 + Examples
+
+These examples demonstrate how to use the `XMSSource` operator.
 
 This example demonstrates the use of multiple `XMSSource` operators with different parameter combinations.
 

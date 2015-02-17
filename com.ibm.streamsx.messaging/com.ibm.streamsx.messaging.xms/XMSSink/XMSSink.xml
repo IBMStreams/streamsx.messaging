@@ -16,13 +16,15 @@ according to the value of the message_class attribute in the connection specific
 An additional empty value can be specified in the message_class attribute, in which case the operator constructs an empty JMS or XMS message.
 This message class cannot be used with a native schema.
 
-**Consistent Region Behavior**
-The `XMSSink` operator supports consistent region. This operator can be part of a consistent region but cannot be at start of a consistent region.
+# Behavior in a consistent region
 
-**Exceptions**
+The `XMSSink` operator supports consistent regions. 
+This operator can be part of a consistent region but it cannot be at the start of a consistent region.
+
+# Exceptions
 
 The following list describes the common types of exceptions that can occur:
- * Run-time errors that halt the operator execution.
+ * Run time errors that halt the operator execution.
    * The `XMSSink` operator throws an exception and terminates in the following cases:
      * During the initial connect attempt, the **reconnectionPolicy** is set to `NoRetry`
        and the operator does not have a successful connection, or during transient connection failures
@@ -58,6 +60,8 @@ The information about the exception is also sent to the optional error output po
 unless it is a run time error that halts the operator or a compile time error.
 
 + Examples
+
+These examples demonstrate how to use the `XMSSink` operator.
 
 This example demonstrates the use of multiple `XMSSink` operators with different parameter combinations and an optional error output port.
 
