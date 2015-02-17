@@ -14,6 +14,7 @@ import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.logging.TraceLevel;
+import com.ibm.streams.operator.model.Icons;
 import com.ibm.streams.operator.model.InputPortSet;
 import com.ibm.streams.operator.model.InputPorts;
 import com.ibm.streams.operator.model.Parameter;
@@ -24,6 +25,7 @@ import com.ibm.streams.operator.state.ConsistentRegionContext;
 	description="The tuples arriving on this port are expected to contain three attributes \\\"key\\\", \\\"topic\\\" and \\\"message\\\". " +
 			"Out of these \\\"message\\\", is a required attribute."))
 @PrimitiveOperator(name=KafkaSink.OPER_NAME, description=KafkaSink.DESC)
+@Icons(location16="icons/KafkaProducer_16.gif", location32="icons/KafkaProducer_32.gif")
 public class KafkaSink extends KafkaBaseOper {
 	
 	
@@ -105,7 +107,7 @@ public class KafkaSink extends KafkaBaseOper {
 			"The incoming stream can have three attributes: topic, key and message. " +
 			"The message is a required attribute. If the key attribute is not specified, the message is used as the key. " +
 			"A topic can be specified as either an input stream attribute or as a parameter." +
-			"\\n\\n** Behavior in a Consistent Region **" + 
-			"\\nThis operator cannot be placed at the start of a consistent region."
+			"\\n\\n**Behavior in a Consistent Region**" + 
+			"\\nThis operator can participate in a consistent region.  This operator cannot be placed at the start of a consistent region."
 			;
 }

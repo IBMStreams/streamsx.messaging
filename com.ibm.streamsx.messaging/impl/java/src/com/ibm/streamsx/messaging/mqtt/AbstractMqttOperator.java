@@ -24,6 +24,7 @@ import com.ibm.streams.operator.log4j.LogLevel;
 import com.ibm.streams.operator.log4j.LoggerNames;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.Parameter;
+import com.ibm.streams.operator.state.ConsistentRegionContext;
 
 public abstract class AbstractMqttOperator extends AbstractOperator {
 
@@ -412,7 +413,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	 */
 	abstract protected StreamingOutput<OutputTuple> getErrorOutputPort();
 	
-	protected void submitToErrorPort(String errorMsg) {
+	protected void submitToErrorPort(String errorMsg, ConsistentRegionContext crContext) {
 		StreamingOutput<OutputTuple> errorOutputPort = getErrorOutputPort();
 		if (errorOutputPort != null) {
 			OutputTuple errorTuple = errorOutputPort.newTuple();
@@ -420,10 +421,17 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 			errorTuple.setString(0, errorMsg);
 
 			try {
+				if(crContext != null) {
+					crContext.acquirePermit();
+				}
 				errorOutputPort.submit(errorTuple);
 			} catch (Exception e) {
 				TRACE.log(TraceLevel.ERROR,
 						Messages.getString("Error_AbstractMqttOperator.10"), e); //$NON-NLS-1$
+			} finally {
+				if(crContext != null) {
+					crContext.releasePermit();
+				}
 			}
 		}
 	}

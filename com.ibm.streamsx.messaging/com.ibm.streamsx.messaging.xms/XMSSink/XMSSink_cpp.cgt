@@ -4,6 +4,11 @@
 # others. All Rights Reserved.                                    
 #######################################################################  
 %>
+
+<%
+   my $isInConsistentRegion = 
+   $model->getContext()->getOptionalContext("ConsistentRegion");
+%>
  
 <%
 # Set up commonly used variables
@@ -127,10 +132,24 @@ using namespace std;
 
 <%SPL::CodeGen::implementationPrologue($model);%>
 
+<%
+    ### Consistent region ERROR message ###
+    my $crContext = $model->getContext()->getOptionalContext("ConsistentRegion");
+    if($crContext && $crContext->isStartOfRegion()) {
+        SPL::CodeGen::exitln("The following operator cannot be the start of a consistent region: XMSSink");
+    }
+%>
+
 // Constructor
 MY_OPERATOR::MY_OPERATOR() : nTruncatedInserts(0),nTruncatedInsertsPC( getContext().getMetrics().getCustomMetricByName("nTruncatedInserts")),nFailedInserts(0),nFailedInsertsPC( getContext().getMetrics().getCustomMetricByName("nFailedInserts")),nConnectionAttempts(0),nConnectionAttemptsPC( getContext().getMetrics().getCustomMetricByName("nConnectionAttempts"))
 {
 	SPLAPPTRC(L_DEBUG, "Entry: Constructor", "XMSSink");
+	
+	<%if ($isInConsistentRegion) {%>
+	_crContext = static_cast<ConsistentRegionContext *> (getContext().getOptionalContext(CONSISTENT_REGION));
+	
+	getContext().registerStateHandler(*this);
+	<%}%>
 	
 	std::ostringstream ErrMsg;
 	
@@ -1023,5 +1042,31 @@ elsif ($msgType eq 'xml') { %>
 
 <% } %>
 
+<%if ($isInConsistentRegion) {%>
+
+void MY_OPERATOR::checkpoint(Checkpoint & ckpt)
+{
+	SPLAPPTRC(L_TRACE, "Checkpoint: " << ckpt.getSequenceId(), "CONSISTENT");
+}
+
+void MY_OPERATOR::reset(Checkpoint & ckpt)
+{
+   SPLAPPTRC(L_TRACE, "Reset: " << ckpt.getSequenceId(), "CONSISTENT");
+}
+
+void MY_OPERATOR::resetToInitialState()
+{
+    SPLAPPTRC(L_TRACE, "Reset to Initial State. ", "CONSISTENT");
+}
+
+void MY_OPERATOR::drain() {
+    SPLAPPTRC(L_TRACE, "Drain Operator", "CONSISTENT");
+}
+
+void MY_OPERATOR::retireCheckpoint(int64_t id) {
+	SPLAPPTRC(L_TRACE, "Retire Checkpoint: " << id, "CONSISTENT");
+}
+
+<%}%>
 
 <%SPL::CodeGen::implementationEpilogue($model);%>

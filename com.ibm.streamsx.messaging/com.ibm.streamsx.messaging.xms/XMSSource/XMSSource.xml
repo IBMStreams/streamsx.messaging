@@ -12,7 +12,11 @@ The `XMSSource` operator reads data from a WebSphere MQ queue or topic and creat
 Each input WebSphere MQ message is converted to a separate tuple and sent to the output stream. 
 A single message cannot contain multiple tuples.
 
-# Exceptions
+**Consistent Region Behavior**
+
+The `XMSSource` operator cannot paticipate in a consistent region.
+
+**Exceptions**
 
 The following list describes the common types of exceptions that can occur:
  * Run time errors that halt the operator execution.
