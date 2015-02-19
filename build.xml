@@ -57,7 +57,7 @@
 	</target>
 	
 	<target name="toolkitIndexOnly" description="Index the toolkit.">
-		<ant dir="${toolkit}" target="cpp" />
+		<ant dir="${toolkit}" target="toolkit" />
 	</target>
 
 	<target name="spldoc" depends="spldoc_work, revertversion" />
