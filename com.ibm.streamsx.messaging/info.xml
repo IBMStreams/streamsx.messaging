@@ -23,10 +23,10 @@ IBM MessageSight v1.1 and v1.2.
 
 The `KafkaProvider` and `KafkaConsumer` operators supports Kafka v0.8.1.1.
 
-**Restriction**: The `XMSSource`, `XMSSink`, operators in the Messaging Toolkit
+**Restriction**: The `XMSSource` and `XMSSink`, operators in the Messaging Toolkit
 are not supported on POWER7 or POWER 8 Systems. You must use x86_64 systems. 
 
-**Restriction**: The `XMSSource`, `XMSSink`, operators in the Messaging Toolkit
+**Restriction**: The `XMSSource` and `XMSSink`, operators in the Messaging Toolkit
 are not supported on RHEL 7 platforms.
 
 The following figure shows how the `XMSSink` and `XMSSource` operators in the Messaging Toolkit use standard XMS architecture and APIs. 
@@ -87,12 +87,14 @@ Alternatively, you can fully qualify the operators that are provided by toolkit 
 
 # Procedure
 
-1. Verify that the appropriate environment variables are set for the messaging systems that you use.
+1. Review the list of restrictions for the InfoSphere Streams specialized toolkits in the product documentation.
+   For example, the `XMSSource` and `XMSSink` operators are not supported on POWER7 or POWER 8 systems. 
+2. Verify that the appropriate environment variables are set for the messaging systems that you use.
    * If you use `JMSSink` or `JMSSource` operators to connect to WebSphere MQ or Apache ActiveMQ systems,
      set **STREAMS_MESSAGING_WMQ_HOME** or **STREAMS_MESSAGING_AMQ_HOME** respectively.
    * If you use `XMSSink` or `XMSSource` operators to connect to WebSphere MQ messaging systems,
      set **XMS_HOME**, **MQ_HOME**, and **LD_LIBRARY_PATH**.
-2. Configure the SPL compiler to find the toolkit root directory. Use one of the following methods:
+3. Configure the SPL compiler to find the toolkit root directory. Use one of the following methods:
   * Set the **STREAMS_SPLPATH** environment variable to the root directory of a toolkit or multiple toolkits (with : as a separator).
     For example:
         export STREAMS_SPLPATH=$STREAMS_INSTALL/toolkits/com.ibm.streamsx.messaging
@@ -101,7 +103,7 @@ Alternatively, you can fully qualify the operators that are provided by toolkit 
     where MyMain is the name of the SPL main composite.
     **Note**: These command parameters override the **STREAMS_SPLPATH** environment variable.
   * Add the toolkit location in InfoSphere Streams Studio.
-3. Develop your application. To avoid the need to fully qualify the operators, add a use directive in your application. 
+4. Develop your application. To avoid the need to fully qualify the operators, add a use directive in your application. 
   * For example, you can add the following clause in your SPL source file:
         use com.ibm.streamsx.messaging.jms::*;
         use com.ibm.streamsx.messaging.mqtt::*;
@@ -112,9 +114,9 @@ Alternatively, you can fully qualify the operators that are provided by toolkit 
         use com.ibm.streamsx.messaging.mqtt::MQTTSink; 
         use com.ibm.streamsx.messaging.xms::XMSSource;
         use com.ibm.streamsx.messaging.kafka::KafkaConsumer;
-4. Build your application.  You can use the **sc** command or Streams Studio.  
-5. Start the InfoSphere Streams instance. 
-6. Run the application. You can submit the application as a job by using the **streamtool submitjob** command or by using Streams Studio. 
+5. Build your application.  You can use the **sc** command or Streams Studio.  
+6. Start the InfoSphere Streams instance. 
+7. Run the application. You can submit the application as a job by using the **streamtool submitjob** command or by using Streams Studio. 
 
 + Connection specifications document
 
@@ -231,7 +233,7 @@ The &lt;JMS&gt; element has the following attributes:
 The &lt;MQTT&gt; element specifies the information that is needed by the `MQTTSink` and `MQTTSource` operators
 to establish a connection with MQTT-based messaging systems.
 
-The following example shows a &lt;connection specification&gt; element that contains an &lt;MQTT&gt; element:
+The following example shows a &lt;connection_specification&gt; element that contains an &lt;MQTT&gt; element:
 
     &lt;connection_specifications&gt;
       &lt;connection_specification name="mqttconn"&gt;
@@ -451,7 +453,7 @@ When the message_class attribute value is `map`:
   * If the MapMessage contains an attribute whose type does not match the data type in the &lt;native_schema&gt;,
     the operators attempt to convert it using the standard XMS or JMS conversion rules.
     If this conversion fails, the entire message is discarded and an error message is logged.
-  * If the Map Message contains an attribute with a null value, the corresponding output stream attribute is set to the default value for its type.
+  * If the MapMessage contains an attribute with a null value, the corresponding output stream attribute is set to the default value for its type.
   * If the MapMessage contains attributes that are not listed in the &lt;native_schema&gt;, the attributes are ignored.
 
 When the message_class attribute value is `stream`:
@@ -486,7 +488,7 @@ When the message_class attribute value is `wbe`:
 
 When the message_class attribute value is `wbe22`:
 * The `XMSSink` operator constructs an XMS TextMessage. The `JMSSink` operator constructs a JMS TextMessage.
-  The TextMessage contains an XML document in the WebSphere Business Event 2.2 event packet format.
+  The TextMessage contains an XML document in the WebSphere Business Events 2.2 event packet format.
   
   The XML document contains a single "connector-object" (event). 
   The input stream name is used for both the WBE event-name and event-object name.
@@ -605,13 +607,13 @@ The &lt;attribute&gt; element has three possible attributes:
         stream, bytes, xml, wbe, or wbe22, the String data is truncated.
       * If the message class is bytes and Bytes data in the tuple is smaller than the length specified in the native schema,
         the Bytes data is padded with null values to fit the length. For other message classes, the Bytes data is written as is.
-      * If the Blob data in the tuple is longer that the length specified in the native schema and the message class is either map,
+      * If the Blob data in the tuple is longer than the length specified in the native schema and the message class is either map,
         stream, bytes, or xml, the Blob data is truncated. For message classes wbe and wbe22, Blob data type is not supported.
     * `XMSSource`
       * If the message class is bytes and the String or Bytes data in the message is smaller than the length specified in the native schema,
         the message is discarded.
       * If the message class is map or stream, the length attribute is ignored for String data.
-      * If the message class is map or stream and the Bytes data is in the message is smaller than the length specified in the native schema,
+      * If the message class is map or stream and the Bytes data in the message is smaller than the length specified in the native schema,
         the Bytes data is padded with null values to fit the length.
       * If the message class is map or stream and the Bytes data is in the message is longer than the length specified in the native schema,
         the Bytes data is truncated to fit the length.
@@ -619,7 +621,7 @@ The &lt;attribute&gt; element has three possible attributes:
       * If the message class is bytes and the String data in the tuple is smaller than the length specified in the native schema,
         the String data is padded with spaces to fit the length. For other message classes the String data is written as is.
       * If the String data in the tuple is longer than the length specified in the native schema and the message class is either map,
-        stream, bytes, or xml, the String data is a truncated.
+        stream, bytes, or xml, the String data is truncated.
       * If the message class is bytes and the Bytes data in the tuple is smaller than the length specified in the native schema,
         the Bytes data is padded with null values to fit the length. For other message classes the Bytes data is written as is.
       * If the Blob data in the tuple is longer than the length specified in the native schema and the message class is either map,
