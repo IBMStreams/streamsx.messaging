@@ -138,9 +138,9 @@ else {
 #include <SPL/Runtime/Common/RuntimeException.h>
 #include "xms.hpp"
 #include "MessagingResource.h"  
-
+#include <streams_boost/filesystem.hpp>
 using namespace std;
-
+using namespace streams_boost;
 
 
 <%SPL::CodeGen::implementationPrologue($model);%>
@@ -179,16 +179,49 @@ MY_OPERATOR::MY_OPERATOR(): nMessagesReadPC( getContext().getMetrics().getCustom
 # InitialContext and ConnectionFactory are guaranteed to be there by the XML Schema
 	my $ic =$conn->getAttributeByName('initial_context');
 
+
+    use URI;
+    
+    # support relative binding file path.
+    if(defined ($ic) && $ic ne '') {
+        my $url = new URI($ic);
+        if($url->scheme eq 'file' || $url->scheme eq '') {
+            $ic = $url->path;
+            if(substr($ic,-1)  eq '/') {
+               $ic .= '.bindings';
+            }
+        }
+    }
+    else {
+        $ic = './etc/.bindings';
+    }
+    
 # Append .bindings to the URL, if it is a file based one that refers to a directory. The XMS client requires this
 
-	if ((substr($ic,0,8) eq 'file:///') &&  	# If it starts with file:///
-	(substr($ic,-1)  eq '/'))			# and it ends with a /
-	{
-		$ic .= '.bindings';                      # append .bindings
-	}
+	#if ((substr($ic,0,8) eq 'file:///') &&  	# If it starts with file:///
+	#(substr($ic,-1)  eq '/'))			# and it ends with a /
+	#{
+	#	$ic .= '.bindings';                      # append .bindings
+	#}
 
 	%>
-	pInitialContext = new xms::String("<%=$ic %>");
+	
+	std::string initContext = "<%=$ic %>";
+  	
+  	// binding file path does not have scheme specified indicating this is a file path
+  	if(initContext.find("://") == std::string::npos) {
+  	    streams_boost::filesystem::path filePath(initContext);
+  	
+  	    if(filePath.is_relative()) {
+            // if relative, convert to absolute path using the application directory as the base
+            filePath = streams_boost::filesystem::absolute(filePath, getPE().getApplicationDirectory());
+            initContext = filePath.string();
+        }
+        
+        initContext = "file://" + initContext;
+  	}
+	
+	pInitialContext = new xms::String(initContext);
 	pConnectionFactory = new xms::String("<%=$conn->getAttributeByName('connection_factory'); %>");
 	<%
 

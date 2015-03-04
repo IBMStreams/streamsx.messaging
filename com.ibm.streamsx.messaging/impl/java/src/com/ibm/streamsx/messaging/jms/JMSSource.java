@@ -332,7 +332,7 @@ public class JMSSource extends ProcessTupleProducer {
 		// the operator throws a runtime error and abort
 
 		connectionDocumentParser.parseAndValidateConnectionDocument(
-				getConnectionDocument(), connection, access, streamSchema, false);
+				getConnectionDocument(), connection, access, streamSchema, false, context.getPE().getApplicationDirectory());
 
 		// codepage parameter can come only if message class is bytes
 

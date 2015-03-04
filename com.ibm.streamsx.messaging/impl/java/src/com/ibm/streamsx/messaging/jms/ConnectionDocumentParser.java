@@ -4,8 +4,11 @@
  *******************************************************************************/
 package com.ibm.streamsx.messaging.jms;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -192,11 +195,52 @@ class ConnectionDocumentParser {
 		return msgClass;
 
 	}
+	
+	// Convert relative provider url path to absolute path for wmq only.
+	// non-absolute path should be relative to application directory.
+	// i.e file:./etc/ will be converted to applicationDir + ./etc/
+	// If provider_url string is not provided
+	private void convertProviderURLPath(File applicationDir) throws ParseConnectionDocumentException {
+		
+	   if(!isAMQ()) {
+		   
+		   // default case when provider_url is not specified or left empty
+		   if(this.providerURL == null || this.providerURL.trim().length() == 0) { 
+			   this.providerURL = "file://" + applicationDir + "/etc/";
+		   }
+		   else { // provider_url has a value specified
+			   // provider_url starts with file protocol.
+			   if(this.providerURL.startsWith("file")){
+				   try {
+					  URL url = new URL(providerURL);
+				      String path = url.getPath();
+				      
+				      if(!path.startsWith("/")) {
+				          URL absProviderURL = new URL(url.getProtocol(), url.getHost(), applicationDir + File.separator + path);
+				    	  this.providerURL = absProviderURL.toString();
+				      }
+				   } catch (MalformedURLException e) {
+					   throw new ParseConnectionDocumentException(e.getMessage());
+				   }
+			   }
+			   else { // no file protocol specified, convert it to absolute and prefix file protocol
+				   // it is a absolute path
+				   if(this.providerURL.startsWith("/")) {
+					   this.providerURL = "file://" + this.providerURL;
+				   }
+				   else { // relative path is specified
+					   this.providerURL = "file://" + applicationDir + File.separator + this.providerURL;
+				   }
+				   
+			   }
+		   }
+	   }
+	}
 
 	// subroutine to parse and validate the connection document
 	// called by both the JMSSink and JMSSource
 	public void parseAndValidateConnectionDocument(String connectionDocument, String connection, String access,
-			StreamSchema streamSchema, boolean isProducer) throws ParseConnectionDocumentException, SAXException,
+			StreamSchema streamSchema, boolean isProducer, File applicationDir) throws ParseConnectionDocumentException, SAXException,
 			IOException, ParserConfigurationException {
 		// validate the connections document against the xsd
 		validateConnectionsXML(connectionDocument);
@@ -217,6 +261,8 @@ class ConnectionDocumentParser {
 		if (msgClass != MessageClass.empty) {
 			nativeSchemaChecks(isProducer, streamSchema, nativeSchema);
 		}
+		// convert provider_url to absolute if needed
+		convertProviderURLPath(applicationDir);
 	}
 
 	// subroutine to validate the connections document against the xsd
