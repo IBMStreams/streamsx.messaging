@@ -122,7 +122,14 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 			String dataAttributeName = getDataAttributeName() == null ? IMqttConstants.MQTT_DEFAULT_DATA_ATTRIBUTE_NAME : getDataAttributeName();
 			
 			int dataAttrIndex = streamSchema.getAttributeIndex(dataAttributeName);
-			Type.MetaType dataAttributeType = streamSchema.getAttribute(dataAttributeName).getType().getMetaType();
+			
+			// if neither dataAttributeName is specified or schema attribute named "data" can be found
+			// then it is assumed this schema contains only a single attribute and it is the data attribute
+			if(dataAttrIndex == -1) {
+				dataAttrIndex = 0;
+			}
+			
+			Type.MetaType dataAttributeType = streamSchema.getAttribute(dataAttrIndex).getType().getMetaType();
 			
 			boolean isBlob = false;
 			if(dataAttributeType.equals(MetaType.BLOB))
@@ -381,17 +388,25 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 		
 		if (inputPorts.size() > 0)
 		{
-			// if user is not specifying dataAttributeName attribute, then we check if stream schema contains default data attribute
+			// if user is not specifying dataAttributeName attribute
+			// then we check if stream schema contains default data attribute
+			// or if schema contains only single attribute
 			if(!checker.getOperatorContext().getParameterNames().contains("dataAttributeName")) { //$NON-NLS-1$
 							
 				StreamingInput<Tuple> dataPort = inputPorts.get(0);
 			    StreamSchema streamSchema = dataPort.getStreamSchema();
-							
-			    Attribute data = streamSchema.getAttribute("data");
-							
+			    
+			    Attribute dataAttribute = null;
+			    if(streamSchema.getAttributeCount() == 1) {
+			    	dataAttribute = streamSchema.getAttribute(0);
+			    }
+			    else {
+			    	dataAttribute = streamSchema.getAttribute("data");
+			    }
+			    							
 			    // the default data attribute must be present and must be either BLOB or RSTRING
-			    if(data != null) {
-			    	checker.checkAttributeType(data, MetaType.RSTRING, MetaType.BLOB );
+			    if(dataAttribute != null) {
+			    	checker.checkAttributeType(dataAttribute, MetaType.RSTRING, MetaType.BLOB );
 			    }
 			    else {
 				    checker.setInvalidContext(Messages.getString("Error_MqttSinkOperator.5"), new Object[]{}); //$NON-NLS-1$
