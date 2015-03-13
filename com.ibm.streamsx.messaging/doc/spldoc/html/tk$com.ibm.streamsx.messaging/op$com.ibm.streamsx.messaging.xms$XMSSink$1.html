@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="Examples"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_page"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>Examples</title>
+</head>
+<body id="spldoc_page">
+
+
+<h1 class="title topictitle1">Examples</h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a> &gt; <a class="xref" href="op$com.ibm.streamsx.messaging.xms$XMSSink.html">XMSSink</a> &gt; Examples</p>
+
+</div>
+
+
+<div class="section">
+<p class="p">These examples demonstrate how to use the <tt class="ph tt">XMSSink</tt> operator.
+</p>
+
+<p class="p">This example demonstrates the use of multiple <tt class="ph tt">XMSSink</tt> operators with different parameter combinations and an optional error output port.
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+composite Main{
+graph
+stream &lt;int32 id, rstring fname, rstring lname&gt;
+MyPersonNamesStream=Beacon()
+{
+	param
+	iterations:10u;
+}
+//XMSSink Operator with connections.xml 
+//defaulted to ./etc/connections.xml
+() as MySink1=XMSSink(MyPersonNamesStream)
+{
+	param
+		connection: "wbe";
+		access: "OutTrading";
+}	
+
+//XMSSink Operator with the fully qualified 
+//name of connections.xml
+() as MySink2=XMSSink(MyPersonNamesStream)
+{
+	param
+		connectionDocument:"/home/streamsuser/connections/XMSconnections.xml";
+		connection: "wbe";
+		access: "OutTrading";
+}	
+
+//XMSSink Operator with optional 
+//output error port specified
+stream &lt;tuple&lt;int32 id, rstring fname, 
+rstring lname&gt;inTuple, rstring errorMessage&gt;
+MySink3 = XMSSink(MyPersonNamesStream)
+{
+	param
+		connection: "wbe";
+		access: "OutTrading";
+}
+//XMSSink Operator with reconnectionPolicy 
+//specified as NoRetry
+() as  MySink4 = XMSSink( MyPersonNamesStream ) 
+{
+	param
+		connection: "wbe";
+		access: "OutTrading";
+		reconnectionPolicy: NoRetry;
+}	
+
+//XMSSink Operator with optional period 
+//and reconnectionPolicy specified
+() as MySink5 = XMSSink( MyPersonNamesStream )
+{
+	param
+		connection: "wbe";
+		access: "OutTrading";
+		reconnectionPolicy: InfiniteRetry;
+		period: 1.20;
+}
+//XMSSink Operator with reconnectionPolicy 
+//specified as BoundedRetry
+() as MySink6 = XMSSink( MyPersonNamesStream )
+{
+	param
+		connection: "wbe";
+		access: "OutTrading";
+		reconnectionPolicy: BoundedRetry;
+		reconnectionBound: 2u;
+		period: 1.20;
+}
+}
+</pre>
+
+
+</div>
+
+<p class="p">The following is a sample <tt class="ph tt">connections.xml</tt> file:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+&lt;st:connections xmlns:st="http://www.ibm.com/xmlns/prod/streams/adapters"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+  &lt;connection_specifications&gt;
+    &lt;connection_specification name="wbe"&gt;
+      &lt;XMS initial_context="file:///opt/InitialContext/" 
+        connection_factory="TestConFac"  /&gt;
+	&lt;/connection_specification&gt;
+  &lt;/connection_specifications&gt;	
+
+  &lt;access_specifications&gt;
+    &lt;access_specification name="OutTrading"&gt;
+      &lt;destination identifier="TestDestination" 
+      delivery_mode="persistent" message_class="map" /&gt;
+      &lt;uses_connection connection="wbe"/&gt;
+      &lt;native_schema&gt;
+        &lt;attribute name="id" type="Int"/&gt;
+        &lt;attribute name="fname" type="String"/&gt;
+        &lt;attribute name="lname" type="String"/&gt;
+      &lt;/native_schema&gt;
+	&lt;/access_specification&gt;
+  &lt;/access_specifications&gt;
+&lt;/st:connections&gt;	
+</pre>
+
+
+</div>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

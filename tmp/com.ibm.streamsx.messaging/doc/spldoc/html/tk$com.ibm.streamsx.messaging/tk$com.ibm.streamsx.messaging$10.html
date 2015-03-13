@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="Uses_connection element"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_page"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>Uses_connection element</title>
+</head>
+<body id="spldoc_page">
+
+
+<h1 class="title topictitle1">Uses_connection element</h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$2.html">Connection specifications document</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$7.html">Access_specification element</a> &gt; Uses_connection element</p>
+
+</div>
+
+
+<div class="section">
+<p class="p">A &lt;uses_connection&gt; element identifies a connection specification that can be used with the access specification.
+</p>
+
+<p class="p">Here is an example of an abridged access specification that contains &lt;uses_connection&gt; elements:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+&lt;access_specification name="PersonSink"&gt;
+...
+  &lt;uses_connection connection="testSysten" /&gt;
+  &lt;uses_connection connection="productionSystem" /&gt;
+  ...
+&lt;/access_specification&gt;
+</pre>
+
+
+</div>
+
+<p class="p">The &lt;uses_connection&gt; element has a single attribute, connection, whose value is the name of a &lt;connection_specification&gt; element in the same connection specifications document. An &lt;access_specification&gt; element must have at least one &lt;uses_connection&gt; element.
+</p>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

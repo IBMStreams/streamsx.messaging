@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="JMS element"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_page"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>JMS element</title>
+</head>
+<body id="spldoc_page">
+
+
+<h1 class="title topictitle1">JMS element</h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$2.html">Connection specifications document</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$3.html">Connection_specification element</a> &gt; JMS element</p>
+
+</div>
+
+
+<div class="section">
+<p class="p">The &lt;JMS&gt; element specifies the information that is needed by the <tt class="ph tt">JMSSink</tt> and <tt class="ph tt">JMSSource</tt> operators to establish a connection to messaging system.
+</p>
+
+<p class="p">The following example shows connection specification that contains a &lt;JMS&gt; element:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+&lt;connection_specifications&gt;
+  &lt;connection_specification name="amqConn"&gt;
+    &lt;JMS initial_context="org.apache.activemq.jndi.ActiveMQInitialContextFactory"
+    provider_url = "tcp://machinename.com:61616"
+    connection_factory = "ConnectionFactory"/&gt;
+    user="user1"
+    password="password1"
+  &lt;/connection_specification&gt;
+&lt;/connection_specifications&gt;
+</pre>
+
+
+</div>
+
+<div class="p">The &lt;JMS&gt; element has the following attributes:
+<ul class="ul">
+<li class="li"> connection_factory
+<ul class="ul">
+<li class="li"> This mandatory attribute value is the name of the ConnectionFactory administered object.     This administered object is within the directory service context that is specified by the initial_context attribute,     and it is used to establish the connection. For applications that use Apache ActiveMQ,     you can use the default administered object called ConnectionFactory.</li>
+
+</ul>
+</li>
+
+<li class="li"> initial_context
+<ul class="ul">
+<li class="li"> This mandatory attribute represents the class name of the factory class that creates an initial context.     The following example shows the initial_context when the messaging provider is WebSphere MQ and it uses the <tt class="ph tt">.bindings</tt> file:      <tt class="ph tt">com.sun.jndi.fscontext.RefFSContextFactory</tt></li>
+
+<li class="li"> The following example shows the initial_context when the messaging provider is Apache ActiveMQ:      <tt class="ph tt">org.apache.activemq.jndi.ActiveMQInitialContextFactory</tt></li>
+
+</ul>
+</li>
+
+<li class="li"> password
+<ul class="ul">
+<li class="li"> The password attribute contains the authentication credentials (password) for the user ID. This attribute is optional.</li>
+
+</ul>
+</li>
+
+<li class="li"> provider_url
+<ul class="ul">
+<li class="li"> This mandatory attribute is a URL that points to the directory service that contains the administered objects     or the JNDI URL that stores the objects in the file system. The syntax of the URL varies based on the messaging provider.
+<ul class="ul">
+<li class="li"> <tt class="ph tt">file:///homes/abc/xyz/wef</tt>:        Use this format if your application sends data to or receive messages from a WebSphere MQ queue or topic.        This format specifies that the administered objects are stored in a file called <tt class="ph tt">.bindings</tt>,        which is in the <tt class="ph tt">/homes/abc/xyz/wef</tt> directory.</li>
+
+<li class="li"> <tt class="ph tt">tcp://machinename.com:61616</tt>:        Use this format if your application sends data to or receives messages from Apache ActiveMQ.</li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+<li class="li"> user
+<ul class="ul">
+<li class="li"> The value of the user attribute provides the user identification under which the connection to the messaging provider is attempted.     This attribute is optional.</li>
+
+</ul>
+</li>
+
+</ul>
+
+</div>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

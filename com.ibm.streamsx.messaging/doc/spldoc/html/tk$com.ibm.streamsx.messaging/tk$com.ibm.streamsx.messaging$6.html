@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="XMS element"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_page"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>XMS element</title>
+</head>
+<body id="spldoc_page">
+
+
+<h1 class="title topictitle1">XMS element</h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$2.html">Connection specifications document</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$3.html">Connection_specification element</a> &gt; XMS element</p>
+
+</div>
+
+
+<div class="section">
+<p class="p">The &lt;XMS&gt; element specifies the information that is needed by the <tt class="ph tt">XMSSink</tt> and <tt class="ph tt">XMSSource</tt> operators to establish a connection to messaging system.  The &lt;XMS&gt; element does not actually contain the information; rather, it references an XMS or JMS administered object, which is held in an external directory service.  The information about how to make the connection is held in this administered object.
+</p>
+
+<p class="p">Here is an example connection specification that contains an &lt;XMS&gt; element:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+&lt;connection_specification name="wbe"&gt;
+  &lt;XMS initial_context="file:///opt/InitialContext/" 
+    connection_factory="TestConFac" 
+    user="user1"
+    password="password1" /&gt;
+&lt;/connection_specification&gt;
+</pre>
+
+
+</div>
+
+<div class="p">The &lt;XMS&gt; element has four attributes:
+<ul class="ul">
+<li class="li"> initial_context
+<ul class="ul">
+<li class="li"> This mandatory attribute value is a URL that points to the directory service that contains the administered objects.     It uses the reference JNDI implementation, which stores objects in the file system.     The syntax of the URL can take two forms:
+<ul class="ul">
+<li class="li"> <tt class="ph tt">file:///xxx/yyy/zzz</tt>:       This format specifies that the JNDI objects are stored in a file that is called <tt class="ph tt">zzz</tt>, which is in the directory <tt class="ph tt">xxx/yyy</tt>.</li>
+
+<li class="li"> <tt class="ph tt">file:///xxx/yyy/</tt>:       This format specifies that the JNDI objects are stored in a file that is called <tt class="ph tt">.bindings</tt>, which is in the directory <tt class="ph tt">xxx/yyy</tt>.       By default, the MQExplorer tool puts its entries in a file called <tt class="ph tt">.bindings</tt>.</li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+<li class="li"> connection_factory
+<ul class="ul">
+<li class="li"> This mandatory attribute value is the name of the ConnectionFactory administered object.     In particular, it is the administered object within the directory service context that is specified by the initial_context attribute,     and it is used to make the connection.</li>
+
+</ul>
+</li>
+
+<li class="li"> user
+<ul class="ul">
+<li class="li"> This optional attribute value provides the user identification that is used to connect to the messaging provider.      If this attribute is not specified, a NULL value is used for the corresponding parameter in the XMS <tt class="ph tt">connect()</tt> function call.</li>
+
+</ul>
+</li>
+
+<li class="li"> password
+<ul class="ul">
+<li class="li"> This optional attribute value provides the authentication credentials (password) for the user ID.     If this attribute is not specified, a NULL value is used for the corresponding parameter in the XMS <tt class="ph tt">connect()</tt> function call.</li>
+
+</ul>
+</li>
+
+</ul>
+
+</div>
+
+</div>
+
+</div>
+
+
+</body>
+</html>
