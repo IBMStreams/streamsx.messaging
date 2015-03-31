@@ -14,8 +14,8 @@
 			<url>http://repository.apache.org/content/repositories/snapshots/</url>
 		</repository>
 		<repository>
-			<id>Eclipse Paho Repo snapshots</id>
-			<url>https://repo.eclipse.org/content/repositories/paho-snapshots</url>
+			<id>Eclipse Paho Repo releases</id>
+			<url>https://repo.eclipse.org/content/repositories/paho-releases</url>
 		</repository>
 	</repositories>
 	<properties>
@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>org.eclipse.paho</groupId>
 			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>1.0.1</version>
 		</dependency>
 	</dependencies>
 	<build>
