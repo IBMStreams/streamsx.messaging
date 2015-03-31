@@ -184,13 +184,13 @@ MY_OPERATOR::MY_OPERATOR(): nMessagesReadPC( getContext().getMetrics().getCustom
     
     # support relative binding file path.
     if(!defined ($ic) || $ic eq '') {
-        SPL::CodeGen::exitln("A value must be specified for provider_url attribute in connection document.");
+        SPL::CodeGen::exitln("A value must be specified for initial_context attribute in connection document.");
     }
 
     my $url = new URI($ic);
     
     if($url->scheme eq '') {
-        SPL::CodeGen::exitln("Invalid provider_url format detected.");
+        SPL::CodeGen::exitln("Invalid initial_context format detected.");
     }
 
     if($url->scheme eq 'file') {
