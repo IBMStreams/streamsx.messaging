@@ -172,17 +172,27 @@ MY_OPERATOR::MY_OPERATOR() : nTruncatedInserts(0),nTruncatedInsertsPC( getContex
     use URI;
     
     # support relative binding file path.
-    if(defined ($ic) && $ic ne '') {
-        my $url = new URI($ic);
-        if($url->scheme eq 'file' || $url->scheme eq '') {
-            $ic = $url->path;
-            if(substr($ic,-1)  eq '/') {
-               $ic .= '.bindings';
-            }
-        }
+    if(!defined ($ic) || $ic eq '') {
+        SPL::CodeGen::exitln("A value must be specified for provider_url attribute in connection document.");
     }
-    else {
-        $ic = './etc/.bindings';
+
+    my $url = new URI($ic);
+    
+    if($url->scheme eq '') {
+        SPL::CodeGen::exitln("Invalid provider_url format detected.");
+    }
+
+    if($url->scheme eq 'file') {
+        my $path = $url->path;
+        
+        # This is a relative path
+        if(substr($path, 0, 1) ne '/') {
+            $ic = $path;
+        }
+        # if it ends with a / then append .bindings
+        if(substr($ic,-1) eq '/') {
+            $ic .= '.bindings';
+        }
     }
     
   	# Append .bindings to the URL, if it is a file based one that refers to a directory. The XMS client requires this
@@ -191,12 +201,12 @@ MY_OPERATOR::MY_OPERATOR() : nTruncatedInserts(0),nTruncatedInsertsPC( getContex
     #   	$ic .= '.bindings';                      	
     #	}
     #
-  	#%>
+  	%>
   	
   	std::string initContext = "<%=$ic %>";
   	
-  	// binding file path does not have scheme specified indicating this is a file path
-  	if(initContext.find("://") == std::string::npos) {
+  	// process relative file path
+  	if(initContext.find("file:") == std::string::npos) {
   	    streams_boost::filesystem::path filePath(initContext);
   	
   	    if(filePath.is_relative()) {

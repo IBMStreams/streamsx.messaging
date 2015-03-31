@@ -199,41 +199,34 @@ class ConnectionDocumentParser {
 	// Convert relative provider url path to absolute path for wmq only.
 	// non-absolute path should be relative to application directory.
 	// i.e file:./etc/ will be converted to applicationDir + ./etc/
-	// If provider_url string is not provided
 	private void convertProviderURLPath(File applicationDir) throws ParseConnectionDocumentException {
 		
 	   if(!isAMQ()) {
 		   
-		   // default case when provider_url is not specified or left empty
+		   // provider_url can not be empty
 		   if(this.providerURL == null || this.providerURL.trim().length() == 0) { 
-			   this.providerURL = "file://" + applicationDir + "/etc/";
+			   throw new ParseConnectionDocumentException("A value must be specified for provider_url attribute in connection document");
 		   }
-		   else { // provider_url has a value specified
-			   // provider_url starts with file protocol.
-			   if(this.providerURL.startsWith("file")){
-				   try {
-					  URL url = new URL(providerURL);
-				      String path = url.getPath();
-				      
-				      if(!path.startsWith("/")) {
-				          URL absProviderURL = new URL(url.getProtocol(), url.getHost(), applicationDir + File.separator + path);
-				    	  this.providerURL = absProviderURL.toString();
+		   
+		   // provider_url has a value specified
+		   try {
+		       URL url = new URL(providerURL);
+		       
+		       // We only care about url with file scheme.
+		       if("file".equalsIgnoreCase(url.getProtocol())) {
+		    	   String path = url.getPath();
+		    	   
+		    	   // relative path is considered being relative to the application directory
+		    	   if(!path.startsWith("/")) {
+				          URL absProviderURL = new URL(url.getProtocol(), url.getHost(), applicationDir.getAbsolutePath() + File.separator + path);
+				    	  this.providerURL = absProviderURL.toExternalForm();
 				      }
-				   } catch (MalformedURLException e) {
-					   throw new ParseConnectionDocumentException(e.getMessage());
-				   }
-			   }
-			   else { // no file protocol specified, convert it to absolute and prefix file protocol
-				   // it is a absolute path
-				   if(this.providerURL.startsWith("/")) {
-					   this.providerURL = "file://" + this.providerURL;
-				   }
-				   else { // relative path is specified
-					   this.providerURL = "file://" + applicationDir + File.separator + this.providerURL;
-				   }
-				   
-			   }
+		       }
+		       
+		   } catch (MalformedURLException e) {
+			   throw new ParseConnectionDocumentException("Invalid provider_url value detected: " + e.getMessage());
 		   }
+		   
 	   }
 	}
 
