@@ -681,7 +681,7 @@ The &lt;attribute&gt; element has three possible attributes:
      * xml
 </info:description>
     <info:version>2.0.0</info:version>
-    <info:requiredProductVersion>3.2.2</info:requiredProductVersion>
+    <info:requiredProductVersion>4.0.0.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>
   <info:resources>
