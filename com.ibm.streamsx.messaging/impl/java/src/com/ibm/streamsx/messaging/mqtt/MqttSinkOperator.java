@@ -32,6 +32,7 @@ import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.Type;
 import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
+import com.ibm.streams.operator.log4j.LoggerNames;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.Icons;
 import com.ibm.streams.operator.model.InputPortSet;
@@ -80,7 +81,9 @@ description=SPLDocConstants.MQTTSINK_OP_DESCRIPTION)
 @Icons(location16="icons/MQTTSink_16.gif", location32="icons/MQTTSink_32.gif")
 public class MqttSinkOperator extends AbstractMqttOperator implements StateHandler{
 	 
+	private static final String CLASS_NAME = "com.ibm.streamsx.messaging.mqtt.MqttSinkOperator";
 	static Logger TRACE = Logger.getLogger(MqttSinkOperator.class);
+	static Logger LOGGER = Logger.getLogger(LoggerNames.LOG_FACILITY + "." + CLASS_NAME);
 	
 	// Parameters
 	private String topic;
@@ -318,7 +321,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 			
 			// if there is a control port, a warning message is issued as control port is not supported in a consistent region
 			if(inputPorts.size() > 1) {
-				TRACE.warn("Having a control port in a consistent region is not supported. The control information may not be replayed, persisted and restored correctly.  You may need to manually replay the control signals to bring the operator back to a consistent state.");
+				LOGGER.warn("Having a control port in a consistent region is not supported. The control information may not be replayed, persisted and restored correctly.  You may need to manually replay the control signals to bring the operator back to a consistent state.");
 			}
 			
 			if(cContext.isStartOfRegion()) {
