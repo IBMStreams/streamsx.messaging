@@ -395,7 +395,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		ConnectionDocumentParser connectionDocumentParser = new ConnectionDocumentParser();
 
 		connectionDocumentParser.parseAndValidateConnectionDocument(
-				getConnectionDocument(), connection, access, streamSchema, true);
+				getConnectionDocument(), connection, access, streamSchema, true, context.getPE().getApplicationDirectory());
 
 		// codepage parameter can come only if message class is bytes
 		// Since the message class is extracted runtime during the parsing of
