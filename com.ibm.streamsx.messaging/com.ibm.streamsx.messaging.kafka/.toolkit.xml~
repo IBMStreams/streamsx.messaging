@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<toolkitModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/toolkit" productVersion="4.0.1.0" xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:ti="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <toolkit name="com.ibm.streamsx.messaging.kafka" requiredProductVersion="2.0" version="1.0.0">
+    <description>Toolkit Description</description>
+    <uriTable>
+      <uri index="2" value="KafkaProducer/KafkaProducer_16.gif"/>
+      <uri index="5" value="KafkaConsumer/KafkaConsumer_16.gif"/>
+      <uri index="4" value="KafkaConsumer"/>
+      <uri index="6" value="KafkaConsumer/KafkaConsumer_32.gif"/>
+      <uri index="1" value="KafkaProducer"/>
+      <uri index="7" value="NewKafkaConsumer"/>
+      <uri index="3" value="KafkaProducer/KafkaProducer_32.gif"/>
+    </uriTable>
+    <namespace name="">
+      <primitiveOp language="Java" modelUriIndex="1" name="KafkaProducer" public="true">
+        <description>This operator acts as a Kafka producer sending tuples as mesages to a Kafka broker. The broker is assumed to be already configured and running. The incoming stream can have three attributes: topic, key and message. The message is a required attribute. If the key attribute is not specified, the message is used as the key. A topic can be specified as either an input stream attribute or as a parameter.
+
+**Behavior in a Consistent Region**
+This operator can participate in a consistent region.  This operator cannot be placed at the start of a consistent region.</description>
+        <images>
+          <image size="16" uriIndex="2"/>
+          <image size="32" uriIndex="3"/>
+        </images>
+        <parameter expressionMode="Constant" name="vmArg" optional="true" type="rstring">
+          <description>Command line options passed to the Java Virtual Machine at startup</description>
+        </parameter>
+        <parameter cardinality="-1" expressionMode="AttributeFree" name="kafkaProperty" optional="true" type="rstring">
+          <description>Specify a Kafka property "key=value" form. This will override any property specified in the properties file.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="keyAttribute" optional="true" type="rstring">
+          <description>Name of the attribute for the key. Default is "key"</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="messageAttribute" optional="true" type="rstring">
+          <description>Name of the attribute for the message. This attribute is required. Default is "message"</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="propertiesFile" optional="true" type="rstring">
+          <description>Properties file containing kafka properties.  Properties file is recommended to be stored in the etc directory.  If a relative path is specified, the path is relative to the application directory.</description>
+        </parameter>
+        <parameter cardinality="-1" expressionMode="AttributeFree" name="topic" optional="true" type="rstring">
+          <description>Topic to be published to. A topic can also be specified as an input stream attribute.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="topicAttribute" optional="true" type="rstring">
+          <description>Name of the attribute for the topic. Default is "topic"</description>
+        </parameter>
+        <inputPort maxNumPorts="1" minNumPorts="1" optional="false" windowPunctInputMode="Oblivious">
+          <description>The tuples arriving on this port are expected to contain three attributes "key", "topic" and "message". Out of these "message", is a required attribute.</description>
+          <windowPolicy>NonWindowed</windowPolicy>
+        </inputPort>
+      </primitiveOp>
+      <primitiveOp language="Java" modelUriIndex="4" name="KafkaConsumer" public="true">
+        <description>This operator acts as a Kafka consumer receiving messages for one or more topics. Note that there may be multiple threads receiving messages depending on the configuration specified. Ordering of messages is not guaranteed.
+
+**Behavior in a Consistent Region**
+This operator cannot be used inside a consistent region.</description>
+        <images>
+          <image size="16" uriIndex="5"/>
+          <image size="32" uriIndex="6"/>
+        </images>
+        <parameter expressionMode="Constant" name="vmArg" optional="true" type="rstring">
+          <description>Command line options passed to the Java Virtual Machine at startup</description>
+        </parameter>
+        <parameter cardinality="-1" expressionMode="AttributeFree" name="kafkaProperty" optional="true" type="rstring">
+          <description>Specify a Kafka property "key=value" form. This will override any property specified in the properties file.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="keyAttribute" optional="true" type="rstring">
+          <description>Name of the attribute for the key. Default is "key"</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="messageAttribute" optional="true" type="rstring">
+          <description>Name of the attribute for the message. This attribute is required. Default is "message"</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="propertiesFile" optional="true" type="rstring">
+          <description>Properties file containing kafka properties.  Properties file is recommended to be stored in the etc directory.  If a relative path is specified, the path is relative to the application directory.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="threadsPerTopic" optional="true" type="int32">
+          <description>Number of threads per topic. Default is 1.</description>
+        </parameter>
+        <parameter cardinality="-1" expressionMode="AttributeFree" name="topic" optional="false" type="rstring">
+          <description>Topic to be subscribed to.</description>
+        </parameter>
+        <outputPort expressionMode="Nonexistent" maxNumPorts="1" minNumPorts="1" optional="false" windowPunctOutputMode="Free">
+          <description>Messages received from Kafka are sent on this output port.</description>
+        </outputPort>
+      </primitiveOp>
+      <primitiveOp language="Java" modelUriIndex="7" name="NewKafkaConsumer" public="true">
+        <description>Java Operator NewKafkaConsumer</description>
+        <parameter expressionMode="Constant" name="vmArg" optional="true" type="rstring">
+          <description>Command line options passed to the Java Virtual Machine at startup</description>
+        </parameter>
+        <parameter cardinality="-1" expressionMode="AttributeFree" name="kafkaProperty" optional="true" type="rstring">
+          <description>Specify a Kafka property "key=value" form. This will override any property specified in the properties file.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="keyAttribute" optional="true" type="rstring">
+          <description>Name of the attribute for the key. Default is "key"</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="messageAttribute" optional="true" type="rstring">
+          <description>Name of the attribute for the message. This attribute is required. Default is "message"</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="propertiesFile" optional="true" type="rstring">
+          <description>Properties file containing kafka properties.  Properties file is recommended to be stored in the etc directory.  If a relative path is specified, the path is relative to the application directory.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="threadsPerTopic" optional="true" type="int32">
+          <description>Number of threads per topic. Default is 1.</description>
+        </parameter>
+        <parameter cardinality="-1" expressionMode="AttributeFree" name="topic" optional="false" type="rstring">
+          <description>Topic to be subscribed to.</description>
+        </parameter>
+        <outputPort expressionMode="Nonexistent" maxNumPorts="1" minNumPorts="1" optional="false" windowPunctOutputMode="Generating">
+          <description>Port that produces tuples</description>
+        </outputPort>
+        <outputPort expressionMode="Nonexistent" minNumPorts="0" optional="true" windowPunctOutputMode="Generating">
+          <description>Optional output ports</description>
+        </outputPort>
+      </primitiveOp>
+    </namespace>
+    <sabFiles>
+      <ti:include path="toolkit.xml" root="toolkitDir"/>
+      <ti:include path="impl/java/lib/**" root="toolkitDir"/>
+      <ti:include path="impl/java/bin/**" root="toolkitDir"/>
+      <ti:include path="impl/bin/**" root="toolkitDir"/>
+      <ti:include path="impl/lib/**" root="toolkitDir"/>
+      <ti:include path="impl/nl/*.dat" root="toolkitDir"/>
+      <ti:include path="etc/**" root="toolkitDir"/>
+      <ti:include path="lib/**" root="toolkitDir"/>
+      <ti:include path="nl/**" root="toolkitDir"/>
+      <ti:include path="opt/**" root="toolkitDir"/>
+    </sabFiles>
+  </toolkit>
+
+</toolkitModel>

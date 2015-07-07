@@ -1,5 +1,4 @@
 /output
-com.ibm.streamsx.messaging.kafka
 impl/lib
 opt/downloaded
 /target
