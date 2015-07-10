@@ -1,5 +1,6 @@
 /output
 impl/lib
+com.ibm.streamsx.messaging.kafka
 opt/downloaded
 /target
 /.externalToolBuilders
