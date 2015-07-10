@@ -41,6 +41,29 @@ public class SimpleConsumerClient implements StateHandler {
 
 	private static Logger TRACE = Logger.getLogger(SimpleConsumerClient.class
 			.getCanonicalName());
+	public static long getLastOffset(SimpleConsumer consumer, String topic,
+			int partition, long whichTime, String clientName) {
+		TopicAndPartition topicAndPartition = new TopicAndPartition(topic,
+				partition);
+		Map<TopicAndPartition, PartitionOffsetRequestInfo> requestInfo = new HashMap<TopicAndPartition, PartitionOffsetRequestInfo>();
+		requestInfo.put(topicAndPartition, new PartitionOffsetRequestInfo(
+				whichTime, 1));
+		kafka.javaapi.OffsetRequest request = new kafka.javaapi.OffsetRequest(
+				requestInfo, kafka.api.OffsetRequest.CurrentVersion(),
+				clientName);
+		OffsetResponse response = consumer.getOffsetsBefore(request);
+
+		if (response.hasError()) {
+			TRACE.log(TraceLevel.ERROR,
+					"Error fetching data Offset Data the Broker. Reason: "
+							+ response.errorCode(topic, partition));
+			return 0;
+		}
+		long[] offsets = response.offsets(topic, partition);
+		TRACE.log(TraceLevel.TRACE,
+				"Retrieving offsets: " + Arrays.toString(offsets));
+		return offsets[0];
+	}
 	private Thread processThread;
 	static final String OPER_NAME = "KafkaConsumer";
 	private ConsistentRegionContext crContext;
@@ -50,14 +73,15 @@ public class SimpleConsumerClient implements StateHandler {
 	private OperatorContext operContext;
 	// consumer variables
 	public SimpleConsumer myConsumer = null;
-	ZkClient zkClient;
-	String topic;
-	Broker leadBroker;
-	long readOffset;
-	long resetReadOffset = -1;
-	int partition;
-	int so_timeout;
-	String clientName;
+	private ZkClient zkClient;
+	private String topic;
+	private Broker leadBroker;
+	private long readOffset;
+	private long resetReadOffset = -1;
+	private int partition;
+	private int so_timeout;
+	private String clientName;
+
 	protected Properties finalProperties = new Properties();
 
 	public SimpleConsumerClient(String a_topic, int a_partition,
@@ -69,6 +93,170 @@ public class SimpleConsumerClient implements StateHandler {
 		this.partition = a_partition;
 		this.finalProperties = props;
 		this.triggerCount = trigCnt;
+	}
+
+	/**
+	 * Notification that initialization is complete and all input and output
+	 * ports are connected and ready to receive and submit tuples.
+	 * 
+	 * @throws Exception
+	 *             Operator failure, will cause the enclosing PE to terminate.
+	 */
+	public synchronized void allPortsReady() throws Exception {
+		Logger.getLogger(this.getClass()).trace(
+				"Operator " + operContext.getName()
+						+ " all ports are ready in PE: "
+						+ operContext.getPE().getPEId() + " in Job: "
+						+ operContext.getPE().getJobId());
+		// Start a thread for producing tuples because operator
+		// implementations must not block and must return control to the caller.
+		processThread.start();
+	}
+
+	@Override
+	public void checkpoint(Checkpoint checkpoint) throws Exception {
+		// System.out.println("Checkpoint readOffset " + readOffset);
+		TRACE.log(TraceLevel.INFO, "Checkpoint " + checkpoint.getSequenceId());
+		checkpoint.getOutputStream().writeLong(readOffset);
+	}
+
+	@Override
+	public void close() throws IOException {
+		TRACE.log(TraceLevel.INFO, "StateHandler close");
+	}
+
+	@Override
+	public void drain() throws Exception {
+		// System.out.println("Drain...");
+		TRACE.log(TraceLevel.INFO, "Drain...");
+	}
+
+	private Broker findLeader(ZkClient a_zkClient, String a_topic,
+			int a_partition) {
+		int leaderID;
+		Broker a_leadBroker = null;
+
+		try {
+
+			leaderID = ZkUtils.getLeaderForPartition(zkClient, a_topic,
+					a_partition).get();
+			a_leadBroker = ZkUtils.getBrokerInfo(zkClient, leaderID).get();
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			System.out.println("Exception from ZkClient!");
+
+		}
+
+		return a_leadBroker;
+	}
+
+	private Broker findNewLeader(Broker oldBroker, ZkClient a_zkClient,
+			String a_topic, int a_partition) {
+
+		for (int i = 0; i < 3; i++) {
+			boolean goSleep = false;
+			Broker newLeadBroker = findLeader(a_zkClient, a_topic, a_partition);
+
+			if (newLeadBroker == null) {
+				goSleep = true;
+			} else if (newLeadBroker.host().equalsIgnoreCase(oldBroker.host())
+					&& i == 0) {
+				// if it's the first time, let's give zookeeper a chance to
+				// recover.
+				goSleep = true;
+			} else {
+				return newLeadBroker;
+			}
+
+			if (goSleep) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException ie) {
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private ZkClient getInitializedZkClient() {
+		ZkClient localZkClient;
+		String zkConnect = finalProperties.getProperty("zookeeper.connect");
+		int zkSessionTimeout = getIntegerProperty(
+				"zookeeper.session.timeout.ms", 400);
+		int zkConnectionTimeout = getIntegerProperty("zookeeper.sync.time.ms",
+				200);
+
+		TRACE.log(TraceLevel.INFO,
+				"Initializing ZooKeeper with values: zkConnect(" + zkConnect
+						+ ") zkSessionTimeout(" + zkSessionTimeout
+						+ ") zkConnectionTimeout(" + zkConnectionTimeout + ")");
+		
+		try {
+			localZkClient = new ZkClient(zkConnect, zkSessionTimeout,
+					zkConnectionTimeout, ZKStringSerializer$.MODULE$);
+		} catch (Exception e) {
+			TRACE.log(TraceLevel.ERROR,
+					"Zookeeper client did not initialize correctly with exception: "
+							+ e);
+			throw e;
+		}
+
+		return localZkClient;
+	}
+
+	private int getIntegerProperty(String propName, int defaultVal) {
+		int integerProp = defaultVal;
+		try { 
+			integerProp = Integer.parseInt(finalProperties
+				.getProperty(propName));
+		} catch (Exception e){
+			e.printStackTrace();
+			TRACE.log(TraceLevel.ERROR, "Property " + propName + " was not input as type int. Exception: " + e);
+		}
+		
+		return integerProp;
+	}
+
+	private String getKeyFromMessageAndOffset(MessageAndOffset messageAndOffset) throws UnsupportedEncodingException {
+		ByteBuffer keyPayload = messageAndOffset.message()
+				.key();
+		byte[] keyBytes = new byte[keyPayload.limit()];
+		keyPayload.get(keyBytes);
+		String key = new String(keyBytes, "UTF-8");
+		return key;
+	}
+
+	private String getMessageFromMessageAndOffset(
+			MessageAndOffset messageAndOffset) throws UnsupportedEncodingException {
+		
+		ByteBuffer messagePayload = messageAndOffset.message()
+				.payload();
+		
+		byte[] messageBytes = new byte[messagePayload.limit()];
+		messagePayload.get(messageBytes);
+		String message = new String(messageBytes, "UTF-8");
+		return message;
+	}
+
+	private void handleFetchError(FetchResponse fetchResponse) {
+		short code = fetchResponse.errorCode(topic, partition);
+		TRACE.log(
+				TraceLevel.ERROR,
+				"Error fetching data from the Broker:"
+						+ leadBroker.host() + " Reason: " + code);
+
+		if (code == ErrorMapping.OffsetOutOfRangeCode()) {
+			// We asked for an invalid offset. This should never
+			// happen.
+			TRACE.log(TraceLevel.ERROR,
+					"Tried to request an invalid offset. Exiting.");
+		}
+		myConsumer.close();
+		myConsumer = null;
+		leadBroker = findLeader(zkClient, topic, partition);
 	}
 
 	public void initialize(OperatorContext context) throws Exception {
@@ -136,24 +324,6 @@ public class SimpleConsumerClient implements StateHandler {
 	}
 
 	/**
-	 * Notification that initialization is complete and all input and output
-	 * ports are connected and ready to receive and submit tuples.
-	 * 
-	 * @throws Exception
-	 *             Operator failure, will cause the enclosing PE to terminate.
-	 */
-	public synchronized void allPortsReady() throws Exception {
-		Logger.getLogger(this.getClass()).trace(
-				"Operator " + operContext.getName()
-						+ " all ports are ready in PE: "
-						+ operContext.getPE().getPEId() + " in Job: "
-						+ operContext.getPE().getJobId());
-		// Start a thread for producing tuples because operator
-		// implementations must not block and must return control to the caller.
-		processThread.start();
-	}
-
-	/**
 	 * Submit new tuples to the output stream
 	 * 
 	 * @throws Exception
@@ -171,7 +341,7 @@ public class SimpleConsumerClient implements StateHandler {
 			TRACE.log(
 					TraceLevel.TRACE,
 					"Iteration through the while loop. ReadOffset: "
-							+ Long.toString(readOffset));
+							+ readOffset);
 
 			if (myConsumer == null) {
 				myConsumer = new SimpleConsumer(leadBroker.host(),
@@ -274,43 +444,26 @@ public class SimpleConsumerClient implements StateHandler {
 			myConsumer.close();
 	}
 
-	private String getKeyFromMessageAndOffset(MessageAndOffset messageAndOffset) throws UnsupportedEncodingException {
-		ByteBuffer keyPayload = messageAndOffset.message()
-				.key();
-		byte[] keyBytes = new byte[keyPayload.limit()];
-		keyPayload.get(keyBytes);
-		String key = new String(keyBytes, "UTF-8");
-		return key;
+	@Override
+	public void reset(Checkpoint checkpoint) throws Exception {
+		// System.out.println("Reset");
+		TRACE.log(TraceLevel.INFO,
+				"Reset to checkpoint " + checkpoint.getSequenceId());
+		resetReadOffset = checkpoint.getInputStream().readLong();
+
+		// System.out.println("Set readOffset to : " + readOffset);
 	}
 
-	private String getMessageFromMessageAndOffset(
-			MessageAndOffset messageAndOffset) throws UnsupportedEncodingException {
-		
-		ByteBuffer messagePayload = messageAndOffset.message()
-				.payload();
-		
-		byte[] messageBytes = new byte[messagePayload.limit()];
-		messagePayload.get(messageBytes);
-		String message = new String(messageBytes, "UTF-8");
-		return message;
+	@Override
+	public void resetToInitialState() throws Exception {
+		// System.out.println("ResetToInitial");
+		TRACE.log(TraceLevel.INFO, "Reset to initial state");
 	}
 
-	private void handleFetchError(FetchResponse fetchResponse) {
-		short code = fetchResponse.errorCode(topic, partition);
-		TRACE.log(
-				TraceLevel.ERROR,
-				"Error fetching data from the Broker:"
-						+ leadBroker.host() + " Reason: " + code);
-
-		if (code == ErrorMapping.OffsetOutOfRangeCode()) {
-			// We asked for an invalid offset. This should never
-			// happen.
-			TRACE.log(TraceLevel.ERROR,
-					"Tried to request an invalid offset. Exiting.");
-		}
-		myConsumer.close();
-		myConsumer = null;
-		leadBroker = findLeader(zkClient, topic, partition);
+	@Override
+	public void retireCheckpoint(long id) throws Exception {
+		// System.out.println("Retire checkpoint");
+		TRACE.log(TraceLevel.INFO, "Retire checkpoint");
 	}
 
 	/**
@@ -334,159 +487,6 @@ public class SimpleConsumerClient implements StateHandler {
 
 		// Must call super.shutdown()
 		// super.shutdown();
-	}
-
-	@Override
-	public void close() throws IOException {
-		TRACE.log(TraceLevel.INFO, "StateHandler close");
-	}
-
-	@Override
-	public void checkpoint(Checkpoint checkpoint) throws Exception {
-		// System.out.println("Checkpoint readOffset " + readOffset);
-		TRACE.log(TraceLevel.INFO, "Checkpoint " + checkpoint.getSequenceId());
-		checkpoint.getOutputStream().writeLong(readOffset);
-	}
-
-	@Override
-	public void drain() throws Exception {
-		// System.out.println("Drain...");
-		TRACE.log(TraceLevel.INFO, "Drain...");
-	}
-
-	@Override
-	public void reset(Checkpoint checkpoint) throws Exception {
-		// System.out.println("Reset");
-		TRACE.log(TraceLevel.INFO,
-				"Reset to checkpoint " + checkpoint.getSequenceId());
-		resetReadOffset = checkpoint.getInputStream().readLong();
-
-		// System.out.println("Set readOffset to : " + readOffset);
-	}
-
-	@Override
-	public void resetToInitialState() throws Exception {
-		// System.out.println("ResetToInitial");
-		TRACE.log(TraceLevel.INFO, "Reset to initial state");
-	}
-
-	@Override
-	public void retireCheckpoint(long id) throws Exception {
-		// System.out.println("Retire checkpoint");
-		TRACE.log(TraceLevel.INFO, "Retire checkpoint");
-	}
-
-	private ZkClient getInitializedZkClient() {
-		ZkClient localZkClient;
-		String zkConnect = finalProperties.getProperty("zookeeper.connect");
-		int zkSessionTimeout = getIntegerProperty(
-				"zookeeper.session.timeout.ms", 400);
-		int zkConnectionTimeout = getIntegerProperty("zookeeper.sync.time.ms",
-				200);
-
-		TRACE.log(TraceLevel.INFO,
-				"Initializing ZooKeeper with values: zkConnect(" + zkConnect
-						+ ") zkSessionTimeout(" + zkSessionTimeout
-						+ ") zkConnectionTimeout(" + zkConnectionTimeout + ")");
-		
-		try {
-			localZkClient = new ZkClient(zkConnect, zkSessionTimeout,
-					zkConnectionTimeout, ZKStringSerializer$.MODULE$);
-		} catch (Exception e) {
-			TRACE.log(TraceLevel.ERROR,
-					"Zookeeper client did not initialize correctly with exception: "
-							+ e);
-			throw e;
-		}
-
-		return localZkClient;
-	}
-
-	private int getIntegerProperty(String propName, int defaultVal) {
-		int integerProp = defaultVal;
-		try { 
-			integerProp = Integer.parseInt(finalProperties
-				.getProperty(propName));
-		} catch (Exception e){
-			e.printStackTrace();
-			TRACE.log(TraceLevel.ERROR, "Property " + propName + "was not input as type int. Exception: " + e);
-		}
-		
-		return integerProp;
-	}
-
-	private Broker findLeader(ZkClient a_zkClient, String a_topic,
-			int a_partition) {
-		int leaderID;
-		Broker a_leadBroker = null;
-
-		try {
-
-			leaderID = ZkUtils.getLeaderForPartition(zkClient, a_topic,
-					a_partition).get();
-			a_leadBroker = ZkUtils.getBrokerInfo(zkClient, leaderID).get();
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-			System.out.println("Exception from ZkClient!");
-
-		}
-
-		return a_leadBroker;
-	}
-
-	private Broker findNewLeader(Broker oldBroker, ZkClient a_zkClient,
-			String a_topic, int a_partition) {
-
-		for (int i = 0; i < 3; i++) {
-			boolean goSleep = false;
-			Broker newLeadBroker = findLeader(a_zkClient, a_topic, a_partition);
-
-			if (newLeadBroker == null) {
-				goSleep = true;
-			} else if (newLeadBroker.host().equalsIgnoreCase(oldBroker.host())
-					&& i == 0) {
-				// if it's the first time, let's give zookeeper a chance to
-				// recover.
-				goSleep = true;
-			} else {
-				return newLeadBroker;
-			}
-
-			if (goSleep) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException ie) {
-				}
-			}
-		}
-
-		return null;
-	}
-
-	public static long getLastOffset(SimpleConsumer consumer, String topic,
-			int partition, long whichTime, String clientName) {
-		TopicAndPartition topicAndPartition = new TopicAndPartition(topic,
-				partition);
-		Map<TopicAndPartition, PartitionOffsetRequestInfo> requestInfo = new HashMap<TopicAndPartition, PartitionOffsetRequestInfo>();
-		requestInfo.put(topicAndPartition, new PartitionOffsetRequestInfo(
-				whichTime, 1));
-		kafka.javaapi.OffsetRequest request = new kafka.javaapi.OffsetRequest(
-				requestInfo, kafka.api.OffsetRequest.CurrentVersion(),
-				clientName);
-		OffsetResponse response = consumer.getOffsetsBefore(request);
-
-		if (response.hasError()) {
-			TRACE.log(TraceLevel.ERROR,
-					"Error fetching data Offset Data the Broker. Reason: "
-							+ response.errorCode(topic, partition));
-			return 0;
-		}
-		long[] offsets = response.offsets(topic, partition);
-		TRACE.log(TraceLevel.TRACE,
-				"Retrieving offsets: " + Arrays.toString(offsets));
-		return offsets[0];
 	}
 
 }
