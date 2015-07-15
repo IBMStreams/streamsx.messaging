@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Logger;
 
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.naming.NamingException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,10 +29,12 @@ import com.ibm.streams.operator.metrics.Metric;
 import com.ibm.streams.operator.model.CustomMetric;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.samples.patterns.ProcessTupleProducer;
+import com.ibm.streams.operator.state.Checkpoint;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
+import com.ibm.streams.operator.state.StateHandler;
 
 //The JMSSource operator converts a message JMS queue or topic to stream
-public class JMSSource extends ProcessTupleProducer {	
+public class JMSSource extends ProcessTupleProducer implements StateHandler{	
 
 	private static final String CLASS_NAME = "com.ibm.streamsx.messaging.jms.JMSSource";
 
@@ -71,6 +74,9 @@ public class JMSSource extends ProcessTupleProducer {
 	// MQ
 	// set to true for Apache Active MQ.
 	private boolean isAMQ;
+	
+	// consistent region context
+    private ConsistentRegionContext consistentRegionContext;
 
 	// Variables to hold performance metrices for JMSSource
 
@@ -82,6 +88,9 @@ public class JMSSource extends ProcessTupleProducer {
 	Metric nMessagesRead;
 	Metric nMessagesDropped;
 	Metric nReconnectionAttempts;
+	
+	// when in consistent region, this parameter is used to indicate max time the receive method should block
+	public static final long receiveTimeout = 500l;
 
 	// initialize the metrices.
 	@CustomMetric(kind = Metric.Kind.COUNTER)
@@ -146,6 +155,33 @@ public class JMSSource extends ProcessTupleProducer {
 	
 	// Declaring the JMSMEssagehandler,
 	private JMSMessageHandlerImpl messageHandlerImpl;
+	
+	// Specify after how many messages are received, the operator should establish consistent region
+	private int triggerCount = 0;
+
+	// instance of JMSSourceCRState to hold variables required for consistent region
+	private JMSSourceCRState crState = null;
+	
+	private String messageSelector = null;
+
+	
+	public String getMessageSelector() {
+		return messageSelector;
+	}
+
+	@Parameter(optional = true)
+	public void setMessageSelector(String messageSelector) {
+		this.messageSelector = messageSelector;
+	}
+
+	public int getTriggerCount() {
+		return triggerCount;
+	}
+
+	@Parameter(optional = true)
+	public void setTriggerCount(int triggerCount) {
+		this.triggerCount = triggerCount;
+	}
 
 	// Mandatory parameter access
 	@Parameter(optional = false)
@@ -190,6 +226,65 @@ public class JMSSource extends ProcessTupleProducer {
 		this.connectionDocument = connectionDocument;
 	}
 	
+	// Class to hold various variables for consistent region
+	private class JMSSourceCRState {
+		
+		// Last fully processed message
+		private Message lastMsgSent;
+		
+		// Counters for counting number of received messages
+		private int msgCounter;
+		
+		private boolean doCheckpoint;
+		
+		JMSSourceCRState() {
+			lastMsgSent = null;
+			msgCounter = 0;
+			doCheckpoint = false;
+		}
+		
+		private boolean isDoCheckpoint() {
+			return doCheckpoint;
+		}
+
+		private void setDoCheckpoint(boolean doCheckpoint) {
+			this.doCheckpoint = doCheckpoint;
+		}
+
+		public void increaseMsgCounterByOne() {
+			this.msgCounter++;
+		}
+
+		public Message getLastMsgSent() {
+			return lastMsgSent;
+		}
+
+		public void setLastMsgSent(Message lastMsgSent) {
+			this.lastMsgSent = lastMsgSent;
+		}
+
+		public int getMsgCounter() {
+			return msgCounter;
+		}
+
+		public void setMsgCounter(int msgCounter) {
+			this.msgCounter = msgCounter;
+		}
+		
+		public void acknowledgeMsg() throws JMSException {
+			if(lastMsgSent != null) {
+				lastMsgSent.acknowledge();
+			}
+		}
+		
+		public void reset() {
+			lastMsgSent = null;
+			msgCounter = 0;
+			doCheckpoint = false;
+		}
+		
+	}
+	
 	public String getConnectionDocument() {
 		
 		if (connectionDocument == null)
@@ -211,11 +306,13 @@ public class JMSSource extends ProcessTupleProducer {
 	@ContextCheck(compile = true)
 	public static void checkInConsistentRegion(OperatorContextChecker checker) {
 		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
+		OperatorContext context = checker.getOperatorContext();
 		
-		if(consistentRegionContext != null) {
-			checker.setInvalidContext("The following operator cannot be in a consistent region: JMSSource", new String[] {});
+		if(consistentRegionContext != null && consistentRegionContext.isTriggerOperator() && !context.getParameterNames().contains("triggerCount")) {
+			checker.setInvalidContext("triggerCount parameter must be set when consistent region is configured to operator driven", new String[] {});
 		}
 	}
+	
 	/*
 	 * The method checkErrorOutputPort validates that the stream on error output
 	 * port contains the mandatory attribute of type rstring which will contain
@@ -292,6 +389,16 @@ public class JMSSource extends ProcessTupleProducer {
 			}
 		}
 		
+		if(context.getParameterNames().contains("triggerCount")) {
+			if(Integer.valueOf(context.getParameterValues("triggerCount").get(0)) < 1) {
+				logger.log(LogLevel.ERROR, "triggerCount should be greater than zero");
+				checker.setInvalidContext(
+						"triggerCount value {0} should be greater than zero  ",
+						new String[] { context.getParameterValues("triggerCount")
+								.get(0).trim() });
+			}
+		}
+		
 	}
 
 	// add check for reconnectionPolicy is present if either period or
@@ -310,6 +417,12 @@ public class JMSSource extends ProcessTupleProducer {
 			NamingException, ConnectionException, Exception {
 
 		super.initialize(context);
+		
+		consistentRegionContext = context.getOptionalContext(ConsistentRegionContext.class);
+		
+		if(consistentRegionContext != null) {
+			crState = new JMSSourceCRState();
+		}
 		
 		JmsClasspathUtil.setupClassPaths(context);
 
@@ -351,7 +464,7 @@ public class JMSSource extends ProcessTupleProducer {
 		jmsConnectionHelper = new JMSConnectionHelper(reconnectionPolicy,
 				reconnectionBound, period, false, 0,
 				0, connectionDocumentParser.getDeliveryMode(),
-				nReconnectionAttempts, logger);
+				nReconnectionAttempts, logger, (consistentRegionContext != null), messageSelector);
 		jmsConnectionHelper.createAdministeredObjects(
 				connectionDocumentParser.getInitialContextFactory(),
 				connectionDocumentParser.getProviderURL(),
@@ -393,19 +506,44 @@ public class JMSSource extends ProcessTupleProducer {
 			InterruptedException, ConnectionException, Exception {
 		// create the initial connection.
 		jmsConnectionHelper.createInitialConnection();
+		
+		boolean isInConsistentRegion = consistentRegionContext != null;
+		boolean isTriggerOperator = isInConsistentRegion && consistentRegionContext.isTriggerOperator();
+		
+		long timeout = isInConsistentRegion ? JMSSource.receiveTimeout : 0;
+
 		while (!Thread.interrupted()) {
 			// read a message from the consumer
+			
 			try {
-				Message m = jmsConnectionHelper.receiveMessage();
+				
+				if(isInConsistentRegion) {
+					consistentRegionContext.acquirePermit();
+					
+					// A checkpoint has been made, thus acknowledging the last sent message
+					if(crState.isDoCheckpoint()) {
+						
+						crState.acknowledgeMsg();
+						
+						crState.reset();
+					}
+				}
+
+				Message m = jmsConnectionHelper.receiveMessage(timeout);
+				
+				if(m == null) {
+					continue;
+				}
 				// nMessagesRead indicates the number of messages which we have
 				// read from the JMS Provider successfully
 				nMessagesRead.incrementValue(1);
 				OutputTuple dataTuple = dataOutputPort.newTuple();
+				
 				// convert the message to the output Tuple using the appropriate
 				// message handler
-
 				MessageAction returnVal = messageHandlerImpl
 						.convertMessageToTuple(m, dataTuple);
+				
 				// take an action based on the return type
 				switch (returnVal) {
 				// the message type is incorrect
@@ -457,9 +595,31 @@ public class JMSSource extends ProcessTupleProducer {
 					dataOutputPort.submit(dataTuple);
 					break;
 				}
-
+				
+				// set last processed message
+				if(isInConsistentRegion) {
+					crState.setLastMsgSent(m);
+				}
+				
+				// If the consistent region is driven by operator, then
+				// 1. increase message counter
+				// 2. Call make consistent region if message counter reached the triggerCounter specified by user
+				// 3. Reset counter to 0 for next round of CR
+			    if(isTriggerOperator) {
+					crState.increaseMsgCounterByOne();
+					
+					if(crState.getMsgCounter() == getTriggerCount()){
+						consistentRegionContext.makeConsistent();
+						//crState.reset();
+					}
+			    }
+			
 			} catch (Exception Ex) {
 
+			} finally {
+				if(consistentRegionContext != null) {
+					consistentRegionContext.releasePermit();
+				}
 			}
 		}
 	}
@@ -477,6 +637,7 @@ public class JMSSource extends ProcessTupleProducer {
 	@Override
 	public void shutdown() throws Exception {
 		// close the connection.
+		
 		if (isAMQ) {
 			super.shutdown();
 			jmsConnectionHelper.closeConnection();
@@ -485,5 +646,49 @@ public class JMSSource extends ProcessTupleProducer {
 			super.shutdown();
 		}
 
+	}
+
+	@Override
+	public void close() throws IOException {
+		
+	}
+
+	@Override
+	public void checkpoint(Checkpoint checkpoint) throws Exception {
+		logger.log(LogLevel.INFO, "Checkpoint... ");
+	
+		crState.setDoCheckpoint(true);
+		
+	}
+
+	@Override
+	public void drain() throws Exception {
+		logger.log(LogLevel.INFO, "Drain... ");
+		
+	}
+
+	@Override
+	public void reset(Checkpoint checkpoint) throws Exception {
+		logger.log(LogLevel.INFO, "Reset to checkpoint " + checkpoint.getSequenceId());
+		
+		// Reset consistent region variables and recover JMS session to make re-delivery of
+		// unacknowledged message 
+		crState.reset();
+		jmsConnectionHelper.recoverSession();
+		
+	}
+
+	@Override
+	public void resetToInitialState() throws Exception {
+		logger.log(LogLevel.INFO, "Resetting to Initial...");
+			
+		crState.reset();
+		jmsConnectionHelper.recoverSession();
+	}
+
+	@Override
+	public void retireCheckpoint(long id) throws Exception {
+		logger.log(LogLevel.INFO, "Retire checkpoint " + id);
+        
 	}
 }
