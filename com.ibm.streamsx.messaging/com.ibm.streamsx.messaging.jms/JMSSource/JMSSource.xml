@@ -265,6 +265,24 @@ If this parameter is not specified, the operator uses the file that is in the de
         <type>rstring</type>
         <cardinality>1</cardinality>
       </parameter>
+      <parameter>
+        <name>triggerCount</name>
+        <description>
+This optional parameter specifies how many messages are submitted before the JMSSource operator starts to drain the pipeline and establish a consistent state. 
+This parameter must be greater than zero and must be set if the JMSSource operator is the start operator of an operatorDriven consistent region.</description>
+        <optional>true</optional>
+        <type>int32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+	  <name>messageSelector</name>
+        <description>
+        This optional parameter is used as JMS Message Selector.
+        </description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
     </parameters>
     <inputPorts>
     </inputPorts>

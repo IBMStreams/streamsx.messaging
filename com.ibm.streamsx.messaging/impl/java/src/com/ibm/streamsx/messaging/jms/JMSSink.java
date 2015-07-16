@@ -36,6 +36,7 @@ import com.ibm.streams.operator.state.Checkpoint;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streams.operator.state.StateHandler;
 
+
 //The JMSSink operator publishes data from Streams to a JMS Provider queue or a topic.
 
 public class JMSSink extends AbstractOperator implements StateHandler{
@@ -158,6 +159,9 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	// Variable to define if the connection attempted to the JMSProvider is the
 	// first one.
 	private boolean isInitialConnection = true;
+	
+	// consistent region context
+    private ConsistentRegionContext consistentRegionContext;
 
 	// Mandatory parameter access
 	@Parameter(optional = false)
@@ -373,7 +377,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		
 		JmsClasspathUtil.setupClassPaths(context);
 		
-		context.registerStateHandler(this);
+		consistentRegionContext = context.getOptionalContext(ConsistentRegionContext.class);
 		
 		/*
 		 * Set appropriate variables if the optional error output port is
@@ -414,7 +418,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		jmsConnectionHelper = new JMSConnectionHelper(reconnectionPolicy,
 				reconnectionBound, period, true, maxMessageSendRetries, 
 				messageSendRetryDelay, connectionDocumentParser.getDeliveryMode(),
-				nReconnectionAttempts, nFailedInserts, logger);
+				nReconnectionAttempts, nFailedInserts, logger, (consistentRegionContext != null));
 		jmsConnectionHelper.createAdministeredObjects(
 				connectionDocumentParser.getInitialContextFactory(),
 				connectionDocumentParser.getProviderURL(),
@@ -486,6 +490,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			jmsConnectionHelper.createInitialConnection();
 			isInitialConnection = false;
 		}
+		
 		// Construct the JMS message based on the message type taking the
 		// attributes from the tuple.
 		Message message = mhandler.convertTupleToMessage(tuple,
@@ -499,6 +504,8 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 						"Dropping this tuple since an exception occurred while sending.");
 			}
 		}
+		
+		
 
 	}
 
@@ -539,6 +546,11 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	@Override
 	public void checkpoint(Checkpoint checkpoint) throws Exception {
 		logger.log(LogLevel.INFO, "checkpoint " + checkpoint.getSequenceId());
+		
+		if(jmsConnectionHelper.getSession() != null) {
+			jmsConnectionHelper.getSession().commit();
+		}
+		
 	}
 
 	@Override
@@ -549,11 +561,20 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	@Override
 	public void reset(Checkpoint checkpoint) throws Exception {
 		logger.log(LogLevel.INFO, "Reset to checkpoint " + checkpoint.getSequenceId());
+	
+		if(jmsConnectionHelper.getSession() != null) {
+			jmsConnectionHelper.getSession().rollback();
+		}
+		
 	}
 
 	@Override
 	public void resetToInitialState() throws Exception {
 		logger.log(LogLevel.INFO, "Reset to initial state");
+		
+		if(jmsConnectionHelper.getSession() != null) {
+			jmsConnectionHelper.getSession().rollback();
+		}
 	}
 
 	@Override
