@@ -325,12 +325,12 @@ public class SimpleConsumerClient implements StateHandler {
 		readOffset = getLastOffset(myConsumer, topic, partition,
 				kafka.api.OffsetRequest.LatestTime(), clientName);
 
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File("/tmp/initialOffset.txt")))){
-			bw.write(Long.toString(readOffset));
-			bw.close();
-		}catch (FileNotFoundException ex) {
-			TRACE.log(TraceLevel.ERROR, "Failed to write out offset!");
-		}
+//		try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File("/tmp/initialOffset.txt")))){
+//			bw.write(Long.toString(readOffset));
+//			bw.close();
+//		}catch (FileNotFoundException ex) {
+//			TRACE.log(TraceLevel.ERROR, "Failed to write out offset!");
+//		}
 		
 		
 		/*
@@ -506,12 +506,13 @@ public class SimpleConsumerClient implements StateHandler {
 		// System.out.println("ResetToInitial");
 		if (TRACE.isInfoEnabled())
 			TRACE.log(TraceLevel.INFO, "Reset to initial state");
-		try(BufferedReader br = new BufferedReader(new FileReader("/tmp/initialOffset.txt"))) {
-		    String line = br.readLine();
-		    readOffset = Long.parseLong(line);
-			if (TRACE.isInfoEnabled())
-				TRACE.log(TraceLevel.INFO, "Retrieved initial state from file.");
-		}
+//		try {
+//			BufferedReader br = new BufferedReader(new FileReader("/tmp/initialOffset.txt"));
+//		    String line = br.readLine();
+//		    readOffset = Long.parseLong(line);
+//			if (TRACE.isInfoEnabled())
+//				TRACE.log(TraceLevel.INFO, "Retrieved initial state from file.");
+//		}
 	}
 
 	@Override
