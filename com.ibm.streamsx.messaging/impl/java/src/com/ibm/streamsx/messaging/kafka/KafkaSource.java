@@ -33,6 +33,8 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	private int threadsPerTopic = 1;
 	private int a_partition = -1;
 	private int triggerCount = -1;
+	private int leaderConnectionRetries = 3;
+	private int connectionRetryInterval = 1000;
 	private static Logger trace = Logger.getLogger(KafkaSource.class.getName());
 
 	//consistent region checks
@@ -106,7 +108,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		trace.log(TraceLevel.INFO, "Initializing client");
 		if(a_partition >= 0){
 			trace.log(TraceLevel.INFO, "Using simple consumer client.");
-			simpleClient = new SimpleConsumerClient(topics.get(0),  a_partition, keyAH, messageAH, finalProperties, triggerCount);
+			simpleClient = new SimpleConsumerClient(topics.get(0),  a_partition, keyAH, messageAH, finalProperties, triggerCount, leaderConnectionRetries, connectionRetryInterval);
 			simpleClient.initialize(getOperatorContext());
 			simpleClient.allPortsReady();
 		} else {
@@ -137,6 +139,18 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 			description="Number of messages between checkpointing for consistent region. This is only relevant to operator driven checkpointing.")
 	public void setTriggerCount(int value) {
 	   	this.triggerCount = value;
+	}
+    
+    @Parameter(name="leaderConnectionRetries", optional=true, 
+			description="Number of attempts at finding a Kafka Broker before giving up. This is relevant when first looking for a broker, and in the case that a lead broker host goes down. Default is 3.")
+	public void setLeaderConnectionRetries(int value) {
+	   	this.leaderConnectionRetries = value;
+	}
+    
+    @Parameter(name="connectionRetryInterval", optional=true, 
+			description="Interval between each attempt to find a lead Kafka Broker in milliseconds. Number of attempts is set by the leaderConnectionRetries parameter.")
+	public void setConnectionRetryInterval(int value) {
+	   	this.connectionRetryInterval = value;
 	}
 
 	public static final String DESC = 

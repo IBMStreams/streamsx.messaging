@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
+ 
 import kafka.api.FetchRequest;
 import kafka.api.FetchRequestBuilder;
 import kafka.api.PartitionOffsetRequestInfo;
@@ -68,6 +68,9 @@ public class SimpleConsumerClient implements StateHandler {
 	private String charSet = "UTF-8";
 	private AttributeHelper keyAH;
 	private AttributeHelper messageAH;
+	private int leaderConnectionRetries = 3;
+	private int connectionRetryInterval = 1000;
+	
 	
 	private static final int DEFAULT_BUFFER_SIZE = 64 * 1024;
 	private static final int DEFAULT_FETCH_SIZE = 100 * 1024;
@@ -75,13 +78,16 @@ public class SimpleConsumerClient implements StateHandler {
 
 	public SimpleConsumerClient(String a_topic, int a_partition,
 			AttributeHelper keyAH,
-			AttributeHelper messageAH, Properties props, long trigCnt) {
+			AttributeHelper messageAH, Properties props, long trigCnt,
+			int connectionRetries, int connectionRetryInterval) {
 		this.topic = a_topic;
 		this.keyAH = keyAH;
 	    this.messageAH = messageAH;
 		this.partition = a_partition;
 		this.finalProperties = props;
 		this.triggerCount = trigCnt;
+		this.leaderConnectionRetries = connectionRetries;
+		this.connectionRetryInterval = connectionRetryInterval;
 	}
 
 	/**
@@ -105,19 +111,22 @@ public class SimpleConsumerClient implements StateHandler {
 	@Override
 	public void checkpoint(Checkpoint checkpoint) throws Exception {
 		// System.out.println("Checkpoint readOffset " + readOffset);
-		TRACE.log(TraceLevel.INFO, "Checkpoint " + checkpoint.getSequenceId());
+		if (TRACE.isInfoEnabled())
+			TRACE.log(TraceLevel.INFO, "Checkpoint " + checkpoint.getSequenceId());
 		checkpoint.getOutputStream().writeLong(readOffset);
 	}
 
 	@Override
 	public void close() throws IOException {
-		TRACE.log(TraceLevel.INFO, "StateHandler close");
+		if (TRACE.isInfoEnabled())
+			TRACE.log(TraceLevel.INFO, "StateHandler close");
 	}
 
 	@Override
 	public void drain() throws Exception {
 		// System.out.println("Drain...");
-		TRACE.log(TraceLevel.INFO, "Drain...");
+		if (TRACE.isInfoEnabled())
+			TRACE.log(TraceLevel.INFO, "Drain...");
 	}
 
 	private Broker findLeader(ZkClient a_zkClient, String a_topic,
@@ -135,6 +144,7 @@ public class SimpleConsumerClient implements StateHandler {
 
 			e.printStackTrace();
 			System.out.println("Exception from ZkClient!");
+			TRACE.log(TraceLevel.ERROR, "Exception from ZkClient.");
 
 		}
 
@@ -142,15 +152,16 @@ public class SimpleConsumerClient implements StateHandler {
 	}
 
 	private Broker findNewLeader(Broker oldBroker, ZkClient a_zkClient,
-			String a_topic, int a_partition) {
+			String a_topic, int a_partition, int numLeaderTries, int sleepBetweenTries) throws IOException{
 
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < numLeaderTries; i++) {
 			boolean goSleep = false;
 			Broker newLeadBroker = findLeader(a_zkClient, a_topic, a_partition);
 
 			if (newLeadBroker == null) {
 				goSleep = true;
-			} else if (newLeadBroker.host().equalsIgnoreCase(oldBroker.host())
+			} else if (oldBroker != null 
+					&& newLeadBroker.host().equalsIgnoreCase(oldBroker.host())
 					&& i == 0) {
 				// if it's the first time, let's give zookeeper a chance to
 				// recover.
@@ -161,13 +172,15 @@ public class SimpleConsumerClient implements StateHandler {
 
 			if (goSleep) {
 				try {
-					Thread.sleep(1000);
+					if(TRACE.isInfoEnabled())
+						TRACE.log(TraceLevel.INFO, "Sleeping after attempt " + (i+1) + ".");
+					Thread.sleep(sleepBetweenTries);
 				} catch (InterruptedException ie) {
 				}
 			}
 		}
-
-		return null;
+		
+		throw new IOException("Unable to find a new Kafka lead Broker after " + numLeaderTries + " attempts. Unable to proceed.");  
 	}
 
 	private ZkClient getInitializedZkClient() throws Exception{
@@ -178,11 +191,13 @@ public class SimpleConsumerClient implements StateHandler {
 		int zkConnectionTimeout = getIntegerProperty("zookeeper.sync.time.ms",
 				200);
 
-		TRACE.log(TraceLevel.INFO,
-				"Initializing ZooKeeper with values: zkConnect(" + zkConnect
-						+ ") zkSessionTimeout(" + zkSessionTimeout
-						+ ") zkConnectionTimeout(" + zkConnectionTimeout + ")");
-		
+		if (TRACE.isInfoEnabled())
+			TRACE.log(TraceLevel.INFO,
+					"Initializing ZooKeeper with values: zkConnect("
+							+ zkConnect + ") zkSessionTimeout("
+							+ zkSessionTimeout + ") zkConnectionTimeout("
+							+ zkConnectionTimeout + ")");
+
 		try {
 			localZkClient = new ZkClient(zkConnect, zkSessionTimeout,
 					zkConnectionTimeout, ZKStringSerializer$.MODULE$);
@@ -238,7 +253,7 @@ public class SimpleConsumerClient implements StateHandler {
 		return offsets[0];
 	}
 
-	private void handleFetchError(FetchResponse fetchResponse) {
+	private void handleFetchError(FetchResponse fetchResponse) throws IOException {
 		short code = fetchResponse.errorCode(topic, partition);
 		TRACE.log(
 				TraceLevel.ERROR,
@@ -253,7 +268,7 @@ public class SimpleConsumerClient implements StateHandler {
 		}
 		myConsumer.close();
 		myConsumer = null;
-		leadBroker = findLeader(zkClient, topic, partition);
+		leadBroker = findNewLeader(null, zkClient, topic, partition, leaderConnectionRetries, connectionRetryInterval);
 	}
 
 	public void initialize(OperatorContext context) throws Exception {
@@ -276,8 +291,9 @@ public class SimpleConsumerClient implements StateHandler {
 		bufferSize = getIntegerProperty("simpleConsumer.bufferSize.bytes", DEFAULT_BUFFER_SIZE);
 		fetchSize = getIntegerProperty("simpleConsumer.fetchSize.bytes", DEFAULT_FETCH_SIZE);
 		
+		
 		zkClient = getInitializedZkClient();
-		leadBroker = findLeader(zkClient, topic, partition);
+		leadBroker = findNewLeader(null, zkClient, topic, partition, leaderConnectionRetries, connectionRetryInterval);
 
 		if (leadBroker == null) {
 			TRACE.log(TraceLevel.ERROR,
@@ -297,12 +313,14 @@ public class SimpleConsumerClient implements StateHandler {
 		
 		myConsumer = new SimpleConsumer(leadBroker.host(), leadBroker.port(),
 				so_timeout, bufferSize, clientName);
-		TRACE.log(TraceLevel.INFO, "Consumer initialization complete.");
-		TRACE.log(TraceLevel.INFO,
-				"Initializing SimpleConsumer with values: leadBroker(" + leadBroker.host() + ":" + leadBroker.port()
-						+ ") socket timeout(" + so_timeout
-						+ ") bufferSize(" + bufferSize 
-						+ ") clientName(" + clientName + ")");
+		if (TRACE.isInfoEnabled())
+			TRACE.log(TraceLevel.INFO, "Consumer initialization complete.");
+		if (TRACE.isInfoEnabled())
+			TRACE.log(TraceLevel.INFO,
+					"Initializing SimpleConsumer with values: leadBroker("
+							+ leadBroker.host() + ":" + leadBroker.port()
+							+ ") socket timeout(" + so_timeout
+							+ ") bufferSize(" + bufferSize + ") clientName(" + clientName + ")");
 
 		readOffset = getLastOffset(myConsumer, topic, partition,
 				kafka.api.OffsetRequest.LatestTime(), clientName);
@@ -349,7 +367,7 @@ public class SimpleConsumerClient implements StateHandler {
 	 * @throws Exception
 	 *             if an error occurs while submitting a tuple
 	 */
-	private void produceTuples() throws UnsupportedEncodingException {
+	private void produceTuples() throws UnsupportedEncodingException,IOException {
 		final StreamingOutput<OutputTuple> out = operContext
 				.getStreamingOutputs().get(0);
 		OutputTuple tuple = out.newTuple();
@@ -379,7 +397,7 @@ public class SimpleConsumerClient implements StateHandler {
 				myConsumer = null;
 				fetchResponse = null;
 				leadBroker = findNewLeader(leadBroker, zkClient, topic,
-						partition);
+						partition, leaderConnectionRetries, connectionRetryInterval);
 			}
 
 			if (fetchResponse != null) {
@@ -475,8 +493,9 @@ public class SimpleConsumerClient implements StateHandler {
 	@Override
 	public void reset(Checkpoint checkpoint) throws Exception {
 		// System.out.println("Reset");
-		TRACE.log(TraceLevel.INFO,
-				"Reset to checkpoint " + checkpoint.getSequenceId());
+		if (TRACE.isInfoEnabled())
+			TRACE.log(TraceLevel.INFO,
+					"Reset to checkpoint " + checkpoint.getSequenceId());
 		readOffset = checkpoint.getInputStream().readLong();
 		inReset = true;
 		// System.out.println("Set readOffset to : " + readOffset);
@@ -485,18 +504,21 @@ public class SimpleConsumerClient implements StateHandler {
 	@Override
 	public void resetToInitialState() throws Exception {
 		// System.out.println("ResetToInitial");
-		TRACE.log(TraceLevel.INFO, "Reset to initial state");
+		if (TRACE.isInfoEnabled())
+			TRACE.log(TraceLevel.INFO, "Reset to initial state");
 		try(BufferedReader br = new BufferedReader(new FileReader("/tmp/initialOffset.txt"))) {
 		    String line = br.readLine();
 		    readOffset = Long.parseLong(line);
-		    TRACE.log(TraceLevel.INFO, "Retrieved initial state from file.");
+			if (TRACE.isInfoEnabled())
+				TRACE.log(TraceLevel.INFO, "Retrieved initial state from file.");
 		}
 	}
 
 	@Override
 	public void retireCheckpoint(long id) throws Exception {
 		// System.out.println("Retire checkpoint");
-		TRACE.log(TraceLevel.INFO, "Retire checkpoint");
+		if (TRACE.isInfoEnabled())
+			TRACE.log(TraceLevel.INFO, "Retire checkpoint");
 	}
 
 	/**
