@@ -12,6 +12,7 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
+import javax.jms.InvalidSelectorException;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
@@ -70,6 +71,22 @@ class JMSConnectionHelper {
 
 	// Time to wait before try to resend failed message
 	private final long messageRetryDelay;
+	
+	private final boolean useClientAckMode;
+	
+	// JMS message selector
+	private String messageSelector;
+	
+	// Timestamp of session creation
+	private long sessionCreationTime;
+
+	public long getSessionCreationTime() {
+		return sessionCreationTime;
+	}
+
+	private void setSessionCreationTime(long sessionCreationTime) {
+		this.sessionCreationTime = sessionCreationTime;
+	}
 
 	// procedure to detrmine if there exists a valid connection or not
 	private boolean isConnectValid() {
@@ -107,6 +124,7 @@ class JMSConnectionHelper {
 	// object
 	private synchronized void setSession(Session session) {
 		this.session = session;
+		this.setSessionCreationTime(System.currentTimeMillis());
 	}
 
 	// setter for connect
@@ -128,7 +146,7 @@ class JMSConnectionHelper {
 	JMSConnectionHelper(ReconnectionPolicies reconnectionPolicy,
 			int reconnectionBound, double period, boolean isProducer,
 			int maxMessageRetry, long messageRetryDelay,
-			String deliveryMode, Metric nReconnectionAttempts, Logger logger) {
+			String deliveryMode, Metric nReconnectionAttempts, Logger logger, boolean useClientAckMode, String messageSelector) {
 		this.reconnectionPolicy = reconnectionPolicy;
 		this.reconnectionBound = reconnectionBound;
 		this.period = period;
@@ -138,6 +156,8 @@ class JMSConnectionHelper {
 		this.nReconnectionAttempts = nReconnectionAttempts;
 		this.maxMessageRetries = maxMessageRetry;
 		this.messageRetryDelay = messageRetryDelay;
+		this.useClientAckMode = useClientAckMode;
+		this.messageSelector = messageSelector;
 	}
 
 	// This constructor sets the parameters required to create a connection for
@@ -145,9 +165,9 @@ class JMSConnectionHelper {
 	JMSConnectionHelper(ReconnectionPolicies reconnectionPolicy,
 			int reconnectionBound, double period, boolean isProducer,
 			int maxMessageRetry, long messageRetryDelay, String deliveryMode, 
-			Metric nReconnectionAttempts, Metric nFailedInserts, Logger logger) {
+			Metric nReconnectionAttempts, Metric nFailedInserts, Logger logger, boolean useClientAckMode) {
 		this(reconnectionPolicy, reconnectionBound, period, isProducer,
-			 maxMessageRetry, messageRetryDelay, deliveryMode, nReconnectionAttempts, logger);
+			 maxMessageRetry, messageRetryDelay, deliveryMode, nReconnectionAttempts, logger, useClientAckMode, null);
 		this.nFailedInserts = nFailedInserts;
 
 	}
@@ -223,6 +243,9 @@ class JMSConnectionHelper {
 						break;
 					}
 
+				} catch (InvalidSelectorException e) {
+					throw new ConnectionException(
+							"Connection to JMS failed. Invalid message selector");
 				} catch (JMSException e) {
 					logger.log(LogLevel.ERROR, "RECONNECTION_EXCEPTION",
 							new Object[] { e.toString() });
@@ -272,7 +295,14 @@ class JMSConnectionHelper {
 		
 		// Create session from connection; false means
 		// session is not transacted.
-		setSession(getConnect().createSession(false, Session.AUTO_ACKNOWLEDGE));
+		
+		if(isProducer) {
+			setSession(getConnect().createSession(this.useClientAckMode, Session.AUTO_ACKNOWLEDGE));
+		}
+		else {
+			setSession(getConnect().createSession(false, (this.useClientAckMode) ? Session.CLIENT_ACKNOWLEDGE : Session.AUTO_ACKNOWLEDGE));
+		}
+		
 
 		if (isProducer == true) {
 			// Its JMSSink, So we will create a producer
@@ -294,7 +324,7 @@ class JMSConnectionHelper {
 
 		} else {
 			// Its JMSSource, So we will create a consumer
-			setConsumer(getSession().createConsumer(dest));
+			setConsumer(getSession().createConsumer(dest, messageSelector));
 			// start the connection
 			getConnect().start();
 		}
@@ -352,16 +382,26 @@ class JMSConnectionHelper {
 	}
 
 	// this subroutine receives messages from a message consumer
-	Message receiveMessage() throws ConnectionException, InterruptedException,
+	// This method supports either blocking or non-blocking receive
+	// if wait is false, then timeout value is ignored
+	Message receiveMessage(boolean wait, long timeout) throws ConnectionException, InterruptedException,
 			JMSException {
 		try {
-			// try to receive a message
-			synchronized (getSession()) {
-				return (getConsumer().receive());
+			
+			if(wait) {
+				// try to receive a message via blocking method
+				synchronized (getSession()) {
+					return (getConsumer().receive(timeout));
+				}
 			}
-
+			else {
+				// try to receive a message with non blocking method
+				synchronized (getSession()) {
+					return (getConsumer().receiveNoWait());
+				}
+			}
+			
 		}
-
 		catch (JMSException e) {
 			// If the JMSSource operator was interrupted in middle
 			if (e.toString().contains("java.lang.InterruptedException")) {
@@ -374,10 +414,39 @@ class JMSConnectionHelper {
 					new Object[] { e.toString() });
 			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
 			createConnection();
-			// retry to receive
-			synchronized (getSession()) {
-				return (getConsumer().receive());
+			// retry to receive again
+			if(wait) {
+				// try to receive a message via blocking method
+				synchronized (getSession()) {
+					return (getConsumer().receive(timeout));
+				}
 			}
+			else {
+				// try to receive a message with non blocking method
+				synchronized (getSession()) {
+					return (getConsumer().receiveNoWait());
+				}
+			}
+		}
+	}
+	
+	// Recovers session causing unacknowledged message to be re-delivered
+	public void recoverSession() throws JMSException, ConnectionException, InterruptedException {
+
+		try {
+			synchronized (getSession()) {
+				getSession().recover();
+			}
+		} catch (JMSException e) {
+			
+			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
+			setConnect(null);
+			createConnection();
+			
+			synchronized (getSession()) {
+				getSession().recover();
+			}
+			
 		}
 	}
 
