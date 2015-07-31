@@ -74,7 +74,19 @@ class JMSConnectionHelper {
 	
 	private final boolean useClientAckMode;
 	
+	// JMS message selector
 	private String messageSelector;
+	
+	// Timestamp of session creation
+	private long sessionCreationTime;
+
+	public long getSessionCreationTime() {
+		return sessionCreationTime;
+	}
+
+	private void setSessionCreationTime(long sessionCreationTime) {
+		this.sessionCreationTime = sessionCreationTime;
+	}
 
 	// procedure to detrmine if there exists a valid connection or not
 	private boolean isConnectValid() {
@@ -112,6 +124,7 @@ class JMSConnectionHelper {
 	// object
 	private synchronized void setSession(Session session) {
 		this.session = session;
+		this.setSessionCreationTime(System.currentTimeMillis());
 	}
 
 	// setter for connect
@@ -369,16 +382,26 @@ class JMSConnectionHelper {
 	}
 
 	// this subroutine receives messages from a message consumer
-	Message receiveMessage(long timeout) throws ConnectionException, InterruptedException,
+	// This method supports either blocking or non-blocking receive
+	// if wait is false, then timeout value is ignored
+	Message receiveMessage(boolean wait, long timeout) throws ConnectionException, InterruptedException,
 			JMSException {
 		try {
-			// try to receive a message
-			synchronized (getSession()) {
-				return (getConsumer().receive(timeout));
+			
+			if(wait) {
+				// try to receive a message via blocking method
+				synchronized (getSession()) {
+					return (getConsumer().receive(timeout));
+				}
 			}
-
+			else {
+				// try to receive a message with non blocking method
+				synchronized (getSession()) {
+					return (getConsumer().receiveNoWait());
+				}
+			}
+			
 		}
-
 		catch (JMSException e) {
 			// If the JMSSource operator was interrupted in middle
 			if (e.toString().contains("java.lang.InterruptedException")) {
@@ -391,21 +414,40 @@ class JMSConnectionHelper {
 					new Object[] { e.toString() });
 			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
 			createConnection();
-			// retry to receive
-			synchronized (getSession()) {
-				return (getConsumer().receive());
+			// retry to receive again
+			if(wait) {
+				// try to receive a message via blocking method
+				synchronized (getSession()) {
+					return (getConsumer().receive(timeout));
+				}
+			}
+			else {
+				// try to receive a message with non blocking method
+				synchronized (getSession()) {
+					return (getConsumer().receiveNoWait());
+				}
 			}
 		}
 	}
 	
-	public void recoverSession() throws JMSException {
-		
-		if(getSession() != null) {
+	// Recovers session causing unacknowledged message to be re-delivered
+	public void recoverSession() throws JMSException, ConnectionException, InterruptedException {
+
+		try {
 			synchronized (getSession()) {
 				getSession().recover();
 			}
+		} catch (JMSException e) {
+			
+			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
+			setConnect(null);
+			createConnection();
+			
+			synchronized (getSession()) {
+				getSession().recover();
+			}
+			
 		}
-		
 	}
 
 	// close the connection

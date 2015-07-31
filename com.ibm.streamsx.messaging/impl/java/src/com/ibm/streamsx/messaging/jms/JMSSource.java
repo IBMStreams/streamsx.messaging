@@ -6,7 +6,11 @@ package com.ibm.streamsx.messaging.jms;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.jms.JMSException;
@@ -90,7 +94,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	Metric nReconnectionAttempts;
 	
 	// when in consistent region, this parameter is used to indicate max time the receive method should block
-	public static final long receiveTimeout = 500l;
+	public static final long RECEIVE_TIMEOUT = 500l;
 
 	// initialize the metrices.
 	@CustomMetric(kind = Metric.Kind.COUNTER)
@@ -163,8 +167,11 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	private JMSSourceCRState crState = null;
 	
 	private String messageSelector = null;
-
 	
+	private boolean initalConnectionEstablished = false;
+	
+	private Object resetLock = new Object();
+
 	public String getMessageSelector() {
 		return messageSelector;
 	}
@@ -235,20 +242,28 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		// Counters for counting number of received messages
 		private int msgCounter;
 		
-		private boolean doCheckpoint;
+		// Flag to indicate a checkpoint has been made.
+		private boolean isCheckpointPerformed;
+		
+		private List<String> msgIDWIthSameTS;
 		
 		JMSSourceCRState() {
 			lastMsgSent = null;
 			msgCounter = 0;
-			doCheckpoint = false;
-		}
-		
-		private boolean isDoCheckpoint() {
-			return doCheckpoint;
+			isCheckpointPerformed = false;
+			msgIDWIthSameTS = new ArrayList<String>();
 		}
 
-		private void setDoCheckpoint(boolean doCheckpoint) {
-			this.doCheckpoint = doCheckpoint;
+		public List<String> getMsgIDWIthSameTS() {
+			return msgIDWIthSameTS;
+		}
+
+		public boolean isCheckpointPerformed() {
+			return isCheckpointPerformed;
+		}
+
+		public void setCheckpointPerformed(boolean isCheckpointPerformed) {
+			this.isCheckpointPerformed = isCheckpointPerformed;
 		}
 
 		public void increaseMsgCounterByOne() {
@@ -260,15 +275,22 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		}
 
 		public void setLastMsgSent(Message lastMsgSent) {
-			this.lastMsgSent = lastMsgSent;
+			
+			try {
+				if(this.lastMsgSent != null && this.lastMsgSent.getJMSTimestamp() != lastMsgSent.getJMSTimestamp()) {
+					this.msgIDWIthSameTS.clear();
+				}
+				
+				this.msgIDWIthSameTS.add(lastMsgSent.getJMSMessageID());
+			} catch (JMSException e) {
+				
+			}		
+			this.lastMsgSent = lastMsgSent;	
+			
 		}
 
 		public int getMsgCounter() {
 			return msgCounter;
-		}
-
-		public void setMsgCounter(int msgCounter) {
-			this.msgCounter = msgCounter;
 		}
 		
 		public void acknowledgeMsg() throws JMSException {
@@ -280,7 +302,8 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		public void reset() {
 			lastMsgSent = null;
 			msgCounter = 0;
-			doCheckpoint = false;
+			isCheckpointPerformed = false;
+			msgIDWIthSameTS = new ArrayList<String>();
 		}
 		
 	}
@@ -420,11 +443,11 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		
 		consistentRegionContext = context.getOptionalContext(ConsistentRegionContext.class);
 		
+		JmsClasspathUtil.setupClassPaths(context);
+		
 		if(consistentRegionContext != null) {
 			crState = new JMSSourceCRState();
 		}
-		
-		JmsClasspathUtil.setupClassPaths(context);
 
 		// create connection document parser object (which is responsible for
 		// parsing the connection document)
@@ -504,13 +527,28 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	@Override
 	protected void process() throws UnsupportedEncodingException,
 			InterruptedException, ConnectionException, Exception {
-		// create the initial connection.
-		jmsConnectionHelper.createInitialConnection();
 		
 		boolean isInConsistentRegion = consistentRegionContext != null;
 		boolean isTriggerOperator = isInConsistentRegion && consistentRegionContext.isTriggerOperator();
 		
-		long timeout = isInConsistentRegion ? JMSSource.receiveTimeout : 0;
+		// create the initial connection.
+	    try {
+			jmsConnectionHelper.createInitialConnection();
+			if(isInConsistentRegion) {
+				notifyResetLock(true);
+		    }
+		} catch (Exception e1) {
+			
+			if(isInConsistentRegion) {
+				notifyResetLock(false);
+			}
+			// Initial connection fails to be created.
+			// throw the exception.
+			throw e1;
+		}
+
+		long timeout = isInConsistentRegion ? JMSSource.RECEIVE_TIMEOUT : 0;
+		long sessionCreationTime = 0;
 
 		while (!Thread.interrupted()) {
 			// read a message from the consumer
@@ -521,19 +559,42 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 					consistentRegionContext.acquirePermit();
 					
 					// A checkpoint has been made, thus acknowledging the last sent message
-					if(crState.isDoCheckpoint()) {
+					if(crState.isCheckpointPerformed()) {
 						
-						crState.acknowledgeMsg();
-						
-						crState.reset();
+						try {
+							crState.acknowledgeMsg();
+						} catch (Exception e) {
+							consistentRegionContext.reset();
+						} finally {
+							crState.reset();
+						}
+				
 					}
 				}
 
-				Message m = jmsConnectionHelper.receiveMessage(timeout);
+				Message m = jmsConnectionHelper.receiveMessage(true, timeout);
 				
 				if(m == null) {
 					continue;
 				}
+				
+				if(isInConsistentRegion) {
+					// following section takes care of possible duplicate messages
+					// i.e connection re-created due to failure causing unacknowledged message to be delivered again
+					// we don't want to process duplicate messages again.
+					if(crState.getLastMsgSent() == null) {
+						sessionCreationTime = jmsConnectionHelper.getSessionCreationTime();
+					}
+					else {
+						// if session has been re-created and message is duplicate,ignore
+						if(jmsConnectionHelper.getSessionCreationTime() > sessionCreationTime && 
+						   isDuplicateMsg(m, crState.getLastMsgSent().getJMSTimestamp(), crState.getMsgIDWIthSameTS())) {
+						    logger.log(LogLevel.INFO, "Ignored duplicated message: " + m.getJMSMessageID());
+							continue;
+						}
+					}
+				}
+				
 				// nMessagesRead indicates the number of messages which we have
 				// read from the JMS Provider successfully
 				nMessagesRead.incrementValue(1);
@@ -604,13 +665,11 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 				// If the consistent region is driven by operator, then
 				// 1. increase message counter
 				// 2. Call make consistent region if message counter reached the triggerCounter specified by user
-				// 3. Reset counter to 0 for next round of CR
 			    if(isTriggerOperator) {
 					crState.increaseMsgCounterByOne();
 					
 					if(crState.getMsgCounter() == getTriggerCount()){
 						consistentRegionContext.makeConsistent();
-						//crState.reset();
 					}
 			    }
 			
@@ -647,6 +706,27 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		}
 
 	}
+	
+	private boolean isInitalConnectionEstablished() throws InterruptedException {
+		
+		synchronized(resetLock) {
+			if(initalConnectionEstablished) {
+				return true;
+			}
+			
+			resetLock.wait();
+			return initalConnectionEstablished;
+		}
+	}
+	
+	private void notifyResetLock(boolean result) {
+		if(consistentRegionContext != null) {
+	    	synchronized(resetLock) {
+		    	initalConnectionEstablished = result;
+		    	resetLock.notifyAll();
+		    }
+	    }
+	}
 
 	@Override
 	public void close() throws IOException {
@@ -656,8 +736,17 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	@Override
 	public void checkpoint(Checkpoint checkpoint) throws Exception {
 		logger.log(LogLevel.INFO, "Checkpoint... ");
-	
-		crState.setDoCheckpoint(true);
+	 
+		crState.setCheckpointPerformed(true);
+		
+		ObjectOutputStream stream = checkpoint.getOutputStream();
+		
+		stream.writeBoolean(crState.getLastMsgSent() != null);
+		
+		if(crState.getLastMsgSent() != null) {
+			stream.writeLong(crState.getLastMsgSent().getJMSTimestamp());
+			stream.writeObject(crState.getMsgIDWIthSameTS());
+		}
 		
 	}
 
@@ -667,23 +756,88 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void reset(Checkpoint checkpoint) throws Exception {
 		logger.log(LogLevel.INFO, "Reset to checkpoint " + checkpoint.getSequenceId());
 		
+		if(!isInitalConnectionEstablished()) {
+			throw new ConnectionException("Connection to JMS failed.");
+		}
+		
 		// Reset consistent region variables and recover JMS session to make re-delivery of
 		// unacknowledged message 
-		crState.reset();
 		jmsConnectionHelper.recoverSession();
+				
+		ObjectInputStream stream = checkpoint.getInputStream();
+		boolean hasMsg = stream.readBoolean();
+		
+		if(hasMsg) {
+			long lastSentMsgTS = stream.readLong();
+			List<String> lastSentMsgIDs =  (List<String>) stream.readObject();
+			
+			deduplicateMsg(lastSentMsgTS, lastSentMsgIDs);
+		}
+		
+		crState.reset();
+	
+	}
+	
+	private boolean isDuplicateMsg(Message msg, long lastSentMsgTs, List<String> lastSentMsgIDs) throws JMSException {
+		boolean res = false;
+		
+		if(msg.getJMSTimestamp() < lastSentMsgTs) {
+			res = true;
+		}			
+		else if(msg.getJMSTimestamp() == lastSentMsgTs) {
+			
+			if(lastSentMsgIDs.contains(msg.getJMSMessageID())) {
+				res = true;
+			}
+			
+		}
+		
+		return res;
+		
+	}
+	
+	private void deduplicateMsg(long lastSentMsgTs, List<String> lastSentMsgIDs) throws JMSException, ConnectionException, InterruptedException {
+		logger.log(LogLevel.INFO, "Deduplicate messages...");
+		
+		boolean stop = false;
+		
+		while(!stop) {
+			
+			Message msg = jmsConnectionHelper.receiveMessage(false, 0);
+			
+			if(msg == null) {
+				return;
+			}
+			
+			if(isDuplicateMsg(msg, lastSentMsgTs, lastSentMsgIDs)) {
+				msg.acknowledge();
+				logger.log(LogLevel.INFO, "Ignored duplicated message: " + msg.getJMSMessageID());
+			}
+			else {
+				jmsConnectionHelper.recoverSession();
+				stop = true;
+			}
+			
+		}
 		
 	}
 
 	@Override
 	public void resetToInitialState() throws Exception {
 		logger.log(LogLevel.INFO, "Resetting to Initial...");
-			
-		crState.reset();
+		
+		if(!isInitalConnectionEstablished()) {
+			throw new ConnectionException("Connection to JMS failed.");
+		}
+		
 		jmsConnectionHelper.recoverSession();
+		crState.reset();
+	
 	}
 
 	@Override
