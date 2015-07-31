@@ -680,8 +680,8 @@ The &lt;attribute&gt; element has three possible attributes:
      * composite types
      * xml
 </info:description>
-    <info:version>2.1.1</info:version>
-    <info:requiredProductVersion>4.0.1.0</info:requiredProductVersion>
+    <info:version>2.1.0</info:version>
+    <info:requiredProductVersion>4.0.0.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>
   <info:resources>
