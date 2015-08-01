@@ -1,4 +1,4 @@
-#Fri Mar 13 10:29:19 EDT 2015
+#Sat Aug 01 01:14:11 EDT 2015
 copytosourcelist=
 hreftargetslist=tk$JmsWithXmlParse/ns$application.xml,toolkits/toolkits.xml,tk$JmsWithXmlParse/tk$JmsWithXmlParse.xml
 fullditatopicfile=fullditatopic.list
@@ -38,7 +38,7 @@ codereffile=coderef.list
 codereflist=
 user.input.file.listfile=usr.input.file.list
 uplevels=
-user.input.dir=/homes/hny7/chanskw/gitspreeRelease/streamsx.messaging/samples/JmsWithXmlParse/doc/spldoc/dita
+user.input.dir=/homes/hny4/congli/gitSamantha/ibmstreams/streamsx.messaging/samples/JmsWithXmlParse/doc/spldoc/dita
 conrefpushfile=conrefpush.list
 tempdirToinputmapdir.relative.value=
 flagimagefile=flagimage.list

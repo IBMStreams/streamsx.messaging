@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.mqtt.html">com.ibm.streamsx.messaging.mqtt</a> &gt; MQTTSource</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.1.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.mqtt.html">com.ibm.streamsx.messaging.mqtt</a> &gt; MQTTSource</p>
 
 </div>
 
@@ -348,7 +348,7 @@ This operator supports 20 parameters.<dl class="dl">
 <dt class="dt dlterm" id="spldoc_operator__parameter_dataAttributeName"><tt class="ph tt">dataAttributeName</tt></dt>
 
 <dd class="dd">
-<p class="p">This optional parameter specifies the name of the attribute that is used to hold actual content of message, if not specified, default data attribute name is data
+<p class="p">This optional parameter specifies the name of the attribute that is used to hold actual content of message, if not specified, in the case where multiple attributes are defined for the streams schema, the operator will look for attribute named data and use it as data attribute. In the case where the schema contains only a signle attribute, the operator will assume that the attribute is the data attribute
 </p>
 <dl class="dl">
 
