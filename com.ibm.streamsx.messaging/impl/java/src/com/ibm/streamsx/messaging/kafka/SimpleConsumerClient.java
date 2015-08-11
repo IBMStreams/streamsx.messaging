@@ -43,7 +43,7 @@ public class SimpleConsumerClient implements StateHandler {
 	static final String OPER_NAME = "KafkaConsumer";
 	private ConsistentRegionContext crContext;
 	private boolean shutdown = false;
-	private long triggerCount;
+	private int triggerCount;
 	private long triggerIteration = 0;
 	private OperatorContext operContext;
 	private boolean inReset = false;
@@ -72,7 +72,7 @@ public class SimpleConsumerClient implements StateHandler {
 
 	public SimpleConsumerClient(String a_topic, int a_partition,
 			AttributeHelper keyAH,
-			AttributeHelper messageAH, Properties props, long trigCnt,
+			AttributeHelper messageAH, Properties props, int trigCnt,
 			int connectionRetries, int connectionRetryInterval) {
 		this.topic = a_topic;
 		this.keyAH = keyAH;

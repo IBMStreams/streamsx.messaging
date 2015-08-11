@@ -114,12 +114,12 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		return propertiesFile;
 	}
 
-	@Parameter(optional = true, description = "Name of the attribute for the message. This attribute is required. Default is \\\"message\\\"")
+	@Parameter(optional = true, description = "Name of the attribute for the message. This attribute is required. Default is \\\"message\\\".")
 	public void setMessageAttribute(String value) {
 		messageAH.setName(value);
 	}
 
-	@Parameter(optional = true, description = "Name of the attribute for the key. Default is \\\"key\\\"")
+	@Parameter(optional = true, description = "Name of the attribute for the key. Default is \\\"key\\\".")
 	public void setKeyAttribute(String value) {
 		keyAH.setName(value);
 	}

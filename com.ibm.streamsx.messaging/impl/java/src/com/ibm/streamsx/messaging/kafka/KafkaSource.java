@@ -130,7 +130,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	}	
 	
     @Parameter(name="partition", optional=true, 
-			description="Partition to subscribe to.")
+			description="Partition to subscribe to. This must be set when using consistent region.")
 	public void setPartition(int value) {
 	   	this.a_partition = value;
 	}
@@ -142,23 +142,25 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	}
     
     @Parameter(name="leaderConnectionRetries", optional=true, 
-			description="Number of attempts at finding a Kafka Broker before giving up. This is relevant when first looking for a broker, and in the case that a lead broker host goes down. Default is 3.")
+			description="Number of attempts at finding a Kafka Broker before giving up. This is relevant when first looking for a broker, and in the case that a lead broker host goes down. This is only valid when the partition parameter is set. Default is 3.")
 	public void setLeaderConnectionRetries(int value) {
 	   	this.leaderConnectionRetries = value;
 	}
     
     @Parameter(name="connectionRetryInterval", optional=true, 
-			description="Interval between each attempt to find a lead Kafka Broker in milliseconds. Number of attempts is set by the leaderConnectionRetries parameter.")
+			description="Interval between each attempt to find a lead Kafka Broker in milliseconds. Number of attempts is set by the leaderConnectionRetries parameter. This is only valid when the partition parameter is set. Default is 1000 ms.")
 	public void setConnectionRetryInterval(int value) {
 	   	this.connectionRetryInterval = value;
 	}
 
 	public static final String DESC = 
-			"This operator acts as a Kafka consumer receiving messages for one or more topics. " +
+			"This operator acts as a Kafka consumer receiving messages for a single topic. " +
 			"Note that there may be multiple threads receiving messages depending on the configuration specified. " +
 			"Ordering of messages is not guaranteed." + 
 			"\\n\\n**Behavior in a Consistent Region**" + 
-			"\\nThis operator can be used inside a consistent region. some behavior."
+			"\\nThis operator can be used inside a consistent region. Operator driven and periodical checkpointing " +
+			"are supported. Partition to be read from must be specified. To consume multiple partitions in a topic, use " + 
+			"user defined parallelism or multiple consumers."
 			;
 
 	@Override
