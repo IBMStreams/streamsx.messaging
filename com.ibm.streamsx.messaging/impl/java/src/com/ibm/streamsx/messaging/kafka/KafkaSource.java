@@ -158,7 +158,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 			"Note that there may be multiple threads receiving messages depending on the configuration specified. " +
 			"Ordering of messages is not guaranteed." + 
 			"\\n\\n**Behavior in a Consistent Region**" + 
-			"\\nThis operator cannot be used inside a consistent region."
+			"\\nThis operator can be used inside a consistent region. some behavior."
 			;
 
 	@Override
