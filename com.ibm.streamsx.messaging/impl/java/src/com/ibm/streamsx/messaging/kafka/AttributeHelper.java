@@ -82,6 +82,7 @@ class AttributeHelper {
 		else 
 			otup.setBlob(name, ValueFactory.newBlob(value));
 	}
+	
 	String getString(Tuple tuple) throws IOException {
 		if(!isAvailable) return null;
 		if(isString)
