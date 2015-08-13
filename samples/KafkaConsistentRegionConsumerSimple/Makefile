@@ -5,6 +5,7 @@
 
 TOOLKIT_NAME=com.ibm.streamsx.messaging
 STREAMS_MESSAGING_TOOLKIT ?= $(shell  ([ -e ../../$(TOOLKIT_NAME)/toolkit.xml ] && echo ../../$(TOOLKIT_NAME)) ||\
+						          echo $(STREAMS_STUDIO_SPL_PATH) ||\
 						          ([ -e "../$(TOOLKIT_NAME)" ] && echo ../$(TOOLKIT_NAME)) ||\
 									echo $(STREAMS_INSTALL)/toolkits/$(TOOLKIT_NAME))
 
@@ -16,7 +17,7 @@ SPL_CMD_ARGS ?= -t $(STREAMS_MESSAGING_TOOLKIT)
 SPL_MAIN_COMPOSITE = application::ConsistentRegionConsumerSimple
 
 all: distributed
-
+ 
 data:
 	mkdir data
 
@@ -28,4 +29,3 @@ distributed: data
 
 clean: 
 	$(SPLC) $(SPLC_FLAGS) -C -M $(SPL_MAIN_COMPOSITE)
-	rm data/*.out
