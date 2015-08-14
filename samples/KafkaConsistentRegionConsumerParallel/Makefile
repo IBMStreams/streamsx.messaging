@@ -5,6 +5,7 @@
 
 TOOLKIT_NAME=com.ibm.streamsx.messaging
 STREAMS_MESSAGING_TOOLKIT ?= $(shell  ([ -e ../../$(TOOLKIT_NAME)/toolkit.xml ] && echo ../../$(TOOLKIT_NAME)) ||\
+						          echo $(STREAMS_STUDIO_SPL_PATH) ||\
 						          ([ -e "../$(TOOLKIT_NAME)" ] && echo ../$(TOOLKIT_NAME)) ||\
 									echo $(STREAMS_INSTALL)/toolkits/$(TOOLKIT_NAME))
 
@@ -13,7 +14,7 @@ SPLC_FLAGS ?= -a --data-directory data
 SPLC = $(STREAMS_INSTALL)/bin/sc
 
 SPL_CMD_ARGS ?= -t $(STREAMS_MESSAGING_TOOLKIT)
-SPL_MAIN_COMPOSITE = application::ConsistentRegionConsumerParallel
+SPL_MAIN_COMPOSITE = application::ConsistentRegionParallelConsumers
 
 all: distributed
 
@@ -28,4 +29,3 @@ distributed: data
 
 clean: 
 	$(SPLC) $(SPLC_FLAGS) -C -M $(SPL_MAIN_COMPOSITE)
-	rm data/*.out

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>KafkaConsistentRegionParallelConsumers</name>
+	<name>KafkaParallelConsumers</name>
 	<comment></comment>
 	<projects>
 	</projects>

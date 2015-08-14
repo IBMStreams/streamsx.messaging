@@ -22,7 +22,7 @@ use com.ibm.streamsx.messaging.kafka::* ;
  * 
  * 
  */
-composite ConsistentRegionConsumerSimple
+composite ConsistentRegionSimple
 {
 	graph
 		//generate data to be written to a kafka server
