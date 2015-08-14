@@ -14,7 +14,7 @@ SPLC_FLAGS ?= -a --data-directory data
 SPLC = $(STREAMS_INSTALL)/bin/sc
 
 SPL_CMD_ARGS ?= -t $(STREAMS_MESSAGING_TOOLKIT)
-SPL_MAIN_COMPOSITE = application::ConsistentRegionConsumerSimple
+SPL_MAIN_COMPOSITE = application::ConsistentRegionSimple
 
 all: distributed
  

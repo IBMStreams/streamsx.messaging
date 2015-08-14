@@ -27,7 +27,7 @@ use com.ibm.streamsx.messaging.kafka::* ;
  * TO REMOVE CONSISTENT REGION: remove @consistent annotations (there are two) and 
  * delete JobControlPlane operator.  
  */
-composite ConsistentRegionConsumerParallel
+composite ConsistentRegionParallelConsumers
 {
 	graph
 		//generate data to be written to a kafka server
