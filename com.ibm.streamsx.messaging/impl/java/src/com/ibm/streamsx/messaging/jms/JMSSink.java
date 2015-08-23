@@ -50,6 +50,8 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	 */
 	private static Logger logger = Logger.getLogger(LoggerNames.LOG_FACILITY
 			+ "." + CLASS_NAME, "com.ibm.streamsx.messaging.jms.JMSMessages");
+	
+	public static final String OP_CKP_NAME_PROPERTITY = "StreamsOperatorCkpName";
 
 	// Variables required by the optional error output port
 
@@ -162,6 +164,24 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	
 	// consistent region context
     private ConsistentRegionContext consistentRegionContext;
+    
+    // CR queue name for storing checkpoint information
+    private String consistentRegionQueueName;
+    
+    // variable to keep track of last successful check point sequeuce id.
+    private long lastSuccessfulCheckpointId = 0;
+    
+    // unique id to identify messages on CR queue
+    private String operatorUniqueID;
+
+	public String getConsistentRegionQueueName() {
+		return consistentRegionQueueName;
+	}
+
+	@Parameter(optional = true)
+	public void setConsistentRegionQueueName(String consistentRegionQueueName) {
+		this.consistentRegionQueueName = consistentRegionQueueName;
+	}
 
 	// Mandatory parameter access
 	@Parameter(optional = false)
@@ -287,10 +307,34 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	@ContextCheck(compile = true, runtime = false)
 	public static void checkCompileTimeConsistentRegion(OperatorContextChecker checker) {
 		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
+		OperatorContext context = checker.getOperatorContext();
 		
-		if(consistentRegionContext != null && consistentRegionContext.isStartOfRegion()) {
-			checker.setInvalidContext("The following operator cannot be the start of a consistent region: JMSSink", new String[] {});
+		if(consistentRegionContext != null) {
+			
+			if(consistentRegionContext.isStartOfRegion()) {
+				checker.setInvalidContext("The following operator cannot be the start of a consistent region: JMSSink", new String[] {});
+			}
+			
+			if(!context.getParameterNames().contains("consistentRegionQueueName")) {
+				checker.setInvalidContext("consistentRegionQueueName parameter must be set when JMSSink is participating in a consistent region", new String[] {});
+			}
+			
+			if(context.getParameterNames().contains("reconnectionPolicy") ||
+			   context.getParameterNames().contains("reconnectionBound") || 
+			   context.getParameterNames().contains("period") || 
+			   context.getParameterNames().contains("maxMessageSendRetries") || 
+			   context.getParameterNames().contains("messageSendRetryDelay")) {
+				
+				checker.setInvalidContext("Parameters 'reconnectionPolicy', 'reconnectionBound', 'period', 'maxMessageSendRetries' and 'messageSendRetryDelay' can not be specified when JMSSink is participating in a consistent region", new String[] {});
+			}
 		}
+		else {
+			
+			if(context.getParameterNames().contains("consistentRegionQueueName")) {
+				checker.setInvalidContext("consistentRegionQueueName parameter can not be specified when JMSSink is not participating in a consistent region", new String[] {});
+			}
+		}
+		
 	}
 
 	/*
@@ -353,6 +397,18 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 						new String[] {context.getParameterValues("messageSendRetryDelay").get(0)});
 			}
 		}
+		
+		// consistentRegionQueueName must not be null if present
+		if(context.getParameterNames().contains("consistentRegionQueueName")) {
+			
+			String consistentRegionQueueName = context.getParameterValues("consistentRegionQueueName").get(0);
+			if(consistentRegionQueueName == null || consistentRegionQueueName.trim().length() == 0) {
+				logger.log(LogLevel.ERROR, "consistentRegionQueueName value must be a non-empty value");
+				checker.setInvalidContext(
+						"consistentRegionQueueName value must be a non-empty value", 
+						new String[] {});
+			}
+		}
 	}
 
 	// add compile time check for either period or reconnectionBound to be
@@ -360,12 +416,16 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	// and messageRetryDelay to be present only when maxMessageRetriesis present
 	@ContextCheck(compile = true)
 	public static void checkParameters(OperatorContextChecker checker) {
-		checker.checkDependentParameters("period", "reconnectionPolicy");
-		checker.checkDependentParameters("reconnectionBound",
-				"reconnectionPolicy");
+		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
 		
-		checker.checkDependentParameters("maxMessageSendRetries", "messageSendRetryDelay");
-		checker.checkDependentParameters("messageSendRetryDelay", "maxMessageSendRetries");
+		if(consistentRegionContext == null) {
+			checker.checkDependentParameters("period", "reconnectionPolicy");
+			checker.checkDependentParameters("reconnectionBound",
+					"reconnectionPolicy");
+			
+			checker.checkDependentParameters("maxMessageSendRetries", "messageSendRetryDelay");
+			checker.checkDependentParameters("messageSendRetryDelay", "maxMessageSendRetries");
+		}
 	}
 
 	@Override
@@ -378,6 +438,9 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		JmsClasspathUtil.setupClassPaths(context);
 		
 		consistentRegionContext = context.getOptionalContext(ConsistentRegionContext.class);
+		
+		operatorUniqueID = context.getPE().getDomainId() + "_" + context.getPE().getInstanceId() + "_" + context.getPE().getJobId() + "_" + context.getName();
+		String msgSelectorCR = (consistentRegionContext == null) ? null : JMSSink.OP_CKP_NAME_PROPERTITY + "=" + "'" + operatorUniqueID + "'";
 		
 		/*
 		 * Set appropriate variables if the optional error output port is
@@ -418,14 +481,23 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		jmsConnectionHelper = new JMSConnectionHelper(reconnectionPolicy,
 				reconnectionBound, period, true, maxMessageSendRetries, 
 				messageSendRetryDelay, connectionDocumentParser.getDeliveryMode(),
-				nReconnectionAttempts, nFailedInserts, logger, (consistentRegionContext != null));
+				nReconnectionAttempts, nFailedInserts, logger, (consistentRegionContext != null), msgSelectorCR);
 		jmsConnectionHelper.createAdministeredObjects(
 				connectionDocumentParser.getInitialContextFactory(),
 				connectionDocumentParser.getProviderURL(),
 				connectionDocumentParser.getUserPrincipal(),
 				connectionDocumentParser.getUserCredential(),
 				connectionDocumentParser.getConnectionFactory(),
-				connectionDocumentParser.getDestination());
+				connectionDocumentParser.getDestination(),
+				getConsistentRegionQueueName());
+		
+		// Initialize JMS connection if operator is in a consistent region.
+		// When this operator is in a consistent region, a transacted session is used,
+		// So the connection/message send retry logic does not apply, here the noRetry version
+		// of the connection initialization method is used, thus it makes sure to do it in Initial method than in process method.
+		if(consistentRegionContext != null) {
+			jmsConnectionHelper.createInitialConnectionNoRetry();
+		}
 
 		// Create the appropriate JMS message handlers as specified by the
 		// messageType.
@@ -485,10 +557,16 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			throws InterruptedException, ConnectionException,
 			UnsupportedEncodingException, ParserConfigurationException,
 			TransformerException, Exception {
+		
+		boolean msgSent = false;
+		
 		// Create the initial connection for the first time only
-		if (isInitialConnection) {
-			jmsConnectionHelper.createInitialConnection();
-			isInitialConnection = false;
+		// This is only called if the operator is NOT in a consistent region.
+		if(consistentRegionContext == null) {
+			if (isInitialConnection) {
+				jmsConnectionHelper.createInitialConnection();	
+				isInitialConnection = false;
+			}	
 		}
 		
 		// Construct the JMS message based on the message type taking the
@@ -497,15 +575,24 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 				jmsConnectionHelper.getSession());
 		// Send the message
 		// If an exception occured while sending , drop the particular tuple.
-		if (!jmsConnectionHelper.sendMessage(message)) {
+		
+		if(consistentRegionContext == null) {
+			// Operator is not in a consistent region
+			msgSent = jmsConnectionHelper.sendMessage(message);
+		}
+		else {
+			msgSent = jmsConnectionHelper.sendMessageNoRetry(message);
+		}
+		
+		if (!msgSent) {
+									
 			logger.log(LogLevel.ERROR, "EXCEPTION_SINK");
 			if (hasErrorPort) {
 				sendOutputErrorMsg(tuple,
 						"Dropping this tuple since an exception occurred while sending.");
 			}
+			
 		}
-		
-		
 
 	}
 
@@ -547,10 +634,59 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	public void checkpoint(Checkpoint checkpoint) throws Exception {
 		logger.log(LogLevel.INFO, "checkpoint " + checkpoint.getSequenceId());
 		
-		if(jmsConnectionHelper.getSession() != null) {
-			jmsConnectionHelper.getSession().commit();
-		}
+		long currentCheckpointId = checkpoint.getSequenceId();
+		long committedCheckpointId = 0;
+		boolean commit = true;
 		
+		
+		// The entire checkpoint should fail if any of the JMS operation fails.
+		// For example, if connection drops at receiveMssage, this means the tuples sent
+		// before current checkpoint are lost because we are using transacted session for CR
+		// It is not necessary to try to establish the connection again,
+		// any JMSException received should be propagated back to the CR framework.
+			
+		// retrieve a message from CR queue
+		Message crMsg = jmsConnectionHelper.receiveCRMessage();
+
+		// No checkpoint message yet, it may happen for the first checkpoint
+		if(crMsg != null) {
+		    committedCheckpointId = crMsg.getLongProperty("checkpointId");
+		}
+			
+		// Something is wrong here as committedCheckpointId should be greater than 1 when a successful checkpoint has been made
+		if(committedCheckpointId == 0 && lastSuccessfulCheckpointId > 0) {
+		    throw new Exception("Checkpoint can not proceed, expecting a checkpoint message, but not found.");
+		}
+			
+		if((currentCheckpointId - lastSuccessfulCheckpointId > 1) &&
+		   (lastSuccessfulCheckpointId < committedCheckpointId)) {
+			// this transaction has been processed before, and this is a duplicate
+			// discard this transaction. 
+			logger.log(LogLevel.INFO, "discard this transaction as it has been processed last time.");
+		    commit = false;
+				
+		}
+			
+		if(commit) {
+			jmsConnectionHelper.sendCRMessage(createCheckpointMsg(currentCheckpointId));
+			jmsConnectionHelper.commitSession();
+		}
+		else {
+			jmsConnectionHelper.roolbackSession();
+		}
+			
+		lastSuccessfulCheckpointId = currentCheckpointId;
+			
+	}
+	
+	private Message createCheckpointMsg(long currentCheckpointId) throws Exception {
+		
+		Message message;
+		message = jmsConnectionHelper.getSession().createMessage();
+		message.setStringProperty(JMSSink.OP_CKP_NAME_PROPERTITY, operatorUniqueID);
+		message.setLongProperty("checkpointId", currentCheckpointId);
+		
+		return message;
 	}
 
 	@Override
@@ -562,9 +698,8 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	public void reset(Checkpoint checkpoint) throws Exception {
 		logger.log(LogLevel.INFO, "Reset to checkpoint " + checkpoint.getSequenceId());
 	
-		if(jmsConnectionHelper.getSession() != null) {
-			jmsConnectionHelper.getSession().rollback();
-		}
+		lastSuccessfulCheckpointId = checkpoint.getSequenceId();
+		jmsConnectionHelper.roolbackSession();
 		
 	}
 
@@ -572,9 +707,8 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	public void resetToInitialState() throws Exception {
 		logger.log(LogLevel.INFO, "Reset to initial state");
 		
-		if(jmsConnectionHelper.getSession() != null) {
-			jmsConnectionHelper.getSession().rollback();
-		}
+		lastSuccessfulCheckpointId = 0;
+		jmsConnectionHelper.roolbackSession();
 	}
 
 	@Override
