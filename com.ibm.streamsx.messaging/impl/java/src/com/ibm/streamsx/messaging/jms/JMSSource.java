@@ -494,7 +494,8 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 				connectionDocumentParser.getUserPrincipal(),
 				connectionDocumentParser.getUserCredential(),
 				connectionDocumentParser.getConnectionFactory(),
-				connectionDocumentParser.getDestination());
+				connectionDocumentParser.getDestination(),
+				null);
 
 		// Create the appropriate JMS message handlers as specified by the
 		// messageType.
