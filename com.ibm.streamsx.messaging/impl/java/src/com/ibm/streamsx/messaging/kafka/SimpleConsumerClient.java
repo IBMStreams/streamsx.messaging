@@ -416,9 +416,15 @@ public class SimpleConsumerClient implements StateHandler {
 
 							ByteBuffer keyPayload = messageAndOffset.message()
 									.key();
-							byte[] keyBytes = new byte[keyPayload.limit()];
-							keyPayload.get(keyBytes);
-							String key = new String(keyBytes, charSet);
+							String key;
+							
+							if (keyPayload != null) {
+								byte[] keyBytes = new byte[keyPayload.limit()];
+								keyPayload.get(keyBytes);
+								key = new String(keyBytes, charSet);
+							} else {
+								key = ""; //handle case of no key 
+							}
 
 							// Set attributes in tuple:
 							tuple.setString(messageAH.getName(), message);
