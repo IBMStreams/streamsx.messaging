@@ -37,6 +37,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 			messageAH = new AttributeHelper("message");
 	protected List<String> topics = new ArrayList<String>();
 	protected KafkaClient client = null;
+	protected SimpleConsumerClient simpleClient = null;
 	private final Logger trace = Logger.getLogger(KafkaBaseOper.class
 			.getCanonicalName());
 
@@ -70,8 +71,15 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		supportedTypes.remove(MetaType.BLOB);
 		topicAH.initialize(ss, false, supportedTypes);
 
-		trace.log(TraceLevel.INFO, "Creating client");
-		client = new KafkaClient(topicAH, keyAH, messageAH, finalProperties);
+		
+		
+		OperatorContext operContext = getOperatorContext();
+		if (operContext.getParameterNames().contains("partition") == false){
+			//we don't need to create this client if using simpleConsumerClient
+			trace.log(TraceLevel.INFO, "Creating client");
+			client = new KafkaClient(topicAH, keyAH, messageAH, finalProperties);
+		}
+		
 	}
 
 	@Parameter(cardinality = -1, optional = true, description = "Specify a Kafka property \\\"key=value\\\" form. "
@@ -94,8 +102,9 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	}
 
 	public String getPropertiesFile() {
-
-		File file = new File(propertiesFile);
+		trace.log(TraceLevel.TRACE, "Properties file: " + propertiesFile);
+    	if (propertiesFile == null) return null;
+    	File file = new File(propertiesFile);
 		
 		// if the properties file is relative, the path is relative to the application directory
 		if (!file.isAbsolute())
@@ -105,12 +114,12 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		return propertiesFile;
 	}
 
-	@Parameter(optional = true, description = "Name of the attribute for the message. This attribute is required. Default is \\\"message\\\"")
+	@Parameter(optional = true, description = "Name of the attribute for the message. This attribute is required. Default is \\\"message\\\".")
 	public void setMessageAttribute(String value) {
 		messageAH.setName(value);
 	}
 
-	@Parameter(optional = true, description = "Name of the attribute for the key. Default is \\\"key\\\"")
+	@Parameter(optional = true, description = "Name of the attribute for the key. Default is \\\"key\\\".")
 	public void setKeyAttribute(String value) {
 		keyAH.setName(value);
 	}
