@@ -123,7 +123,7 @@ public class SimpleConsumerClient implements StateHandler {
 
 		try {
 
-			leaderID = ZkUtils.getLeaderForPartition(zkClient, a_topic,
+			leaderID = (Integer) ZkUtils.getLeaderForPartition(zkClient, a_topic,
 					a_partition).get();
 			a_leadBroker = ZkUtils.getBrokerInfo(zkClient, leaderID).get();
 
