@@ -4,6 +4,7 @@ package com.ibm.streamsx.messaging.kafka;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -24,7 +25,7 @@ import kafka.utils.ZkUtils;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.log4j.Logger;
 
-import scala.actors.threadpool.Arrays;
+//import scala.actors.threadpool.Arrays;
 
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OutputTuple;
