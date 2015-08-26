@@ -18,8 +18,8 @@
 	<classpathentry kind="lib" path="opt/downloaded/geronimo-jms_1.1_spec-1.1.1.jar"/>
 	<classpathentry kind="con" path="com.ibm.streams.java/com.ibm.streams.operator"/>
 	<classpathentry kind="lib" path="opt/downloaded/hawtbuf-1.11.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/kafka_2.8.0-0.8.1.1.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/org.eclipse.paho.client.mqttv3-1.0.1.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/slf4j-api-1.7.10.jar"/>
+	<classpathentry kind="lib" path="opt/downloaded/kafka_2.10-0.8.2-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="impl/java/bin"/>
 </classpath>
