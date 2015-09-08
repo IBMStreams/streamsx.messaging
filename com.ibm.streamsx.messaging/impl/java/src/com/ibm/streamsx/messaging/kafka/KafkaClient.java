@@ -110,9 +110,9 @@ class KafkaClient {
 		for(String topic : topics) {
 			topicCountMap.put(topic, threadsPerTopic);        
 		}
+		Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
 		int threadNumber = 0;
 		for(String topic : topics) {
-			Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
 			List<KafkaStream<byte[], byte[]>> streams = consumerMap.get(topic);        // now launch all the threads
 			for (KafkaStream<byte[], byte[]> stream : streams) {
 				trace.log(TraceLevel.INFO, "Starting thread [" + threadNumber + "] for topic: " + topic);

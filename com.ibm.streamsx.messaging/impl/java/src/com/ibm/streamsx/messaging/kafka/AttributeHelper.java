@@ -70,15 +70,21 @@ class AttributeHelper {
 	
 	void setValue(OutputTuple otup, String value) {
 		if(!isAvailable) return;
-		if(isString) 
+		if(isString) {
+			if (value == null)
+				value = "";
 			otup.setString(name, value);
-		else 
+		} else 
 			otup.setBlob(name, ValueFactory.newBlob(value.getBytes(CS)));
 	}
 	void setValue(OutputTuple otup, byte[] value) {
 		if(!isAvailable) return;
-		if(isString) 
-			otup.setString(name, new String(value, CS));
+		if(isString) {
+			if (value == null)
+				otup.setString(name,"");
+			else 
+				otup.setString(name, new String(value, CS));
+		}
 		else 
 			otup.setBlob(name, ValueFactory.newBlob(value));
 	}
