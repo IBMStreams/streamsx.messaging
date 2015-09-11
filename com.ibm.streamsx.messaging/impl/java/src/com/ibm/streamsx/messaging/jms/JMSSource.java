@@ -747,7 +747,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 
 	}
 	
-	private boolean isInitalConnectionEstablished() throws InterruptedException {
+	private boolean isInitialConnectionEstablished() throws InterruptedException {
 		
 		synchronized(resetLock) {
 			if(initalConnectionEstablished) {
@@ -801,7 +801,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	public void reset(Checkpoint checkpoint) throws Exception {
 		logger.log(LogLevel.INFO, "Reset to checkpoint " + checkpoint.getSequenceId());
 		
-		if(!isInitalConnectionEstablished()) {
+		if(!isInitialConnectionEstablished()) {
 			throw new ConnectionException("Connection to JMS failed.");
 		}
 		
@@ -871,7 +871,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	public void resetToInitialState() throws Exception {
 		logger.log(LogLevel.INFO, "Resetting to Initial...");
 		
-		if(!isInitalConnectionEstablished()) {
+		if(!isInitialConnectionEstablished()) {
 			throw new ConnectionException("Connection to JMS failed.");
 		}
 		
