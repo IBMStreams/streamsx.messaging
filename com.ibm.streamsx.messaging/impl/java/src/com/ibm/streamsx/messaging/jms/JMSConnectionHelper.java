@@ -447,25 +447,14 @@ class JMSConnectionHelper {
 	}
 
 	// this subroutine receives messages from a message consumer
-	// This method supports either blocking or non-blocking receive
-	// if wait is false, then timeout value is ignored
-	Message receiveMessage(boolean wait, long timeout) throws ConnectionException, InterruptedException,
+	// This method supports the receive method with timeout
+	Message receiveMessage(long timeout) throws ConnectionException, InterruptedException,
 			JMSException {
 		try {
-			
-			if(wait) {
-				// try to receive a message via blocking method
-				synchronized (getSession()) {
-					return (getConsumer().receive(timeout));
-				}
+			// try to receive a message via blocking method
+			synchronized (getSession()) {
+				return (getConsumer().receive(timeout));
 			}
-			else {
-				// try to receive a message with non blocking method
-				synchronized (getSession()) {
-					return (getConsumer().receiveNoWait());
-				}
-			}
-			
 		}
 		catch (JMSException e) {
 			// If the JMSSource operator was interrupted in middle
@@ -480,18 +469,12 @@ class JMSConnectionHelper {
 			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
 			createConnection();
 			// retry to receive again
-			if(wait) {
-				// try to receive a message via blocking method
-				synchronized (getSession()) {
-					return (getConsumer().receive(timeout));
-				}
+			
+			// try to receive a message via blocking method
+			synchronized (getSession()) {
+				return (getConsumer().receive(timeout));
 			}
-			else {
-				// try to receive a message with non blocking method
-				synchronized (getSession()) {
-					return (getConsumer().receiveNoWait());
-				}
-			}
+			
 		}
 	}
 	
@@ -539,10 +522,10 @@ class JMSConnectionHelper {
 	}
 		
 	// receive a message from consistent region queue
-	Message receiveCRMessage() throws JMSException {
+	Message receiveCRMessage(long timeout) throws JMSException {
 		
 		synchronized (getSession()) {
-			return (getConsumerCR().receiveNoWait());
+			return (getConsumerCR().receive(timeout));
 		}
 	}
 	
