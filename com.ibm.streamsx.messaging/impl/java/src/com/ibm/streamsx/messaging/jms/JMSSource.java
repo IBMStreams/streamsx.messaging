@@ -22,6 +22,7 @@ import org.xml.sax.SAXException;
 
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
+import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingOutput;
@@ -36,6 +37,7 @@ import com.ibm.streams.operator.samples.patterns.ProcessTupleProducer;
 import com.ibm.streams.operator.state.Checkpoint;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streams.operator.state.StateHandler;
+import com.ibm.streams.operator.types.RString;
 
 //The JMSSource operator converts a message JMS queue or topic to stream
 public class JMSSource extends ProcessTupleProducer implements StateHandler{	
@@ -170,7 +172,18 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	
 	private boolean initalConnectionEstablished = false;
 	
+	private String messageIDOutAttrName = null;
+	
 	private Object resetLock = new Object();
+
+	public String getMessageIDOutAttrName() {
+		return messageIDOutAttrName;
+	}
+
+	@Parameter(optional = true)
+	public void setMessageIDOutAttrName(String messageIDOutAttrName) {
+		this.messageIDOutAttrName = messageIDOutAttrName;
+	}
 
 	public String getMessageSelector() {
 		return messageSelector;
@@ -422,6 +435,21 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 			}
 		}
 		
+        if (checker.getOperatorContext().getParameterNames().contains("messageIDOutAttrName")) { //$NON-NLS-1$
+    		
+    		List<String> parameterValues = checker.getOperatorContext().getParameterValues("messageIDOutAttrName"); //$NON-NLS-1$
+    		String outAttributeName = parameterValues.get(0);
+	    	List<StreamingOutput<OutputTuple>> outputPorts = checker.getOperatorContext().getStreamingOutputs();
+	    	if (outputPorts.size() > 0)
+	    	{
+	    		StreamingOutput<OutputTuple> outputPort = outputPorts.get(0);
+	    		StreamSchema streamSchema = outputPort.getStreamSchema();
+	    		boolean check = checker.checkRequiredAttributes(streamSchema, outAttributeName);
+	    		if (check)
+	    			checker.checkAttributeType(streamSchema.getAttribute(outAttributeName), MetaType.RSTRING);
+	    	}
+    	}
+		
 	}
 
 	// add check for reconnectionPolicy is present if either period or
@@ -532,6 +560,14 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		boolean isInConsistentRegion = consistentRegionContext != null;
 		boolean isTriggerOperator = isInConsistentRegion && consistentRegionContext.isTriggerOperator();
 		
+		int msgIDAttrIndex = -1;
+		
+		if(this.getMessageIDOutAttrName() != null) {
+			StreamSchema streamSchema = getOutput(0).getStreamSchema();
+			msgIDAttrIndex = streamSchema.getAttributeIndex(this.getMessageIDOutAttrName());
+		}
+		
+		
 		// create the initial connection.
 	    try {
 			jmsConnectionHelper.createInitialConnection();
@@ -573,7 +609,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 					}
 				}
 
-				Message m = jmsConnectionHelper.receiveMessage(true, timeout);
+				Message m = jmsConnectionHelper.receiveMessage(timeout);
 				
 				if(m == null) {
 					continue;
@@ -654,6 +690,9 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 					break;
 				// the message was read successfully
 				case SUCCESSFUL_MESSAGE:
+					if(msgIDAttrIndex != -1 && m.getJMSMessageID() != null) {
+						dataTuple.setObject(msgIDAttrIndex, new RString(m.getJMSMessageID()));
+					}
 					dataOutputPort.submit(dataTuple);
 					break;
 				}
@@ -708,7 +747,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 
 	}
 	
-	private boolean isInitalConnectionEstablished() throws InterruptedException {
+	private boolean isInitialConnectionEstablished() throws InterruptedException {
 		
 		synchronized(resetLock) {
 			if(initalConnectionEstablished) {
@@ -762,7 +801,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	public void reset(Checkpoint checkpoint) throws Exception {
 		logger.log(LogLevel.INFO, "Reset to checkpoint " + checkpoint.getSequenceId());
 		
-		if(!isInitalConnectionEstablished()) {
+		if(!isInitialConnectionEstablished()) {
 			throw new ConnectionException("Connection to JMS failed.");
 		}
 		
@@ -809,7 +848,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		
 		while(!stop) {
 			
-			Message msg = jmsConnectionHelper.receiveMessage(false, 0);
+			Message msg = jmsConnectionHelper.receiveMessage(JMSSource.RECEIVE_TIMEOUT);
 			
 			if(msg == null) {
 				return;
@@ -832,7 +871,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	public void resetToInitialState() throws Exception {
 		logger.log(LogLevel.INFO, "Resetting to Initial...");
 		
-		if(!isInitalConnectionEstablished()) {
+		if(!isInitialConnectionEstablished()) {
 			throw new ConnectionException("Connection to JMS failed.");
 		}
 		

@@ -51,7 +51,10 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	private static Logger logger = Logger.getLogger(LoggerNames.LOG_FACILITY
 			+ "." + CLASS_NAME, "com.ibm.streamsx.messaging.jms.JMSMessages");
 	
+	// property names used in message header
 	public static final String OP_CKP_NAME_PROPERTITY = "StreamsOperatorCkpName";
+	
+	public static final String CKP_ID_PROPERTITY = "checkpointId";
 
 	// Variables required by the optional error output port
 
@@ -646,15 +649,16 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		// any JMSException received should be propagated back to the CR framework.
 			
 		// retrieve a message from CR queue
-		Message crMsg = jmsConnectionHelper.receiveCRMessage();
+		Message crMsg = jmsConnectionHelper.receiveCRMessage(500);
 
 		// No checkpoint message yet, it may happen for the first checkpoint
 		if(crMsg != null) {
-		    committedCheckpointId = crMsg.getLongProperty("checkpointId");
+		    committedCheckpointId = crMsg.getLongProperty(JMSSink.CKP_ID_PROPERTITY);
 		}
 			
 		// Something is wrong here as committedCheckpointId should be greater than 1 when a successful checkpoint has been made
 		if(committedCheckpointId == 0 && lastSuccessfulCheckpointId > 0) {
+			logger.log(LogLevel.ERROR, "Checkpoint can not proceed, expecting a checkpoint message, but not found.");
 		    throw new Exception("Checkpoint can not proceed, expecting a checkpoint message, but not found.");
 		}
 			
@@ -684,7 +688,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		Message message;
 		message = jmsConnectionHelper.getSession().createMessage();
 		message.setStringProperty(JMSSink.OP_CKP_NAME_PROPERTITY, operatorUniqueID);
-		message.setLongProperty("checkpointId", currentCheckpointId);
+		message.setLongProperty(JMSSink.CKP_ID_PROPERTITY, currentCheckpointId);
 		
 		return message;
 	}

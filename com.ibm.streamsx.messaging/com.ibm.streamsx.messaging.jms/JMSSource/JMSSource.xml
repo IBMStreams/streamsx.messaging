@@ -71,6 +71,7 @@ The following types of exceptions can occur:
      * If an attribute occurs more than once in the &lt;native_schema&gt; element.
      * The **connectionsDocument** parameter refers to an file that does not exist.
      * The **connectionsDocument** parameter is not specified and the `connections.xml` file is not present in the default location.
+     * The **messageIDOutAttrName** parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.
  * Run time errors that cause a message to be dropped and an error message to be logged.
    * The `JMSSource` operator throws an exception and discards the message in the following cases.
      The trace and log information for these exceptions is logged in the console logs
@@ -301,6 +302,15 @@ This parameter must be greater than zero and must be set if the JMSSource operat
 	  <name>messageSelector</name>
         <description>
         This optional parameter is used as JMS Message Selector.
+        </description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+       <parameter>
+	  <name>messageIDOutAttrName</name>
+        <description>
+        Output attribute on output data stream to assign message ID to, the specified attribute in output stream must be of type rstring.
         </description>
         <optional>true</optional>
         <type>rstring</type>
