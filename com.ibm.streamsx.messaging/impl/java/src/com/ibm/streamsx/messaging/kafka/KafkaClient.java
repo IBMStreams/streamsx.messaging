@@ -202,13 +202,17 @@ class ProducerHelper extends AProducerHelper {
 	@Override
 	void send(Tuple tuple, List<String> topics) throws Exception {
 		//repeated code for performance reasons
+		byte [] key;
+		byte [] message = messageAH.getBytes(tuple);
+		
 		if(keyAH.isAvailable()) {
+			key = keyAH.getBytes(tuple);
 			for(String topic : topics) {
-				producer.send(new ProducerRecord(topic,keyAH.getBytes(tuple), messageAH.getBytes(tuple)));
+				producer.send(new ProducerRecord(topic,key, message));
 			}
 		} else {
 			for(String topic : topics) {
-				producer.send(new ProducerRecord(topic,null, messageAH.getBytes(tuple)));
+				producer.send(new ProducerRecord(topic,null, message));
 			}
 		}
 	}
