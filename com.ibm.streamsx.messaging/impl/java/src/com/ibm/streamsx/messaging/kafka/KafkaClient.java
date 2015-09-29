@@ -39,7 +39,7 @@ class KafkaClient {
 	private Properties finalProperties = null;
 	private boolean isInit = false, isConsumer = false;
 	
-	private AProducerHelper producer = null;
+	private ProducerHelper producer = null;
 	
 
 	static final Logger trace = Logger.getLogger(KafkaClient.class.getCanonicalName());
@@ -166,22 +166,10 @@ class KafkaClient {
 	}
 }
 
-abstract class AProducerHelper {
+class ProducerHelper {
 	AttributeHelper keyAH=null, messageAH = null;
-
-	abstract void init(Properties finalProperties, AttributeHelper keyAH,
-			AttributeHelper messageAH) throws Exception;
-	
-	abstract void send(Tuple tuple, AttributeHelper topicAH)  throws Exception;
-	
-	abstract void send(Tuple tuple,  List<String> topics)  throws Exception;
-	
-} 
-
-class ProducerHelper extends AProducerHelper {
 	private KafkaProducer producer = null;
 
-	@Override
 	void init(Properties finalProperties, AttributeHelper keyAH,
 			AttributeHelper messageAH) {
 		producer = new KafkaProducer(finalProperties);
@@ -189,31 +177,20 @@ class ProducerHelper extends AProducerHelper {
 		this.messageAH = messageAH;
 	}
 
-	@Override
 	void send(Tuple tuple, AttributeHelper topicAH) throws Exception {
-		//repeated code for performance reasons
-		if(keyAH.isAvailable()) {
-			producer.send(new ProducerRecord(topicAH.getString(tuple),keyAH.getBytes(tuple), messageAH.getBytes(tuple)));
-		} else {
-			producer.send(new ProducerRecord(topicAH.getString(tuple),null, messageAH.getBytes(tuple)));
-		}
+		String topic = topicAH.getString(tuple);
+		byte [] message = messageAH.getBytes(tuple);
+		byte [] key = keyAH.getBytes(tuple);
+		
+		producer.send(new ProducerRecord(topic ,key, message));
 	}
 
-	@Override
 	void send(Tuple tuple, List<String> topics) throws Exception {
-		//repeated code for performance reasons
-		byte [] key;
 		byte [] message = messageAH.getBytes(tuple);
-		
-		if(keyAH.isAvailable()) {
-			key = keyAH.getBytes(tuple);
-			for(String topic : topics) {
-				producer.send(new ProducerRecord(topic,key, message));
-			}
-		} else {
-			for(String topic : topics) {
-				producer.send(new ProducerRecord(topic,null, message));
-			}
+		byte [] key = keyAH.getBytes(tuple);
+		for(String topic : topics) {
+			producer.send(new ProducerRecord(topic,key, message));
 		}
+
 	}
 }
