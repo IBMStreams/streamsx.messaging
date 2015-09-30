@@ -106,9 +106,10 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	public void allPortsReady() throws Exception {
 		//initialize the client
 		trace.log(TraceLevel.INFO, "Initializing client");
+
 		if(a_partition >= 0){
 			trace.log(TraceLevel.INFO, "Using simple consumer client.");
-			simpleClient = new SimpleConsumerClient(topics.get(0),  a_partition, keyAH, messageAH, finalProperties, triggerCount, leaderConnectionRetries, connectionRetryInterval);
+			simpleClient = new SimpleConsumerClient(topics.get(0),  a_partition, topicAH, keyAH, messageAH, finalProperties, triggerCount, leaderConnectionRetries, connectionRetryInterval);
 			simpleClient.initialize(getOperatorContext());
 			simpleClient.allPortsReady();
 		} else {
