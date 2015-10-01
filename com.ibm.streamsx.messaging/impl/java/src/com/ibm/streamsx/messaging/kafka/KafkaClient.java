@@ -181,13 +181,18 @@ class ProducerHelper {
 		String topic = topicAH.getString(tuple);
 		byte [] message = messageAH.getBytes(tuple);
 		byte [] key = keyAH.getBytes(tuple);
-		
+		if (key == null) {
+			key = message;
+		}
 		producer.send(new ProducerRecord(topic ,key, message));
 	}
 
 	void send(Tuple tuple, List<String> topics) throws Exception {
 		byte [] message = messageAH.getBytes(tuple);
 		byte [] key = keyAH.getBytes(tuple);
+		if (key == null) {
+			key = message;
+		}
 		for(String topic : topics) {
 			producer.send(new ProducerRecord(topic,key, message));
 		}
