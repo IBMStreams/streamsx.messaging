@@ -99,7 +99,7 @@ public class SimpleConsumerClient implements StateHandler {
 		// Start a thread for producing tuples because operator
 		// implementations must not block and must return control to the caller.
 		processThread.start();
-	}
+	}   
 
 	@Override
 	public void checkpoint(Checkpoint checkpoint) throws Exception {
