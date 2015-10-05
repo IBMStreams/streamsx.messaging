@@ -14,6 +14,10 @@
 	    <url>http://repository.apache.org/content/repositories/snapshots/</url>
 	  </repository>
 	  <repository>
+	    <id>apache.releases</id>
+	    <url>https://repository.apache.org/content/repositories/releases/</url>
+	  </repository>
+	  <repository>
 	    <id>Eclipse Paho Repo releases</id>
 	    <url>https://repo.eclipse.org/content/repositories/paho-releases</url>
 	  </repository>
@@ -24,7 +28,7 @@
 	  <dependency>
 	    <groupId>org.apache.kafka</groupId>
 	    <artifactId>kafka_2.10</artifactId>
-	    <version>0.8.2-SNAPSHOT</version>
+	    <version>0.8.2.1</version>
 	    <exclusions>
 	      <exclusion>
 		<groupId>com.sun.jmx</groupId>
