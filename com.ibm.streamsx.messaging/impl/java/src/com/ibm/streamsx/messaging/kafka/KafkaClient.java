@@ -223,9 +223,7 @@ class ProducerStringHelper extends AProducerHelper{
 		String topic = topicAH.getString(tuple);
 		String message = messageAH.getString(tuple);
 		String key = keyAH.getString(tuple);
-		if (key == null) {
-			key = message;
-		}
+
 		producer.send(new ProducerRecord<String, String>(topic ,key, message));
 	}
 
@@ -233,9 +231,7 @@ class ProducerStringHelper extends AProducerHelper{
 	void send(Tuple tuple, List<String> topics) throws Exception {
 		String message = messageAH.getString(tuple);
 		String key = keyAH.getString(tuple);
-		if (key == null) {
-			key = message;
-		}
+
 		for(String topic : topics) {
 			producer.send(new ProducerRecord<String, String>(topic,key, message));
 		}
