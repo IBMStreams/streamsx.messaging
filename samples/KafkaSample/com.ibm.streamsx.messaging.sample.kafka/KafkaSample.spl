@@ -16,25 +16,25 @@ use com.ibm.streamsx.messaging.kafka::*;
 composite KafkaSample {
     graph
 
-	  //create some messages and send to Kafka
-		stream<rstring topic, /*rstring key,*/ rstring message> OutputStream = Beacon() {
-			param
-				initDelay : 5.0;
-			output OutputStream: topic = "MyNewerTopic2", message = "****This is the time for all good men and women to come to the aid of the nation. "
-									+ "A quick brown fox jumped over the lazy dog.****" ;//, key = "abc";
-		}
-
-
-		() as KafkaSinkOp = KafkaProducer(OutputStream) {
-			param
-				propertiesFile : "etc/producer.properties";
-		}
+//	  //create some messages and send to Kafka
+//		stream<rstring topic, /*rstring key,*/ rstring message> OutputStream = Beacon() {
+//			param
+//				initDelay : 5.0;
+//			output OutputStream: topic = "MyNewerTopic2", message = "****This is the time for all good men and women to come to the aid of the nation. "
+//									+ "A quick brown fox jumped over the lazy dog.****" ;//, key = "abc";
+//		}
+//
+//
+//		() as KafkaSinkOp = KafkaProducer(OutputStream) {
+//			param
+//				propertiesFile : "etc/producer.properties";
+//		}
 		
 		stream<rstring key, rstring message> KafkaStream = KafkaConsumer()
 		{
 			param
 				propertiesFile : "etc/consumer.properties" ;
-				topic : "MyNewerTopic2" ;
+				topic : "myTestTopic" ;
 				kafkaProperty : "group.id=newGroup" + (rstring) getTimestampInSecs();
 				//partition : 0;
 				//threadsPerTopic : 6;

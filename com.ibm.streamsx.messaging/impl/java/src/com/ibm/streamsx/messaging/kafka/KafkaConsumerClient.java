@@ -7,7 +7,7 @@ import java.util.concurrent.ThreadFactory;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamingOutput;
 
-public abstract class KafkaConsumerInterface {
+public abstract class KafkaConsumerClient {
 	AttributeHelper topicAH;
 	AttributeHelper keyAH;
 	AttributeHelper 	messageAH;
@@ -17,8 +17,6 @@ public abstract class KafkaConsumerInterface {
 	abstract void init(
 			StreamingOutput<OutputTuple> so,
 			ThreadFactory tf, List<String> topics, int threadsPerTopic);
-	
-	abstract void produceTuples();
 	
 	abstract void shutdown();
 	

@@ -36,7 +36,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	private int leaderConnectionRetries = 3;
 	private int connectionRetryInterval = 1000;
 	private static Logger trace = Logger.getLogger(KafkaSource.class.getName());
-	KafkaConsumerInterface newKafkaConsumer;
+	KafkaConsumerClient newKafkaConsumer;
 	
 	
 	//consistent region checks

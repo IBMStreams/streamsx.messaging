@@ -11,7 +11,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamingOutput;
 
-public class StreamsKafkaConsumer9 extends KafkaConsumerInterface {
+public class StreamsKafkaConsumer9 extends KafkaConsumerClient {
 	KafkaConsumer<String, String> consumer;
 	static Boolean shutdown = false;
 	StreamingOutput<OutputTuple> oTuple;
@@ -27,7 +27,12 @@ public class StreamsKafkaConsumer9 extends KafkaConsumerInterface {
 			StreamingOutput<OutputTuple> so,
 			ThreadFactory tf, List<String> topics, int threadsPerTopic){
 		oTuple = so;
-		consumer.subscribe(topics); 
+		
+		try {
+			consumer.subscribe(topics); 
+		} catch (Exception e){
+			System.out.println("Failed to subscribe. Topics: " + topics.toString() + " consumer: " + consumer.toString());
+		}
 		
 		processThread = tf.newThread(new Runnable() {
 
