@@ -36,7 +36,9 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	private int leaderConnectionRetries = 3;
 	private int connectionRetryInterval = 1000;
 	private static Logger trace = Logger.getLogger(KafkaSource.class.getName());
-
+	KafkaConsumerClient newKafkaConsumer;
+	
+	
 	//consistent region checks
 	@ContextCheck(compile = true)
 	public static void checkInConsistentRegion(OperatorContextChecker checker) {
@@ -113,8 +115,10 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 			simpleClient.initialize(getOperatorContext());
 			simpleClient.allPortsReady();
 		} else {
-			trace.log(TraceLevel.INFO, "Using high level consumer client.");
-			client.initConsumer(getOutput(0), getOperatorContext().getThreadFactory(), topics, threadsPerTopic);
+			trace.log(TraceLevel.INFO, "Using new consumer client.");
+			newKafkaConsumer = new StreamsKafkaConsumer9(topicAH, keyAH, messageAH, finalProperties);
+			System.out.println(topics.toString());
+			newKafkaConsumer.init(getOutput(0), getOperatorContext().getThreadFactory(), topics, threadsPerTopic);
 		}
 	}
 

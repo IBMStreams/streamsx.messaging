@@ -14,14 +14,16 @@ use com.ibm.streamsx.messaging.kafka::*;
  */
 
 composite KafkaSample {
+	param 
+		expression<rstring> $topic : "myTestTopic" ;
     graph
 
 	  //create some messages and send to Kafka
 		stream<rstring topic, rstring key, rstring message> OutputStream = Beacon() {
 			param
-				iterations : 10 ;
-				period : 1.0 ;
-			output OutputStream: topic = "mytopic", message = "this is from kafka sink", key = "abc";
+				initDelay : 5.0;
+			output OutputStream: topic = $topic, message = "****This is the time for all good men and women to come to the aid of the nation. "
+									+ "A quick brown fox jumped over the lazy dog.****" , key = "abc";
 		}
 
 
@@ -34,12 +36,59 @@ composite KafkaSample {
 		{
 			param
 				propertiesFile : "etc/consumer.properties" ;
-				topic : "mytopic" ;
+				topic : $topic;
+				kafkaProperty : "group.id=newGroup" + (rstring) getTimestampInSecs();
+				//partition : 0;
+				//threadsPerTopic : 6;
+//				config
+//				// Fuse it with the Consumer partition.
+//					placement : partitionColocation("Consumer") ;
 		}
 
 		() as SinkOp = Custom(KafkaStream)
 		{
+		
 			logic
-				onTuple KafkaStream : println("Message: " +(rstring) KafkaStream) ;
+				state :
+				{
+					mutable uint64 _msgCnt = 0ul ;
+					mutable uint64 _lastKnownMsgCnt = 0ul ;
+					mutable KafkaStream _mostRecentlyReceivedMessage = { } ;
+					mutable boolean _loadTestingEnded = false ;
+				}
+
+				onTuple KafkaStream :
+				{
+					_msgCnt ++ ;
+					// Let us keep a copy of the most recently received message in a state variable.
+					// This will be used to print the very last tuple that came from the producer when
+					// the entire Kafka load testing is completed.
+					//
+					// Activate this line only for smaller sized payloads (upto 1KB in size).
+					// Beyond that, it will affect the performance due to large string copy during this assignment.
+					//
+					///// assignFrom(_mostRecentlyReceivedMessage, MFKT);
+
+					// Always print the very first message.
+					// After that, print only once for every 500K messages.
+					if((_msgCnt == 1ul) ||((_msgCnt % 500000ul) == 0ul))
+					{
+						if(_msgCnt == 1ul)
+						{
+							appTrc(Trace.error,
+								"******* START OF KAFKA LOAD TESTING (main application entry point) *******") ;
+						}
+
+						appTrc(Trace.error, "Message " +(rstring) _msgCnt + "-->" +(rstring)
+							KafkaStream) ;
+					}
+
+				}
+
+
+//				config
+//				// Fuse it with the Consumer partition.
+//					placement : partitionColocation("Consumer") ;
+			
 		}
 }
