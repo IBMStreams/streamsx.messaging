@@ -195,6 +195,18 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	public void retireCheckpoint(long id) throws Exception {
 		simpleClient.retireCheckpoint(id);
 	}
+	
+	@Override
+	public void shutdown() throws Exception {
+		if (simpleClient != null)
+			simpleClient.shutdown();
+
+        OperatorContext context = getOperatorContext();
+        trace.log(TraceLevel.ALL, "Operator " + context.getName() + " shutting down in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
+        
+        // Must call super.shutdown()
+        super.shutdown();
+	}
 
 }
 
