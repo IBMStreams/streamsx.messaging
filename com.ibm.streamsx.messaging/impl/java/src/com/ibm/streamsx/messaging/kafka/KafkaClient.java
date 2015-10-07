@@ -256,9 +256,7 @@ class ProducerByteHelper extends AProducerHelper{
 		String topic = topicAH.getString(tuple);
 		byte [] message = messageAH.getBytes(tuple);
 		byte [] key = keyAH.getBytes(tuple);
-		if (key == null) {
-			key = message;
-		}
+
 		producer.send(new ProducerRecord<byte[],byte[]>(topic ,key, message));
 	}
 
@@ -266,9 +264,7 @@ class ProducerByteHelper extends AProducerHelper{
 	void send(Tuple tuple, List<String> topics) throws Exception {
 		byte [] message = messageAH.getBytes(tuple);
 		byte [] key = keyAH.getBytes(tuple);
-		if (key == null) {
-			key = message;
-		}
+
 		for(String topic : topics) {
 			producer.send(new ProducerRecord<byte[],byte[]>(topic,key, message));
 		}
