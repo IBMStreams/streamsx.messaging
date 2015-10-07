@@ -63,6 +63,10 @@ class KafkaClient {
 		checkInit(false);
 		
 		trace.log(TraceLevel.INFO, "Initializing Kafka Producer: " + finalProperties);
+		
+		setDefaultSerializers(finalProperties);
+		//handle default key.serializer
+		
 
 		if(messageAH.isString())
 			producer = new ProducerStringHelper();
@@ -72,6 +76,27 @@ class KafkaClient {
 		producer.init(finalProperties, keyAH, messageAH);
 	}
 	
+	private void setDefaultSerializers(Properties finalProperties2) {
+		if (!finalProperties.containsKey("key.serializer")){
+			if(messageAH.isString()){
+				finalProperties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+			}
+			else{
+				finalProperties.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+			}
+		}
+		
+		if (!finalProperties.containsKey("value.serializer")){
+			if(messageAH.isString()){
+				finalProperties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+			}
+			else{
+				finalProperties.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+			}
+		}
+		
+	}
+
 	public void send(Tuple tuple, List<String> topics) throws Exception {
 		producer.send(tuple, topics);
 	}
@@ -181,6 +206,18 @@ abstract class AProducerHelper {
 	
 } 
 
+abstract class AProducerHelper {
+	AttributeHelper keyAH=null, messageAH = null;
+
+	abstract void init(Properties finalProperties, AttributeHelper keyAH,
+			AttributeHelper messageAH) throws Exception;
+	
+	abstract void send(Tuple tuple, AttributeHelper topicAH)  throws Exception;
+	
+	abstract void send(Tuple tuple,  List<String> topics)  throws Exception;
+	
+} 
+
 class ProducerStringHelper extends AProducerHelper{
 	AttributeHelper keyAH=null, messageAH = null;
 	private KafkaProducer<String, String> producer = null;
@@ -214,6 +251,7 @@ class ProducerStringHelper extends AProducerHelper{
 	}
 }
 
+
 class ProducerByteHelper extends AProducerHelper{
 	AttributeHelper keyAH=null, messageAH = null;
 	private KafkaProducer<byte[],byte[]> producer = null;
@@ -231,9 +269,7 @@ class ProducerByteHelper extends AProducerHelper{
 		String topic = topicAH.getString(tuple);
 		byte [] message = messageAH.getBytes(tuple);
 		byte [] key = keyAH.getBytes(tuple);
-		if (key == null) {
-			key = message;
-		}
+
 		producer.send(new ProducerRecord<byte[],byte[]>(topic ,key, message));
 	}
 
@@ -241,12 +277,12 @@ class ProducerByteHelper extends AProducerHelper{
 	void send(Tuple tuple, List<String> topics) throws Exception {
 		byte [] message = messageAH.getBytes(tuple);
 		byte [] key = keyAH.getBytes(tuple);
-		if (key == null) {
-			key = message;
-		}
+
 		for(String topic : topics) {
 			producer.send(new ProducerRecord<byte[],byte[]>(topic,key, message));
 		}
 
 	}
+
 }
+

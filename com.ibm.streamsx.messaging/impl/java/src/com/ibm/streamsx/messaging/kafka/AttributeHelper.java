@@ -70,23 +70,30 @@ class AttributeHelper {
 	
 	void setValue(OutputTuple otup, String value) {
 		if(!isAvailable) return;
-		if(isString) {
+		if (isString) {
 			if (value == null)
 				value = "";
 			otup.setString(name, value);
-		} else 
-			otup.setBlob(name, ValueFactory.newBlob(value.getBytes(CS)));
-	}
-	void setValue(OutputTuple otup, byte[] value) {
-		if(!isAvailable) return;
-		if(isString) {
-			if (value == null)
-				otup.setString(name,"");
-			else 
-				otup.setString(name, new String(value, CS));
+		} else {
+			if (value != null) {
+				otup.setBlob(name, ValueFactory.newBlob(value.getBytes(CS)));
+			}
 		}
-		else 
-			otup.setBlob(name, ValueFactory.newBlob(value));
+	}
+
+	void setValue(OutputTuple otup, byte[] value) {
+		if (!isAvailable)
+			return;
+		if (isString) {
+			if (value == null)
+				otup.setString(name, "");
+			else
+				otup.setString(name, new String(value, CS));
+		} else {
+			if (value != null) {
+				otup.setBlob(name, ValueFactory.newBlob(value));
+			}
+		}
 	}
 	
 	String getString(Tuple tuple) throws IOException {

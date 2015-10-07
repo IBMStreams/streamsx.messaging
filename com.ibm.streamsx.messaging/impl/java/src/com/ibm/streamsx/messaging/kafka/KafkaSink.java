@@ -105,7 +105,7 @@ public class KafkaSink extends KafkaBaseOper {
 			"This operator acts as a Kafka producer sending tuples as messages to a Kafka broker. " + 
 			"The broker is assumed to be already configured and running. " +
 			"The incoming stream can have three attributes: topic, key and message. " +
-			"The message is a required attribute. If the key attribute is not specified, the message is used as the key. " +
+			"The message is a required attribute. " +
 			"A topic can be specified as either an input stream attribute or as a parameter. " +
 			"Specify properties as described here: http://kafka.apache.org/documentation.html#newproducerconfigs. " + 
 			"\\n\\n**Behavior in a Consistent Region**" + 
