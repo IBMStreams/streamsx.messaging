@@ -76,7 +76,7 @@ class AttributeHelper {
 			otup.setString(name, value);
 		} else {
 			if (value == null) {
-				otup.setBlob(name, null);
+				//don't set because we want it to be empty. 
 			} else {
 				otup.setBlob(name, ValueFactory.newBlob(value.getBytes(CS)));
 			}
@@ -93,7 +93,7 @@ class AttributeHelper {
 				otup.setString(name, new String(value, CS));
 		} else {
 			if (value == null) {
-				otup.setBlob(name, null);
+				//don't set because we want it to be empty.
 			} else {
 				otup.setBlob(name, ValueFactory.newBlob(value));
 			}
