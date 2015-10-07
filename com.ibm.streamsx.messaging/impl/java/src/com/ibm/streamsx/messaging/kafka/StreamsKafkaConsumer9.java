@@ -10,23 +10,26 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamingOutput;
+import com.ibm.streams.operator.logging.TraceLevel;
 
 public class StreamsKafkaConsumer9 extends KafkaConsumerClient {
 	KafkaConsumer<String, String> consumer;
 	static Boolean shutdown = false;
-	StreamingOutput<OutputTuple> oTuple;
 	
-	public StreamsKafkaConsumer9(AttributeHelper topicAH, AttributeHelper keyAH, AttributeHelper 	messageAH, Properties props) {
+	
+	public StreamsKafkaConsumer9(AttributeHelper topicAH, AttributeHelper keyAH, AttributeHelper messageAH, Properties props) {
 		this.topicAH = topicAH;
 		this.keyAH = keyAH;
 		this.messageAH =  messageAH;
 		this.props = props;
+		
+		consumer = new KafkaConsumer<String,String>(props); 
 	}
 	
 	public void init(
 			StreamingOutput<OutputTuple> so,
 			ThreadFactory tf, List<String> topics, int threadsPerTopic){
-		oTuple = so;
+		streamingOutput = so;
 		
 		try {
 			consumer.subscribe(topics); 
@@ -50,7 +53,13 @@ public class StreamsKafkaConsumer9 extends KafkaConsumerClient {
 
 		});
 		
-		
+		/*
+		 * Set the thread not to be a daemon to ensure that the SPL runtime will
+		 * wait for the thread to complete before determining the operator is
+		 * complete.
+		 */
+		processThread.setDaemon(false);
+		processThread.start();
 	}
 	
 	public void produceTuples(){
@@ -65,9 +74,21 @@ public class StreamsKafkaConsumer9 extends KafkaConsumerClient {
 		}
 	}
 	
-	private static void process(ConsumerRecords<String, String> records) {
+	private void process(ConsumerRecords<String, String> records) throws Exception {
+		String topic;
+		
 		for (ConsumerRecord<String, String> record : records){
-			System.out.printf("offset = %d, key = %s, value = %s", record.offset(), record.key(), record.value());
+			topic = record.topic();
+			if(shutdown) return;
+			if(trace.isLoggable(TraceLevel.DEBUG))
+				trace.log(TraceLevel.DEBUG, "Topic: " + topic + ", Message: " + record.value() );
+			OutputTuple otup = streamingOutput.newTuple();
+			if(topicAH.isAvailable())
+				topicAH.setValue(otup, topic);
+			if(keyAH.isAvailable())
+				keyAH.setValue(otup, record.key());
+			messageAH.setValue(otup, record.value());
+			streamingOutput.submit(otup);
 		}
 	}
 	

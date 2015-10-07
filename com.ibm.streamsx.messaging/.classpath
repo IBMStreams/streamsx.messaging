@@ -14,7 +14,6 @@
 	<classpathentry kind="con" path="com.ibm.streams.java/com.ibm.streams.operator"/>
 	<classpathentry kind="lib" path="opt/downloaded/hawtbuf-1.11.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/org.eclipse.paho.client.mqttv3-1.0.1.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/slf4j-api-1.7.10.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/kafka_2.10-0.9.0.0.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/kafka-clients-0.9.0.0.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/jackson-core-2.5.4.jar"/>

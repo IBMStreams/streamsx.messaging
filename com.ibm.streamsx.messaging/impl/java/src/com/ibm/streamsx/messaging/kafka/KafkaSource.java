@@ -117,6 +117,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		} else {
 			trace.log(TraceLevel.INFO, "Using new consumer client.");
 			newKafkaConsumer = new StreamsKafkaConsumer9(topicAH, keyAH, messageAH, finalProperties);
+			System.out.println(topics.toString());
 			newKafkaConsumer.init(getOutput(0), getOperatorContext().getThreadFactory(), topics, threadsPerTopic);
 		}
 	}
