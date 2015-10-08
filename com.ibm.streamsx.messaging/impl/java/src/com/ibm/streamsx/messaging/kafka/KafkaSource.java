@@ -161,7 +161,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 			"\\n\\n**Behavior in a Consistent Region**" + 
 			"\\nThis operator can be used inside a consistent region. Operator driven and periodical checkpointing " +
 			"are supported. Partition to be read from must be specified. To consume multiple partitions in a topic, use " + 
-			"user defined parallelism or multiple consumers."
+			"user defined parallelism or multiple consumers. Resetting to initial state is not supported."
 			;
 
 	@Override
