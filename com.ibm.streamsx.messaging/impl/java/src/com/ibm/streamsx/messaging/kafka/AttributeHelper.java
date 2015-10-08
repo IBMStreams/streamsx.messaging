@@ -75,9 +75,7 @@ class AttributeHelper {
 				value = "";
 			otup.setString(name, value);
 		} else {
-			if (value == null) {
-				otup.setBlob(name, null);
-			} else {
+			if (value != null) {
 				otup.setBlob(name, ValueFactory.newBlob(value.getBytes(CS)));
 			}
 		}
@@ -92,9 +90,7 @@ class AttributeHelper {
 			else
 				otup.setString(name, new String(value, CS));
 		} else {
-			if (value == null) {
-				otup.setBlob(name, null);
-			} else {
+			if (value != null) {
 				otup.setBlob(name, ValueFactory.newBlob(value));
 			}
 		}
