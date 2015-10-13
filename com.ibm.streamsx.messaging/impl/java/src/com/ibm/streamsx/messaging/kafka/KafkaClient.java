@@ -206,18 +206,6 @@ abstract class AProducerHelper {
 	
 } 
 
-abstract class AProducerHelper {
-	AttributeHelper keyAH=null, messageAH = null;
-
-	abstract void init(Properties finalProperties, AttributeHelper keyAH,
-			AttributeHelper messageAH) throws Exception;
-	
-	abstract void send(Tuple tuple, AttributeHelper topicAH)  throws Exception;
-	
-	abstract void send(Tuple tuple,  List<String> topics)  throws Exception;
-	
-} 
-
 class ProducerStringHelper extends AProducerHelper{
 	AttributeHelper keyAH=null, messageAH = null;
 	private KafkaProducer<String, String> producer = null;

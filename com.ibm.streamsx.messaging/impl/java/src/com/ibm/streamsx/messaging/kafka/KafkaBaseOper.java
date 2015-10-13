@@ -49,11 +49,23 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 			finalProperties.load(new FileReader(propFile));
 		}
 		finalProperties.putAll(properties);
-
+		finalProperties = transformTrustStoreProperty(finalProperties);
+		
 		if (finalProperties == null || finalProperties.isEmpty())
 			throw new Exception(
 					"Kafka connection properties must be specified.");
 
+	}
+
+	private Properties transformTrustStoreProperty(Properties props) {
+		String trustStoreFile = props.getProperty("ssl.truststore.location");
+		if (trustStoreFile != null){
+			trustStoreFile = getAbsoluteFilePath(trustStoreFile);
+			System.out.println("TrustStore location: " + trustStoreFile);
+			props.setProperty("ssl.truststore.location", trustStoreFile);
+			trace.log(TraceLevel.INFO, "TrustStore location set to " + trustStoreFile);
+		}
+		return props;
 	}
 
 	public void initSchema(StreamSchema ss) throws Exception {
@@ -104,14 +116,19 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	public String getPropertiesFile() {
 		trace.log(TraceLevel.TRACE, "Properties file: " + propertiesFile);
     	if (propertiesFile == null) return null;
-    	File file = new File(propertiesFile);
+    	propertiesFile = getAbsoluteFilePath(propertiesFile);
+		return propertiesFile;
+	}
+	
+	public String getAbsoluteFilePath(String filePath){
+		File file = new File(filePath);
 		
 		// if the properties file is relative, the path is relative to the application directory
 		if (!file.isAbsolute())
 		{
-			propertiesFile = getOperatorContext().getPE().getApplicationDirectory().getAbsolutePath() + "/" +  propertiesFile;
+			filePath = getOperatorContext().getPE().getApplicationDirectory().getAbsolutePath() + "/" +  filePath;
 		}
-		return propertiesFile;
+		return filePath;
 	}
 
 	@Parameter(optional = true, description = "Name of the attribute for the message. This attribute is required. Default is \\\"message\\\".")
@@ -125,7 +142,16 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	}
 
 	@Override
-	public void shutdown() {
-		client.shutdown();
+	public void shutdown() throws Exception {
+		if (client != null)
+			client.shutdown();
+		if (simpleClient != null)
+			simpleClient.shutdown();
+
+        OperatorContext context = getOperatorContext();
+        trace.log(TraceLevel.ALL, "Operator " + context.getName() + " shutting down in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
+        
+        // Must call super.shutdown()
+        super.shutdown();
 	}
 }

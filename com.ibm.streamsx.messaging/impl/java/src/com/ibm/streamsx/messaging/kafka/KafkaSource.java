@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
+import com.ibm.streams.operator.ProcessingElement;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.logging.TraceLevel;
 import com.ibm.streams.operator.model.Icons;
@@ -90,7 +91,6 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		super.initialize(context);
 		super.initSchema(getOutput(0).getStreamSchema());
 		
-		
 		getOutput(0);
 		if(threadsPerTopic < 1) 
 			throw new IllegalArgumentException("Number of threads per topic cannot be less than one: " + threadsPerTopic);
@@ -115,9 +115,8 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 			simpleClient.initialize(getOperatorContext());
 			simpleClient.allPortsReady();
 		} else {
-			trace.log(TraceLevel.INFO, "Using new consumer client.");
-			newKafkaConsumer = new StreamsKafkaConsumer9(topicAH, keyAH, messageAH, finalProperties);
-			System.out.println(topics.toString());
+			KafkaClientFactory clientFactory = new KafkaClientFactory();
+			newKafkaConsumer = clientFactory.getClient(topicAH, keyAH, messageAH, finalProperties);
 			newKafkaConsumer.init(getOutput(0), getOperatorContext().getThreadFactory(), topics, threadsPerTopic);
 		}
 	}
@@ -174,6 +173,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		
 	}
 
+
 	@Override
 	public void checkpoint(Checkpoint checkpoint) throws Exception {
 		simpleClient.checkpoint(checkpoint);
@@ -198,6 +198,13 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	@Override
 	public void retireCheckpoint(long id) throws Exception {
 		simpleClient.retireCheckpoint(id);
+	}
+	
+	@Override
+	public void shutdown(){
+		if (newKafkaConsumer != null){
+			newKafkaConsumer.shutdown();
+		}
 	}
 
 }

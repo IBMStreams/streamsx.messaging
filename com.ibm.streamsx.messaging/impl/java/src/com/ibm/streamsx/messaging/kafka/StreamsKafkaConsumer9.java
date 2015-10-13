@@ -18,11 +18,7 @@ public class StreamsKafkaConsumer9 extends KafkaConsumerClient {
 	
 	
 	public StreamsKafkaConsumer9(AttributeHelper topicAH, AttributeHelper keyAH, AttributeHelper messageAH, Properties props) {
-		this.topicAH = topicAH;
-		this.keyAH = keyAH;
-		this.messageAH =  messageAH;
-		this.props = props;
-		
+		super(topicAH,keyAH,messageAH,props);
 		consumer = new KafkaConsumer<String,String>(props); 
 	}
 	
@@ -44,10 +40,7 @@ public class StreamsKafkaConsumer9 extends KafkaConsumerClient {
 				try {
 					produceTuples();
 				} catch (Exception e) {
-//					TRACE.log(TraceLevel.ERROR, "Operator error: " + e.getMessage() + "\n" + e.getStackTrace());
-//					Logger.getLogger(this.getClass())
-//							.error("Operator error", e); //$NON-NLS-1$
-					System.out.println("Catching produceTuples return");
+					trace.log(TraceLevel.ERROR, "Operator error: " + e.getMessage() + "\n" + e.getStackTrace());
 				}
 			}
 

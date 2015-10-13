@@ -241,7 +241,7 @@ public class SimpleConsumerClient implements StateHandler {
 		TRACE.log(
 				TraceLevel.ERROR,
 				"Error fetching data from the Broker:"
-						+ leadBroker.host() + " Reason: " + code);
+						+ leadBroker.id() + " Reason: " + code);
 
 		if (code == ErrorMapping.OffsetOutOfRangeCode()) {
 			// We asked for an invalid offset. This should never

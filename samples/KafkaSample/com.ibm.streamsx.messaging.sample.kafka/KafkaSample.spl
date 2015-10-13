@@ -15,7 +15,7 @@ use com.ibm.streamsx.messaging.kafka::*;
 
 composite KafkaSample {
 	param 
-		expression<rstring> $topic : "myTestTopic" ;
+		expression<rstring> $topic : "alexTest" ;
     graph
 
 	  //create some messages and send to Kafka
@@ -29,20 +29,15 @@ composite KafkaSample {
 
 		() as KafkaSinkOp = KafkaProducer(OutputStream) {
 			param
-				propertiesFile : "etc/producer.properties";
+				propertiesFile : getThisToolkitDir() + "/etc/producer.properties";
 		}
 		
 		stream<rstring key, rstring message> KafkaStream = KafkaConsumer()
 		{
 			param
-				propertiesFile : "etc/consumer.properties" ;
+				propertiesFile : getThisToolkitDir() + "/etc/consumer.properties" ;
 				topic : $topic;
 				kafkaProperty : "group.id=newGroup" + (rstring) getTimestampInSecs();
-				//partition : 0;
-				//threadsPerTopic : 6;
-//				config
-//				// Fuse it with the Consumer partition.
-//					placement : partitionColocation("Consumer") ;
 		}
 
 		() as SinkOp = Custom(KafkaStream)
@@ -84,11 +79,6 @@ composite KafkaSample {
 					}
 
 				}
-
-
-//				config
-//				// Fuse it with the Consumer partition.
-//					placement : partitionColocation("Consumer") ;
 			
 		}
 }
