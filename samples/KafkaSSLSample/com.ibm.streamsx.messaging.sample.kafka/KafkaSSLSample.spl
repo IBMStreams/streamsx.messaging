@@ -13,7 +13,7 @@ use com.ibm.streamsx.messaging.kafka::*;
  * 
  */
 
-composite KafkaSample {
+composite KafkaSSLSample {
 	param 
 		expression<rstring> $topic : "sampleTopic" ;
     graph

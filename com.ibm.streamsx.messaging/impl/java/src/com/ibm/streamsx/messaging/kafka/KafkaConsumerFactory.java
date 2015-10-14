@@ -13,8 +13,7 @@ public class KafkaConsumerFactory {
 	public KafkaConsumerClient getClient(AttributeHelper topicAH,
 			AttributeHelper keyAH, AttributeHelper messageAH, Properties props) {
 
-		if (props.containsKey("security.protocol")
-				&& props.getProperty("security.protocol").equalsIgnoreCase("SSL")){
+		if (props.containsKey("bootstrap.servers")){
 			trace.log(TraceLevel.WARNING, "Using new 0.9 consumer client.");
 			client = new StreamsKafkaConsumer9(topicAH, keyAH, messageAH, props);
 		} else {
