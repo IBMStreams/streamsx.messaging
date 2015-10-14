@@ -26,7 +26,7 @@ import com.ibm.streams.operator.model.Parameter;
  * Base operator for all the common functions
  * 
  */
-@Libraries({ "opt/downloaded/*" })
+@Libraries({ "opt/downloaded/*","opt/*" })
 public abstract class KafkaBaseOper extends AbstractOperator {
 
 	protected Properties properties = new Properties(),
