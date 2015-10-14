@@ -36,8 +36,6 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 			keyAH = new AttributeHelper("key"),
 			messageAH = new AttributeHelper("message");
 	protected List<String> topics = new ArrayList<String>();
-	protected KafkaClient client = null;
-	protected SimpleConsumerClient simpleClient = null;
 	private final Logger trace = Logger.getLogger(KafkaBaseOper.class
 			.getCanonicalName());
 
@@ -82,15 +80,6 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		// blobs are not supported for topics
 		supportedTypes.remove(MetaType.BLOB);
 		topicAH.initialize(ss, false, supportedTypes);
-
-		
-		
-		OperatorContext operContext = getOperatorContext();
-		if (operContext.getParameterNames().contains("partition") == false){
-			//we don't need to create this client if using simpleConsumerClient
-			trace.log(TraceLevel.INFO, "Creating client");
-			client = new KafkaClient(topicAH, keyAH, messageAH, finalProperties);
-		}
 		
 	}
 
@@ -143,10 +132,6 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 
 	@Override
 	public void shutdown() throws Exception {
-		if (client != null)
-			client.shutdown();
-		if (simpleClient != null)
-			simpleClient.shutdown();
 
         OperatorContext context = getOperatorContext();
         trace.log(TraceLevel.ALL, "Operator " + context.getName() + " shutting down in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
