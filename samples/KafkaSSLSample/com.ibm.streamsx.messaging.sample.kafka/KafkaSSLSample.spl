@@ -10,6 +10,10 @@ use com.ibm.streamsx.messaging.kafka::*;
 /**
  * Example of using a [KafkaProducer] and [KafkaConsumer]
  * This assumes that the topic has already been created
+ * If you are not using the java default truststore, you must specify the 
+ * following properties in your consumer.properties and producer.properties files:
+ * ssl.truststore.location=etc/truststore.jks
+ * ssl.truststore.password=passw0rd
  * 
  */
 

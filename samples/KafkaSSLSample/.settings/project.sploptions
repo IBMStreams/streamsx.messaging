@@ -6,7 +6,7 @@
 <entry key="com.ibm.streams.studio.splproject:REPLACE_ENVIRONMENT">F</entry>
 <entry key="com.ibm.streams.studio.splproject:EXT_FULL_BUILD_CMD">make all</entry>
 <entry key="com.ibm.streams.studio.splproject:OUTPUT_DIR">output</entry>
-<entry key="com.ibm.streams.studio.splproject:BUILDER_TYPE">1</entry>
+<entry key="com.ibm.streams.studio.splproject:BUILDER_TYPE">0</entry>
 <entry key="com.ibm.streams.studio.splproject:DERIVED_OUTPUT_DIR">T</entry>
 <entry key="com.ibm.streams.studio.splproject:EXT_INCR_BUILD_CMD">make</entry>
 <entry key="com.ibm.streams.studio.splproject:DATA_DIR">data</entry>
