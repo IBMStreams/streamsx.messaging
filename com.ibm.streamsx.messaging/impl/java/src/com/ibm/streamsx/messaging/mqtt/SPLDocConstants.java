@@ -14,7 +14,7 @@ public class SPLDocConstants {
 	static final String MQTTSRC_OUTPUT_PORT_1 = "The optional output port is an error port where the operator submits a single tuple for each failed message. The tuple contains a single attribute of type rstring or ustring, which contains the details of the error message.";
 	static final String MQTTSRC_OUPUT_PORT_0 = "This is the data port and is mandatory.";
 	static final String MQTTSRC_INPUT_PORT0 = "This is the optional control port.  You can use the control port to update information at run time, such as the connection information that the operator uses to connect to an MQTT server, the topics that the operator subscribes to, or the QoS levels of the subscribed topics.";
-	static final String MQTTSRC_PARAM_PERIOD_DESC = "This parameter specifies the time period in seconds the operator waits before it tries to reconnect. It is an optional parameter of type float64. Default value is 60000 ms.";
+	static final String MQTTSRC_PARAM_PERIOD_DESC = "This parameter specifies the time period in milliseconds the operator waits before it tries to reconnect. It is an optional parameter of type int64. Default value is 60000 ms.";
 	static final String MQTTSRC_PARAM_RECONN_BOUND_DESC = "This optional parameter of type int32 specifies the number of successive connections that are attempted for an operator.  Specify 0 for no retry, n for n number of retries, -1 for inifinite retry.";
 	static final String MQTTSRC_PARAM_TOPICATTRNAME_DESC = "Output attribute on output data stream to assign message topic to.";
 	static final String MQTTSRC_PARAM_ERRORATTRNAME_DESC = "Output attribute on optional error output port to assign error message to.";
@@ -40,7 +40,7 @@ public class SPLDocConstants {
 
 	static final String MQTTSINK_PARAM_RETAIN_DESC = "Indicates if messages should be retained on the MQTT server.  Default is false.";
 
-	static final String MQTTSINK_PARAM_PERIOD_DESC = "This parameter specifies the time period in seconds the operator waits before it tries to reconnect. It is an optional parameter of type float64. Default value is 60000 ms.";
+	static final String MQTTSINK_PARAM_PERIOD_DESC = "This parameter specifies the time period in milliseconds the operator waits before it tries to reconnect. It is an optional parameter of type int64. Default value is 60000 ms.";
 
 	static final String MQTTSINK_PARAM_RECONN_BOUND_DESC = "This optional parameter of type int32 specifies the number of successive connections that are attempted for an operator.  Specify 0 for no retry, n for n number of retries, -1 for inifinite retry.";
 
