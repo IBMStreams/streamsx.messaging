@@ -4,10 +4,7 @@
 .PHONY: all clean 
 
 TOOLKIT_NAME=com.ibm.streamsx.messaging
-STREAMS_MESSAGING_TOOLKIT ?= $(shell  ([ -e ../../$(TOOLKIT_NAME)/toolkit.xml ] && echo ../../$(TOOLKIT_NAME)) ||\
-						          echo $(STREAMS_STUDIO_SPL_PATH) ||\
-						          ([ -e "../$(TOOLKIT_NAME)" ] && echo ../$(TOOLKIT_NAME)) ||\
-									echo $(STREAMS_INSTALL)/toolkits/$(TOOLKIT_NAME))
+STREAMS_MESSAGING_TOOLKIT ?= ../../com.ibm.streamsx.messaging:${STREAMS_INSTALL}/toolkits/com.ibm.streamsx.messaging
 
 
 SPLC_FLAGS ?= -a --data-directory data 
