@@ -12,12 +12,12 @@ import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.logging.TraceLevel;
 
-public class StreamsKafkaConsumer9 extends KafkaConsumerClient {
+public class KafkaConsumerV9 extends KafkaConsumerClient {
 	KafkaConsumer<String, String> consumer;
 	static Boolean shutdown = false;
 	
 	
-	public StreamsKafkaConsumer9(AttributeHelper topicAH, AttributeHelper keyAH, AttributeHelper messageAH, Properties props) {
+	public KafkaConsumerV9(AttributeHelper topicAH, AttributeHelper keyAH, AttributeHelper messageAH, Properties props) {
 		super(topicAH,keyAH,messageAH,props);
 		consumer = new KafkaConsumer<String,String>(props); 
 	}

@@ -15,7 +15,7 @@ public class KafkaConsumerFactory {
 
 		if (props.containsKey("bootstrap.servers")){
 			trace.log(TraceLevel.WARNING, "Using new 0.9 consumer client.");
-			client = new StreamsKafkaConsumer9(topicAH, keyAH, messageAH, props);
+			client = new KafkaConsumerV9(topicAH, keyAH, messageAH, props);
 		} else {
 			trace.log(TraceLevel.WARNING, "Using High Level consumer client.");
 			client = new KafkaHighLevelConsumer(topicAH, keyAH, messageAH, props);

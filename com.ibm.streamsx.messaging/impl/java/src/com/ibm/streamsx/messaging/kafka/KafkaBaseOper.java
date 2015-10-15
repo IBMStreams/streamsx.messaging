@@ -57,20 +57,23 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	}
 
 	private Properties transformTrustStoreProperty(Properties props) {
-		String trustStoreFile = props.getProperty("ssl.truststore.location");
-		String securityProtocol = props.getProperty("security.protocol");
-		String trustStorePassword = props.getProperty("ssl.truststore.password");
+		final String trustorePropertyName = "ssl.truststore.location";
+		final String trustorePasswordPropertyName = "ssl.truststore.password";
+		final String securityProtocolPropertyName = "security.protocol";
+		String trustStoreFile = props.getProperty(trustorePropertyName);
+		String securityProtocol = props.getProperty(securityProtocolPropertyName);
+		String trustStorePassword = props.getProperty(trustorePasswordPropertyName);
 		if (trustStoreFile != null){
 			trustStoreFile = getAbsoluteFilePath(trustStoreFile);
-			props.setProperty("ssl.truststore.location", trustStoreFile);
+			props.setProperty(trustorePropertyName, trustStoreFile);
 			trace.log(TraceLevel.INFO, "TrustStore location set to " + trustStoreFile);
 		} else if (securityProtocol.equalsIgnoreCase("SSL")){
 			Map<String, String> env = System.getenv();
 			//get java default truststore
 			trustStoreFile = env.get("STREAMS_INSTALL") + "/java/jre/lib/security/cacerts";
-			props.setProperty("ssl.truststore.location", trustStoreFile);
+			props.setProperty(trustorePropertyName, trustStoreFile);
 			if (trustStorePassword == null)
-				props.setProperty("ssl.truststore.password", "changeit");
+				props.setProperty(trustorePasswordPropertyName, "changeit");
 		}
 		return props;
 	}
