@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -57,11 +58,19 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 
 	private Properties transformTrustStoreProperty(Properties props) {
 		String trustStoreFile = props.getProperty("ssl.truststore.location");
+		String securityProtocol = props.getProperty("security.protocol");
+		String trustStorePassword = props.getProperty("ssl.truststore.password");
 		if (trustStoreFile != null){
 			trustStoreFile = getAbsoluteFilePath(trustStoreFile);
-			System.out.println("TrustStore location: " + trustStoreFile);
 			props.setProperty("ssl.truststore.location", trustStoreFile);
 			trace.log(TraceLevel.INFO, "TrustStore location set to " + trustStoreFile);
+		} else if (securityProtocol.equalsIgnoreCase("SSL")){
+			Map<String, String> env = System.getenv();
+			//get java default truststore
+			trustStoreFile = env.get("STREAMS_INSTALL") + "/java/jre/lib/security/cacerts";
+			props.setProperty("ssl.truststore.location", trustStoreFile);
+			if (trustStorePassword == null)
+				props.setProperty("ssl.truststore.password", "changeit");
 		}
 		return props;
 	}
