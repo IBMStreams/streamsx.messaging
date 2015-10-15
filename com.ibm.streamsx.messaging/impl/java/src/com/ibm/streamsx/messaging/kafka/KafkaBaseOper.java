@@ -125,7 +125,16 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	}
 
 	@Override
-	public void shutdown() {
-		client.shutdown();
+	public void shutdown() throws Exception {
+		if (client != null)
+			client.shutdown();
+		if (simpleClient != null)
+			simpleClient.shutdown();
+
+        OperatorContext context = getOperatorContext();
+        trace.log(TraceLevel.ALL, "Operator " + context.getName() + " shutting down in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
+        
+        // Must call super.shutdown()
+        super.shutdown();
 	}
 }

@@ -4,6 +4,7 @@ package com.ibm.streamsx.messaging.kafka;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -23,8 +24,6 @@ import kafka.utils.ZkUtils;
 
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.log4j.Logger;
-
-import scala.actors.threadpool.Arrays;
 
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OutputTuple;
@@ -60,21 +59,21 @@ public class SimpleConsumerClient implements StateHandler {
 	private String clientName;
 	protected Properties finalProperties = new Properties();
 	private String charSet = "UTF-8";
-	private AttributeHelper keyAH;
-	private AttributeHelper messageAH;
+	private AttributeHelper topicAH = null, keyAH = null, messageAH = null;
 	private int leaderConnectionRetries = 3;
 	private int connectionRetryInterval = 1000;
-	final long initialOffsetTime = kafka.api.OffsetRequest.LatestTime();
+	long initialOffsetTime = kafka.api.OffsetRequest.LatestTime();
 	
 	private static final int DEFAULT_BUFFER_SIZE = 64 * 1024;
 	private static final int DEFAULT_FETCH_SIZE = 100 * 1024;
 	private static final int DEFAULT_SO_TIMEOUT = 30 * 1000;
 
 	public SimpleConsumerClient(String a_topic, int a_partition,
-			AttributeHelper keyAH,
-			AttributeHelper messageAH, Properties props, int trigCnt,
+			AttributeHelper topicAH, AttributeHelper keyAH,
+			AttributeHelper messageAH,  Properties props, int trigCnt,
 			int connectionRetries, int connectionRetryInterval) {
 		this.topic = a_topic;
+		this.topicAH = topicAH;
 		this.keyAH = keyAH;
 	    this.messageAH = messageAH;
 		this.partition = a_partition;
@@ -124,7 +123,7 @@ public class SimpleConsumerClient implements StateHandler {
 
 		try {
 
-			leaderID = ZkUtils.getLeaderForPartition(zkClient, a_topic,
+			leaderID = (Integer) ZkUtils.getLeaderForPartition(zkClient, a_topic,
 					a_partition).get();
 			a_leadBroker = ZkUtils.getBrokerInfo(zkClient, leaderID).get();
 
@@ -246,9 +245,17 @@ public class SimpleConsumerClient implements StateHandler {
 
 		if (code == ErrorMapping.OffsetOutOfRangeCode()) {
 			// We asked for an invalid offset. This should never
-			// happen.
+			// happen unless  this part of the log has been deleted. 
 			TRACE.log(TraceLevel.ERROR,
-					"Tried to request an invalid offset. Exiting.");
+					"Tried to request an invalid offset. Resetting to earliest available offset.");
+			
+			if (initialOffsetTime < kafka.api.OffsetRequest.EarliestTime()){
+				initialOffsetTime = kafka.api.OffsetRequest.EarliestTime();
+			} 
+			
+			readOffset = getLastOffset(myConsumer, topic, partition,
+					initialOffsetTime, clientName);
+			
 		}
 		myConsumer.close();
 		myConsumer = null;
@@ -346,6 +353,7 @@ public class SimpleConsumerClient implements StateHandler {
 	 *             if an error occurs while submitting a tuple
 	 */
 	private void produceTuples() throws UnsupportedEncodingException,IOException {
+		
 		final StreamingOutput<OutputTuple> out = operContext
 				.getStreamingOutputs().get(0);
 		OutputTuple tuple = out.newTuple();
@@ -405,25 +413,28 @@ public class SimpleConsumerClient implements StateHandler {
 										"Found an old offset: " + currentOffset
 												+ " Expecting: " + readOffset);
 							}
-
+							
+							if(topicAH.isAvailable())
+								topicAH.setValue(tuple, topic);
+							if(keyAH.isAvailable()){
+								ByteBuffer keyPayload = messageAndOffset.message()
+								.key();
+								
+								if (keyPayload != null) {
+									byte[] keyBytes = new byte[keyPayload.limit()];
+									keyPayload.get(keyBytes);
+									keyAH.setValue(tuple, keyBytes);
+								}
+							}
+							
 							ByteBuffer messagePayload = messageAndOffset
 									.message().payload();
-
 							byte[] messageBytes = new byte[messagePayload
 									.limit()];
 							messagePayload.get(messageBytes);
-							String message = new String(messageBytes, charSet);
-
-							ByteBuffer keyPayload = messageAndOffset.message()
-									.key();
-							byte[] keyBytes = new byte[keyPayload.limit()];
-							keyPayload.get(keyBytes);
-							String key = new String(keyBytes, charSet);
-
-							// Set attributes in tuple:
-							tuple.setString(messageAH.getName(), message);
-							tuple.setString(keyAH.getName(), key);
-
+							messageAH.setValue(tuple, messageBytes);
+							
+							
 							numRead++;
 							// Submit tuple to output stream
 							out.submit(tuple);
