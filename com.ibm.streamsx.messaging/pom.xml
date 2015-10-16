@@ -30,6 +30,14 @@
 	    <artifactId>kafka_2.10</artifactId>
 	    <version>0.8.2.2</version>
 	    <exclusions>
+	     <exclusion>
+	     	<groupId>org.apache.kafka</groupId>
+		    <artifactId>kafka-clients</artifactId>
+		</exclusion>     	
+	     <exclusion>
+		<groupId>com.sun.jmx</groupId>
+		<artifactId>jmxri</artifactId>
+	      </exclusion>
 	      <exclusion>
 		<groupId>com.sun.jmx</groupId>
 		<artifactId>jmxri</artifactId>
