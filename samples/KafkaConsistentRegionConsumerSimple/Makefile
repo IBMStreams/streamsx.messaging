@@ -3,7 +3,6 @@
 
 .PHONY: all clean 
 
-TOOLKIT_NAME=com.ibm.streamsx.messaging
 STREAMS_MESSAGING_TOOLKIT ?= ../../com.ibm.streamsx.messaging:${STREAMS_INSTALL}/toolkits/com.ibm.streamsx.messaging
 
 

@@ -58,7 +58,6 @@ public class SimpleConsumerClient implements StateHandler {
 	private int fetchSize;
 	private String clientName;
 	protected Properties finalProperties = new Properties();
-	private String charSet = "UTF-8";
 	private AttributeHelper topicAH = null, keyAH = null, messageAH = null;
 	private int leaderConnectionRetries = 3;
 	private int connectionRetryInterval = 1000;
