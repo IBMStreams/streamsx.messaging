@@ -20,6 +20,8 @@ import com.ibm.streams.operator.model.InputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
+import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
+import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 
 @InputPorts(@InputPortSet(cardinality=1, optional=false, 
 	description="The tuples arriving on this port are expected to contain three attributes \\\"key\\\", \\\"topic\\\" and \\\"message\\\". " +
@@ -81,6 +83,24 @@ public class KafkaSink extends KafkaBaseOper {
 		//TODO: check for minimum properties
 		trace.log(TraceLevel.INFO, "Initializing producer");
 		client.initProducer();
+		
+		// register for data governance
+		// only register user specified topic in param
+		registerForDataGovernance();
+	}
+
+	private void registerForDataGovernance() {
+		trace.log(TraceLevel.INFO, "KafkaSink -- Registering for data governance");
+
+		if (!topics.isEmpty()) {
+			for (String topic : topics) {
+				trace.log(TraceLevel.INFO, OPER_NAME + " -- data governance - topic to register: " + topic);
+				DataGovernanceUtil.registerForDataGovernance(this, topic, IGovernanceConstants.ASSET_KAFKA_TOPIC_TYPE,
+						null, null, false, "KafkaSink");
+			}
+		} else {
+			trace.log(TraceLevel.INFO, "KafkaSink -- Registering for data governance -- topics is empty");
+		}
 	}
 	
 	@Override

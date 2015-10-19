@@ -22,6 +22,8 @@ import com.ibm.streams.operator.model.PrimitiveOperator;
 import com.ibm.streams.operator.state.Checkpoint;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streams.operator.state.StateHandler;
+import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
+import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 
 @OutputPorts(@OutputPortSet(cardinality=1, optional=false, 
 	description="Messages received from Kafka are sent on this output port."))
@@ -99,6 +101,23 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 				throw new IllegalArgumentException("Partition parameter must be specified when using consistent region");
 			}
 			
+		}
+		
+		// register for data governance
+		registerForDataGovernance();
+
+	}
+
+	private void registerForDataGovernance() {
+		trace.log(TraceLevel.INFO, "KafkaSource - Registering for data governance");
+		if (topics != null) {
+			for (String topic : topics) {
+				trace.log(TraceLevel.INFO, "KafkaSource - data governance - topic: " + topic);
+				DataGovernanceUtil.registerForDataGovernance(this, topic, IGovernanceConstants.ASSET_KAFKA_TOPIC_TYPE,
+						null, null, true, "KafkaSource");
+			}
+		} else {
+			trace.log(TraceLevel.INFO, "KafkaSource - Registering for data governance -- topics is empty");
 		}
 	}
 
