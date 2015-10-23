@@ -23,5 +23,6 @@
 	<classpathentry kind="lib" path="opt/downloaded/kafka_2.10-0.8.2.2.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/kafka-clients-0.8.2.2.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/snappy-java-1.1.1.7.jar"/>
+	<classpathentry kind="lib" path="opt/downloaded/amqp-client-3.5.6.jar"/>
 	<classpathentry kind="output" path="impl/java/bin"/>
 </classpath>

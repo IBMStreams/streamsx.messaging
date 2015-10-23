@@ -50,6 +50,11 @@
 	    <version>5.11-SNAPSHOT</version>
 	  </dependency>
 	  <dependency>
+		  <groupId>com.rabbitmq</groupId>
+		  <artifactId>amqp-client</artifactId>
+		  <version>3.5.6</version>
+		</dependency>
+	  <dependency>
 	    <groupId>org.eclipse.paho</groupId>
 	    <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
 	    <version>1.0.1</version>
