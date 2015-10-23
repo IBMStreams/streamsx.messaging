@@ -1,3 +1,7 @@
+/*******************************************************************************
+* Copyright (C) 2015, MOHAMED-ALI SAID
+* All Rights Reserved
+*******************************************************************************/
 package com.ibm.streamsx.messaging.rabbitmq;
 
 import java.io.File;
