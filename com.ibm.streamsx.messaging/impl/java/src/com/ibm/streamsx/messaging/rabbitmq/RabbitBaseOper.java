@@ -28,7 +28,6 @@ public class RabbitBaseOper extends AbstractOperator {
 			password = "guest",
 			exchangeName = "logs",
 			exchangeType = "direct",
-			routingKey = "",
 			queueName = "";
 	protected int portId = 5672;
 	
@@ -120,10 +119,7 @@ public class RabbitBaseOper extends AbstractOperator {
 		routingKeyAH.setName(value);
 	}
     
-    @Parameter(optional=true, description="Exchange Name.")
-	public void setRoutingKey(String value) {
-		routingKey = value;
-	}
+
 	
 }
 

@@ -50,7 +50,6 @@ description=""))
 @PrimitiveOperator(name="RabbitMQSink", description="something")
 public class RabbitMQSink extends RabbitBaseOper {
 
-	private RabbitMQWrapper rabbitMQWrapper;
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(RabbitMQSink.class);
 	
 	
@@ -75,8 +74,8 @@ public class RabbitMQSink extends RabbitBaseOper {
         // or external configuration files or a combination of the two.
 
      
-        rabbitMQWrapper = new RabbitMQWrapper(exchangeName, exchangeType);
-        rabbitMQWrapper.login(username, password, hostName, portId);
+//        rabbitMQWrapper = new RabbitMQWrapper(exchangeName, exchangeType);
+//        rabbitMQWrapper.login(username, password, hostName, portId);
         // TODO:
         // If needed, insert code to establish connections or resources to communicate an external system or data store.
         // The configuration information for this may come from parameters supplied to the operator invocation, 
@@ -112,9 +111,19 @@ public class RabbitMQSink extends RabbitBaseOper {
     	// typically sending tuple data to an external system or data store.
     	
     	String message = tuple.getString(messageAH.getName());
-    	String guid = tuple.getString(routingKeyAH.getName());
+    	String routingKey = tuple.getString(routingKeyAH.getName());
     	
-         rabbitMQWrapper.publish(guid,message);
+    	try {
+			log.trace("Producing message: " + message + " in thread: "
+					+ Thread.currentThread().getName());
+			channel.basicPublish(exchangeName, routingKey, null,
+					message.getBytes());
+		} catch (IOException e) {
+			log.trace("Exception message:" + e.getMessage() + "\r\n");
+		}
+    	
+    	
+        // rabbitMQWrapper.publish(guid,message);
 		
     	
     }
@@ -140,7 +149,7 @@ public class RabbitMQSink extends RabbitBaseOper {
     @Override
     public synchronized void shutdown() throws IOException, TimeoutException {
         OperatorContext context = getOperatorContext();      
-        rabbitMQWrapper.logout(); // should force the join() to exit
+        //rabbitMQWrapper.logout(); // should force the join() to exit
         super.shutdown();
     }
     

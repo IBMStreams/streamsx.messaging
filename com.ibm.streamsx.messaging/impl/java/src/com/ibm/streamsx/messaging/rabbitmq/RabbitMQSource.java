@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
 @OutputPorts(@OutputPortSet(cardinality=1, optional=false, 
 description="Messages received from Kafka are sent on this output port."))
 @PrimitiveOperator(name="RabbitMQSource", description="something")
-public class RabbitMQSource extends RabbitBaseOper implements UpdateEvent {
+public class RabbitMQSource extends RabbitBaseOper {
 
 	public static final String EXCHANGENAME_PARAM = "exchangeName";
 	public static final String ROUTINGKEY_PARAM = "routingKey";
@@ -58,7 +58,7 @@ public class RabbitMQSource extends RabbitBaseOper implements UpdateEvent {
 	public static final String PASSWORD_PARAM="password";
 	public static final String HOSTNAME_PARAM="hostName";
 	public static final String PORTID_PARAM="portId";
-
+	private String routingKey;
 	//private RabbitMQWrapper rabbitMQWrapper;
 	//private String exchangeNameParam, routingKeyParam,userNameParam,passwordParam,hostNameParam;
 	//private int portIdParam;
@@ -175,27 +175,10 @@ public class RabbitMQSource extends RabbitBaseOper implements UpdateEvent {
         // out.punctuate(Punctuation.FINAL_MARKER);
     }
     
-    public void NotifyUpdateEvent (String guid, String message){
-    	try {
-           
-    	final StreamingOutput<OutputTuple> out = getOutput(0);
-        
-        // TODO Modify the following code to create and submit tuples to the output port
-        OutputTuple tuple = out.newTuple();
-            
-        // Set attributes in tuple:
-        // tuple.setString("AttributeName", "AttributeValue");
-        if (!guid.isEmpty())
-        	tuple.setString(routingKeyAH.getName(),guid);
-   	    tuple.setString(messageAH.getName(),message);
-        // Submit tuple to output stream            
-        out.submit(tuple);
-
-        } catch (Exception e) {
-        	System.out.println("Exception: " + e);
-           //log. Logger.getLogger(this.getClass()).error("Operator error", e);
-        }  
-    }
+    @Parameter(optional=true, description="Exchange Name.")
+	public void setRoutingKey(String value) {
+		routingKey = value;
+	}
     
 //    @Parameter(optional=true, description="Exchange Name.")
 //	public void setExchangeName(String value) {
