@@ -41,11 +41,10 @@ import org.slf4j.LoggerFactory;
  * <p>With the exception of operator initialization, all the other events may occur concurrently with each other, 
  * which lead to these methods being called concurrently by different threads.</p> 
  */
-@Libraries({ "opt/downloaded/*" })
 @OutputPorts(@OutputPortSet(cardinality=1, optional=false, 
 description="Messages received from Kafka are sent on this output port."))
 @PrimitiveOperator(name="RabbitMQSource", description="something")
-public class RabbitMQSource extends AbstractOperator implements UpdateEvent {
+public class RabbitMQSource extends RabbitBaseOper implements UpdateEvent {
 
 	public static final String EXCHANGENAME_PARAM = "exchangeName";
 	public static final String ROUTINGKEY_PARAM = "routingKey";
@@ -55,8 +54,8 @@ public class RabbitMQSource extends AbstractOperator implements UpdateEvent {
 	public static final String PORTID_PARAM="portId";
 
 	private RabbitMQWrapper rabbitMQWrapper;
-	private String exchangeNameParam, routingKeyParam,userNameParam,passwordParam,hostNameParam;
-	private int portIdParam;
+	//private String exchangeNameParam, routingKeyParam,userNameParam,passwordParam,hostNameParam;
+	//private int portIdParam;
 	
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(RabbitMQSource.class);
 	/**
@@ -79,8 +78,8 @@ public class RabbitMQSource extends AbstractOperator implements UpdateEvent {
         // If needed, insert code to establish connections or resources to communicate an external system or data store.
         // The configuration information for this may come from parameters supplied to the operator invocation, 
         // or external configuration files or a combination of the two.
-        rabbitMQWrapper = new RabbitMQWrapper(this,exchangeNameParam,routingKeyParam);
-        rabbitMQWrapper.login(userNameParam, passwordParam, hostNameParam, portIdParam);
+        rabbitMQWrapper = new RabbitMQWrapper(this,exchangeName,routingKey);
+        rabbitMQWrapper.login(username, password, hostName, portId);
        
         /*
          * Create the thread for producing tuples. 
@@ -144,9 +143,9 @@ public class RabbitMQSource extends AbstractOperator implements UpdateEvent {
             
         // Set attributes in tuple:
         // tuple.setString("AttributeName", "AttributeValue");
-        
-        tuple.setString("guid_request",guid);
-   	    tuple.setString("message",message);
+        if (!guid.isEmpty())
+        	tuple.setString(routingKeyAH.getName(),guid);
+   	    tuple.setString(messageAH.getName(),message);
         // Submit tuple to output stream            
         out.submit(tuple);
 
@@ -156,35 +155,35 @@ public class RabbitMQSource extends AbstractOperator implements UpdateEvent {
         }  
     }
     
-    @Parameter(optional=true, description="Exchange Name.")
-	public void setExchangeName(String value) {
-		exchangeNameParam = value;
-	}
-    
-    @Parameter(optional=true, description="Exchange Name.")
-	public void setRoutingKey(String value) {
-		routingKeyParam = value;
-	}
-    
-    @Parameter(optional=true, description="Exchange Name.")
-	public void setUsername(String value) {
-		userNameParam = value;
-	}
-    
-    @Parameter(optional=true, description="Exchange Name.")
-	public void setPassword(String value) {
-		passwordParam = value;
-	}
-    
-    @Parameter(optional=true, description="Exchange Name.")
-	public void setHostname(String value) {
-		hostNameParam = value;
-	}
-    
-    @Parameter(optional=true, description="Exchange Name.")
-	public void setPortId(int value) {
-		portIdParam = value;
-	}
+//    @Parameter(optional=true, description="Exchange Name.")
+//	public void setExchangeName(String value) {
+//		exchangeNameParam = value;
+//	}
+//    
+//    @Parameter(optional=true, description="Exchange Name.")
+//	public void setRoutingKey(String value) {
+//		routingKeyParam = value;
+//	}
+//    
+//    @Parameter(optional=true, description="Exchange Name.")
+//	public void setUsername(String value) {
+//		userNameParam = value;
+//	}
+//    
+//    @Parameter(optional=true, description="Exchange Name.")
+//	public void setPassword(String value) {
+//		passwordParam = value;
+//	}
+//    
+//    @Parameter(optional=true, description="Exchange Name.")
+//	public void setHostname(String value) {
+//		hostNameParam = value;
+//	}
+//    
+//    @Parameter(optional=true, description="Exchange Name.")
+//	public void setPortId(int value) {
+//		portIdParam = value;
+//	}
 
     /**
      * Shutdown this operator, which will interrupt the thread

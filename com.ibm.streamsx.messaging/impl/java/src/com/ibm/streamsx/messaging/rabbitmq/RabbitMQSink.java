@@ -43,18 +43,12 @@ import org.slf4j.LoggerFactory;
  * <p>With the exception of operator initialization, all the other events may occur concurrently with each other, 
  * which lead to these methods being called concurrently by different threads.</p> 
  */
-@Libraries({ "opt/downloaded/*" })
 @InputPorts(@InputPortSet(cardinality=1, optional=false, 
 description=""))
 @PrimitiveOperator(name="RabbitMQSink", description="something")
-public class RabbitMQSink extends AbstractOperator {
+public class RabbitMQSink extends RabbitBaseOper {
 
 	private RabbitMQWrapper rabbitMQWrapper;
-	private String exchangeNameParam, routingKeyParam,userNameParam,passwordParam,hostNameParam;
-	private int portIdParam;
-	
-	// joins to the event thread of the RFAConsumer to hold the operator open
-	
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(RabbitMQSink.class);
 	
 	
@@ -70,6 +64,7 @@ public class RabbitMQSink extends AbstractOperator {
     
     	// Must call super.initialize(context) to correctly setup an operator.
 		super.initialize(context);
+		super.initSchema(getInput(0).getStreamSchema());
         log.trace("Operator " + context.getName() + " initializing in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
 
         // TODO:
@@ -78,8 +73,8 @@ public class RabbitMQSink extends AbstractOperator {
         // or external configuration files or a combination of the two.
 
      
-        rabbitMQWrapper = new RabbitMQWrapper(exchangeNameParam);
-        rabbitMQWrapper.login(userNameParam, passwordParam, hostNameParam, portIdParam);
+        rabbitMQWrapper = new RabbitMQWrapper(exchangeName, exchangeType);
+        rabbitMQWrapper.login(username, password, hostName, portId);
         // TODO:
         // If needed, insert code to establish connections or resources to communicate an external system or data store.
         // The configuration information for this may come from parameters supplied to the operator invocation, 
@@ -114,8 +109,8 @@ public class RabbitMQSink extends AbstractOperator {
         // TODO Insert code here to process the incoming tuple, 
     	// typically sending tuple data to an external system or data store.
     	
-    	String message = tuple.getString("message");
-    	String guid = tuple.getString("guid_request");
+    	String message = tuple.getString(messageAH.getName());
+    	String guid = tuple.getString(routingKeyAH.getName());
     	
          rabbitMQWrapper.publish(guid,message);
 		
@@ -134,36 +129,6 @@ public class RabbitMQSink extends AbstractOperator {
     	// TODO: If window punctuations are meaningful to the external system or data store, 
     	// insert code here to process the incoming punctuation.
     }
-    
-    @Parameter(optional=true, description="Exchange Name.")
-	public void setExchangeName(String value) {
-		exchangeNameParam = value;
-	}
-    
-    @Parameter(optional=true, description="Exchange Name.")
-	public void setRoutingKey(String value) {
-		routingKeyParam = value;
-	}
-    
-    @Parameter(optional=true, description="Exchange Name.")
-	public void setUsername(String value) {
-		userNameParam = value;
-	}
-    
-    @Parameter(optional=true, description="Exchange Name.")
-	public void setPassword(String value) {
-		passwordParam = value;
-	}
-    
-    @Parameter(optional=true, description="Exchange Name.")
-	public void setHostname(String value) {
-		hostNameParam = value;
-	}
-    
-    @Parameter(optional=true, description="Exchange Name.")
-	public void setPortId(int value) {
-		portIdParam = value;
-	}
 
     /**
      * Shutdown this operator.
@@ -171,11 +136,8 @@ public class RabbitMQSink extends AbstractOperator {
      */
     @Override
     public synchronized void shutdown() throws Exception {
-        OperatorContext context = getOperatorContext();
-       
+        OperatorContext context = getOperatorContext();      
         rabbitMQWrapper.logout(); // should force the join() to exit
-        
-        // TODO: If needed, close connections or release resources related to any external system or data store.
         super.shutdown();
     }
     
