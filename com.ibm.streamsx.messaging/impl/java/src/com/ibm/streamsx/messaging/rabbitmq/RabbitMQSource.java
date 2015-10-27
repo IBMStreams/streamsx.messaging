@@ -8,7 +8,9 @@ package com.ibm.streamsx.messaging.rabbitmq;
 
 //import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import com.ibm.streams.operator.AbstractOperator;
 import com.ibm.streams.operator.OperatorContext;
@@ -21,7 +23,11 @@ import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
 
 import com.ibm.streamsx.messaging.rabbitmq.UpdateEvent;
-import com.ibm.streamsx.messaging.rabbitmq.RabbitMQWrapper;
+import com.rabbitmq.client.Consumer;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Envelope;
+
 import org.slf4j.LoggerFactory;
 /**
  * This operator was originally contributed by Mohamed-Ali Said @saidmohamedali
@@ -53,7 +59,7 @@ public class RabbitMQSource extends RabbitBaseOper implements UpdateEvent {
 	public static final String HOSTNAME_PARAM="hostName";
 	public static final String PORTID_PARAM="portId";
 
-	private RabbitMQWrapper rabbitMQWrapper;
+	//private RabbitMQWrapper rabbitMQWrapper;
 	//private String exchangeNameParam, routingKeyParam,userNameParam,passwordParam,hostNameParam;
 	//private int portIdParam;
 	
@@ -73,14 +79,23 @@ public class RabbitMQSource extends RabbitBaseOper implements UpdateEvent {
             throws Exception {
     	// Must call super.initialize(context) to correctly setup an operator.
         super.initialize(context);
+        super.initSchema(getOutput(0).getStreamSchema());
         log.trace(this.getClass().getName()+"Operator " + context.getName() + " initializing in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
         // TODO:
         // If needed, insert code to establish connections or resources to communicate an external system or data store.
         // The configuration information for this may come from parameters supplied to the operator invocation, 
-        // or external configuration files or a combination of the two.
-        rabbitMQWrapper = new RabbitMQWrapper(this,exchangeName,routingKey);
-        rabbitMQWrapper.login(username, password, hostName, portId);
-       
+//        // or external configuration files or a combination of the two.
+//        rabbitMQWrapper = new RabbitMQWrapper(this,exchangeName,routingKey);
+//        rabbitMQWrapper.login(username, password, hostName, portId);
+        if (queueName == ""){
+        	queueName = channel.queueDeclare().getQueue();
+        }
+        
+        channel.queueBind(queueName, exchangeName, routingKey);
+        System.out.println("Queue: " + queueName + " Exchange: " + exchangeName);
+        //produce tuples returns immediately, but we don't want ports to close
+        createAvoidCompletionThread();
+        
         /*
          * Create the thread for producing tuples. 
          * The thread is created at initialize time but started.
@@ -92,9 +107,10 @@ public class RabbitMQSource extends RabbitBaseOper implements UpdateEvent {
                     @Override
                     public void run() {
                         try {
-                            rabbitMQWrapper.Consume();
+                        	produceTuples();
+                            //rabbitMQWrapper.Consume();
                         } catch (Exception e) {
-                           // Logger.getLogger(this.getClass()).error("Operator error", e);
+                           e.printStackTrace(); // Logger.getLogger(this.getClass()).error("Operator error", e);
                         }                    
                     }
                     
@@ -127,7 +143,33 @@ public class RabbitMQSource extends RabbitBaseOper implements UpdateEvent {
      * @throws Exception if an error occurs while submitting a tuple
      */
     private void produceTuples() throws Exception  {
-        
+    	System.out.println("Producing tuples!");
+		Consumer consumer = new DefaultConsumer(channel) {
+			@Override
+			public void handleDelivery(String consumerTag, Envelope envelope,
+					AMQP.BasicProperties properties, byte[] body)
+					throws IOException {
+				String message = new String(body, "UTF-8");
+				StreamingOutput<OutputTuple> out = getOutput(0);
+				OutputTuple tuple = out.newTuple();
+				if (routingKeyAH.isAvailable()){
+					tuple.setString(routingKeyAH.getName(), envelope.getRoutingKey());
+					System.out.println(routingKeyAH.getName() + ":" + envelope.getRoutingKey());
+				} else {
+					System.out.println("What the hell?? " + routingKeyAH.toString());
+				}
+				tuple.setString(messageAH.getName(),message);
+				System.out.println("message: " + message);
+				// Submit tuple to output stream
+				try {
+					out.submit(tuple);
+				} catch (Exception e) {
+					System.out.println("Catching submit exception");
+					e.printStackTrace();
+				}
+			}
+		};
+	    channel.basicConsume(queueName, true, consumer);
         // TODO If there is a finite set of tuples, submit a final punctuation when finished
         // by uncommenting the following line:
         // out.punctuate(Punctuation.FINAL_MARKER);
@@ -188,10 +230,11 @@ public class RabbitMQSource extends RabbitBaseOper implements UpdateEvent {
     /**
      * Shutdown this operator, which will interrupt the thread
      * executing the <code>produceTuples()</code> method.
-     * @throws Exception Operator failure, will cause the enclosing PE to terminate.
+     * @throws TimeoutException 
+     * @throws IOException 
      */
-    public synchronized void shutdown() throws Exception {
-    	rabbitMQWrapper.logout();
+    public synchronized void shutdown() throws IOException, TimeoutException {
+    	//rabbitMQWrapper.logout();
         if (processThread != null) {
             processThread.interrupt();
             processThread = null;

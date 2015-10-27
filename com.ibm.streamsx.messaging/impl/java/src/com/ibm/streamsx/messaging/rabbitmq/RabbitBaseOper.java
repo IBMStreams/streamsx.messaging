@@ -39,27 +39,29 @@ public class RabbitBaseOper extends AbstractOperator {
 	private final Logger trace = Logger.getLogger(RabbitBaseOper.class
 			.getCanonicalName());
 	
+	private ConnectionFactory connectionFactory;
+	private com.rabbitmq.client.Connection connection;
+	protected Channel channel;
 	
-//	public synchronized void initialize(OperatorContext context)
-//			throws Exception {
-//    	// Must call super.initialize(context) to correctly setup an operator.
-//		super.initialize(context);
-//        Logger.getLogger(this.getClass()).trace("Operator " + context.getName() + " initializing in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
-//		ConnectionFactory factory = new ConnectionFactory();
-//	    factory.setHost(hostName);
-//	    factory.setUsername(username);
-//	    factory.setPassword(password);
-//	    connection = factory.newConnection();
-//	    channel = connection.createChannel();
-//	    channel.exchangeDeclare(exchangeName, "fanout");
-//	    
-//	    //channel.queueDeclare(queueName, false, false, false, null);
-//	}
+	public synchronized void initialize(OperatorContext context)
+			throws Exception {
+    	// Must call super.initialize(context) to correctly setup an operator.
+		super.initialize(context);
+        connectionFactory = new ConnectionFactory();
+		connectionFactory.setUsername(username);
+		connectionFactory.setPassword(password);
+		connectionFactory.setHost(hostName);
+		connectionFactory.setPort(portId);
+		connection = connectionFactory.newConnection();
+		channel = connection.createChannel();
+		channel.exchangeDeclare(exchangeName, exchangeType);
+	    //channel.queueDeclare(queueName, false, false, false, null);
+	}
 	
-//	public void shutdown() throws IOException, TimeoutException{
-//	    channel.close();
-//	    connection.close();
-//	}
+	public void shutdown() throws IOException, TimeoutException{
+	    channel.close();
+	    connection.close();
+	}
 	
 	public void initSchema(StreamSchema ss) throws Exception {
 		Set<MetaType> supportedTypes = new HashSet<MetaType>();
@@ -67,7 +69,7 @@ public class RabbitBaseOper extends AbstractOperator {
 		supportedTypes.add(MetaType.USTRING);
 		supportedTypes.add(MetaType.BLOB);
 
-		routingKeyAH.initialize(ss, false, supportedTypes);
+		routingKeyAH.initialize(ss, true, supportedTypes);
 		messageAH.initialize(ss, true, supportedTypes);
 		
 	}
