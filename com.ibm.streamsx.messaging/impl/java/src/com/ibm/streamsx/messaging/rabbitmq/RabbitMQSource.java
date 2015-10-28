@@ -8,6 +8,8 @@ package com.ibm.streamsx.messaging.rabbitmq;
 //import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import com.ibm.streams.operator.OperatorContext;
@@ -60,7 +62,7 @@ public class RabbitMQSource extends RabbitBaseOper {
 	public static final String PASSWORD_PARAM = "password";
 	public static final String HOSTNAME_PARAM = "hostName";
 	public static final String PORTID_PARAM = "portId";
-	private String routingKey;
+	private List<String> routingKeys = new ArrayList<String>();;
 
 	private static final org.slf4j.Logger log = LoggerFactory
 			.getLogger(RabbitMQSource.class);
@@ -86,13 +88,7 @@ public class RabbitMQSource extends RabbitBaseOper {
 				+ " initializing in PE: " + context.getPE().getPEId()
 				+ " in Job: " + context.getPE().getJobId());
 
-		if (queueName == "") {
-			queueName = channel.queueDeclare().getQueue();
-		}
-
-		channel.queueBind(queueName, exchangeName, routingKey);
-		System.out
-				.println("Queue: " + queueName + " Exchange: " + exchangeName);
+		initRabbitChannel();
 		// produce tuples returns immediately, but we don't want ports to close
 		createAvoidCompletionThread();
 
@@ -113,6 +109,18 @@ public class RabbitMQSource extends RabbitBaseOper {
 				});
 
 		processThread.setDaemon(false);
+	}
+
+	private void initRabbitChannel() throws IOException {
+		if (queueName == "") {
+			queueName = channel.queueDeclare().getQueue();
+		}
+
+		for (String routingKey : routingKeys){
+			channel.queueBind(queueName, exchangeName, routingKey);
+			System.out
+				.println("Queue: " + queueName + " Exchange: " + exchangeName);
+		}
 	}
 
 	/**
@@ -166,10 +174,16 @@ public class RabbitMQSource extends RabbitBaseOper {
 		channel.basicConsume(queueName, true, consumer);
 	}
 
+//	@Parameter(optional = true, description = "Exchange Name.")
+//	public void setRoutingKey(String value) {
+//		routingKey = value;
+//	}
+	
 	@Parameter(optional = true, description = "Exchange Name.")
-	public void setRoutingKey(String value) {
-		routingKey = value;
-	}
+	public void setRoutingKey(List<String> values) {
+		if(values!=null)
+			routingKeys.addAll(values);
+	}	
 
 	/**
 	 * Shutdown this operator, which will interrupt the thread executing the
