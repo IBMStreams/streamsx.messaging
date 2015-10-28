@@ -62,7 +62,7 @@ public class RabbitMQSource extends RabbitBaseOper {
 	public static final String PASSWORD_PARAM = "password";
 	public static final String HOSTNAME_PARAM = "hostName";
 	public static final String PORTID_PARAM = "portId";
-	private List<String> routingKeys = new ArrayList<String>();;
+	private List<String> routingKeys = new ArrayList<String>();
 
 	private static final org.slf4j.Logger log = LoggerFactory
 			.getLogger(RabbitMQSource.class);

@@ -6,7 +6,11 @@
 package com.ibm.streamsx.messaging.rabbitmq;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
@@ -18,6 +22,7 @@ import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.logging.TraceLevel;
 import com.ibm.streams.operator.model.Libraries;
 import com.ibm.streams.operator.model.Parameter;
+import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -30,7 +35,9 @@ public class RabbitBaseOper extends AbstractOperator {
 	protected String hostName = "localhost", username = "guest",
 			password = "guest", exchangeName = "logs", exchangeType = "direct",
 			queueName = "";
+	protected List<String> hostAndPortList = new ArrayList<String>();
 	protected int portId = 5672;
+	protected Address[] addressArr; 
 
 	protected AttributeHelper topicAH = new AttributeHelper("topic"),
 			routingKeyAH = new AttributeHelper("routing_key"),
@@ -46,14 +53,30 @@ public class RabbitBaseOper extends AbstractOperator {
 		ConnectionFactory connectionFactory = new ConnectionFactory();
 		connectionFactory.setUsername(username);
 		connectionFactory.setPassword(password);
-		connectionFactory.setHost(hostName);
-		connectionFactory.setPort(portId);
-		connection = connectionFactory.newConnection();
+		//connectionFactory.setHost(hostName);
+		//connectionFactory.setPort(portId);
+		//hostAndPortList.add(hostName); ports.add(portId);
+		addressArr = buildAddressArray(hostAndPortList);
+		System.out.println("Addr Array: " + addressArr[0].getHost() + ":" + addressArr[0].getPort());
+		connection = connectionFactory.newConnection(addressArr);
 		channel = connection.createChannel();
 		channel.exchangeDeclare(exchangeName, exchangeType);
 		trace.log(TraceLevel.INFO,
 				"Initializing channel connection to exchange: " + exchangeName
 						+ " of type: " + exchangeType + " as user: " + username);
+	}
+
+	private Address[] buildAddressArray(List<String> hostsAndPorts) throws MalformedURLException {
+		Address[] addrArr = new Address[hostsAndPorts.size()];
+		int i = 0;
+		for (String hostAndPort : hostsAndPorts){
+			URL tmpURL = new URL("http://" + hostAndPort);
+			addrArr[i++] = new Address(tmpURL.getHost(), tmpURL.getPort());
+			System.out.println("Adding: " + tmpURL.getHost() + ":"+ tmpURL.getPort());
+		}
+		trace.log(TraceLevel.INFO, "Built address array: \n" + addrArr.toString());
+		
+		return addrArr;
 	}
 
 	public void shutdown() throws IOException, TimeoutException {
@@ -73,8 +96,8 @@ public class RabbitBaseOper extends AbstractOperator {
 	}
 
 	@Parameter(optional = false, description = "Name of the attribute for the message. This attribute is required. Default is \\\"message\\\".")
-	public void setHostname(String value) {
-		hostName = value;
+	public void setHostAndPort(List<String> value) {
+		hostAndPortList.addAll(value);
 	}
 
 	@Parameter(optional = false, description = "Name of the attribute for the key. Default is \\\"key\\\".")
@@ -102,10 +125,10 @@ public class RabbitBaseOper extends AbstractOperator {
 		messageAH.setName(value);
 	}
 
-	@Parameter(optional = true, description = "Port id. Default 5672.")
-	public void setPortId(int value) {
-		portId = value;
-	}
+//	@Parameter(optional = true, description = "Port id. Default 5672.")
+//	public void setPortId(int value) {
+//		portId = value;
+//	}
 
 	@Parameter(optional = true, description = "Exchange Name.")
 	public void setRoutingKeyAttribute(String value) {
