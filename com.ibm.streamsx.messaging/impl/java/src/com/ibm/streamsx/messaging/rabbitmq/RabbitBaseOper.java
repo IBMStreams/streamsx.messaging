@@ -27,7 +27,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
-@Libraries({ "opt/downloaded/*" })
+@Libraries({ "opt/downloaded/*"/*, "@RABBITMQ_HOME@" */})
 public class RabbitBaseOper extends AbstractOperator {
 
 	protected Channel channel;
@@ -39,6 +39,7 @@ public class RabbitBaseOper extends AbstractOperator {
 	protected int portId = 5672;
 	protected Address[] addressArr; 
 	private String vHost;
+	private Boolean autoRecovery = true;
 
 	protected AttributeHelper topicAH = new AttributeHelper("topic"),
 			routingKeyAH = new AttributeHelper("routing_key"),
@@ -54,7 +55,7 @@ public class RabbitBaseOper extends AbstractOperator {
 		ConnectionFactory connectionFactory = new ConnectionFactory();
 		connectionFactory.setUsername(username);
 		connectionFactory.setPassword(password);
-		connectionFactory.setAutomaticRecoveryEnabled(true);
+		connectionFactory.setAutomaticRecoveryEnabled(autoRecovery);
 		if (vHost != null)
 			connectionFactory.setVirtualHost(vHost);
 		addressArr = buildAddressArray(hostAndPortList);
@@ -133,11 +134,6 @@ public class RabbitBaseOper extends AbstractOperator {
 		messageAH.setName(value);
 	}
 
-//	@Parameter(optional = true, description = "Port id. Default 5672.")
-//	public void setPortId(int value) {
-//		portId = value;
-//	}
-
 	@Parameter(optional = true, description = "Exchange Name.")
 	public void setRoutingKeyAttribute(String value) {
 		routingKeyAH.setName(value);
@@ -147,5 +143,15 @@ public class RabbitBaseOper extends AbstractOperator {
 	public void setVirtualHost(String value) {
 		vHost = value; 
 	}
+	
+	@Parameter(optional = true, description = "Exchange Name.")
+	public void setAutomaticRecovery(Boolean value) {
+		autoRecovery = value; 
+	}
+	
+//	@Parameter(optional = true, description = "Exchange Name.")
+//	public void setAutomaticRecovery(Boolean value) {
+//		autoRecovery = value; 
+//	}
 
 }

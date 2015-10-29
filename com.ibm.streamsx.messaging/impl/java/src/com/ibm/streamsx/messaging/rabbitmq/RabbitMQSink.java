@@ -6,6 +6,8 @@
 package com.ibm.streamsx.messaging.rabbitmq;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,7 @@ import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.model.InputPortSet;
 import com.ibm.streams.operator.model.InputPorts;
 import com.ibm.streams.operator.model.PrimitiveOperator;
+import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.AlreadyClosedException;
 
 /**
@@ -111,7 +114,11 @@ public class RabbitMQSink extends RabbitBaseOper {
 		try {
 			log.trace("Producing message: " + message + " in thread: "
 					+ Thread.currentThread().getName());
-			channel.basicPublish(exchangeName, routingKey, null,
+			BasicProperties.Builder propsBuilder = new BasicProperties.Builder();
+			Map<String, Object> headers = new HashMap<String,Object>();
+			headers.put("test", "myHeader");
+			propsBuilder.headers(headers);
+			channel.basicPublish(exchangeName, routingKey, propsBuilder.build(),
 					message.getBytes());
 		} catch (Exception e) {
 			log.trace("Exception message:" + e.getMessage() + "\r\n");

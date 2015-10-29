@@ -9,7 +9,11 @@ package com.ibm.streamsx.messaging.rabbitmq;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 
 import com.ibm.streams.operator.OperatorContext;
@@ -56,12 +60,6 @@ import org.slf4j.LoggerFactory;
 @PrimitiveOperator(name = "RabbitMQSource", description = "something")
 public class RabbitMQSource extends RabbitBaseOper {
 
-	public static final String EXCHANGENAME_PARAM = "exchangeName";
-	public static final String ROUTINGKEY_PARAM = "routingKey";
-	public static final String USERNAME_PARAM = "userName";
-	public static final String PASSWORD_PARAM = "password";
-	public static final String HOSTNAME_PARAM = "hostName";
-	public static final String PORTID_PARAM = "portId";
 	private List<String> routingKeys = new ArrayList<String>();
 
 	private static final org.slf4j.Logger log = LoggerFactory
@@ -150,7 +148,20 @@ public class RabbitMQSource extends RabbitBaseOper {
 					throws IOException {
 				String message = new String(body, "UTF-8");
 				StreamingOutput<OutputTuple> out = getOutput(0);
+				Map<String, Object> msgHeader = properties.getHeaders();
+				Map<String, String> headers = new HashMap<String,String>();
+				
+				Iterator<Entry<String,Object>> it = msgHeader.entrySet().iterator();
+				while (it.hasNext()){
+					Map.Entry<String, Object> pair = it.next();
+					System.out.println("Header: " + pair.getKey() + ":" + pair.getValue().toString());
+					headers.put(pair.getKey(), pair.getValue().toString());
+				}
+				
+				
 				OutputTuple tuple = out.newTuple();
+				System.out.println("Schema: " + tuple.getStreamSchema().getAttributeNames().toString());
+
 				if (routingKeyAH.isAvailable()) {
 					tuple.setString(routingKeyAH.getName(),
 							envelope.getRoutingKey());
@@ -161,6 +172,11 @@ public class RabbitMQSource extends RabbitBaseOper {
 							+ routingKeyAH.toString());
 				}
 				tuple.setString(messageAH.getName(), message);
+				
+				
+				
+				tuple.setMap("msgHeader", headers);
+
 				System.out.println("message: " + message);
 				// Submit tuple to output stream
 				try {
