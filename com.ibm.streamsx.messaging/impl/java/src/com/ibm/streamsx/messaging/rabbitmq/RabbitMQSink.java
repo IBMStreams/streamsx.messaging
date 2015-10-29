@@ -17,6 +17,7 @@ import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.model.InputPortSet;
 import com.ibm.streams.operator.model.InputPorts;
 import com.ibm.streams.operator.model.PrimitiveOperator;
+import com.rabbitmq.client.AlreadyClosedException;
 
 /**
  * This operator was originally contributed by Mohamed-Ali Said @saidmohamedali
@@ -102,7 +103,7 @@ public class RabbitMQSink extends RabbitBaseOper {
 	 */
 	@Override
 	public void process(StreamingInput<Tuple> stream, Tuple tuple)
-			throws Exception {
+			{
 
 		String message = tuple.getString(messageAH.getName());
 		String routingKey = tuple.getString(routingKeyAH.getName());
@@ -112,10 +113,9 @@ public class RabbitMQSink extends RabbitBaseOper {
 					+ Thread.currentThread().getName());
 			channel.basicPublish(exchangeName, routingKey, null,
 					message.getBytes());
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.trace("Exception message:" + e.getMessage() + "\r\n");
-		}
-
+		} 
 	}
 
 	/**

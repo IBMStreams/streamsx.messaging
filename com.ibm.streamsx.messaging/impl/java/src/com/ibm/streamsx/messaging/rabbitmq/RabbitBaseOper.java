@@ -38,6 +38,7 @@ public class RabbitBaseOper extends AbstractOperator {
 	protected List<String> hostAndPortList = new ArrayList<String>();
 	protected int portId = 5672;
 	protected Address[] addressArr; 
+	private String vHost;
 
 	protected AttributeHelper topicAH = new AttributeHelper("topic"),
 			routingKeyAH = new AttributeHelper("routing_key"),
@@ -53,9 +54,9 @@ public class RabbitBaseOper extends AbstractOperator {
 		ConnectionFactory connectionFactory = new ConnectionFactory();
 		connectionFactory.setUsername(username);
 		connectionFactory.setPassword(password);
-		//connectionFactory.setHost(hostName);
-		//connectionFactory.setPort(portId);
-		//hostAndPortList.add(hostName); ports.add(portId);
+		connectionFactory.setAutomaticRecoveryEnabled(true);
+		if (vHost != null)
+			connectionFactory.setVirtualHost(vHost);
 		addressArr = buildAddressArray(hostAndPortList);
 		System.out.println("Addr Array: " + addressArr[0].getHost() + ":" + addressArr[0].getPort());
 		connection = connectionFactory.newConnection(addressArr);
@@ -64,6 +65,8 @@ public class RabbitBaseOper extends AbstractOperator {
 		trace.log(TraceLevel.INFO,
 				"Initializing channel connection to exchange: " + exchangeName
 						+ " of type: " + exchangeType + " as user: " + username);
+		trace.log(TraceLevel.INFO,
+				"Connection to host: " + connection.getAddress());
 	}
 
 	private Address[] buildAddressArray(List<String> hostsAndPorts) throws MalformedURLException {
@@ -81,7 +84,12 @@ public class RabbitBaseOper extends AbstractOperator {
 
 	public void shutdown() throws IOException, TimeoutException {
 		channel.close();
-		connection.close();
+		try {
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			trace.log(TraceLevel.ALL, "Exception at close: " + e.toString());
+		}
 	}
 
 	public void initSchema(StreamSchema ss) throws Exception {
@@ -133,6 +141,11 @@ public class RabbitBaseOper extends AbstractOperator {
 	@Parameter(optional = true, description = "Exchange Name.")
 	public void setRoutingKeyAttribute(String value) {
 		routingKeyAH.setName(value);
+	}
+	
+	@Parameter(optional = true, description = "Exchange Name.")
+	public void setVirtualHost(String value) {
+		vHost = value; 
 	}
 
 }
