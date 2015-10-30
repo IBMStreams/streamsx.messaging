@@ -112,7 +112,7 @@ public class RabbitMQSink extends RabbitBaseOper {
 
 		String message = tuple.getString(messageAH.getName());
 		String routingKey = "";
-		Map<String, Object> headers = new HashMap<>();
+		Map<String, Object> headers = new HashMap<String,Object>();
 		
 		if (routingKeyAH.isAvailable()){
 			routingKey = tuple.getString(routingKeyAH.getName());
