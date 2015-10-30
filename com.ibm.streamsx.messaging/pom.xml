@@ -14,9 +14,13 @@
 			<url>http://repository.apache.org/content/repositories/snapshots/</url>
 		</repository>
 		<repository>
-			<id>Eclipse Paho Repo snapshots</id>
-			<url>https://repo.eclipse.org/content/repositories/paho-snapshots</url>
-		</repository>
+		    <id>apache.releases</id>
+		    <url>https://repository.apache.org/content/repositories/releases/</url>
+	    </repository>
+		<repository>
+	    <id>Eclipse Paho Repo releases</id>
+	    <url>https://repo.eclipse.org/content/repositories/paho-releases</url>
+	  </repository>
 	</repositories>
 	<properties>
 	</properties>
@@ -46,9 +50,14 @@
 			<version>5.11-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.paho</groupId>
-			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+		    <groupId>org.eclipse.paho</groupId>
+		    <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+		    <version>1.0.1</version>
+	 	 </dependency>
+		<dependency>
+		  <groupId>com.rabbitmq</groupId>
+		  <artifactId>amqp-client</artifactId>
+		  <version>3.5.6</version>
 		</dependency>
 	</dependencies>
 	<build>
