@@ -29,8 +29,7 @@ import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Envelope;
-
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 
 /**
  * This operator was originally contributed by Mohamed-Ali Said @saidmohamedali
@@ -62,13 +61,13 @@ public class RabbitMQSource extends RabbitBaseOper {
 
 	private List<String> routingKeys = new ArrayList<String>();
 
-	private static final org.slf4j.Logger log = LoggerFactory
-			.getLogger(RabbitMQSource.class);
+	private final Logger trace = Logger.getLogger(RabbitBaseOper.class
+			.getCanonicalName());
 	/**
 	 * Thread for calling <code>produceTuples()</code> to produce tuples
 	 */
 	private Thread processThread;
-
+	private String queueName = "";
 	/**
 	 * Initialize this operator. Called once before any tuples are processed.
 	 * 
@@ -82,7 +81,7 @@ public class RabbitMQSource extends RabbitBaseOper {
 			throws Exception {
 		super.initialize(context);
 		super.initSchema(getOutput(0).getStreamSchema());
-		log.trace(this.getClass().getName() + "Operator " + context.getName()
+		trace.log(TraceLevel.INFO, this.getClass().getName() + "Operator " + context.getName()
 				+ " initializing in PE: " + context.getPE().getPEId()
 				+ " in Job: " + context.getPE().getJobId());
 
@@ -113,6 +112,9 @@ public class RabbitMQSource extends RabbitBaseOper {
 		if (queueName == "") {
 			queueName = channel.queueDeclare().getQueue();
 		}
+		
+		if (routingKeys.isEmpty())
+			routingKeys.add("");//receive all messages by default
 
 		for (String routingKey : routingKeys){
 			channel.queueBind(queueName, exchangeName, routingKey);
@@ -148,34 +150,34 @@ public class RabbitMQSource extends RabbitBaseOper {
 					throws IOException {
 				String message = new String(body, "UTF-8");
 				StreamingOutput<OutputTuple> out = getOutput(0);
-				Map<String, Object> msgHeader = properties.getHeaders();
-				Map<String, String> headers = new HashMap<String,String>();
 				
-				Iterator<Entry<String,Object>> it = msgHeader.entrySet().iterator();
-				while (it.hasNext()){
-					Map.Entry<String, Object> pair = it.next();
-					System.out.println("Header: " + pair.getKey() + ":" + pair.getValue().toString());
-					headers.put(pair.getKey(), pair.getValue().toString());
-				}
 				
 				
 				OutputTuple tuple = out.newTuple();
 				System.out.println("Schema: " + tuple.getStreamSchema().getAttributeNames().toString());
 
+				tuple.setString(messageAH.getName(), message);
+				
 				if (routingKeyAH.isAvailable()) {
 					tuple.setString(routingKeyAH.getName(),
 							envelope.getRoutingKey());
 					System.out.println(routingKeyAH.getName() + ":"
 							+ envelope.getRoutingKey());
-				} else {
-					System.out.println("What the hell?? "
-							+ routingKeyAH.toString());
+				} 				
+				
+				if (messageHeaderAH.isAvailable()){
+					Map<String, Object> msgHeader = properties.getHeaders();
+					if (msgHeader != null && !msgHeader.isEmpty()){
+						Map<String, String> headers = new HashMap<String,String>();
+						Iterator<Entry<String,Object>> it = msgHeader.entrySet().iterator();
+						while (it.hasNext()){
+							Map.Entry<String, Object> pair = it.next();
+							System.out.println("Header: " + pair.getKey() + ":" + pair.getValue().toString());
+							headers.put(pair.getKey(), pair.getValue().toString());
+						}
+						tuple.setMap(messageHeaderAH.getName(), headers);
+					}
 				}
-				tuple.setString(messageAH.getName(), message);
-				
-				
-				
-				tuple.setMap("msgHeader", headers);
 
 				System.out.println("message: " + message);
 				// Submit tuple to output stream
@@ -189,17 +191,17 @@ public class RabbitMQSource extends RabbitBaseOper {
 		};
 		channel.basicConsume(queueName, true, consumer);
 	}
-
-//	@Parameter(optional = true, description = "Exchange Name.")
-//	public void setRoutingKey(String value) {
-//		routingKey = value;
-//	}
 	
 	@Parameter(optional = true, description = "Exchange Name.")
 	public void setRoutingKey(List<String> values) {
 		if(values!=null)
 			routingKeys.addAll(values);
 	}	
+	
+	@Parameter(optional = true, description = "Name of the queue. Main reason to specify is to facilitate parallel consuming. Default is a random queue name..")
+	public void setQueueName(String value) {
+		queueName = value;
+	}
 
 	/**
 	 * Shutdown this operator, which will interrupt the thread executing the

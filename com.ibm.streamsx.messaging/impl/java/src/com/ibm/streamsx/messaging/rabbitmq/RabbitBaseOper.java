@@ -33,19 +33,18 @@ public class RabbitBaseOper extends AbstractOperator {
 	protected Channel channel;
 	protected Connection connection;
 	protected String hostName = "localhost", username = "guest",
-			password = "guest", exchangeName = "logs", exchangeType = "direct",
-			queueName = "";
+			password = "guest", exchangeName = "", exchangeType = "direct";
+			
 	protected List<String> hostAndPortList = new ArrayList<String>();
-	protected int portId = 5672;
 	protected Address[] addressArr; 
 	private String vHost;
 	private Boolean autoRecovery = true;
 
-	protected AttributeHelper topicAH = new AttributeHelper("topic"),
+	protected AttributeHelper messageHeaderAH = new AttributeHelper("msg_header"),
 			routingKeyAH = new AttributeHelper("routing_key"),
 			messageAH = new AttributeHelper("message");
 
-	protected final Logger trace = Logger.getLogger(RabbitBaseOper.class
+	private final Logger trace = Logger.getLogger(RabbitBaseOper.class
 			.getCanonicalName());
 
 	public synchronized void initialize(OperatorContext context)
@@ -95,63 +94,62 @@ public class RabbitBaseOper extends AbstractOperator {
 
 	public void initSchema(StreamSchema ss) throws Exception {
 		Set<MetaType> supportedTypes = new HashSet<MetaType>();
+		supportedTypes.add(MetaType.MAP);
+		messageHeaderAH.initialize(ss, false, supportedTypes);
+		supportedTypes.remove(MetaType.MAP);
+		
 		supportedTypes.add(MetaType.RSTRING);
 		supportedTypes.add(MetaType.USTRING);
 		supportedTypes.add(MetaType.BLOB);
 
-		routingKeyAH.initialize(ss, true, supportedTypes);
+		routingKeyAH.initialize(ss, false, supportedTypes);
 		messageAH.initialize(ss, true, supportedTypes);
 
 	}
 
-	@Parameter(optional = false, description = "Name of the attribute for the message. This attribute is required. Default is \\\"message\\\".")
+	@Parameter(optional = false, description = "List of host and port in form: \\\"myhost1:3456\\\",\\\"myhost2:3456\\\".")
 	public void setHostAndPort(List<String> value) {
 		hostAndPortList.addAll(value);
 	}
 
-	@Parameter(optional = false, description = "Name of the attribute for the key. Default is \\\"key\\\".")
+	@Parameter(optional = false, description = "Username for RabbitMQ authentication.")
 	public void setUsername(String value) {
 		username = value;
 	}
 
-	@Parameter(optional = false, description = "Name of the attribute for the key. Default is \\\"key\\\".")
+	@Parameter(optional = false, description = "Password for RabbitMQ authentication.")
 	public void setPassword(String value) {
 		password = value;
 	}
 
-	@Parameter(optional = true, description = "Exchange Name.")
+	@Parameter(optional = false, description = "Required attribute. Name of the RabbitMQ exchange.")
 	public void setExchangeName(String value) {
 		exchangeName = value;
 	}
 
-	@Parameter(optional = true, description = "Name of the attribute for the key. Default is \\\"key\\\".")
-	public void setQueueName(String value) {
-		queueName = value;
-	}
-
-	@Parameter(optional = true, description = "Name of the attribute for the message. This attribute is required. Default is \\\"message\\\".")
+	@Parameter(optional = true, description = "Name of the attribute for the message. Default is \\\"message\\\".")
 	public void setMessageAttribute(String value) {
 		messageAH.setName(value);
 	}
 
-	@Parameter(optional = true, description = "Exchange Name.")
+	@Parameter(optional = true, description = "Name of the attribute for the routing_key. Default is \\\"routing_key\\\".")
 	public void setRoutingKeyAttribute(String value) {
 		routingKeyAH.setName(value);
 	}
+
+	@Parameter(optional = true, description = "Name of the attribute for the message_header. Schema of type must be Map<ustring,ustring>. Default is \\\"message_header\\\".")
+	public void setMsgHeaderAttribute(String value) {
+		messageHeaderAH.setName(value);
+	}
 	
-	@Parameter(optional = true, description = "Exchange Name.")
+	@Parameter(optional = true, description = "Set Virtual Host. Default is null.")
 	public void setVirtualHost(String value) {
 		vHost = value; 
 	}
 	
-	@Parameter(optional = true, description = "Exchange Name.")
+	@Parameter(optional = true, description = "Have connections to RabbitMQ automatically recovered. Default is true.")
 	public void setAutomaticRecovery(Boolean value) {
 		autoRecovery = value; 
 	}
-	
-//	@Parameter(optional = true, description = "Exchange Name.")
-//	public void setAutomaticRecovery(Boolean value) {
-//		autoRecovery = value; 
-//	}
 
 }
