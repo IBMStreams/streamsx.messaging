@@ -118,8 +118,7 @@ public class RabbitMQSource extends RabbitBaseOper {
 
 		for (String routingKey : routingKeys){
 			channel.queueBind(queueName, exchangeName, routingKey);
-			System.out
-				.println("Queue: " + queueName + " Exchange: " + exchangeName);
+			trace.log(TraceLevel.INFO, "Queue: " + queueName + " Exchange: " + exchangeName);
 		}
 	}
 
@@ -142,7 +141,7 @@ public class RabbitMQSource extends RabbitBaseOper {
 	 *             if an error occurs while submitting a tuple
 	 */
 	private void produceTuples() throws Exception {
-		System.out.println("Producing tuples!");
+		trace.log(TraceLevel.INFO, "Producing tuples!");
 		Consumer consumer = new DefaultConsumer(channel) {
 			@Override
 			public void handleDelivery(String consumerTag, Envelope envelope,
@@ -154,14 +153,14 @@ public class RabbitMQSource extends RabbitBaseOper {
 				
 				
 				OutputTuple tuple = out.newTuple();
-				System.out.println("Schema: " + tuple.getStreamSchema().getAttributeNames().toString());
+				trace.log(TraceLevel.INFO, "Schema: " + tuple.getStreamSchema().getAttributeNames().toString());
 
 				tuple.setString(messageAH.getName(), message);
 				
 				if (routingKeyAH.isAvailable()) {
 					tuple.setString(routingKeyAH.getName(),
 							envelope.getRoutingKey());
-					System.out.println(routingKeyAH.getName() + ":"
+					trace.log(TraceLevel.INFO, routingKeyAH.getName() + ":"
 							+ envelope.getRoutingKey());
 				} 				
 				
@@ -172,19 +171,19 @@ public class RabbitMQSource extends RabbitBaseOper {
 						Iterator<Entry<String,Object>> it = msgHeader.entrySet().iterator();
 						while (it.hasNext()){
 							Map.Entry<String, Object> pair = it.next();
-							System.out.println("Header: " + pair.getKey() + ":" + pair.getValue().toString());
+							trace.log(TraceLevel.INFO, "Header: " + pair.getKey() + ":" + pair.getValue().toString());
 							headers.put(pair.getKey(), pair.getValue().toString());
 						}
 						tuple.setMap(messageHeaderAH.getName(), headers);
 					}
 				}
 
-				System.out.println("message: " + message);
+				trace.log(TraceLevel.INFO, "message: " + message);
 				// Submit tuple to output stream
 				try {
 					out.submit(tuple);
 				} catch (Exception e) {
-					System.out.println("Catching submit exception");
+					trace.log(TraceLevel.INFO, "Catching submit exception");
 					e.printStackTrace();
 				}
 			}

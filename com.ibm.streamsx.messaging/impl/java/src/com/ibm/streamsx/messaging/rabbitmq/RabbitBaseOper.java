@@ -58,7 +58,7 @@ public class RabbitBaseOper extends AbstractOperator {
 		if (vHost != null)
 			connectionFactory.setVirtualHost(vHost);
 		addressArr = buildAddressArray(hostAndPortList);
-		System.out.println("Addr Array: " + addressArr[0].getHost() + ":" + addressArr[0].getPort());
+		trace.log(TraceLevel.INFO, "Addr Array: " + addressArr[0].getHost() + ":" + addressArr[0].getPort());
 		connection = connectionFactory.newConnection(addressArr);
 		channel = connection.createChannel();
 		channel.exchangeDeclare(exchangeName, exchangeType);
@@ -75,7 +75,7 @@ public class RabbitBaseOper extends AbstractOperator {
 		for (String hostAndPort : hostsAndPorts){
 			URL tmpURL = new URL("http://" + hostAndPort);
 			addrArr[i++] = new Address(tmpURL.getHost(), tmpURL.getPort());
-			System.out.println("Adding: " + tmpURL.getHost() + ":"+ tmpURL.getPort());
+			trace.log(TraceLevel.INFO, "Adding: " + tmpURL.getHost() + ":"+ tmpURL.getPort());
 		}
 		trace.log(TraceLevel.INFO, "Built address array: \n" + addrArr.toString());
 		
