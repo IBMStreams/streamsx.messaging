@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -26,7 +27,7 @@ import com.ibm.streams.operator.model.Parameter;
  * Base operator for all the common functions
  * 
  */
-@Libraries({ "opt/downloaded/*" })
+@Libraries({ "opt/downloaded/*","opt/*" })
 public abstract class KafkaBaseOper extends AbstractOperator {
 
 	protected Properties properties = new Properties(),
@@ -36,8 +37,6 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 			keyAH = new AttributeHelper("key"),
 			messageAH = new AttributeHelper("message");
 	protected List<String> topics = new ArrayList<String>();
-	protected KafkaClient client = null;
-	protected SimpleConsumerClient simpleClient = null;
 	private final Logger trace = Logger.getLogger(KafkaBaseOper.class
 			.getCanonicalName());
 
@@ -49,11 +48,34 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 			finalProperties.load(new FileReader(propFile));
 		}
 		finalProperties.putAll(properties);
-
+		finalProperties = transformTrustStoreProperty(finalProperties);
+		
 		if (finalProperties == null || finalProperties.isEmpty())
 			throw new Exception(
 					"Kafka connection properties must be specified.");
 
+	}
+
+	private Properties transformTrustStoreProperty(Properties props) {
+		final String trustorePropertyName = "ssl.truststore.location";
+		final String trustorePasswordPropertyName = "ssl.truststore.password";
+		final String securityProtocolPropertyName = "security.protocol";
+		String trustStoreFile = props.getProperty(trustorePropertyName);
+		String securityProtocol = props.getProperty(securityProtocolPropertyName);
+		String trustStorePassword = props.getProperty(trustorePasswordPropertyName);
+		if (trustStoreFile != null){
+			trustStoreFile = getAbsoluteFilePath(trustStoreFile);
+			props.setProperty(trustorePropertyName, trustStoreFile);
+			trace.log(TraceLevel.INFO, "TrustStore location set to " + trustStoreFile);
+		} else if (securityProtocol.equalsIgnoreCase("SSL")){
+			Map<String, String> env = System.getenv();
+			//get java default truststore
+			trustStoreFile = env.get("STREAMS_INSTALL") + "/java/jre/lib/security/cacerts";
+			props.setProperty(trustorePropertyName, trustStoreFile);
+			if (trustStorePassword == null)
+				props.setProperty(trustorePasswordPropertyName, "changeit");
+		}
+		return props;
 	}
 
 	public void initSchema(StreamSchema ss) throws Exception {
@@ -70,15 +92,6 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		// blobs are not supported for topics
 		supportedTypes.remove(MetaType.BLOB);
 		topicAH.initialize(ss, false, supportedTypes);
-
-		
-		
-		OperatorContext operContext = getOperatorContext();
-		if (operContext.getParameterNames().contains("partition") == false){
-			//we don't need to create this client if using simpleConsumerClient
-			trace.log(TraceLevel.INFO, "Creating client");
-			client = new KafkaClient(topicAH, keyAH, messageAH, finalProperties);
-		}
 		
 	}
 
@@ -104,14 +117,19 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	public String getPropertiesFile() {
 		trace.log(TraceLevel.TRACE, "Properties file: " + propertiesFile);
     	if (propertiesFile == null) return null;
-    	File file = new File(propertiesFile);
+    	propertiesFile = getAbsoluteFilePath(propertiesFile);
+		return propertiesFile;
+	}
+	
+	public String getAbsoluteFilePath(String filePath){
+		File file = new File(filePath);
 		
 		// if the properties file is relative, the path is relative to the application directory
 		if (!file.isAbsolute())
 		{
-			propertiesFile = getOperatorContext().getPE().getApplicationDirectory().getAbsolutePath() + "/" +  propertiesFile;
+			filePath = getOperatorContext().getPE().getApplicationDirectory().getAbsolutePath() + "/" +  filePath;
 		}
-		return propertiesFile;
+		return filePath;
 	}
 
 	@Parameter(optional = true, description = "Name of the attribute for the message. If this parameter is not specified, then by default the operator will look for an attribute named \\\"message\\\". If the \\\"message\\\" attribute is not found, messages will not be sent. Default is \\\"message\\\".")
@@ -126,10 +144,6 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 
 	@Override
 	public void shutdown() throws Exception {
-		if (client != null)
-			client.shutdown();
-		if (simpleClient != null)
-			simpleClient.shutdown();
 
         OperatorContext context = getOperatorContext();
         trace.log(TraceLevel.ALL, "Operator " + context.getName() + " shutting down in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );

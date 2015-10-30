@@ -3,7 +3,6 @@ toolkit.xml
 impl/nl/include/*.h
 *.pm
 .toolkitList
-.settings
 doc
 # If you want to include a perl module, do
 !Access.pm

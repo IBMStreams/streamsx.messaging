@@ -32,7 +32,7 @@ public class KafkaSink extends KafkaBaseOper {
 	static final String OPER_NAME =  "KafkaProducer";
 	
 	private static final Logger trace = Logger.getLogger(KafkaSink.class.getName());
-
+	private KafkaProducerClient producerClient;
 	
 	@Parameter(name="topic", cardinality=-1, optional=true, 
 			description="Topic to be published to. A topic can also be specified as an input stream attribute.")
@@ -80,7 +80,9 @@ public class KafkaSink extends KafkaBaseOper {
 			trace.log(TraceLevel.INFO, "Topics: " + topics.toString());
 		//TODO: check for minimum properties
 		trace.log(TraceLevel.INFO, "Initializing producer");
-		client.initProducer();
+		KafkaProducerFactory producerFactory = new KafkaProducerFactory();
+		producerClient = producerFactory.getClient(topicAH, keyAH, messageAH, finalProperties);
+		producerClient.init();
 	}
 	
 	@Override
@@ -92,9 +94,9 @@ public class KafkaSink extends KafkaBaseOper {
 				trace.log(TraceLevel.DEBUG, "Sending message: " + tuple);
 			
 			if(!topics.isEmpty()) 
-				client.send(tuple, topics);
+				producerClient.send(tuple, topics);
 			else 
-				client.send(tuple);
+				producerClient.send(tuple);
 		}catch(Exception e) {
 			//ideally we should not get here since the kafka client doesnt seem to be throwing any exceptions
 			trace.log(TraceLevel.ERROR, "Could not send message: " + tuple, e);
