@@ -32,8 +32,8 @@ public class RabbitBaseOper extends AbstractOperator {
 
 	protected Channel channel;
 	protected Connection connection;
-	protected String hostName = "localhost", username = "guest",
-			password = "guest", exchangeName = "", exchangeType = "direct";
+	protected String hostName = "localhost", username = "",
+			password = "", exchangeName = "", exchangeType = "direct";
 			
 	protected List<String> hostAndPortList = new ArrayList<String>();
 	protected Address[] addressArr; 
@@ -52,8 +52,13 @@ public class RabbitBaseOper extends AbstractOperator {
 		// Must call super.initialize(context) to correctly setup an operator.
 		super.initialize(context);
 		ConnectionFactory connectionFactory = new ConnectionFactory();
-		connectionFactory.setUsername(username);
-		connectionFactory.setPassword(password);
+		if (username != ""){
+			connectionFactory.setUsername(username);
+			connectionFactory.setPassword(password);
+			trace.log(TraceLevel.INFO, "Set username and password.");
+		} else {
+			trace.log(TraceLevel.INFO, "Defaults: " + connectionFactory.getUsername() + " " + connectionFactory.getPassword());				
+		}
 		connectionFactory.setAutomaticRecoveryEnabled(autoRecovery);
 		if (vHost != null)
 			connectionFactory.setVirtualHost(vHost);
@@ -61,10 +66,12 @@ public class RabbitBaseOper extends AbstractOperator {
 		trace.log(TraceLevel.INFO, "Addr Array: " + addressArr[0].getHost() + ":" + addressArr[0].getPort());
 		connection = connectionFactory.newConnection(addressArr);
 		channel = connection.createChannel();
-		channel.exchangeDeclare(exchangeName, exchangeType);
+		System.out.println("Name: "+ exchangeName);
+		if (!exchangeName.isEmpty() && exchangeName != "")
+			channel.exchangeDeclare(exchangeName, exchangeType);
 		trace.log(TraceLevel.INFO,
 				"Initializing channel connection to exchange: " + exchangeName
-						+ " of type: " + exchangeType + " as user: " + username);
+						+ " of type: " + exchangeType + " as user: " + connectionFactory.getUsername());
 		trace.log(TraceLevel.INFO,
 				"Connection to host: " + connection.getAddress());
 	}
@@ -112,12 +119,12 @@ public class RabbitBaseOper extends AbstractOperator {
 		hostAndPortList.addAll(value);
 	}
 
-	@Parameter(optional = false, description = "Username for RabbitMQ authentication.")
+	@Parameter(optional = true, description = "Username for RabbitMQ authentication.")
 	public void setUsername(String value) {
 		username = value;
 	}
 
-	@Parameter(optional = false, description = "Password for RabbitMQ authentication.")
+	@Parameter(optional = true, description = "Password for RabbitMQ authentication.")
 	public void setPassword(String value) {
 		password = value;
 	}

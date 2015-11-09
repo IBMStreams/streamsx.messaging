@@ -111,6 +111,8 @@ public class RabbitMQSource extends RabbitBaseOper {
 	private void initRabbitChannel() throws IOException {
 		if (queueName == "") {
 			queueName = channel.queueDeclare().getQueue();
+		} else {
+			channel.queueDeclare(queueName, true, false, false, null);
 		}
 		
 		if (routingKeys.isEmpty())
