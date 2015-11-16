@@ -133,6 +133,11 @@ public class RabbitBaseOper extends AbstractOperator {
 	public void setExchangeName(String value) {
 		exchangeName = value;
 	}
+	
+	@Parameter(optional = true, description = "Optional attribute. Name of the RabbitMQ exchange type. Default direct.")
+	public void setExchangeType(String value) {
+		exchangeType = value;
+	}
 
 	@Parameter(optional = true, description = "Name of the attribute for the message. Default is \\\"message\\\".")
 	public void setMessageAttribute(String value) {
