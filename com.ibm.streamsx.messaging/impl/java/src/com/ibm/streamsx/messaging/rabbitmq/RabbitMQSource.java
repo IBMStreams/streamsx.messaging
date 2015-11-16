@@ -60,7 +60,7 @@ import java.util.logging.Logger;
 public class RabbitMQSource extends RabbitBaseOper {
 
 	private List<String> routingKeys = new ArrayList<String>();
-
+	
 	private final Logger trace = Logger.getLogger(RabbitBaseOper.class
 			.getCanonicalName());
 	/**
@@ -68,6 +68,7 @@ public class RabbitMQSource extends RabbitBaseOper {
 	 */
 	private Thread processThread;
 	private String queueName = "";
+	private Boolean queueIsDurable = false;
 	/**
 	 * Initialize this operator. Called once before any tuples are processed.
 	 * 
@@ -111,6 +112,8 @@ public class RabbitMQSource extends RabbitBaseOper {
 	private void initRabbitChannel() throws IOException {
 		if (queueName == "") {
 			queueName = channel.queueDeclare().getQueue();
+		} else {
+			channel.queueDeclare(queueName, queueIsDurable, false, false, null);
 		}
 		
 		if (routingKeys.isEmpty())
@@ -149,9 +152,7 @@ public class RabbitMQSource extends RabbitBaseOper {
 					throws IOException {
 				String message = new String(body, "UTF-8");
 				StreamingOutput<OutputTuple> out = getOutput(0);
-				
-				
-				
+						
 				OutputTuple tuple = out.newTuple();
 				trace.log(TraceLevel.INFO, "Schema: " + tuple.getStreamSchema().getAttributeNames().toString());
 
@@ -200,6 +201,11 @@ public class RabbitMQSource extends RabbitBaseOper {
 	@Parameter(optional = true, description = "Name of the queue. Main reason to specify is to facilitate parallel consuming. Default is a random queue name..")
 	public void setQueueName(String value) {
 		queueName = value;
+	}
+	
+	@Parameter(optional = true, description = "Defines whether a queue is durable or not. False by default.")
+	public void setQueueIsDurable(Boolean value) {
+		queueIsDurable = value;
 	}
 
 	/**
