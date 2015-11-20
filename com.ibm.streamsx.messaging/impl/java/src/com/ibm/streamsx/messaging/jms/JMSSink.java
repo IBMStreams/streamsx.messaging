@@ -29,12 +29,15 @@ import com.ibm.streams.operator.Type;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.logging.LogLevel;
 import com.ibm.streams.operator.logging.LoggerNames;
+import com.ibm.streams.operator.logging.TraceLevel;
 import com.ibm.streams.operator.metrics.Metric;
 import com.ibm.streams.operator.model.CustomMetric;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.state.Checkpoint;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streams.operator.state.StateHandler;
+import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
+import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 
 
 //The JMSSink operator publishes data from Streams to a JMS Provider queue or a topic.
@@ -553,6 +556,16 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			throw new RuntimeException("No valid message class is specified.");
 		}
 
+		// register for data governance
+		registerForDataGovernance(connectionDocumentParser.getProviderURL(), connectionDocumentParser.getDestination());
+
+	}
+
+	private void registerForDataGovernance(String providerURL, String destination) {
+		logger.log(TraceLevel.INFO, "JMSSink - Registering for data governance with providerURL: " + providerURL
+				+ " destination: " + destination);
+		DataGovernanceUtil.registerForDataGovernance(this, destination, IGovernanceConstants.ASSET_JMS_MESSAGE_TYPE,
+				providerURL, IGovernanceConstants.ASSET_JMS_SERVER_TYPE, false, "JMSSink");
 	}
 
 	@Override
