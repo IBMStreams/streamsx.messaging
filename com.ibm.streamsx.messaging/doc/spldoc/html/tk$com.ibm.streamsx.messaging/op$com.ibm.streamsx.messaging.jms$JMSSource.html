@@ -22,8 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.1.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSource</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSource</p>
 
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSource.svg" width="672" height="112"/>
 </div>
 
 <div class="section">
@@ -111,6 +115,8 @@
 
 <li class="li"> The <strong class="ph b">connectionsDocument</strong> parameter is not specified and the <tt class="ph tt">connections.xml</tt> file is not present in the default location.</li>
 
+<li class="li"> The <strong class="ph b">messageIDOutAttrName</strong> parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.</li>
+
 </ul>
 </li>
 
@@ -165,10 +171,6 @@
 
 </div>
 
-<div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSource.svg" width="672" height="112"/>
-</div>
-
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
 
 <dl class="dl" compact="compact">
@@ -187,7 +189,7 @@
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 10 parameters. (<tt class="ph tt">codepage, reconnectionPolicy, reconnectionBound, period, initDelay, access, connection, connectionDocument, triggerCount, messageSelector</tt>)
+  <dd class="dd">This operator supports 11 parameters. (<tt class="ph tt">codepage, reconnectionPolicy, reconnectionBound, period, initDelay, access, connection, connectionDocument, triggerCount, messageSelector, messageIDOutAttrName</tt>)
 </dd>
 
  
@@ -309,7 +311,7 @@
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 10 parameters.<dl class="dl">
+This operator supports 11 parameters.<dl class="dl">
 
 <dt class="dt dlterm" id="spldoc_operator__parameter_codepage"><tt class="ph tt">codepage</tt></dt>
 
@@ -594,6 +596,37 @@ This operator supports 10 parameters.<dl class="dl">
 
 <dd class="dd">
 <p class="p">        This optional parameter is used as JMS Message Selector.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_messageIDOutAttrName"><tt class="ph tt">messageIDOutAttrName</tt></dt>
+
+<dd class="dd">
+<p class="p">        Output attribute on output data stream to assign message ID to, the specified attribute in output stream must be of type rstring.
 </p>
 <dl class="dl">
 

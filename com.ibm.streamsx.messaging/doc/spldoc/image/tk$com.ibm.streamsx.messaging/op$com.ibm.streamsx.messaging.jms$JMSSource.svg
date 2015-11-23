@@ -85,13 +85,15 @@ TMnXXD1/kcAecakJSAmMcShkPQCL2vTD4W4YPwAAAABJRU5ErkJggg=="
       ><set attributeName="visibility" from="hidden" end="sdt0.mouseout" to="visible" begin="sdt0.mouseover"
     /></g
     ><g visibility="hidden" style="stroke:none;font-style:italic;font-size:12px;font-family:&apos;Helvetica&apos;,&apos;SansSerif&apos;;"
-    ><rect x="47.65" y="58.0" width="382.53998" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="47.0"
-      /><text x="48.65" y="71.0"
+    ><rect x="47.65" y="43.0" width="391.02" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="62.0"
+      /><text x="48.65" y="56.0"
       >Required: access, connection / Optional: codepage, </text
-      ><text x="48.65" y="86.0"
+      ><text x="48.65" y="71.0"
       >reconnectionPolicy, reconnectionBound, period, </text
+      ><text x="48.65" y="86.0"
+      >initDelay, connectionDocument, triggerCount, messageSelector, </text
       ><text x="48.65" y="101.0"
-      >initDelay, connectionDocument, triggerCount, messageSelector</text
+      >messageIDOutAttrName</text
       ><set attributeName="visibility" from="hidden" end="sdt1.mouseout" to="visible" begin="sdt1.mouseover"
     /></g
     ><g visibility="hidden" style="stroke:none;font-style:italic;font-size:12px;font-family:&apos;Helvetica&apos;,&apos;SansSerif&apos;;"
