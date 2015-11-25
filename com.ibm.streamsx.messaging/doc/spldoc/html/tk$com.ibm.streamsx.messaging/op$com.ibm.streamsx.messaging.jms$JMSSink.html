@@ -22,8 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSink</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSink</p>
 
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSink.svg" width="672" height="112"/>
 </div>
 
 <div class="section">
@@ -34,16 +38,32 @@
 <p class="p">The incoming tuple from InfoSphere Streams can contain one or more attributes, each of which can be of the following data types: int8, uint8, int16, uint16, int32, uint32, int64, uint64, float32, float64, boolean, blob, rstring, decimal32, decimal64, decimal128, ustring, or timestamp. The input tuple is serialized into a JMS message. For the <tt class="ph tt">JMSSink</tt> operator, the following message classes are supported: map, stream, bytes, xml, wbe, wbe22, and empty. The type of message is specified as the value of the message_class attribute in the connection specifications document.
 </p>
 
-<p class="p"><strong class="ph b">Exceptions</strong>
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Behavior in a consistent region
+</h2>
+
+<p class="p">The <tt class="ph tt">JMSSink</tt> operator can be an operator within the reachability graph of a operator-driven consistent region. It cannot be the start of a consistent region.
 </p>
+
+<p class="p">When this operator is participating in a consistent region, the parameter <strong class="ph b">consistentRegionQueueName</strong> must be specified.
+</p>
+
+<p class="p"><tt class="ph tt">JMSSink</tt> operator is using transacted session to achieve the purpose of consistent region and parameters <strong class="ph b">reconnectionPolicy</strong>, <strong class="ph b">reconnectionBound</strong>, <strong class="ph b">period</strong>, <strong class="ph b">maxMessageSendRetries</strong> and <strong class="ph b">messageSendRetryDelay</strong> must not be specified. This is due to the fact that if connection problem occurs, the messages sent since the last successful checkpoint would be lost and it is not necessary to continue to process message even after connection is established again. In this case the operator needs to reset to the last checkpoint and re-send the messages again, thus re-connection policy would not apply when it is participating in a consistent region
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Exceptions
+</h2>
 
 <div class="p">The following list describes the common types of exceptions that can occur:
 <ul class="ul">
-<li class="li"> Runtime errors that halt the operator execution.
+<li class="li"> Run time errors that halt the operator execution.
 <ul class="ul">
-<li class="li"> The <tt class="ph tt">JMSSink</tt> operator throws an exception and terminates in the following cases. For some exceptions, the trace and log information is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
+<li class="li"> The <tt class="ph tt">JMSSink</tt> operator throws an exception and terminates in the following cases.     For some exceptions, the trace and log information is logged in the console logs     and also output to the optional output port if the application is configured to use the optional port.
 <ul class="ul">
-<li class="li"> During the initial connection attempt or during transient reconnection failures, if the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">NoRetry</tt> and the operator does not have a successful connection, or the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">BoundedRetry</tt> and the operator does not have a successful connection after the number of attempts that are specified in the <strong class="ph b">reconnectionBound</strong> parameter. Successive data is lost.</li>
+<li class="li"> During the initial connection attempt or during transient reconnection failures,       if the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">NoRetry</tt> and the operator does not have a successful connection,       or the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">BoundedRetry</tt> and the operator does not have a successful connection       after the number of attempts that are specified in the <strong class="ph b">reconnectionBound</strong> parameter. Successive data is lost.</li>
 
 <li class="li"> The queue name is unknown.</li>
 
@@ -53,7 +73,7 @@
 
 <li class="li"> The operator is unable to connect o the port.</li>
 
-<li class="li"> There is a mismatch between the data type of one or more attributes in the native schema and the data type of attributes in the input stream.</li>
+<li class="li"> There is a mismatch between the data type of one or more attributes in the native schema       and the data type of attributes in the input stream.</li>
 
 <li class="li"> One or more native schema attributes do not have a matching attribute in the input stream schema.</li>
 
@@ -75,13 +95,13 @@
 </ul>
 </li>
 
-<li class="li"> Runtime errors that cause a message to be dropped and an error message to be logged.
+<li class="li"> Run time errors that cause a message to be dropped and an error message to be logged.
 <ul class="ul">
-<li class="li"> The <tt class="ph tt">JMSink</tt> operator throws an exception and discards the message in the following cases. The trace and log information for these exceptions is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
+<li class="li"> The <tt class="ph tt">JMSink</tt> operator throws an exception and discards the message in the following cases.     The trace and log information for these exceptions is logged in the console logs     and also output to the optional output port if the application is configured to use the optional port.
 <ul class="ul">
-<li class="li">  The data being written is longer than the maximum message length specified in the queue. The discarded message is not sent to the WebSphere MQ or Apache Active MQ queue or topic.</li>
+<li class="li">  The data being written is longer than the maximum message length specified in the queue.        The discarded message is not sent to the WebSphere MQ or Apache Active MQ queue or topic.</li>
 
-<li class="li"> The <strong class="ph b">reconnectionBound</strong> parameter is specified, but the <strong class="ph b">reconnectionPolicy</strong> parameter is set to a value other than <tt class="ph tt">BoundedRetry</tt>.</li>
+<li class="li"> The <strong class="ph b">reconnectionBound</strong> parameter is specified, but the <strong class="ph b">reconnectionPolicy</strong> parameter       is set to a value other than <tt class="ph tt">BoundedRetry</tt>.</li>
 
 </ul>
 </li>
@@ -89,9 +109,9 @@
 </ul>
 </li>
 
-<li class="li"> Compile-time errors.
+<li class="li"> Compile time errors.
 <ul class="ul">
-<li class="li"> The <tt class="ph tt">JMSink</tt> operator throws a compile-time error in the following cases. The trace and log information for these exceptions is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
+<li class="li"> The <tt class="ph tt">JMSink</tt> operator throws a compile time error in the following cases.     The trace and log information for these exceptions is logged in the console logs     and also output to the optional output port if the application is configured to use the optional port.
 <ul class="ul">
 <li class="li"> The mandatory parameters, connection and access are not specified.</li>
 
@@ -99,7 +119,7 @@
 
 <li class="li"> The <strong class="ph b">reconnectionBound</strong> parameter is specified, but the <strong class="ph b">reconnectionPolicy</strong> parameter is not specified.</li>
 
-<li class="li"> The environment variables <strong class="ph b">STREAMS_MESSAGING_WMQ_HOME</strong> and <strong class="ph b">STREAMS_MESSAGING_AMQ_HOME</strong> are not set to the locations where the WMQ and AMQ libraries are installed.</li>
+<li class="li"> The environment variables <strong class="ph b">STREAMS_MESSAGING_WMQ_HOME</strong> and <strong class="ph b">STREAMS_MESSAGING_AMQ_HOME</strong>       are not set to the locations where the WMQ and AMQ libraries are installed.</li>
 
 </ul>
 </li>
@@ -111,128 +131,12 @@
 
 </div>
 
-<p class="p"><strong class="ph b">Examples</strong>
-</p>
+  <dl class="dl"><dt class="dt dlterm"><a class="xref" href="op$com.ibm.streamsx.messaging.jms$JMSSink$1.html">Examples</a>
+</dt>
+<dd class="dd">This example show the use of multiple JMSSink operators with different parameter combinations.
+</dd>
+</dl>
 
-<p class="p">The following example show the use of multiple JMSSink operators with different parameter combinations:
-</p>
-
-<div class="p">
-<pre class="pre codeblock">
-composite Main {
-graph	
-
-stream &lt;int32 id, rstring fname, rstring lname&gt;
-MyPersonNamesStream  = Beacon()
-{
-param
-	iterations:10u;
-}	
-
-// JMSSink operator with connections document in the default directory ../etc/connections.xml
-// (relative to the data directory)
-() as  MySink1 = JMSSink( MyPersonNamesStream )
-{
-param
-	connection : "amqConn";	
-	access     : "amqAccess";
-}	
-
-// JMSSink operator with fully qualified name of connections document
-() as  MySink2 = JMSSink( MyPersonNamesStream )
-{
-param
-	connectionDocument   : "/home/streamsuser/connections/JMSconnections.xml";
-	connection           : "amqConn";
-	access               : "amqAccess";
-}	
-
-// JMSSink operator with optional output error port specified
-stream &lt;tuple&lt; int32 id, rstring fname, rstring lname&gt; inTuple, rstring errorMessage&gt;
-MySink3  = JMSSink(MyPersonNamesStream )
-{
-param
-	connection : "amqConn";	
-	access     : "amqAccess";
-}
-// JMSSink operator with reconnectionPolicy specified as  NoRetry
-() as  MySink4 = JMSSink( MyPersonNamesStream )
-{
-param
-	connection         : "amqConn";
-	access             : "amqAccess";
-	reconnectionPolicy : "NoRetry";
-}	
-
-// JMSSink operator with optional period and reconnectionPolicy specified
-() as  MySink5 = JMSSink( MyPersonNamesStream )
-{
-param
-	connection: "amqConn";	
-	access: "amqAccess";
-	reconnectionPolicy : "InfiniteRetry";
-	period: 1.20;
-}
-// JMSSink operator with reconnectionPolicy specified as BoundedRetry
-() as  MySink6 = JMSSink( MyPersonNamesStream )
-{
-param
-	connection: "amqConn";	
-	access: "amqAccess"; 
-	reconnectionPolicy : "BoundedRetry";
-	reconnectionBound : 2;
-	period: 1.20;
-}
-}
-</pre>
-
-
-</div>
-
-<p class="p">The following example shows a sample connections.xml file:
-</p>
-
-<div class="p">
-<pre class="pre codeblock">
-&lt;st:connections 	xmlns:st="http://www.ibm.com/xmlns/prod/streams/adapters"
-					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;	
-
-&lt;connection_specifications&gt;
-	&lt;connection_specification name="amqConn"&gt;
-	 &lt;JMS initial_context="org.apache.activemq.jndi.ActiveMQInitialContextFactory"
-		provider_url = "tcp://machine1.com:61616"
-		connection_factory="ConnectionFactory"/&gt;
-	&lt;/connection_specification&gt;
-&lt;/connection_specifications&gt;	
-
-&lt;access_specifications&gt;
-	&lt;access_specification name="amqAccess"&gt;
-		&lt;destination identifier="dynamicQueues/MapQueue" message_class="bytes" /&gt;
-			&lt;uses_connection connection="amqConn"/&gt;
-			&lt;native_schema&gt;
-				&lt;attribute name="id" type="Int" /&gt;
-				&lt;attribute name="fname" type="Bytes" length="15" /&gt;
-				&lt;attribute name="lname" type="Bytes" length="20" /&gt;
-				&lt;attribute name="age" type="Int" /&gt;
-				&lt;attribute name="gender" type="Bytes" length="1" /&gt;
-				&lt;attribute name="score" type="Float" /&gt;
-				&lt;attribute name="total" type="Double" /&gt;
-			&lt;/native_schema&gt;
-	&lt;/access_specification&gt;
-&lt;/access_specifications&gt;
-&lt;/st:connections&gt;
-</pre>
-
-
-</div>
-
-</div>
-
-<div class="section splprimop">
-<object type="image/svg+xml" data="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSink.svg" width="672" height="112">
-<span>Primitive operator image not displayed. Problem loading file: ../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSink.svg
-</span>
-</object>
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
@@ -253,7 +157,7 @@ param
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 7 parameters. (<tt class="ph tt">codepage, reconnectionPolicy, reconnectionBound, period, access, connection, connectionDocument</tt>)
+  <dd class="dd">This operator supports 10 parameters. (<tt class="ph tt">codepage, reconnectionPolicy, reconnectionBound, period, access, connection, connectionDocument, maxMessageSendRetries, messageSendRetryDelay, consistentRegionQueueName</tt>)
 </dd>
 
  
@@ -287,7 +191,7 @@ param
 
    <dd class="dd">
 
-<p class="p">The JMSSink operator is configurable with a single input port.  This input port is a data port and is required. The input port is non-mutating and its punctuation mode is Oblivious.		 
+<p class="p">The <tt class="ph tt">JMSSink</tt> operator is configurable with a single input port.  This input port is a data port and is required. The input port is non-mutating and its punctuation mode is Oblivious. 
 </p>
    </dd>
 
@@ -339,7 +243,7 @@ param
 
    <dd class="dd">
 
-<p class="p">The JMSSink operator is configurable with an optional output port that submits the error message and the tuple(optional) that caused this error. The optional output port is mutating and its punctuation mode is Free. This optional error output port contains an optional first attribute that contains the input tuple that caused the error and a second attribute of type rstring that contains the error message. Only one error message is sent for each failed tuple.
+<p class="p">The <tt class="ph tt">JMSSink</tt> operator is configurable with an optional output port that submits the error message and the tuple(optional) that caused this error. The optional output port is mutating and its punctuation mode is Free. This optional error output port contains an optional first attribute that contains the input tuple that caused the error and a second attribute of type rstring that contains the error message. Only one error message is sent for each failed tuple.
 </p>
 
 <p class="p"/>
@@ -445,7 +349,7 @@ param
 <dt class="dt dlterm" id="spldoc_operator__parameter_reconnectionBound"><tt class="ph tt">reconnectionBound</tt></dt>
 
 <dd class="dd">
-<p class="p">This optional parameter of type int32 specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified and set to <tt class="ph tt">BoundedRetry</tt>, otherwise a runtime error occurs. If the <strong class="ph b">reconnectionBound</strong> parameter is specified and the <strong class="ph b">reconnectionPolicy</strong> parameter is not set, a compile-time error occurs. The default value for the <strong class="ph b">reconnectionBound</strong> parameter is <tt class="ph tt">5</tt>. 
+<p class="p">This optional parameter of type int32 specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified and set to <tt class="ph tt">BoundedRetry</tt>, otherwise a run time error occurs. If the <strong class="ph b">reconnectionBound</strong> parameter is specified and the <strong class="ph b">reconnectionPolicy</strong> parameter is not set, a compile time error occurs. The default value for the <strong class="ph b">reconnectionBound</strong> parameter is <tt class="ph tt">5</tt>. 
 </p>
 <dl class="dl">
 
@@ -476,7 +380,7 @@ param
 <dt class="dt dlterm" id="spldoc_operator__parameter_period"><tt class="ph tt">period</tt></dt>
 
 <dd class="dd">
-<p class="p">This parameter specifies the time period in seconds the operator waits before it tries to reconnect. It is an optional parameter of type float64. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified, otherwise a compile-time error occurs. The default value for the <strong class="ph b">period</strong> parameter is <tt class="ph tt">60</tt>.		 
+<p class="p">This parameter specifies the time period in seconds the operator waits before it tries to reconnect. It is an optional parameter of type float64. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified, otherwise a compile time error occurs. The default value for the <strong class="ph b">period</strong> parameter is <tt class="ph tt">60</tt>.		 
 </p>
 <dl class="dl">
 
@@ -596,6 +500,99 @@ param
 </dd>
 
 
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_maxMessageSendRetries"><tt class="ph tt">maxMessageSendRetries</tt></dt>
+
+<dd class="dd">
+<p class="p">This optional parameter specifies the number of successive retries that are attempted for a message if a failure occurs when the message is sent.  The default value is zero; no retries are attempted.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_messageSendRetryDelay"><tt class="ph tt">messageSendRetryDelay</tt></dt>
+
+<dd class="dd">
+<p class="p">This optional parameter specifies the time in milliseconds to wait before the next delivery attempt. If the <strong class="ph b">maxMessageSendRetries</strong> is specified, you must also specify a value for this parameter.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int64
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_consistentRegionQueueName"><tt class="ph tt">consistentRegionQueueName</tt></dt>
+
+<dd class="dd">
+<p class="p">        This is a required parameter if this operator is participating in a consistent region. This parameter specifies the queue to be used to store consistent region specific information and the operator will perform a JNDI lookup with the queue name specified at initialization state. The queue name specified must also exist on the same messaging server where this operator is establishing the connection.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
 </dl>
 
 </div>
@@ -645,7 +642,7 @@ param
 
     <dd class="dd">
 
-<p class="p">The number of failed inserts to the WebSphere MQ or the Apache ActiveMQ. Failed insertions can occur when a message is dropped because of a runtime error.
+<p class="p">The number of failed inserts to the WebSphere MQ or the Apache ActiveMQ. Failed insertions can occur when a message is dropped because of a run time error.
 </p>
 
      <p class="p"/>

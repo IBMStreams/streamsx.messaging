@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="Examples"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_page"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>Examples</title>
+</head>
+<body id="spldoc_page">
+
+
+<h1 class="title topictitle1">Examples</h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a> &gt; <a class="xref" href="op$com.ibm.streamsx.messaging.xms$XMSSource.html">XMSSource</a> &gt; Examples</p>
+
+</div>
+
+
+<div class="section">
+<p class="p">These examples demonstrate how to use the <tt class="ph tt">XMSSource</tt> operator.
+</p>
+
+<p class="p">This example demonstrates the use of multiple <tt class="ph tt">XMSSource</tt> operators with different parameter combinations.
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+composite Main {
+graph
+//XMSSource Operator with connections.xml 
+//defaulted to ./etc/connections.xml
+stream &lt;int32 id, rstring fname, rstring lname&gt;
+MyPersonNamesStream  = XMSSource(){
+	param 
+		connection: "wbe";
+		access: "OutTrading";
+}    
+
+//XMSSource operator with fully 
+//qualified name of connections.xml
+stream &lt;int32 id, rstring fname, rstring lname&gt;
+MyPersonNamesStream = XMSSource(){
+	param     
+		connectionDocument:"/home/streamsuser/connections/XMSconnections.xml";
+		connection: "wbe";  
+		access: "OutTrading";
+}    
+
+//XMSSource Operator with the optional 
+//error output port specified 
+(stream &lt;int32 id, rstring fname, rstring lname&gt;; 
+stream &lt;rstring errorMessage&gt; ErrorStream)  = XMSSource(){
+	param                     
+		connection: "wbe";
+		access: "OutTrading";
+}    
+
+//XMSSource operator with the optional 
+//initDelay and reconnectionPolicy specified
+stream &lt;int32 id, rstring fname, rstring lname&gt;
+MyPersonNamesStream = XMSSource(){
+	param     
+		connection: "wbe"; 
+		access: "OutTrading";
+		reconnectionPolicy: NoRetry;
+		initDelay: 10.0;
+}
+
+//XMSSource operator with the optional period 
+//and reconnectionPolicy specified
+stream &lt;int32 id, rstring fname, rstring lname&gt; 
+MyPersonNamesStream = XMSSource(){
+	param     
+		connection: "wbe"; 
+		access: "OutTrading"; 
+		reconnectionPolicy: InfiniteRetry;
+		period: 1.20;
+}
+// XMSSource operator with the reconnectionPolicy
+//specified as BoundedRetry
+stream &lt;int32 id, rstring fname, rstring lname&gt;
+MyPersonNamesStream = XMSSource(){
+	param     
+		connection: "wbe"; 
+		access: "OutTrading"; 
+		reconnectionPolicy: BoundedRetry;
+		reconnectionBound: 2u;
+		period: 1.20;
+}
+}
+</pre>
+
+
+</div>
+
+<p class="p">This example uses the same <tt class="ph tt">connections.xml</tt> that is provided in the example for the <tt class="ph tt">XMSSink</tt> operator. 
+</p>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

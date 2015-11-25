@@ -22,22 +22,22 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.kafka.html">com.ibm.streamsx.messaging.kafka</a> &gt; KafkaConsumer</p>
-
-</div>
-
-<div class="section">
-
-<p class="p">This operator acts as a Kafka consumer recieving messages for one or more topics. Note that there may be multiple threads receiving messages depending on the configuration specified. Ordering of messages is not guaranteed.
-</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.kafka.html">com.ibm.streamsx.messaging.kafka</a> &gt; KafkaConsumer</p>
 
 </div>
 
 <div class="section splprimop">
-<object type="image/svg+xml" data="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.kafka$KafkaConsumer.svg" width="672" height="112">
-<span>Primitive operator image not displayed. Problem loading file: ../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.kafka$KafkaConsumer.svg
-</span>
-</object>
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.kafka$KafkaConsumer.svg" width="672" height="112"/>
+</div>
+
+<div class="section">
+
+<p class="p">This operator acts as a Kafka consumer receiving messages for a single topic. Note that there may be multiple threads receiving messages depending on the configuration specified. Ordering of messages is not guaranteed.
+</p>
+
+<p class="p"><strong class="ph b">Behavior in a Consistent Region</strong> This operator can be used inside a consistent region. Operator driven and periodical checkpointing are supported. Partition to be read from must be specified. To consume multiple partitions in a topic, use user defined parallelism or multiple consumers. Resetting to initial state is not supported because the intial offset cannot be saved and may not be present in the Kafka log. In the case of a reset to initial state after operator crash, messages will start being read from the time of reset.
+</p>
+
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
@@ -58,7 +58,7 @@
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 6 parameters. (<tt class="ph tt">kafkaProperty, keyAttribute, messageAttribute, propertiesFile, threadsPerTopic, topic</tt>)
+  <dd class="dd">This operator supports 10 parameters. (<tt class="ph tt">connectionRetryInterval, kafkaProperty, keyAttribute, leaderConnectionRetries, messageAttribute, partition, propertiesFile, threadsPerTopic, topic, triggerCount</tt>)
 </dd>
 
  
@@ -140,7 +140,38 @@
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 6 parameters.<dl class="dl">
+This operator supports 10 parameters.<dl class="dl">
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_connectionRetryInterval"><tt class="ph tt">connectionRetryInterval</tt></dt>
+
+<dd class="dd">
+<p class="p">Interval between each attempt to find a lead Kafka Broker in milliseconds. Number of attempts is set by the leaderConnectionRetries parameter. This is only valid when the partition parameter is set. Default is 1000 ms.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
 
 <dt class="dt dlterm" id="spldoc_operator__parameter_kafkaProperty"><tt class="ph tt">kafkaProperty</tt></dt>
 
@@ -173,7 +204,7 @@ This operator supports 6 parameters.<dl class="dl">
 <dt class="dt dlterm" id="spldoc_operator__parameter_keyAttribute"><tt class="ph tt">keyAttribute</tt></dt>
 
 <dd class="dd">
-<p class="p">Name of the attribute for the key. Default is "key"
+<p class="p">Name of the attribute for the key. Default is "key".
 </p>
 <dl class="dl">
 
@@ -201,10 +232,41 @@ This operator supports 6 parameters.<dl class="dl">
 
 
 
+<dt class="dt dlterm" id="spldoc_operator__parameter_leaderConnectionRetries"><tt class="ph tt">leaderConnectionRetries</tt></dt>
+
+<dd class="dd">
+<p class="p">Number of attempts at finding a Kafka Broker before giving up. This is relevant when first looking for a broker, and in the case that a lead broker host goes down. This is only valid when the partition parameter is set. Default is 3.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
 <dt class="dt dlterm" id="spldoc_operator__parameter_messageAttribute"><tt class="ph tt">messageAttribute</tt></dt>
 
 <dd class="dd">
-<p class="p">Name of the attribute for the message. This attribute is required. Default is "message"
+<p class="p">Name of the attribute for the message. If this parameter is not specified, then by default the operator will look for an attribute named "message". If the "message" attribute is not found, messages will not be sent. Default is "message".
 </p>
 <dl class="dl">
 
@@ -213,6 +275,37 @@ This operator supports 6 parameters.<dl class="dl">
  <dd class="dd">
   <ul class="sl simple">
   <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_partition"><tt class="ph tt">partition</tt></dt>
+
+<dd class="dd">
+<p class="p">Partition to subscribe to. This must be set when using consistent region.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
   </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
@@ -309,6 +402,37 @@ This operator supports 6 parameters.<dl class="dl">
   </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_triggerCount"><tt class="ph tt">triggerCount</tt></dt>
+
+<dd class="dd">
+<p class="p">Number of messages between checkpointing for consistent region. This is only relevant to operator driven checkpointing.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
      </li>
 
   </ul>

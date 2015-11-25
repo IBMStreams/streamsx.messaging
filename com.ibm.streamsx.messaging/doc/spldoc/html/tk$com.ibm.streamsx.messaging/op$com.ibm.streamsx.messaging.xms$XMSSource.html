@@ -22,8 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a> &gt; XMSSource</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a> &gt; XMSSource</p>
 
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSource.svg" width="672" height="112"/>
 </div>
 
 <div class="section">
@@ -31,19 +35,29 @@
 <p class="p">The <tt class="ph tt">XMSSource</tt> operator reads data from a WebSphere MQ queue or topic and creates tuples out of it.
 </p>
 
-<p class="p">Each input WebSphere MQ message is converted to a separate tuple and sent to the output stream. A single message cannot contain multiple tuples.
+<p class="p">Each input WebSphere MQ message is converted to a separate tuple and sent to the output stream.  A single message cannot contain multiple tuples.
 </p>
 
-<p class="p"><strong class="ph b">Exceptions</strong>
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Behavior in a consistent region
+</h2>
+
+<p class="p">The <tt class="ph tt">XMSSource</tt> operator cannot participate in a consistent region.
 </p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Exceptions
+</h2>
 
 <div class="p">The following list describes the common types of exceptions that can occur:
 <ul class="ul">
-<li class="li"> Run-time errors that halt the operator execution.
+<li class="li"> Run time errors that halt the operator execution.
 <ul class="ul">
 <li class="li"> The <tt class="ph tt">XMSSource</tt> operator throws an exception and terminates in the following cases:
 <ul class="ul">
-<li class="li"> During the initial connect attempt, the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">NoRetry</tt> and the operator does not have a successful connection, or during transient connection failures the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">BoundedRetry</tt> and the operator does not have a successful connection after the number of attempts that are specified in the <strong class="ph b">reconnectionBound</strong> parameter. Successive data is lost.</li>
+<li class="li"> During the initial connect attempt, the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">NoRetry</tt>        and the operator does not have a successful connection, or during transient connection failures        the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">BoundedRetry</tt> and the operator does not have a successful connection        after the number of attempts that are specified in the <strong class="ph b">reconnectionBound</strong> parameter. Successive data is lost.</li>
 
 <li class="li"> The queue name is unknown.</li>
 
@@ -61,25 +75,25 @@
 </ul>
 </li>
 
-<li class="li"> Run-time errors that cause a message to be dropped and an error message to be logged.
+<li class="li"> Run time errors that cause a message to be dropped and an error message to be logged.
 <ul class="ul">
 <li class="li"> The <tt class="ph tt">XMSSource</tt> operator throws an exception and discards the message in the following cases:
 <ul class="ul">
 <li class="li"> A MapMessage does not contain the attributes that are specified in the native schema.</li>
 
-<li class="li"> A MapMessage contains attributes whose data type does not match the data type that is specified in the native schema and the conversion fails.</li>
+<li class="li"> A MapMessage contains attributes whose data type does not match the data type        that is specified in the native schema and the conversion fails.</li>
 
 <li class="li"> A StreamMessage does not contain the attributes that are specified in the native schema.</li>
 
-<li class="li"> A StreamMessage contains attributes whose data type does not match the data type specified in the native schema and the conversion fails.</li>
+<li class="li"> A StreamMessage contains attributes whose data type does not match the data type        that is specified in the native schema and the conversion fails.</li>
 
 <li class="li"> A BytesMessage does not contain the attributes that are specified in the native schema.</li>
 
 <li class="li"> The operator encounters a message that does not match the message class that is specified in the native schema.</li>
 
-<li class="li"> When a negative length (-2, -4, or -8) is specified in the native schema for bytes and string data types and the message class is bytes, the operator expects that the XMS message starts with a 2, 4, or 8-byte length field. If there are insufficient bytes remaining in the XMS message, the operator discards the entire message and logs a run-time error.</li>
+<li class="li"> When a negative length (-2, -4, or -8) is specified in the native schema for bytes and string data types        and the message class is bytes, the operator expects that the XMS message starts with a 2, 4, or 8-byte length field.        If there are insufficient bytes remaining in the XMS message, the operator discards the entire message        and logs a run time error.</li>
 
-<li class="li"> When a non-negative length is specified in the native schema for bytes and string, the operator attempts to read exactly that number of bytes from the BytesMessage. If there are insufficient bytes remaining in the XMS message, the operator discards the entire message and logs a run-time error.</li>
+<li class="li"> When a non-negative length is specified in the native schema for bytes and string,        the operator attempts to read exactly that number of bytes from the BytesMessage.        If there are insufficient bytes remaining in the XMS message,        the operator discards the entire message and logs a run time error.</li>
 
 </ul>
 </li>
@@ -89,13 +103,13 @@
 </ul>
 </li>
 
-<li class="li"> Compile-time errors
+<li class="li"> Compile time errors
 <ul class="ul">
 <li class="li"> The <tt class="ph tt">XMSSource</tt> operator throws a compile-time error in the following cases:
 <ul class="ul">
 <li class="li"> The message type is empty and a native schema is specified.</li>
 
-<li class="li"> The message type is bytes, stream, or map and a native schema attribute name or type does not match the name or type of the attribute in the output stream schema.</li>
+<li class="li"> The message type is bytes, stream, or map and a native schema attribute name or type does not match        the name or type of the attribute in the output stream schema.</li>
 
 <li class="li"> An attribute appears twice in the native schema.</li>
 
@@ -126,102 +140,20 @@
 <p class="p">In all of these cases, the operator logs the exception in the console logs, as well as on the error output port, if applicable.
 </p>
 
-<div class="p">Note:
+<div class="p"><strong class="ph b">Note</strong>:
 <ul class="ul">
-<li class="li"> The <tt class="ph tt">XMSSource</tt> operator runs without considering the length value for all message classes for string and bytes data types when a length of -1 is specified; it does not throw an error at either compile time or run time.</li>
-
-<li class="li"> If the WebSphere MQ server goes down while the <tt class="ph tt">XMSSource</tt> operator is running and the <strong class="ph b">reconnectionPolicy</strong> parameter is set to <tt class="ph tt">BoundedRetry</tt> or <tt class="ph tt">InfiniteRetry</tt>, the operator does not try to reconnect to WebSphere MQ. This problem occurs in XMSClient version 2.0.1 or lower.</li>
+<li class="li"> If the WebSphere MQ server goes down while the <tt class="ph tt">XMSSource</tt> operator is running    and the <strong class="ph b">reconnectionPolicy</strong> parameter is set to <tt class="ph tt">BoundedRetry</tt> or <tt class="ph tt">InfiniteRetry</tt>,    the operator does not try to reconnect to WebSphere MQ. This problem occurs in XMSClient version 2.0.1 or lower</li>
 
 </ul>
 
 </div>
 
-<p class="p"><strong class="ph b">Examples</strong>
-</p>
+  <dl class="dl"><dt class="dt dlterm"><a class="xref" href="op$com.ibm.streamsx.messaging.xms$XMSSource$1.html">Examples</a>
+</dt>
+<dd class="dd">These examples demonstrate how to use the <tt class="ph tt">XMSSource</tt> operator.
+</dd>
+</dl>
 
-<p class="p">The following example demonstrates the use of multiple <tt class="ph tt">XMSSource</tt> operators with different parameter combinations:
-</p>
-
-<div class="p">
-<pre class="pre codeblock">
-composite Main {
-graph
-//XMSSource Operator with connections.xml 
-//defaulted to ./etc/connections.xml
-stream &lt;int32 id, rstring fname, rstring lname&gt;
-MyPersonNamesStream  = XMSSource(){
-	param 
-		connection: "wbe";
-		access: "OutTrading";
-}    	
-
-//XMSSource operator with fully 
-//qualified name of connections.xml
-stream &lt;int32 id, rstring fname, rstring lname&gt;
-MyPersonNamesStream = XMSSource(){
-	param     
-		connectionDocument:"/home/streamsuser/connections/XMSconnections.xml";
-		connection: "wbe";  
-		access: "OutTrading";
-}    	
-
-//XMSSource Operator with the optional 
-//error output port specified 
-(stream &lt;int32 id, rstring fname, rstring lname&gt;; 
-stream &lt;rstring errorMessage&gt; ErrorStream)  = XMSSource(){
-	param                     
-		connection: "wbe";
-		access: "OutTrading";
-}    	
-
-//XMSSource operator with the optional 
-//initDelay and reconnectionPolicy specified
-stream &lt;int32 id, rstring fname, rstring lname&gt;
-MyPersonNamesStream = XMSSource(){
-	param     
-		connection: "wbe"; 
-		access: "OutTrading";
-		reconnectionPolicy: NoRetry;
-		initDelay: 10.0;
-}	
-
-//XMSSource operator with the optional period 
-//and reconnectionPolicy specified
-stream &lt;int32 id, rstring fname, rstring lname&gt; 
-MyPersonNamesStream = XMSSource(){
-	param     
-		connection: "wbe"; 
-		access: "OutTrading"; 
-		reconnectionPolicy: InfiniteRetry;
-		period: 1.20;
-}
-// XMSSource operator with the reconnectionPolicy
-//specified as BoundedRetry
-stream &lt;int32 id, rstring fname, rstring lname&gt;
-MyPersonNamesStream = XMSSource(){
-	param     
-		connection: "wbe"; 
-		access: "OutTrading"; 
-		reconnectionPolicy: BoundedRetry;
-		reconnectionBound: 2u;
-		period: 1.20;
-}
-}
-</pre>
-
-
-</div>
-
-<p class="p">This example uses the same <tt class="ph tt">connections.xml</tt> that is provided in the example for the <tt class="ph tt">XMSSink</tt> operator. 
-</p>
-
-</div>
-
-<div class="section splprimop">
-<object type="image/svg+xml" data="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSource.svg" width="672" height="112">
-<span>Primitive operator image not displayed. Problem loading file: ../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSource.svg
-</span>
-</object>
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
@@ -440,7 +372,7 @@ MyPersonNamesStream = XMSSource(){
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__reconnectionBound"><!-- --></a><tt class="ph tt">reconnectionBound</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified and set to <tt class="ph tt">BoundedRetry</tt>, otherwise a compile-time error occurs. If the <strong class="ph b">reconnectionBound</strong> parameter is specified and the <strong class="ph b">reconnectionPolicy</strong> parameter is not set, a compile-time error occurs. The default value for the <strong class="ph b">reconnectionBound</strong> parameter is <tt class="ph tt">5</tt>.
+<p class="p">This optional parameter specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified and set to <tt class="ph tt">BoundedRetry</tt>, otherwise a compile time error occurs. If the <strong class="ph b">reconnectionBound</strong> parameter is specified and the <strong class="ph b">reconnectionPolicy</strong> parameter is not set, a compile time error occurs. The default value for the <strong class="ph b">reconnectionBound</strong> parameter is <tt class="ph tt">5</tt>.
 </p>
 
   <dl class="dl">
@@ -475,7 +407,7 @@ MyPersonNamesStream = XMSSource(){
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__period"><!-- --></a><tt class="ph tt">period</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter specifies the time period in seconds the operator waits before it tries to reconnect. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified, otherwise a compile-time error occurs. The default value for the <strong class="ph b">period</strong> parameter is <tt class="ph tt">60</tt>.		 
+<p class="p">This optional parameter specifies the time period in seconds the operator waits before it tries to reconnect. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified, otherwise a compile time error occurs. The default value for the <strong class="ph b">period</strong> parameter is <tt class="ph tt">60</tt>.		 
 </p>
 
   <dl class="dl">
@@ -615,7 +547,7 @@ MyPersonNamesStream = XMSSource(){
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__connectionDocument"><!-- --></a><tt class="ph tt">connectionDocument</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the <strong class="ph b">connection</strong> and <strong class="ph b">access</strong> parameters. If the parameter is specified, it must have exactly one value that is a string constant.  If the parameter is not specified, the operator uses the file that is in the default location <tt class="ph tt">../etc/connections.xml</tt>.  If a relative path is specified, the path is relative to the root of the application directory.
+<p class="p">This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the <strong class="ph b">connection</strong> and <strong class="ph b">access</strong> parameters. If the parameter is specified, it must have exactly one value that is a string constant. If the parameter is not specified, the operator uses the file that is in the default location <tt class="ph tt">../etc/connections.xml</tt>. If a relative path is specified, the path is relative to the root of the application directory.
 </p>
 
   <dl class="dl">
@@ -727,7 +659,7 @@ stream&lt;${streamType}&gt; ${streamName} = XMSSource()   {
   <dt class="dt dlterm"><tt class="ph tt"> IBM Message Service Client for C/C++ (XMS) libraries</tt>  </dt>
 
 <dd class="dd"/>
-  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>: 
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>
   </dd>
 
   <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__lib">Library Name</a>: <tt class="ph tt">gxi01l, gxi</tt></dd>
@@ -741,7 +673,7 @@ stream&lt;${streamType}&gt; ${streamName} = XMSSource()   {
   <dt class="dt dlterm"><tt class="ph tt">WebSphere MQ Client libraries</tt>  </dt>
 
 <dd class="dd"/>
-  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>: 
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>
   </dd>
 
   <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">@MQ_HOME@/lib64</tt></dd>
@@ -753,7 +685,7 @@ stream&lt;${streamType}&gt; ${streamName} = XMSSource()   {
   <dt class="dt dlterm"><tt class="ph tt">Code that is common to both XMSSource and XMSSink is located in a directory ../Common relative to both of these operators.</tt>  </dt>
 
 <dd class="dd"/>
-  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>: 
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>
   </dd>
 
   <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">../Common</tt></dd>

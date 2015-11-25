@@ -22,71 +22,74 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.mqtt.html">com.ibm.streamsx.messaging.mqtt</a> &gt; MSGTypes.spl</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.mqtt.html">com.ibm.streamsx.messaging.mqtt</a> &gt; MSGTypes.spl</p>
 
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-1">Content</h2>
   
-    <dl class="dl">
+  <dl class="dl">
     <dt class="dt dlterm"/>
 <dd class="dd"/>
 
     
-      <dt class="dt dlterm splhead-2">Composite Operators</dt>
-
-      <dd class="dd"><ul class="sl simple">
-<li class="sli"><strong class="ph b"><a class="xref" href="#spldoc_compilationunit__composite_operator__MQTTSinkUpdate">public composite MQTTSinkUpdate</a></strong>: 
-</li>
-
-<li class="sli"><strong class="ph b"><a class="xref" href="#spldoc_compilationunit__composite_operator__MQTTSourceUpdate">public composite MQTTSourceUpdate</a></strong>: 
-</li>
-
-     </ul>
-</dd>
-
-    
-    
       <dt class="dt dlterm splhead-2">Functions</dt>
 
-      <dd class="dd"><ul class="sl simple">
-<li class="sli"><strong class="ph b"><a class="xref" href="#spldoc_compilationunit__function__newControlSignal.MQTTSourceUpdate.TopicsUpdateAction.list:.:rstring:.:.uint32">MQTTSourceUpdate.ControlPortType newControlSignal(MQTTSourceUpdate.TopicsUpdateAction action, list&lt;rstring&gt; topics, uint32 qos)</a></strong>: Convenience method for creating a control signal that modifies subscription setting for MQTTSource operator
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.html#spldoc_compilationunit__function__newControlSignal.MQTTSourceUpdate.TopicsUpdateAction.list:.:rstring:.:.uint32">newControlSignal(MQTTSourceUpdate.TopicsUpdateAction, list&lt;rstring&gt;, uint32)</a></strong>: Convenience method for creating a control signal that modifies subscription setting for MQTTSource operator 
 </li>
 
-     </ul>
-</dd>
+</ul>
+
+      </dd>
 
     
     
       <dt class="dt dlterm splhead-2">Types</dt>
 
-      <dd class="dd"><ul class="sl simple">
-<li class="sli"><strong class="ph b"><a class="xref" href="#spldoc_compilationunit__composite_type__MQTTSinkUpdate.ControlPortType">MQTTSinkUpdate.ControlPortType</a></strong>: 
+      <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.html#spldoc_compilationunit__type__MQTTBlobMsg">MQTTBlobMsg</a></strong>: Minimum Input/Output Stream Schema type for MQTT operators  data - attribute stores actual content of message in blob format for both input and output port  
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="#spldoc_compilationunit__composite_type__MQTTSourceUpdate.ControlPortType">MQTTSourceUpdate.ControlPortType</a></strong>: Expected schema for the control input port of the MQTTSource operator 
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.html#spldoc_compilationunit__type__MQTTRStringMsg">MQTTRStringMsg</a></strong>: Minimum Input/Output Stream Schema type for MQTT operators  data - attribute stores actual content of message in rstring format for both input and output port  
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="#spldoc_compilationunit__composite_type__MQTTSourceUpdate.TopicsUpdateAction">MQTTSourceUpdate.TopicsUpdateAction</a></strong>: Actions that can be applied to update the topics / Qos for MQTTSource operator 
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.html#spldoc_compilationunit__composite_type__MQTTSinkUpdate.ControlPortType">MQTTSinkUpdate.ControlPortType</a></strong>: The expected schema for the control input port in the MQTTSink operator 
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="#spldoc_compilationunit__composite_type__MQTTSourceUpdate.TopicsUpdateDesc">MQTTSourceUpdate.TopicsUpdateDesc</a></strong>: A descriptor to describe how the topics / qos should be updated in MQTTSource operator.
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.html#spldoc_compilationunit__composite_type__MQTTSourceUpdate.ControlPortType">MQTTSourceUpdate.ControlPortType</a></strong>: Expected schema for the control input port of the MQTTSource operator 
 </li>
 
-     </ul>
-</dd>
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.html#spldoc_compilationunit__composite_type__MQTTSourceUpdate.TopicsUpdateAction">MQTTSourceUpdate.TopicsUpdateAction</a></strong>: Actions that can be applied to update the topics / Qos for MQTTSource operator 
+</li>
+
+<li class="sli"><strong class="ph b"><a class="xref" href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.html#spldoc_compilationunit__composite_type__MQTTSourceUpdate.TopicsUpdateDesc">MQTTSourceUpdate.TopicsUpdateDesc</a></strong>: A descriptor to describe how the topics / qos should be updated in MQTTSource operator.
+</li>
+
+</ul>
+
+      </dd>
 
     
-     </dl>
+  </dl>
 
 </div>
 
-<div class="section"><h2 class="title sectiontitle splhead-1">Composite Operators</h2>
+<div class="section"><h2 class="title sectiontitle splhead-1">Composites</h2>
   
 </div>
 
-<div class="section" id="spldoc_compilationunit__composite_operator__MQTTSourceUpdate"><h2 class="title sectiontitle splpart">public composite MQTTSourceUpdate</h2>
+<div class="section" id="spldoc_compilationunit__composite_operator__MQTTSourceUpdate"><h2 class="title sectiontitle splpart">composite MQTTSourceUpdate</h2>
   
+</div>
+
+<div class="section">
+
+<p class="p">Composite that defines types to be used to update MQTTSource operator using control port 
+</p>
+
 </div>
 
 <div class="section">
@@ -147,8 +150,15 @@
 
    </div>
 
-<div class="section" id="spldoc_compilationunit__composite_operator__MQTTSinkUpdate"><h2 class="title sectiontitle splpart">public composite MQTTSinkUpdate</h2>
+<div class="section" id="spldoc_compilationunit__composite_operator__MQTTSinkUpdate"><h2 class="title sectiontitle splpart">composite MQTTSinkUpdate</h2>
   
+</div>
+
+<div class="section">
+
+<p class="p">Composite that contains types to be used to update MQTTSink operator using control port 
+</p>
+
 </div>
 
 <div class="section">
@@ -169,7 +179,10 @@
        
          <dt class="dt dlterm">MQTTSinkUpdate.ControlPortType = map&lt;rstring, rstring&gt; mqttConfig;</dt>
 
-          <dd class="dd"/>
+         <dd class="dd">
+<p class="p">The expected schema for the control input port in the MQTTSink operator 
+</p>
+</dd>
 
        
      </dl>
@@ -185,7 +198,7 @@
 </div>
 <div class="section">
 
-<p class="p">Convenience method for creating a control signal that modifies subscription setting for MQTTSource operator
+<p class="p">Convenience method for creating a control signal that modifies subscription setting for MQTTSource operator 
 </p>
 
 </div>
@@ -194,15 +207,15 @@
 
  <ul class="sl simple">
    <li class="sli">
-<strong class="ph b">action</strong>: 
+<strong class="ph b">action</strong>: the action to apply for the topics specified
    </li>
 
    <li class="sli">
-<strong class="ph b">topics</strong>: 
+<strong class="ph b">topics</strong>: list of topics to add / remove / update or replace
    </li>
 
    <li class="sli">
-<strong class="ph b">qos</strong>: 
+<strong class="ph b">qos</strong>: qos of the topics to be added, updated or replaced
    </li>
 
  </ul>
@@ -212,9 +225,56 @@
 <div class="section"><h2 class="title sectiontitle">Returns</h2>
 
 <ul class="sl simple"><li class="sli">
-<tt class="ph tt">MQTTSourceUpdate.ControlPortType</tt>
-</li>
+a control signal with expected schema value populated for the control port</li>
 </ul>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle splhead-1">Types</h2>
+  
+</div>
+
+<div class="section" id="spldoc_compilationunit__type__MQTTBlobMsg"><h2 class="title sectiontitle splpart">MQTTBlobMsg</h2>
+  
+</div>
+<div class="section">
+
+<div class="p">Minimum Input/Output Stream Schema type for MQTT operators 
+<ul class="ul">
+<li class="li"> data - attribute stores actual content of message in blob format for both input and output port  </li>
+
+</ul>
+
+</div>
+
+</div>
+
+<div class="section">
+   <p class="p">
+<tt class="ph tt">MQTTBlobMsg = blob data;</tt>
+   </p>
+
+</div>
+
+<div class="section" id="spldoc_compilationunit__type__MQTTRStringMsg"><h2 class="title sectiontitle splpart">MQTTRStringMsg</h2>
+  
+</div>
+<div class="section">
+
+<div class="p">Minimum Input/Output Stream Schema type for MQTT operators 
+<ul class="ul">
+<li class="li"> data - attribute stores actual content of message in rstring format for both input and output port  </li>
+
+</ul>
+
+</div>
+
+</div>
+
+<div class="section">
+   <p class="p">
+<tt class="ph tt">MQTTRStringMsg = rstring data;</tt>
+   </p>
 
 </div>
 

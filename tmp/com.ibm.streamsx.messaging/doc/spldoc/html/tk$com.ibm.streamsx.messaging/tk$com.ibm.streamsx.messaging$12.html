@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="Attribute element"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_page"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>Attribute element</title>
+</head>
+<body id="spldoc_page">
+
+
+<h1 class="title topictitle1">Attribute element</h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$2.html">Connection specifications document</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$7.html">Access_specification element</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$11.html">Native_schema element</a> &gt; Attribute element</p>
+
+</div>
+
+
+<div class="section">
+<p class="p">The &lt;attribute&gt; element specifies information about the attributes that are present in an output XMS or JMS message, or are expected in an input XMS or JMS message.
+</p>
+
+<div class="p">The &lt;attribute&gt; element has three possible attributes:
+<ul class="ul">
+<li class="li"> name
+<ul class="ul">
+<li class="li"> This mandatory attribute specifies the name by which the attribute is known in the message.     The Messaging Toolkit operators use these identifiers exactly as specified to access data in the message.     For example, the operators do not change the case of the identifiers.</li>
+
+</ul>
+</li>
+
+<li class="li"> length
+<ul class="ul">
+<li class="li"> The length attribute specifies the maximum length of the attribute.     The length attribute is required only for String and Bytes data types.     If the length attribute is specified for other data types, the <tt class="ph tt">JMSSink</tt> and <tt class="ph tt">JMSSource</tt> operators generate a run time error,     and the <tt class="ph tt">XMSSink</tt> and <tt class="ph tt">XMSSource</tt> operators generate a compile-time error.     For the length attribute, the operator handles data based on the message class and the data type:
+<ul class="ul">
+<li class="li"> <tt class="ph tt">JMSSource</tt>
+<ul class="ul">
+<li class="li"> If the message class is bytes and String data in the message is smaller than the length specified in the native schema,         the message is discarded.</li>
+
+<li class="li"> For map and stream message classes, the length attribute has no significance.</li>
+
+<li class="li"> The Blob data type is not supported.</li>
+
+</ul>
+</li>
+
+<li class="li"> <tt class="ph tt">JMSSink</tt>
+<ul class="ul">
+<li class="li"> If the message class is bytes and String data in the tuple is smaller than the length specified in the native schema,         the String data is padded with spaces to fit the length. For other message classes, the String data is written as is.</li>
+
+<li class="li"> If the String data in the tuple is longer than the length specified in the native schema and the message class is either map,         stream, bytes, xml, wbe, or wbe22, the String data is truncated.</li>
+
+<li class="li"> If the message class is bytes and Bytes data in the tuple is smaller than the length specified in the native schema,         the Bytes data is padded with null values to fit the length. For other message classes, the Bytes data is written as is.</li>
+
+<li class="li"> If the Blob data in the tuple is longer than the length specified in the native schema and the message class is either map,         stream, bytes, or xml, the Blob data is truncated. For message classes wbe and wbe22, Blob data type is not supported.</li>
+
+</ul>
+</li>
+
+<li class="li"> <tt class="ph tt">XMSSource</tt>
+<ul class="ul">
+<li class="li"> If the message class is bytes and the String or Bytes data in the message is smaller than the length specified in the native schema,         the message is discarded.</li>
+
+<li class="li"> If the message class is map or stream, the length attribute is ignored for String data.</li>
+
+<li class="li"> If the message class is map or stream and the Bytes data in the message is smaller than the length specified in the native schema,         the Bytes data is padded with null values to fit the length.</li>
+
+<li class="li"> If the message class is map or stream and the Bytes data is in the message is longer than the length specified in the native schema,         the Bytes data is truncated to fit the length.</li>
+
+</ul>
+</li>
+
+<li class="li"> <tt class="ph tt">XMSSink</tt>
+<ul class="ul">
+<li class="li"> If the message class is bytes and the String data in the tuple is smaller than the length specified in the native schema,         the String data is padded with spaces to fit the length. For other message classes the String data is written as is.</li>
+
+<li class="li"> If the String data in the tuple is longer than the length specified in the native schema and the message class is either map,         stream, bytes, or xml, the String data is truncated.</li>
+
+<li class="li"> If the message class is bytes and the Bytes data in the tuple is smaller than the length specified in the native schema,         the Bytes data is padded with null values to fit the length. For other message classes the Bytes data is written as is.</li>
+
+<li class="li"> If the Blob data in the tuple is longer than the length specified in the native schema and the message class is either map,         stream, bytes, or xml, the Blob data is truncated. For message classes wbe and wbe22, Blob data is not supported.</li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+<li class="li"> type
+<ul class="ul">
+<li class="li"> This mandatory attribute specifies the data type of the attribute. The following XMS data types and corresponding SPL types,     which are listed in brackets, can be used in the access specifications for the <tt class="ph tt">XMSSink</tt> and <tt class="ph tt">XMSSource</tt> operators:
+<ul class="ul">
+<li class="li"> Byte (int8)</li>
+
+<li class="li"> Short(uint8, int16)</li>
+
+<li class="li"> Int (uint16, int32)</li>
+
+<li class="li"> Long (uint32, int64)</li>
+
+<li class="li"> Float (float32)</li>
+
+<li class="li"> Double (float64)</li>
+
+<li class="li"> Boolean (boolean)</li>
+
+<li class="li"> Bytes (blob) <strong class="ph b">Note</strong>: The SPL type blob is not supported for message classes wbe and wbe22 by the <tt class="ph tt">XMSSink</tt> operator.</li>
+
+<li class="li"> String (rstring)</li>
+
+</ul>
+</li>
+
+<li class="li"> The following table lists the data types that can be used in the access specifications for the <tt class="ph tt">JMSSink</tt> and <tt class="ph tt">JMSSource</tt> operators.      It also lists the corresponding SPL types for each JMS type.
+<pre class="pre codeblock">
+  SPL type   JMS type based on message class
+             map      stream   bytes    xml     wbe            wbe22
+  ===================================================================
+  int8       Byte     Byte     Byte     String  String         String
+  uint8      Byte     Byte     Byte     String  String         String
+  int16      Short    Short    Short    String  String         String
+  uint16     Short    Short    Short    String  String         String
+  int32      Int      Int      Int      String  String         String
+  uint32     Int      Int      Int      String  String         String
+  int64      Long     Long     Long     String  String         String
+  uint64     Long     Long     Long     String  String         String
+  float32    Float    Float    Float    String  String         String
+  float64    Double   Double   Double   String  String         String
+  boolean    Boolean  Boolean  Boolean  String  String         String
+  blob*      Bytes    Bytes    Bytes    String  Not supported  Not supported
+  rstring*   String   String   Bytes    String  String         String
+  decimal32  String   String   Bytes    String  String         String
+  decimal64  String   String   Bytes    String  String         String
+  decimal128 String   String   Bytes    String  String         String
+  timestamp* String   String   Bytes    String  String         String
+  ustring    String   String   Bytes    String  String         String
+</pre>
+
+
+<ul class="ul">
+<li class="li"> <strong class="ph b">NOTE</strong>: 
+<ul class="ul">
+<li class="li"> The blob SPL type is not supported for message classes wbe and wbe22 by the <tt class="ph tt">JMSSink operator</tt>.         The Blob data type is not supported by <tt class="ph tt">JMSSource</tt> operator.</li>
+
+<li class="li"> The information for the rstring SPL type assumes that you use UTF-8 encoding.</li>
+
+<li class="li"> The information for the timestamp SPL type assumes that you use the 1970 UNIX epoch.</li>
+
+</ul>
+</li>
+
+<li class="li"> The following SPL data types are not supported by the Messaging Toolkit operators:
+<ul class="ul">
+<li class="li"> enum</li>
+
+<li class="li"> complexb</li>
+
+<li class="li"> composite types</li>
+
+<li class="li"> xml </li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+</ul>
+
+</div>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

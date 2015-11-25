@@ -22,8 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSource</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSource</p>
 
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSource.svg" width="672" height="112"/>
 </div>
 
 <div class="section">
@@ -34,16 +38,60 @@
 <p class="p">The <tt class="ph tt">JMSSource</tt> operator converts each WebSphere MQ or Apache Active MQ message to a separate tuple and sends it to the output stream. A single message is converted into a single tuple.
 </p>
 
-<p class="p"><strong class="ph b">Exceptions</strong>
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Behavior in a consistent region
+</h2>
+
+<p class="p">The <tt class="ph tt">JMSSource</tt> operator can participate in a consistent region. The operator must be at the start of a consistent region.
 </p>
+
+<p class="p">The operator supports periodic and operator-driven consistent region policies. If the consistent region policy is set as operatorDriven, the triggerCount parameter must be specified. The operator initiates a checkpoint after number of tuples specified by the triggerCount parameter have been processed.  If the consistent region policy is set as periodic, the operator respects the period setting and establishes consistent states accordingly. 
+</p>
+
+<p class="p">When a message queue is consumed by multiple message consumers, i.e. multiple <tt class="ph tt">JMSSource</tt> instances are used to read messages from a same queue, then deterministic routing is required. This requirement can be achieved through the messageSelector parameter. For example, if an SPL application has two JMSSource operator instances and a JMS property named "group" is present on messages that can take value of either 'g1' or 'g2', then each JMSSource operator instance can be assigned in the following manner:
+</p>
+
+<div class="p">MyPersonNamesStream1 = JMSSource()
+<pre class="pre codeblock">
+{
+	param
+		connectionDocument :"/home/streamsuser/connections/JMSconnections.xml";
+		connection         : "amqConn"; 		
+		access             : "amqAccess";
+		messageSelector    : "group = 'g1'";
+}
+</pre>
+
+
+</div>
+
+<div class="p">MyPersonNamesStream2 = JMSSource()
+<pre class="pre codeblock">
+{
+	param
+        connectionDocument :"/home/streamsuser/connections/JMSconnections.xml";
+		connection         : "amqConn"; 		
+		access             : "amqAccess";
+		messageSelector    : "group = 'g2'";
+}
+</pre>
+
+
+</div>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Exceptions
+</h2>
 
 <div class="p">The following types of exceptions can occur:
 <ul class="ul">
-<li class="li"> Runtime errors that halt the operator execution.
+<li class="li"> Run time errors that halt the operator execution.
 <ul class="ul">
-<li class="li"> The JMSSource operator throws an exception and terminates in the following cases. For some exceptions, the trace and log information is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
+<li class="li"> The JMSSource operator throws an exception and terminates in the following cases.      For some exceptions, the trace and log information is logged in the console logs      and also output to the optional output port if the application is configured to use the optional port.
 <ul class="ul">
-<li class="li"> During the initial connection attempt or during transient reconnection failures, if the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">NoRetry</tt> and the operator does not have a successful connection, or the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">BoundedRetry</tt> and the operator does not have a successful connection after the number of attempts that are specified in the <strong class="ph b">reconnectionBound</strong> parameter. Successive data is lost.</li>
+<li class="li"> During the initial connection attempt or during transient reconnection failures,        if the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">NoRetry</tt> and the operator does not have a successful connection,        or the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">BoundedRetry</tt> and the operator does not have a successful connection        after the number of attempts that are specified in the <strong class="ph b">reconnectionBound</strong> parameter. Successive data is lost.</li>
 
 <li class="li"> The queue name is unknown.</li>
 
@@ -53,11 +101,11 @@
 
 <li class="li"> A MapMessage, StreamMessage, or BytesMessage does not contain the attributes that are specified in the native schema.</li>
 
-<li class="li"> A MapMessage or StreamMessage contains attributes whose data type does not match the data type that is specified in the native schema and the conversion fails.</li>
+<li class="li"> A MapMessage or StreamMessage contains attributes whose data type does not match the data type        that is specified in the native schema and the conversion fails.</li>
 
-<li class="li"> The message_class attribute in the access specification is bytes, stream, or map, and the name and type attributes of the &lt;native_schema&gt; element do not match the name and type attribute in the output stream schema.</li>
+<li class="li"> The message_class attribute in the access specification is bytes, stream, or map, and the name        and type attributes of the &lt;native_schema&gt; element do not match the name and type attribute in the output stream schema.</li>
 
-<li class="li"> When the message_class attribute is bytes and in the &lt;native_schema&gt; element, the type attribute is string or bytes and the length attribute is missing.</li>
+<li class="li"> When the message_class attribute is bytes and in the &lt;native_schema&gt; element,        the type attribute is string or bytes and the length attribute is missing.</li>
 
 <li class="li"> An invalid value is specified for the message_class attribute of the access specification.</li>
 
@@ -67,33 +115,35 @@
 
 <li class="li"> The <strong class="ph b">connectionsDocument</strong> parameter is not specified and the <tt class="ph tt">connections.xml</tt> file is not present in the default location.</li>
 
-</ul>
-</li>
+<li class="li"> The <strong class="ph b">messageIDOutAttrName</strong> parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.</li>
 
 </ul>
 </li>
 
-<li class="li"> Runtime errors that cause a message to be dropped and an error message to be logged.
+</ul>
+</li>
+
+<li class="li"> Run time errors that cause a message to be dropped and an error message to be logged.
 <ul class="ul">
-<li class="li"> The <tt class="ph tt">JMSSource</tt> operator throws an exception and discards the message in the following cases. The trace and log information for these exceptions is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
+<li class="li"> The <tt class="ph tt">JMSSource</tt> operator throws an exception and discards the message in the following cases.      The trace and log information for these exceptions is logged in the console logs      and also output to the optional output port if the application is configured to use the optional port.
 <ul class="ul">
 <li class="li"> The <tt class="ph tt">JMSSource</tt> operator reads a message that does not match the message class in the &lt;native_schema&gt; element.</li>
 
-<li class="li"> When a negative length (-2 or -4) is specified in the native schema for bytes and string data types and the message class is bytes, the operator expects the JMS message to start with a 2 or 4-byte length field. If there are insufficient bytes remaining in the JMS message, the operator discards the entire message and logs a runtime error.</li>
+<li class="li"> When a negative length (-2 or -4) is specified in the native schema for bytes and string data types        and the message class is bytes, the operator expects the JMS message to start with a 2 or 4-byte length field.        If there are insufficient bytes remaining in the JMS message,        the operator discards the entire message and logs a run time error.</li>
 
-<li class="li"> When a non-negative length is specified in the native schema for bytes and string, the operator attempts to read exactly that number of bytes from the BytesMessage. If there are insufficient bytes remaining in the JMS message, the operator discards the entire message and logs a run time error.</li>
+<li class="li"> When a non-negative length is specified in the native schema for bytes and string,        the operator attempts to read exactly that number of bytes from the BytesMessage.        If there are insufficient bytes remaining in the JMS message,        the operator discards the entire message and logs a run time error.</li>
 
-<li class="li"> The <strong class="ph b">reconnectionBound</strong> parameter is specified, but the <strong class="ph b">reconnectionPolicy</strong> parameter is set to a value other than <tt class="ph tt">BoundedRetry</tt>.</li>
-
-</ul>
-</li>
+<li class="li"> The <strong class="ph b">reconnectionBound</strong> parameter is specified, but the <strong class="ph b">reconnectionPolicy</strong> parameter is set        to a value other than <tt class="ph tt">BoundedRetry</tt>.</li>
 
 </ul>
 </li>
 
-<li class="li"> Compile-time errors.
+</ul>
+</li>
+
+<li class="li"> Compile time errors.
 <ul class="ul">
-<li class="li"> The <tt class="ph tt">JMSSource</tt> operator throws a compile-time error in the following cases. The trace and log information for these exceptions is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
+<li class="li"> The <tt class="ph tt">JMSSource</tt> operator throws a compile time error in the following cases.      The trace and log information for these exceptions is logged in the console logs      and also output to the optional output port if the application is configured to use the optional port.
 <ul class="ul">
 <li class="li"> The mandatory parameters, <strong class="ph b">connection</strong> and <strong class="ph b">access</strong> are not specified.</li>
 
@@ -101,7 +151,7 @@
 
 <li class="li"> The <strong class="ph b">reconnectionBound</strong> parameter is specified, but the <strong class="ph b">reconnectionPolicy</strong> parameter is not specified.</li>
 
-<li class="li"> The environment variables <strong class="ph b">STREAMS_MESSAGING_WMQ_HOME</strong> and <strong class="ph b">STREAMS_MESSAGING_AMQ_HOME</strong> are not set to the locations where the WMQ and AMQ libraries are installed.</li>
+<li class="li"> The environment variables <strong class="ph b">STREAMS_MESSAGING_WMQ_HOME</strong> and <strong class="ph b">STREAMS_MESSAGING_AMQ_HOME</strong> are not set        to the locations where the WMQ and AMQ libraries are installed.</li>
 
 </ul>
 </li>
@@ -113,91 +163,12 @@
 
 </div>
 
-<p class="p"><strong class="ph b">Examples</strong>
-</p>
+  <dl class="dl"><dt class="dt dlterm"><a class="xref" href="op$com.ibm.streamsx.messaging.jms$JMSSource$1.html">Examples</a>
+</dt>
+<dd class="dd">This example shows the use of multiple <tt class="ph tt">JMSSource</tt> operators with different parameter combinations.
+</dd>
+</dl>
 
-<p class="p">The following example shows the use of multiple <tt class="ph tt">JMSSource</tt> operators with different parameter combinations:
-</p>
-
-<div class="p">
-<pre class="pre codeblock">
-composite Main {
-graph
-// JMSSource operator with the default etc/connections.xml(relative to the application directory)
-// connections document
-stream &lt;int32 id, rstring fname, rstring lname&gt;
-MyPersonNamesStream  = JMSSource()
-{
-	param
-		connection : "amqConn";
-		access     : "amqAccess";
-}	
-
-// JMSSource operator with fully qualified name of connections.xml
-stream &lt;int32 id, rstring fname, rstring lname&gt;
-MyPersonNamesStream = JMSSource()
-{
-	param
-		connectionDocument :"/home/streamsuser/connections/JMSconnections.xml";
-		connection         : "amqConn"; 		
-		access             : "amqAccess";
-}	
-
-// JMSSource operator with optional output error port specified
-(stream &lt;int32 id, rstring fname, rstring lname&gt; MyPersonNamesStream ;
-stream &lt;rstring errorMessage&gt; ErrorStream) = JMSSource()
-{
-	param
-		connection : "amqConn";
-		access     : "amqAccess";
-}	
-
-// JMSSource operator with optional initDelay and reconnectionPolicy specified
-stream &lt;int32 id, rstring fname, rstring lname&gt;
-MyPersonNamesStream = JMSSource()
-{
-	param
-		connection         : "amqConn";
-		access             : "amqAccess";
-		reconnectionPolicy : "NoRetry";
-		initDelay          : 10;
-}	
-
-// JMSSource Operator with optional period and reconnectionPolicy specified
-stream &lt;int32 id, rstring fname, rstring lname&gt;
-MyPersonNamesStream = JMSSource()
-{
-	param
-	connection         : "amqConn";
-	access             : "amqAccess";
-	reconnectionPolicy : "InfiniteRetry";
-	period             : 1.20;
-}	
-
-// JMSSource operator with reconnectionPolicy specified as BoundedRetry
-stream &lt;int32 id, rstring fname, rstring lname&gt;
-MyPersonNamesStream = JMSSource()
-{
-	param
-		connection         : "amqConn";
-		access             : "amqAccess";
-		reconnectionPolicy : "BoundedRetry";
-		reconnectionBound : 2;
-		period: 1.20;
-}
-}                                                                                           
-</pre>
-
-
-</div>
-
-</div>
-
-<div class="section splprimop">
-<object type="image/svg+xml" data="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSource.svg" width="672" height="112">
-<span>Primitive operator image not displayed. Problem loading file: ../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSource.svg
-</span>
-</object>
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
@@ -218,7 +189,7 @@ MyPersonNamesStream = JMSSource()
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 8 parameters. (<tt class="ph tt">codepage, reconnectionPolicy, reconnectionBound, period, initDelay, access, connection, connectionDocument</tt>)
+  <dd class="dd">This operator supports 11 parameters. (<tt class="ph tt">codepage, reconnectionPolicy, reconnectionBound, period, initDelay, access, connection, connectionDocument, triggerCount, messageSelector, messageIDOutAttrName</tt>)
 </dd>
 
  
@@ -340,7 +311,7 @@ MyPersonNamesStream = JMSSource()
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 8 parameters.<dl class="dl">
+This operator supports 11 parameters.<dl class="dl">
 
 <dt class="dt dlterm" id="spldoc_operator__parameter_codepage"><tt class="ph tt">codepage</tt></dt>
 
@@ -407,7 +378,7 @@ This operator supports 8 parameters.<dl class="dl">
 <dt class="dt dlterm" id="spldoc_operator__parameter_reconnectionBound"><tt class="ph tt">reconnectionBound</tt></dt>
 
 <dd class="dd">
-<p class="p">This optional parameter specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified and set to <tt class="ph tt">BoundedRetry</tt>, otherwise a runtime error occurs. If the <strong class="ph b">reconnectionBound</strong> parameter is specified and the <strong class="ph b">reconnectionPolicy</strong> parameter is not set, a compile-time error occurs. The default value for the <strong class="ph b">reconnectionBound</strong> parameter is <tt class="ph tt">5</tt>.
+<p class="p">This optional parameter specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified and set to <tt class="ph tt">BoundedRetry</tt>, otherwise a run time error occurs. If the <strong class="ph b">reconnectionBound</strong> parameter is specified and the <strong class="ph b">reconnectionPolicy</strong> parameter is not set, a compile time error occurs. The default value for the <strong class="ph b">reconnectionBound</strong> parameter is <tt class="ph tt">5</tt>.
 </p>
 <dl class="dl">
 
@@ -438,7 +409,7 @@ This operator supports 8 parameters.<dl class="dl">
 <dt class="dt dlterm" id="spldoc_operator__parameter_period"><tt class="ph tt">period</tt></dt>
 
 <dd class="dd">
-<p class="p">This optional parameter specifies the time period in seconds the operator waits before it tries to reconnect. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified, otherwise a compile-time error occurs. The default value for the <strong class="ph b">period</strong> parameter is <tt class="ph tt">60</tt>.
+<p class="p">This optional parameter specifies the time period in seconds the operator waits before it tries to reconnect. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified, otherwise a compile time error occurs. The default value for the <strong class="ph b">period</strong> parameter is <tt class="ph tt">60</tt>.
 </p>
 <dl class="dl">
 
@@ -563,6 +534,99 @@ This operator supports 8 parameters.<dl class="dl">
 
 <dd class="dd">
 <p class="p">This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the <strong class="ph b">connection</strong> and <strong class="ph b">access</strong> parameters. If this parameter is not specified, the operator uses the file that is in the default location <tt class="ph tt">./etc/connections.xml</tt>.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_triggerCount"><tt class="ph tt">triggerCount</tt></dt>
+
+<dd class="dd">
+<p class="p">This optional parameter specifies how many messages are submitted before the JMSSource operator starts to drain the pipeline and establish a consistent state.  This parameter must be greater than zero and must be set if the JMSSource operator is the start operator of an operatorDriven consistent region.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_messageSelector"><tt class="ph tt">messageSelector</tt></dt>
+
+<dd class="dd">
+<p class="p">        This optional parameter is used as JMS Message Selector.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_messageIDOutAttrName"><tt class="ph tt">messageIDOutAttrName</tt></dt>
+
+<dd class="dd">
+<p class="p">        Output attribute on output data stream to assign message ID to, the specified attribute in output stream must be of type rstring.
 </p>
 <dl class="dl">
 

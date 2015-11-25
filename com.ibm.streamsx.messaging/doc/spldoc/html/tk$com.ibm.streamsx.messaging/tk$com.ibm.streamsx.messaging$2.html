@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="Connection specifications document"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_page"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>Connection specifications document</title>
+</head>
+<body id="spldoc_page">
+
+
+<h1 class="title topictitle1">Connection specifications document</h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; Connection specifications document</p>
+
+</div>
+
+
+<div class="section">
+<p class="p">A connection specifications document is an XML document that describes how operators in the Messaging Toolkit connect to and access messaging systems. Each document contains a collection of &lt;connection_specification&gt; elements and &lt;access_specification&gt; elements.
+</p>
+
+<p class="p">The relationship between connection specifications and access specifications is many-to-many. Operators can connect to the same messaging system (one connection specification) and access several different queues or topics from that service (many access specifications). For example, an operator can connect to a single queue or a single topic in the messaging system.
+</p>
+
+<p class="p">Alternatively, operators can access equivalent data (one access specification) from several different messaging systems (many connection specifications), for example, accessing data from both a test system and a production system.
+</p>
+
+<p class="p">When the SPL compiler encounters an operator declaration for an <tt class="ph tt">XMSSink</tt> and <tt class="ph tt">XMSSource</tt> operators, the compiler reads the connection specifications document that is named by the <strong class="ph b">connectionDocument</strong> parameter for that operator. If this parameter is not specified, the operator looks for a <tt class="ph tt">etc/connections.xml</tt> file, where the path is relative to the root of the application directory.
+</p>
+
+<p class="p">The compiler checks that the document conforms to the semantic rules of the XML schema that is defined for these documents. The SPL compiler uses the information that is given in the connection and access specifications to configure the operator.  The compiler does not attempt to connect to the messaging system or access its data to verify correct configuration at compile time.  The operators have run-time checks to validate configuration; if the configuration is incorrect these checks might result in run time failures, which are captured in the processing element logs.
+</p>
+
+<p class="p">For <tt class="ph tt">MQTTSink</tt> and <tt class="ph tt">MQTTSource</tt> operators, the connection specifications document that is named by <strong class="ph b">connectionDocument</strong> parameter contains only a &lt;connection_specification&gt; element. It does not contain an &lt;access_specification&gt; element.  The <strong class="ph b">connectionDocument</strong> parameter is not mandatory. You can specify the connection information as parameters to the operator.
+</p>
+
+<p class="p">The <tt class="ph tt">JMSSource</tt> and <tt class="ph tt">JMSSink</tt> operators parse the connection specifications document that is named by <strong class="ph b">connectionDocument</strong> parameter at run time. If this parameter is not specified, the operator looks for a <tt class="ph tt">etc/connections.xml</tt> file, where the path is relative to the application root directory directory.
+</p>
+
+<p class="p">A valid connection specifications document consists of a connections root element which contains one &lt;connection_specifications&gt; element and one &lt;access_specifications&gt; element. These elements serve as containers for the connection specifications and access specifications. Here is an abridged example of a complete connection specifications document, with all &lt;connection_specification&gt; and &lt;access_specification&gt; elements omitted:
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;st:connections xmlns:st="http://www.ibm.com/xmlns/prod/streams/adapters"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+  &lt;connection_specifications&gt;
+  ...
+  &lt;/connection_specifications&gt;
+  &lt;access_specifications&gt;
+  ...
+  &lt;/access_specifications&gt;
+&lt;/st:connections&gt;
+</pre>
+
+
+</div>
+
+  <dl class="dl"><dt class="dt dlterm"><a class="xref" href="tk$com.ibm.streamsx.messaging$3.html">Connection_specification element</a>
+</dt>
+<dd class="dd">A &lt;connection_specifications&gt; element is a sequence of zero or more &lt;connection_specification&gt; elements.
+</dd>
+</dl>
+
+  <dl class="dl"><dt class="dt dlterm"><a class="xref" href="tk$com.ibm.streamsx.messaging$7.html">Access_specification element</a>
+</dt>
+<dd class="dd">A sequence of one or more &lt;access_specification&gt; elements make up an &lt;access_specifications&gt; element.
+</dd>
+</dl>
+
+</div>
+
+</div>
+
+
+</body>
+</html>

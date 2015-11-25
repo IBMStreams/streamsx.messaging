@@ -22,8 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a> &gt; XMSSink</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a> &gt; XMSSink</p>
 
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSink.svg" width="672" height="112"/>
 </div>
 
 <div class="section">
@@ -34,16 +38,26 @@
 <p class="p">The incoming tuple from InfoSphere Streams can be one or many of the following data types: int8, uint8, int16, uint16, int32, uint32, int64, float32, float64, boolean, blob, or rstring. The input tuple is serialized into a WebSphere MQ message either as a map, stream, bytes, xml, wbe, or wbe22 message, according to the value of the message_class attribute in the connection specifications document. An additional empty value can be specified in the message_class attribute, in which case the operator constructs an empty JMS or XMS message. This message class cannot be used with a native schema.
 </p>
 
-<p class="p"><strong class="ph b">Exceptions</strong>
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Behavior in a consistent region
+</h2>
+
+<p class="p">The <tt class="ph tt">XMSSink</tt> operator supports consistent regions.  This operator can be part of a consistent region but it cannot be at the start of a consistent region.
 </p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">Exceptions
+</h2>
 
 <div class="p">The following list describes the common types of exceptions that can occur:
 <ul class="ul">
-<li class="li"> Run-time errors that halt the operator execution.
+<li class="li"> Run time errors that halt the operator execution.
 <ul class="ul">
 <li class="li"> The <tt class="ph tt">XMSSink</tt> operator throws an exception and terminates in the following cases:
 <ul class="ul">
-<li class="li"> During the initial connect attempt, the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">NoRetry</tt> and the operator does not have a successful connection, or during transient connection failures the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">BoundedRetry</tt> and the operator does not have a successful connection after the number of attempts that are specified in the <strong class="ph b">reconnectionBound</strong> parameter. Successive data is lost.</li>
+<li class="li"> During the initial connect attempt, the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">NoRetry</tt>        and the operator does not have a successful connection, or during transient connection failures        the <strong class="ph b">reconnectionPolicy</strong> is set to <tt class="ph tt">BoundedRetry</tt> and the operator does not have a successful connection        after the number of attempts that are specified in the <strong class="ph b">reconnectionBound</strong> parameter. Successive data is lost.</li>
 
 <li class="li"> The queue name is unknown.</li>
 
@@ -61,7 +75,7 @@
 </ul>
 </li>
 
-<li class="li"> Run-time errors that cause the message to be dropped and an error message to be logged
+<li class="li"> Run time errors that cause the message to be dropped and an error message to be logged.
 <ul class="ul">
 <li class="li"> The <tt class="ph tt">XMSSink</tt> operator throws an exception and discards the message in the following circumstances:
 <ul class="ul">
@@ -75,13 +89,13 @@
 </ul>
 </li>
 
-<li class="li"> Compile-time errors
+<li class="li"> Compile time errors
 <ul class="ul">
 <li class="li"> The <tt class="ph tt">XMSSink</tt> operator throws a compile-time error in the following cases:
 <ul class="ul">
 <li class="li"> A native schema is specified and the message class is empty.</li>
 
-<li class="li"> There is a mismatch between the data type of one or more attributes in the native schema and the data type of attributes in the input stream.</li>
+<li class="li"> There is a mismatch between the data type of one or more attributes in the native schema        and the data type of attributes in the input stream.</li>
 
 <li class="li"> One or more native schema attributes do not have a matching attribute in the input stream schema.</li>
 
@@ -113,139 +127,15 @@
 
 </div>
 
-<p class="p">In all of these cases, the operator logs the exception in the console logs. The information about the exception is also sent to the optional error output port, unless it is a run-time error that halts the operator or a compile-time error.
+<p class="p">In all of these cases, the operator logs the exception in the console logs. The information about the exception is also sent to the optional error output port, unless it is a run time error that halts the operator or a compile time error.
 </p>
 
-<p class="p">Note: The <tt class="ph tt">XMSSink</tt> operator runs without considering the length value for all message classes for string and bytes data types when a negative length of -1 is provided; it does not throw an error at either compile time or run time.
-</p>
+  <dl class="dl"><dt class="dt dlterm"><a class="xref" href="op$com.ibm.streamsx.messaging.xms$XMSSink$1.html">Examples</a>
+</dt>
+<dd class="dd">These examples demonstrate how to use the <tt class="ph tt">XMSSink</tt> operator.
+</dd>
+</dl>
 
-<p class="p"><strong class="ph b">Examples</strong>
-</p>
-
-<p class="p">The following example demonstrates the use of multiple <tt class="ph tt">XMSSink</tt> operators with different parameter combinations and an optional error output port:
-</p>
-
-<div class="p">
-<pre class="pre codeblock">
-composite Main{
-graph
-stream &lt;int32 id, rstring fname, rstring lname&gt;
-MyPersonNamesStream=Beacon()
-{
-	param
-	iterations:10u;
-}
-//XMSSink Operator with connections.xml 
-//defaulted to ./etc/connections.xml
-() as MySink1=XMSSink(MyPersonNamesStream)
-{
-	param
-		connection: "wbe";
-		access: "OutTrading";
-}	
-
-//XMSSink Operator with the fully qualified 
-//name of connections.xml
-() as MySink2=XMSSink(MyPersonNamesStream)
-{
-	param
-		connectionDocument:"/home/streamsuser/connections/XMSconnections.xml";
-		connection: "wbe";
-		access: "OutTrading";
-}	
-
-//XMSSink Operator with optional 
-//output error port specified
-stream &lt;tuple&lt;int32 id, rstring fname, 
-rstring lname&gt;inTuple, rstring errorMessage&gt;
-MySink3 = XMSSink(MyPersonNamesStream)
-{
-	param
-		connection: "wbe";
-		access: "OutTrading";
-}
-//XMSSink Operator with reconnectionPolicy 
-//specified as NoRetry
-() as  MySink4 = XMSSink( MyPersonNamesStream ) 
-{
-	param
-		connection: "wbe";
-		access: "OutTrading";
-		reconnectionPolicy: NoRetry;
-}	
-
-//XMSSink Operator with optional period 
-//and reconnectionPolicy specified
-() as MySink5 = XMSSink( MyPersonNamesStream )
-{
-	param
-		connection: "wbe";
-		access: "OutTrading";
-		reconnectionPolicy: InfiniteRetry;
-		period: 1.20;
-}
-//XMSSink Operator with reconnectionPolicy 
-//specified as BoundedRetry
-() as MySink6 = XMSSink( MyPersonNamesStream )
-{
-	param
-		connection: "wbe";
-		access: "OutTrading";
-		reconnectionPolicy: BoundedRetry;
-		reconnectionBound: 2u;
-		period: 1.20;
-}
-}
-</pre>
-
-
-</div>
-
-<p class="p">The following is a sample <tt class="ph tt">connections.xml</tt> file:
-</p>
-
-<div class="p">
-<pre class="pre codeblock">
-&lt;st:connections xmlns:st="http://www.ibm.com/xmlns/prod/streams/adapters"
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
-&lt;connection_specifications&gt;
-	&lt;connection_specification name="wbe"&gt;
-		&lt;XMS initial_context="file:///opt/InitialContext/" 
-		connection_factory="TestConFac"  /&gt;
-	&lt;/connection_specification&gt;
-&lt;/connection_specifications&gt;	
-
-&lt;access_specifications&gt;
-	&lt;access_specification name="OutTrading"&gt;
-</pre>
-
-  			&lt;destination identifier="TestDestination" 
-<pre class="pre codeblock">
-		delivery_mode="persistent" message_class="map" /&gt;
-</pre>
-
-  			&lt;uses_connection connection="wbe"/&gt;
-<pre class="pre codeblock">
-		&lt;native_schema&gt;
-			&lt;attribute name="id" type="Int"/&gt;
-			&lt;attribute name="fname" type="String"/&gt;
-			&lt;attribute name="lname" type="String"/&gt;
-		&lt;/native_schema&gt;
-	&lt;/access_specification&gt;
-&lt;/access_specifications&gt;
-&lt;/st:connections&gt;	
-</pre>
-
-
-</div>
-
-</div>
-
-<div class="section splprimop">
-<object type="image/svg+xml" data="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSink.svg" width="672" height="112">
-<span>Primitive operator image not displayed. Problem loading file: ../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSink.svg
-</span>
-</object>
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
@@ -453,7 +343,7 @@ This operator supports 6 parameters.<dl class="dl">
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__reconnectionBound"><!-- --></a><tt class="ph tt">reconnectionBound</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified and set to <tt class="ph tt">BoundedRetry</tt>, otherwise a compile-time error occurs. If the <strong class="ph b">reconnectionBound</strong> parameter is specified and the <strong class="ph b">reconnectionPolicy</strong> parameter is not set, a compile-time error occurs. The default value for the <strong class="ph b">reconnectionBound</strong> parameter is <tt class="ph tt">5</tt>.
+<p class="p">This optional parameter specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified and set to <tt class="ph tt">BoundedRetry</tt>, otherwise a compile time error occurs. If the <strong class="ph b">reconnectionBound</strong> parameter is specified and the <strong class="ph b">reconnectionPolicy</strong> parameter is not set, a compile time error occurs. The default value for the <strong class="ph b">reconnectionBound</strong> parameter is <tt class="ph tt">5</tt>.
 </p>
 
   <dl class="dl">
@@ -488,7 +378,7 @@ This operator supports 6 parameters.<dl class="dl">
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__period"><!-- --></a><tt class="ph tt">period</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter specifies the time period in seconds the operator waits before it tries to reconnect. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified, otherwise a compile-time error occurs. The default value for the <strong class="ph b">period</strong> parameter is <tt class="ph tt">60</tt>.		 
+<p class="p">This optional parameter specifies the time period in seconds the operator waits before it tries to reconnect. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified, otherwise a compile time error occurs. The default value for the <strong class="ph b">period</strong> parameter is <tt class="ph tt">60</tt>. 
 </p>
 
   <dl class="dl">
@@ -593,7 +483,7 @@ This operator supports 6 parameters.<dl class="dl">
      <dt class="dt dlterm"><a name="spldoc_operator__parameter__connectionDocument"><!-- --></a><tt class="ph tt">connectionDocument</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the <strong class="ph b">connection</strong> and <strong class="ph b">access</strong> parameters. If the parameter is specified, it must have exactly one value that is a string constant.  If the parameter is not specified, the operator uses the file that is in the default location <tt class="ph tt">../etc/connections.xml</tt>.  If a relative path is specified, the path is relative to the root of the applicaiton directory.		 
+<p class="p">This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the <strong class="ph b">connection</strong> and <strong class="ph b">access</strong> parameters. If the parameter is specified, it must have exactly one value that is a string constant. If the parameter is not specified, the operator uses the file that is in the default location <tt class="ph tt">../etc/connections.xml</tt>. If a relative path is specified, the path is relative to the root of the application directory. 
 </p>
 
   <dl class="dl">
@@ -673,7 +563,7 @@ This operator supports 6 parameters.<dl class="dl">
 
     <dd class="dd">
 
-<p class="p">The number of failed inserts to the WebSphere MQ.  Failed insertions can occur when a message is dropped because of a run-time error.
+<p class="p">The number of failed inserts to the WebSphere MQ. Failed insertions can occur when a message is dropped because of a run time error.
 </p>
 
      <p class="p"/>
@@ -705,7 +595,7 @@ This operator supports 6 parameters.<dl class="dl">
   <dt class="dt dlterm"><tt class="ph tt"> IBM Message Service Client for C/C++ (XMS) libraries</tt>  </dt>
 
 <dd class="dd"/>
-  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>: 
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>
   </dd>
 
   <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__lib">Library Name</a>: <tt class="ph tt">gxi01l, gxi</tt></dd>
@@ -719,7 +609,7 @@ This operator supports 6 parameters.<dl class="dl">
   <dt class="dt dlterm"><tt class="ph tt">WebSphere MQ Client libraries</tt>  </dt>
 
 <dd class="dd"/>
-  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>: 
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>
   </dd>
 
   <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">@MQ_HOME@/lib64</tt></dd>
@@ -731,7 +621,7 @@ This operator supports 6 parameters.<dl class="dl">
   <dt class="dt dlterm"><tt class="ph tt">Code that is common to both XMSSource and XMSSink is located in a directory ../Common relative to both of these operators.</tt>  </dt>
 
 <dd class="dd"/>
-  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>: 
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__command">Command</a>
   </dd>
 
   <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">../Common</tt></dd>

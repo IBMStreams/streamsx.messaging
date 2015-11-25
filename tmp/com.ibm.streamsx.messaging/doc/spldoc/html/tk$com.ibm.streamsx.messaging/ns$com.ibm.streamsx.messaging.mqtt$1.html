@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xml:lang="en-us" lang="en-us">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="copyright" content="(C) Copyright 2005"/>
+<meta name="DC.rights.owner" content="(C) Copyright 2005"/>
+<meta name="DC.Type" content="reference"/>
+<meta name="DC.Title" content="Operator control input port"/>
+<meta name="DC.Format" content="XHTML"/>
+<meta name="DC.Identifier" content="spldoc_page"/>
+<link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
+<link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
+<title>Operator control input port</title>
+</head>
+<body id="spldoc_page">
+
+
+<h1 class="title topictitle1">Operator control input port</h1>
+
+<div class="body refbody">
+<div class="section">
+<p class="p">
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.mqtt.html">com.ibm.streamsx.messaging.mqtt</a> &gt; Operator control input port</p>
+
+</div>
+
+
+<div class="section">
+<p class="p">Some of the operators in the Messaging Toolkit provide the capability to specify an optional control input port. This input port allows the configuration of the operator to be changed at run time without restarting or recompiling the application.
+</p>
+
+<div class="p">The control port is non-mutating and its punctuation mode is Oblivious. The list contains the operators that support the optional control port and describes its schema:
+<ul class="ul">
+<li class="li"> <tt class="ph tt">MQTTSink</tt> operator:
+<ul class="ul">
+<li class="li"> Schema for the control port: <tt class="ph tt">static ControlPortType = map&lt;rstring, rstring&gt; mqttConfig</tt>
+<ul class="ul">
+<li class="li"> This type is defined in the com.ibm.streams.messaging.mqtt::MQTTSinkUpdate composite in the <tt class="ph tt">MSGTypes.spl</tt> file,       which is shipped as part of the toolkit.</li>
+
+</ul>
+</li>
+
+<li class="li"> Description:
+<ul class="ul">
+<li class="li"> Tuples received on this input port must contain a map attribute with two rstring elements.       The rstring elements contain the name of the configuration option and its value.       The configuration options contain the connection information that the operator uses to connect to an MQTT server.</li>
+
+<li class="li"> The <tt class="ph tt">MQTTSink</tt> operator reads the map &lt;rstring, rstring&gt; attribute and uses the values       to update the connection information at run time.       If an invalid value is specified, the operator ignores the value and continues to use the earlier connection information.</li>
+
+<li class="li"> For more information about the connection information that you can update at run time,        see the list of configuration options for the input control port.</li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+<li class="li"> <tt class="ph tt">MQTTSource</tt> operator:
+<ul class="ul">
+<li class="li"> Schema for the control port: <tt class="ph tt">static ControlPortType = list&lt;TopicsUpdateDesc&gt; topic, map&lt;rstring, rstring&gt; mqttConfig</tt>
+<ul class="ul">
+<li class="li"> This type is defined in the com.ibm.streams.messaging.mqtt::MQTTSourceUpdate composite in the <tt class="ph tt">MSGTypes.spl</tt> file,       which is shipped as part of the toolkit.</li>
+
+<li class="li"> <tt class="ph tt">TopicsUpdateDesc</tt> is:       <tt class="ph tt">type TopicsUpdateDesc = TopicsUpdateAction action, list&lt;rstring&gt; topics, uint32 qos;</tt></li>
+
+<li class="li"> <tt class="ph tt">action</tt> is of type <tt class="ph tt">TopicsUpdateAction</tt> and defines the following operations that you can perform on the topics:
+<ul class="ul">
+<li class="li"> ADD. Add the provided list of topics to the list of subscribed topics.</li>
+
+<li class="li"> REMOVE. Remove the provided list of topics from the list of subscribed topics.</li>
+
+<li class="li"> REPLACE. Replace the current list of subscribed topics with the list of topics provided.</li>
+
+<li class="li"> UPDATE. Change the QoS values for the specified list of topics with the QoS values that are provided.</li>
+
+</ul>
+</li>
+
+<li class="li"> <tt class="ph tt">topics</tt> is the list of topics that you want to update</li>
+
+<li class="li"> <tt class="ph tt">qos</tt> is the quality of service that you want to assign to the list of topics</li>
+
+</ul>
+</li>
+
+<li class="li"> Description:
+<ul class="ul">
+<li class="li"> Tuples received on this input port must contain a map attribute with two rstring elements       and an attribute of type list&lt;TopicsUpdateDesc&gt;.</li>
+
+<li class="li"> The map attribute contains connection information that you want to update at run time.       The rstring elements contains the name of the configuration option and its value.       If an invalid value is specified, the operator ignores the value and continues to use the earlier connection information.       If you do not want to update the connection information, you can specify an empty map attribute.</li>
+
+<li class="li"> For example, <tt class="ph tt">map&lt;rstring, rstring&gt; emptyCon = { "" : "" };</tt>       For more information about the connection information that you can update at run time,        see the list of configuration options for the input control port.</li>
+
+<li class="li"> The attribute of type list&lt;TopicsUpdateDesc&gt; contains three elements,       which specify the operation that you want to perform on the topics, the list of topics,       and the quality of service (QoS) to be provided for each of the topics.</li>
+
+<li class="li"> The QoS applies only for ADD, REPLACE, and UPDATE operations.       For ADD and REPLACE operations, the QoS is applied to the topics that are added or replaced.</li>
+
+<li class="li"> <strong class="ph b">Tip</strong>: To update the QoS for all the subscribed topics, use asterisk (*) as a wildcard character for the topics element.</li>
+
+</ul>
+</li>
+
+</ul>
+</li>
+
+</ul>
+
+</div>
+
+<div class="p">The following list contains descriptions of the configuration options for the control port. The updated configuration options are used immediately and the operator does not wait until a connection failure to apply these values.
+<ul class="ul">
+<li class="li"> connection.trustStore
+<ul class="ul">
+<li class="li"> A new truststore file to establish a new SSL connection with the MQTT server.     The connection.serverURI option must be provided and the protocol must be set to ssl.     Otherwise, the tuple received on the control port is ignored and the operator continues to use its current connection configuration.</li>
+
+</ul>
+</li>
+
+<li class="li"> connection.keyStore
+<ul class="ul">
+<li class="li"> A new keystore to establish a new SSL connection with the MQTT server.     The connection.serverURI option must be provided and the protocol must be set to ssl.     Otherwise, the tuple received on the control port is ignored and the operator continues to use its current connection configuration.</li>
+
+</ul>
+</li>
+
+<li class="li"> connection.keyStorePassword
+<ul class="ul">
+<li class="li"> The password to decrypt the new keystore if the keystore is encrypted.     The connection.serverURI and connection.keyStore options must be provided and the protocol must be set to ssl.     Otherwise, the tuple received on the control port is ignored and the operator continues to use its current connection configuration.</li>
+
+</ul>
+</li>
+
+<li class="li"> connection.serverURI
+<ul class="ul">
+<li class="li"> URI of the new MQTT server that you want to connect to.     If the connection is configured to use SSL, based on the type of SSL authentication,     values for connection.trustStore, connection.keyStore, or both must be provided.</li>
+
+</ul>
+</li>
+
+</ul>
+
+</div>
+
+<p class="p">The following example shows how to add topics A, B, C, and D with different QoS values to the list of subscribed topics.
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+stream&lt;MQTTSourceUpdate.ControlPortType&gt; ControlOp_out1 = Custom(){
+  logic
+   onProcess :{
+     // empty mqtt config because we are not changing connection information.
+     map&lt;rstring, rstring&gt; emptyMqttConfig = { "" : "" } ;
+
+     // Topic A and Topic B needs QoS = 1
+     MQTTSourceUpdate.TopicsUpdateDesc set1 = { 
+       action = MQTTSourceUpdate.ADD,topics = [ "topicA", "topicB" ], qos = 1u } ;
+
+     // Topic C and Topic D needs QoS = 0   
+     MQTTSourceUpdate.TopicsUpdateDesc set2 = { 
+       action = MQTTSourceUpdate.ADD, topics = [ "topicC", "topicD" ], qos = 0u } ;
+
+     // construct tuple to submit
+     tuple&lt;MQTTSourceUpdate.ControlPortType&gt; tupleToSubmit = { 
+       mqttConfig = emptyMqttConfig, topic = [ set1, set2 ] } ;
+     submit(tupleToSubmit, ControlOp_out1) ;
+   }
+}
+</pre>
+
+
+</div>
+
+<p class="p">The following example shows how to update QoS for all the existing topics by using the wildcard character (*):
+</p>
+
+<div class="p">
+<pre class="pre codeblock">
+stream&lt;MQTTSourceUpdate.ControlPortType&gt; ControlOp_out2 = Custom(){
+  logic
+    onProcess :{
+      // empty mqtt config because we are not changing connection information.
+      map&lt;rstring, rstring&gt; emptyMqttConfig = { "" : "" } ;
+
+      // Update all topics to QoS = 2
+      MQTTSourceUpdate.TopicsUpdateDesc set1 = { action =
+      MQTTSourceUpdate.UPDATE, topics = [ "*" ], qos = 2u } ;
+
+      // construct tuple to submit
+      tuple&lt;MQTTSourceUpdate.ControlPortType&gt; tupleToSubmit = { 
+        mqttConfig = emptyMqttConfig, topic = [ set1 ] } ;
+      submit(tupleToSubmit, ControlOp_out2) ;
+    }
+}
+</pre>
+
+
+</div>
+
+</div>
+
+</div>
+
+
+</body>
+</html>
