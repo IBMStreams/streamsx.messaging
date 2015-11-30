@@ -66,9 +66,19 @@ public class RabbitBaseOper extends AbstractOperator {
 		trace.log(TraceLevel.INFO, "Addr Array: " + addressArr[0].getHost() + ":" + addressArr[0].getPort());
 		connection = connectionFactory.newConnection(addressArr);
 		channel = connection.createChannel();
-		System.out.println("Name: "+ exchangeName);
-		if (!exchangeName.isEmpty() && exchangeName != "")
+
+		try{
+			//check to see if the exchange exists
+			channel.exchangeDeclarePassive(exchangeName);
+			trace.log(TraceLevel.INFO, "Exchange was found, therefore no exchange will be declared.");
+		} catch (IOException e){
+			//if exchange doesn't exits, we will create it
+			//we must also create a new channel since last one errored
+			channel = connection.createChannel();
 			channel.exchangeDeclare(exchangeName, exchangeType);
+			trace.log(TraceLevel.INFO, "Exchange was not found, therefore non-durable exchange will be declared.");
+		}
+		
 		trace.log(TraceLevel.INFO,
 				"Initializing channel connection to exchange: " + exchangeName
 						+ " of type: " + exchangeType + " as user: " + connectionFactory.getUsername());
