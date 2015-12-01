@@ -46,7 +46,8 @@ public class RabbitBaseOper extends AbstractOperator {
 
 	private final Logger trace = Logger.getLogger(RabbitBaseOper.class
 			.getCanonicalName());
-
+	protected Boolean usingDefaultExchange = false;
+	
 	public synchronized void initialize(OperatorContext context)
 			throws Exception {
 		// Must call super.initialize(context) to correctly setup an operator.
@@ -65,25 +66,34 @@ public class RabbitBaseOper extends AbstractOperator {
 		addressArr = buildAddressArray(hostAndPortList);
 		trace.log(TraceLevel.INFO, "Addr Array: " + addressArr[0].getHost() + ":" + addressArr[0].getPort());
 		connection = connectionFactory.newConnection(addressArr);
-		channel = connection.createChannel();
-
-		try{
-			//check to see if the exchange exists
-			channel.exchangeDeclarePassive(exchangeName);
-			trace.log(TraceLevel.INFO, "Exchange was found, therefore no exchange will be declared.");
-		} catch (IOException e){
-			//if exchange doesn't exits, we will create it
-			//we must also create a new channel since last one errored
-			channel = connection.createChannel();
-			channel.exchangeDeclare(exchangeName, exchangeType);
-			trace.log(TraceLevel.INFO, "Exchange was not found, therefore non-durable exchange will be declared.");
-		}
+		channel = initializeExchange(connection);
 		
 		trace.log(TraceLevel.INFO,
 				"Initializing channel connection to exchange: " + exchangeName
 						+ " of type: " + exchangeType + " as user: " + connectionFactory.getUsername());
 		trace.log(TraceLevel.INFO,
 				"Connection to host: " + connection.getAddress());
+	}
+
+	private Channel initializeExchange(Connection connection2) throws IOException {
+		Channel channel = connection2.createChannel();
+		try{
+			//check to see if the exchange exists if not then it is the default exchange
+			if ( !exchangeName.isEmpty()){
+				channel.exchangeDeclarePassive(exchangeName);
+				trace.log(TraceLevel.INFO, "Exchange was found, therefore no exchange will be declared.");
+			} else {
+				usingDefaultExchange = true;
+				trace.log(TraceLevel.INFO, "Using the default exchange. Name \"\"");
+			}
+		} catch (IOException e){
+			//if exchange doesn't exits, we will create it
+			//we must also create a new channel since last one errored
+			channel = connection2.createChannel();
+			channel.exchangeDeclare(exchangeName, exchangeType);
+			trace.log(TraceLevel.INFO, "Exchange was not found, therefore non-durable exchange will be declared.");
+		}
+		return channel;
 	}
 
 	private Address[] buildAddressArray(List<String> hostsAndPorts) throws MalformedURLException {
@@ -139,7 +149,7 @@ public class RabbitBaseOper extends AbstractOperator {
 		password = value;
 	}
 
-	@Parameter(optional = false, description = "Required attribute. Name of the RabbitMQ exchange.")
+	@Parameter(optional = false, description = "Required attribute. Name of the RabbitMQ exchange. To use default RabbitMQ exchange, use empty quotes: \\\"\\\".")
 	public void setExchangeName(String value) {
 		exchangeName = value;
 	}

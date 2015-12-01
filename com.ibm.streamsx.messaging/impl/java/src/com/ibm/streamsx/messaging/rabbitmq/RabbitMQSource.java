@@ -119,9 +119,12 @@ public class RabbitMQSource extends RabbitBaseOper {
 		if (routingKeys.isEmpty())
 			routingKeys.add("");//receive all messages by default
 
-		for (String routingKey : routingKeys){
-			channel.queueBind(queueName, exchangeName, routingKey);
-			trace.log(TraceLevel.INFO, "Queue: " + queueName + " Exchange: " + exchangeName);
+		//You can't bind to a default exchange
+		if (!usingDefaultExchange){
+			for (String routingKey : routingKeys){
+				channel.queueBind(queueName, exchangeName, routingKey);
+				trace.log(TraceLevel.INFO, "Queue: " + queueName + " Exchange: " + exchangeName);
+			}
 		}
 	}
 
