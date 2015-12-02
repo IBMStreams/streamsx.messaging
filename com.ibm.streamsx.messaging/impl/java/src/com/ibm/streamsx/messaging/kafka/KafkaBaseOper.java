@@ -67,7 +67,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 			trustStoreFile = getAbsoluteFilePath(trustStoreFile);
 			props.setProperty(trustorePropertyName, trustStoreFile);
 			trace.log(TraceLevel.INFO, "TrustStore location set to " + trustStoreFile);
-		} else if (securityProtocol.equalsIgnoreCase("SSL")){
+		} else if (securityProtocol != null && securityProtocol.equalsIgnoreCase("SSL")){
 			Map<String, String> env = System.getenv();
 			//get java default truststore
 			trustStoreFile = env.get("STREAMS_INSTALL") + "/java/jre/lib/security/cacerts";
