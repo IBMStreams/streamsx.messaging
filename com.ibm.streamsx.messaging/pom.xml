@@ -28,12 +28,8 @@
 	  <dependency>
 	    <groupId>org.apache.kafka</groupId>
 	    <artifactId>kafka_2.10</artifactId>
-	    <version>0.8.2.2</version>
-	    <exclusions>
-	     <exclusion>
-	     	<groupId>org.apache.kafka</groupId>
-		    <artifactId>kafka-clients</artifactId>
-		</exclusion>     	
+	    <version>0.9.0.0</version>
+	    <exclusions>     	
 	     <exclusion>
 		<groupId>com.sun.jmx</groupId>
 		<artifactId>jmxri</artifactId>
