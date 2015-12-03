@@ -21,7 +21,7 @@ Incubation for projects is covered here: https://github.com/IBMStreams/administr
 - [ ] :red_circle: Clear release plan
   * Status: **TBD**
 - [x] :white_check_mark: At least one active committer
-  * Status: @cancilla as an active committer
+  * Status: 3 active committers:  Samantha Chan, Cong Li, Alex Cook
 
 ### Key
 * :white_check_mark: - Complete
