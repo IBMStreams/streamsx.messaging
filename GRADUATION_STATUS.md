@@ -7,7 +7,7 @@ Incubation for projects is covered here: https://github.com/IBMStreams/administr
 ## Status
 
 - [x] :white_check_mark: Stable release(s)
-  * Status: Multiple releases in the release plan
+  * Status: Multiple releases already completed
 - [x] :white_check_mark: Project is properly documented
   * Status: Yes
 - [x] :white_check_mark: Project has samples and instructions to help users get started easily
