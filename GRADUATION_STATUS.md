@@ -14,7 +14,7 @@ Incubation for projects is covered here: https://github.com/IBMStreams/administr
   * Status: Yes
 - [x] :white_check_mark: Sufficient testing
   * Status: Yes, all operators are tested on all Streams supported platform
-- [x] :red_circle: Instructions on how to get started with development and contributing to project
+- [x] :white_check_mark: Instructions on how to get started with development and contributing to project
   * Status: Yes
 - [x] :white_check_mark Website that contains information and documentation of the project
   * Status: Yes and periodically updated
