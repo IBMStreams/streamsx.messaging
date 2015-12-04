@@ -112,8 +112,14 @@ public class KafkaSource extends KafkaBaseOper {
 		this.threadsPerTopic = value;
 	}	
 	@Parameter(name="topic", cardinality=-1, optional=false, 
-			description="Topic to be subscribed to.")
+			description="Topic to be subscribed to. 1 or more can be provided using comma separation. Ex: \\\"mytopic1\\\",\\\"mytopic2\\\"")
 	public void setTopic(List<String> values) {
+		if(values!=null)
+			topics.addAll(values);
+	}	
+	@Parameter(name="partition", cardinality=-1, optional=true, 
+			description="Partition to be subscribed to. 1 or more can be provided using comma separation. You may only specify 1 topic if you are specifying partitions. Ex: 0,2,3")
+	public void setPartition(List<String> values) {
 		if(values!=null)
 			topics.addAll(values);
 	}	
