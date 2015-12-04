@@ -12,10 +12,10 @@ public class KafkaProducerFactory {
 	
 	public KafkaProducerClient getClient(AttributeHelper topicAH,
 			AttributeHelper keyAH, AttributeHelper messageAH, Properties props) {
-		if (keyAH.isString() && messageAH.isString()){
+		if (messageAH.isString() && (!keyAH.isAvailable() || keyAH.isString())){
 			trace.log(TraceLevel.WARNING, "Using KafkaProducer<String,String> client.");
 			client = new ProducerStringHelper(topicAH, keyAH, messageAH, props);
-		} else if (!keyAH.isString() && !messageAH.isString()){
+		} else if ( !messageAH.isString() && (!keyAH.isAvailable() || !keyAH.isString())){
 			trace.log(TraceLevel.WARNING, "Using KafkaProducer<byte,byte> client.");
 			client = new ProducerByteHelper(topicAH, keyAH, messageAH, props);
 		} else {

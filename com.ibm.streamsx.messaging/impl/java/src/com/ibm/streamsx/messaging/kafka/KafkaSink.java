@@ -82,7 +82,6 @@ public class KafkaSink extends KafkaBaseOper {
 		trace.log(TraceLevel.INFO, "Initializing producer");
 		KafkaProducerFactory producerFactory = new KafkaProducerFactory();
 		producerClient = producerFactory.getClient(topicAH, keyAH, messageAH, finalProperties);
-		producerClient.init();
 	}
 	
 	@Override
