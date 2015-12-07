@@ -4,26 +4,32 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.errors.WakeupException;
 
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.logging.TraceLevel;
 
 public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
-	KafkaConsumer<K,V> consumer;
-	private int partition = -1;
-	static Boolean shutdown = false;
+	protected KafkaConsumer<K,V> consumer;
+	private List<Integer> partitions;
+	
+	private final AtomicBoolean shutdown = new AtomicBoolean(false);
+	private long consumerPollTimeout;
 	
 	
-	public KafkaConsumerV9(AttributeHelper topicAH, AttributeHelper keyAH, AttributeHelper messageAH, Properties props) {
+	public KafkaConsumerV9(AttributeHelper topicAH, AttributeHelper keyAH, AttributeHelper messageAH, List<Integer> partitions, int consumerPollTimeout, Properties props) {
 		super(topicAH,keyAH,messageAH,props);
 		setDefaultDeserializers();
-		consumer = new KafkaConsumer<K, V>(props); 		
+		consumer = new KafkaConsumer<K, V>(props); 	
+		this.partitions = partitions;
+		this.consumerPollTimeout = consumerPollTimeout;
 	}
 	
 	private void setDefaultDeserializers() {
@@ -56,7 +62,7 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 			ThreadFactory tf, List<String> topics, int threadsPerTopic){
 		streamingOutput = so;
 		
-		if (partition  == -1){
+		if (partitions == null || partitions.isEmpty()){
 			//subscribe to the topics
 			trace.log(TraceLevel.INFO, "Subscribing to topics: " + topics.toString());
 			try {
@@ -66,10 +72,12 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 				trace.log(TraceLevel.ERROR,"Failed to subscribe. Topics: " + topics.toString() + " consumer: " + consumer.toString());
 			}
 		} else {
-			//subscribe to specific partition
-			TopicPartition partition1 = new TopicPartition(topics.get(0), partition);
+			//subscribe to specific partitions
 			List<TopicPartition> partitionList = new ArrayList<TopicPartition>();
-			partitionList.add(partition1);
+			for (Integer partition : partitions){
+				TopicPartition tPartition = new TopicPartition(topics.get(0), partition);
+				partitionList.add(tPartition);
+			}
 			trace.log(TraceLevel.INFO, "Subscribing to partitions: " + partitionList.toString() + " in topic: " + topics.get(0));
 			try {
 				consumer.assign(partitionList);
@@ -103,11 +111,17 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 	}
 	
 	public void produceTuples(){
-		while (!shutdown) {
+		while (!shutdown.get()) {
 			try {
-				ConsumerRecords<K,V> records = consumer.poll(100);
+				ConsumerRecords<K,V> records = consumer.poll(consumerPollTimeout);
 				process(records);
-			} catch (Exception e) {
+			} catch (WakeupException e) {
+	             // Ignore exception if closing
+	             if (!shutdown.get()){
+	            	 trace.log(TraceLevel.ERROR, "WakeupException: " + e.getMessage());
+	            	 e.printStackTrace();
+	             }
+	        } catch (Exception e) {
 				trace.log(TraceLevel.ERROR, "Error processing messages: " + e.getMessage());
 				e.printStackTrace();
 			}
@@ -119,7 +133,7 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 		
 		for (ConsumerRecord<K,V> record : records){
 			topic = record.topic();
-			if(shutdown) return;
+			if(shutdown.get()) return;
 			if(trace.isLoggable(TraceLevel.DEBUG))
 				trace.log(TraceLevel.DEBUG, "Topic: " + topic + ", Message: " + record.value() );
 			OutputTuple otup = streamingOutput.newTuple();
@@ -141,7 +155,7 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 	
 	public void shutdown() {
 		System.out.println("Shutting down");
-		shutdown = true;
+		shutdown.set(true);
 		if (consumer != null){
 			consumer.close();
 		}
