@@ -17,7 +17,6 @@ composite KafkaSample {
 	param 
 		expression<rstring> $topic : "sampleTopic" ;
     graph
-
 	  //create some messages and send to Kafka
 		stream<rstring topic, rstring key, rstring message> OutputStream = Beacon() {
 			param
@@ -37,6 +36,8 @@ composite KafkaSample {
 			param
 				propertiesFile : getThisToolkitDir() + "/etc/consumer.properties" ;
 				topic : $topic;
+//				vmArg :
+//                    "-agentlib:jdwp=transport=dt_socket,suspend=n,server=y,address=h0811:7777" ;
 		}
 
 		() as SinkOp = Custom(KafkaStream)
