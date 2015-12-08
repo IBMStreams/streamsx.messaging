@@ -26,36 +26,13 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 	
 	public KafkaConsumerV9(AttributeHelper topicAH, AttributeHelper keyAH, AttributeHelper messageAH, List<Integer> partitions, int consumerPollTimeout, Properties props) {
 		super(topicAH,keyAH,messageAH,props);
-		setDefaultDeserializers();
+		KafkaConfigUtilities.setDefaultDeserializers(keyAH, messageAH, props);
 		consumer = new KafkaConsumer<K, V>(props); 	
 		this.partitions = partitions;
 		this.consumerPollTimeout = consumerPollTimeout;
 	}
 	
-	private void setDefaultDeserializers() {
-		if (!props.containsKey("key.deserializer")){
-			if(messageAH.isString()){
-				props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property key.serializer=org.apache.kafka.common.serialization.StringDeserializer" );
-			}
-			else{
-				props.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property key.serializer=org.apache.kafka.common.serialization.ByteArrayDeserializer" );
-			}
-		}
-		
-		if (!props.containsKey("value.deserializer")){
-			if(messageAH.isString()){
-				props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property value.serializer=org.apache.kafka.common.serialization.StringDeserializer" );
-			}
-			else{
-				props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property value.serializer=org.apache.kafka.common.serialization.ByteArrayDeserializer" );
-			}
-		}
-		
-	}
+
 	
 	public void init(
 			StreamingOutput<OutputTuple> so,

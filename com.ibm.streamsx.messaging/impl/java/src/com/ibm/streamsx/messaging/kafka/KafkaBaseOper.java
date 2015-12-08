@@ -40,6 +40,20 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	private final Logger trace = Logger.getLogger(KafkaBaseOper.class
 			.getCanonicalName());
 
+
+	
+	protected static void checkForMessageAttribute(OperatorContext operContext, StreamSchema operSchema) throws Exception {
+		List<String> messageAttrParameter = operContext.getParameterValues("messageAttribute");
+		String messageAttrString = "message";
+		if (!messageAttrParameter.isEmpty()){
+			messageAttrString = messageAttrParameter.get(0);
+		}
+		if ( !operSchema.getAttributeNames().contains(messageAttrString)
+				|| !operSchema.getAttributeNames().contains(messageAttrString)){
+			throw new Exception("Attribute called message or described by the \"messageAttribute\" parameter is REQUIRED.");
+		}		
+	}
+
 	public void initialize(OperatorContext context) throws Exception {
 		super.initialize(context);
 
@@ -132,7 +146,8 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		return filePath;
 	}
 
-	@Parameter(optional = true, description = "Name of the attribute for the message. This attribute is required. Default is \\\"message\\\".")
+	@Parameter(optional = true, description = "Name of the attribute for the message. If this parameter is not specified, then by default the operator will look for an attribute named " +
+			"\\\"message\\\". If the \\\"message\\\" attribute is not found, a compile-time error will be returned.")
 	public void setMessageAttribute(String value) {
 		messageAH.setName(value);
 	}

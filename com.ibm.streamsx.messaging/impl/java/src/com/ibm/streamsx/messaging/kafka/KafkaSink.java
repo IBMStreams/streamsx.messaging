@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
+import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
@@ -62,6 +63,14 @@ public class KafkaSink extends KafkaBaseOper {
 					new String[] {});
 		}
 	}
+	
+	//check for message attribute
+	@ContextCheck(runtime = true, compile=false)
+	public static void checkIncomingMessageAttribute(OperatorContextChecker checker) throws Exception {
+		OperatorContext operContext = checker.getOperatorContext();
+		StreamSchema operSchema = operContext.getStreamingInputs().get(0).getStreamSchema();
+		checkForMessageAttribute(operContext, operSchema);		
+	}
 
 	@Override
 	public void initialize(OperatorContext context)
@@ -85,10 +94,8 @@ public class KafkaSink extends KafkaBaseOper {
 	}
 	
 	@Override
-	public void process(StreamingInput<Tuple> stream, Tuple tuple)
-			throws Exception {
-		try {
-		
+	public void process(StreamingInput<Tuple> stream, Tuple tuple){
+		try {	
 			if(trace.isLoggable(TraceLevel.DEBUG))
 				trace.log(TraceLevel.DEBUG, "Sending message: " + tuple);
 			
@@ -97,7 +104,6 @@ public class KafkaSink extends KafkaBaseOper {
 			else 
 				producerClient.send(tuple);
 		}catch(Exception e) {
-			//ideally we should not get here since the kafka client doesnt seem to be throwing any exceptions
 			trace.log(TraceLevel.ERROR, "Could not send message: " + tuple, e);
 		}
 	}	

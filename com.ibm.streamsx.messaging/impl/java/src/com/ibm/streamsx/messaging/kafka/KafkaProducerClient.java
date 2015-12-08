@@ -14,38 +14,13 @@ public abstract class KafkaProducerClient extends KafkaBaseClient {
 	public KafkaProducerClient(AttributeHelper topicAH, AttributeHelper keyAH,
 			AttributeHelper messageAH, Properties props){
 		super(topicAH, keyAH, messageAH, props);
-		setDefaultSerializers();
+		KafkaConfigUtilities.setDefaultSerializers(keyAH, messageAH, props);
 		
 	}
 
 	abstract void send(Tuple tuple, List<String> topics) throws Exception;
 
-	abstract void send(Tuple tuple) throws Exception;	
-	
-	private void setDefaultSerializers() {
-		if (!props.containsKey("key.serializer")){
-			if(messageAH.isString()){
-				props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property key.serializer=org.apache.kafka.common.serialization.StringSerializer" );
-			}
-			else{
-				props.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property key.serializer=org.apache.kafka.common.serialization.ByteArraySerializer" );
-			}
-		}
-		
-		if (!props.containsKey("value.serializer")){
-			if(messageAH.isString()){
-				props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property value.serializer=org.apache.kafka.common.serialization.StringSerializer" );
-			}
-			else{
-				props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property value.serializer=org.apache.kafka.common.serialization.ByteArraySerializer" );
-			}
-		}
-		
-	}
+	abstract void send(Tuple tuple) throws Exception;
 
 }
 
