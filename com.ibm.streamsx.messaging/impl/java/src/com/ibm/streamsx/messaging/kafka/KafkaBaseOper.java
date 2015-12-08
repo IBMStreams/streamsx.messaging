@@ -33,6 +33,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	protected Properties properties = new Properties(),
 			finalProperties = new Properties();
 	protected String propertiesFile = null;
+	protected String jaasFile = null;
 	protected AttributeHelper topicAH = new AttributeHelper("topic"),
 			keyAH = new AttributeHelper("key"),
 			messageAH = new AttributeHelper("message");
@@ -56,6 +57,11 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 
 	public void initialize(OperatorContext context) throws Exception {
 		super.initialize(context);
+		
+		String jaasFile = getJaasFile();
+		if(jaasFile != null) {
+			System.setProperty("java.security.auth.login.config", jaasFile);
+		}
 
 		String propFile = getPropertiesFile();
 		if (propFile != null) {
@@ -133,6 +139,18 @@ public abstract class KafkaBaseOper extends AbstractOperator {
     	if (propertiesFile == null) return null;
     	propertiesFile = getAbsoluteFilePath(propertiesFile);
 		return propertiesFile;
+	}
+
+	@Parameter(optional = true, description = "Location of the jaas file to be used for SASL connections. Jaas file is recommended to be stored in the etc directory.  If a relative path is specified, the path is relative to the application directory.")
+	public void setJaasFile(String value) {
+		jaasFile = value;
+	}
+
+	public String getJaasFile() {
+		trace.log(TraceLevel.TRACE, "Jaas file: " + jaasFile);
+    		if (jaasFile == null) return null;
+    		jaasFile = getAbsoluteFilePath(jaasFile);
+		return jaasFile;
 	}
 	
 	public String getAbsoluteFilePath(String filePath){
