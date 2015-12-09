@@ -12,7 +12,7 @@ public class KafkaConsumerFactory {
 			.getCanonicalName());
 	
 	public KafkaConsumerClient getClient(AttributeHelper topicAH,
-			AttributeHelper keyAH, AttributeHelper messageAH, List<Integer> partitions, int consumerPollTimeout, Properties props) throws UnsupportedKafkaDeserializerException {
+			AttributeHelper keyAH, AttributeHelper messageAH, List<Integer> partitions, int consumerPollTimeout, Properties props) throws UnsupportedStreamsKafkaConfigurationException {
 
 		if (props.containsKey("bootstrap.servers")){
 			if (KafkaConfigUtilities.getStringProperty("value.deserializer",
@@ -31,7 +31,7 @@ public class KafkaConsumerFactory {
 						.getStringProperty("value.deserializer", props)
 						.equalsIgnoreCase(
 								"org.apache.kafka.common.serialization.ByteArrayDeserializer"))
-					throw new UnsupportedKafkaDeserializerException(
+					throw new UnsupportedStreamsKafkaConfigurationException(
 							"The specified deserializer is not supported by the KafkaSource.");
 				
 				if (messageAH.isString())

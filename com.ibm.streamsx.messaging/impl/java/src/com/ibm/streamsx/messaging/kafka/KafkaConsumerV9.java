@@ -131,7 +131,7 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 			K key);
 	
 	public void shutdown() {
-		System.out.println("Shutting down");
+		trace.log(TraceLevel.ALL, "Shutting down...");
 		shutdown.set(true);
 		if (consumer != null){
 			consumer.close();

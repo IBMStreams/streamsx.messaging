@@ -51,7 +51,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		}
 		if ( !operSchema.getAttributeNames().contains(messageAttrString)
 				|| !operSchema.getAttributeNames().contains(messageAttrString)){
-			throw new Exception("Attribute called message or described by the \"messageAttribute\" parameter is REQUIRED.");
+			throw new UnsupportedStreamsKafkaAttributeException("Attribute called message or described by the \"messageAttribute\" parameter is REQUIRED.");
 		}		
 	}
 
@@ -71,7 +71,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		finalProperties = transformTrustStoreProperty(finalProperties);
 		
 		if (finalProperties == null || finalProperties.isEmpty())
-			throw new Exception(
+			throw new UnsupportedStreamsKafkaConfigurationException(
 					"Kafka connection properties must be specified.");
 
 	}
@@ -117,11 +117,11 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 
 	@Parameter(cardinality = -1, optional = true, description = "Specify a Kafka property \\\"key=value\\\" form. "
 			+ "This will override any property specified in the properties file.")
-	public void setKafkaProperty(List<String> values) {
+	public void setKafkaProperty(List<String> values) throws UnsupportedStreamsKafkaConfigurationException {
 		for (String value : values) {
 			int idx = value.indexOf("=");
 			if (idx == -1)
-				throw new IllegalArgumentException("Invalid property: " + value
+				throw new UnsupportedStreamsKafkaConfigurationException("Invalid property: " + value
 						+ ", not in the key=value format");
 			String name = value.substring(0, idx);
 			String v = value.substring(idx + 1, value.length());

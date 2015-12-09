@@ -33,7 +33,7 @@ public class KafkaSource extends KafkaBaseOper {
 	private List<Integer> partitions = new ArrayList<Integer>();
 	private static Logger trace = Logger.getLogger(KafkaSource.class.getName());
 	
-	KafkaConsumerClient newKafkaConsumer;
+	KafkaConsumerClient streamsKafkaConsumer;
 	private int consumerPollTimeout = 100;
 	
 	
@@ -111,11 +111,11 @@ public class KafkaSource extends KafkaBaseOper {
 	@Override
 	public void allPortsReady() throws Exception {
 		// initialize the client
-		trace.log(TraceLevel.INFO, "Initializing client");
+		trace.log(TraceLevel.INFO, "Initializing source client");
 		KafkaConsumerFactory clientFactory = new KafkaConsumerFactory();
-		newKafkaConsumer = clientFactory.getClient(topicAH, keyAH, messageAH,
+		streamsKafkaConsumer = clientFactory.getClient(topicAH, keyAH, messageAH,
 				partitions, consumerPollTimeout, finalProperties);
-		newKafkaConsumer.init(getOutput(0), getOperatorContext()
+		streamsKafkaConsumer.init(getOutput(0), getOperatorContext()
 				.getThreadFactory(), topics, threadsPerTopic);
 	}
 
@@ -152,8 +152,8 @@ public class KafkaSource extends KafkaBaseOper {
 	
 	@Override
 	public void shutdown(){
-		if (newKafkaConsumer != null){
-			newKafkaConsumer.shutdown();
+		if (streamsKafkaConsumer != null){
+			streamsKafkaConsumer.shutdown();
 		}
 	}
 
