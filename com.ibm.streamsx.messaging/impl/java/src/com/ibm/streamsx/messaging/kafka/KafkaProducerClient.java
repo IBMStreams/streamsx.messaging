@@ -14,8 +14,7 @@ public abstract class KafkaProducerClient extends KafkaBaseClient {
 	public KafkaProducerClient(AttributeHelper topicAH, AttributeHelper keyAH,
 			AttributeHelper messageAH, Properties props){
 		super(topicAH, keyAH, messageAH, props);
-		KafkaConfigUtilities.setDefaultSerializers(keyAH, messageAH, props);
-		
+		props = KafkaConfigUtilities.setDefaultSerializers(keyAH, messageAH, props);
 	}
 
 	abstract void send(Tuple tuple, List<String> topics) throws Exception;

@@ -7,7 +7,7 @@ import com.ibm.streams.operator.logging.TraceLevel;
 
 public class KafkaConfigUtilities {
 	
-	public static void setDefaultDeserializers(AttributeHelper keyAH, AttributeHelper messageAH, Properties props) {
+	public static Properties setDefaultDeserializers(AttributeHelper keyAH, AttributeHelper messageAH, Properties props) {
 		final Logger trace = Logger.getLogger(KafkaConfigUtilities.class
 				.getCanonicalName());
 		
@@ -33,9 +33,10 @@ public class KafkaConfigUtilities {
 			}
 		}
 		
+		return props;
 	}
 	
-	public static void setDefaultSerializers(AttributeHelper keyAH, AttributeHelper messageAH, Properties props) {
+	public static Properties setDefaultSerializers(AttributeHelper keyAH, AttributeHelper messageAH, Properties props) {
 		final Logger trace = Logger.getLogger(KafkaConfigUtilities.class
 				.getCanonicalName());
 		
@@ -61,5 +62,18 @@ public class KafkaConfigUtilities {
 			}
 		}
 		
+		return props;
+	}
+	
+	public static String getStringProperty(String propName, Properties props) {
+		String propVal = props.getProperty(propName); 
+		String stringProp = "";
+		final Logger trace = Logger.getLogger(KafkaConfigUtilities.class
+				.getCanonicalName());
+		if (propVal != null){
+				stringProp = props.getProperty(propName);
+		}
+		trace.log(TraceLevel.INFO, "Property " + propName + " has a final value of " + stringProp);
+		return stringProp;
 	}
 }

@@ -26,7 +26,7 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 	
 	public KafkaConsumerV9(AttributeHelper topicAH, AttributeHelper keyAH, AttributeHelper messageAH, List<Integer> partitions, int consumerPollTimeout, Properties props) {
 		super(topicAH,keyAH,messageAH,props);
-		KafkaConfigUtilities.setDefaultDeserializers(keyAH, messageAH, props);
+		props = KafkaConfigUtilities.setDefaultDeserializers(keyAH, messageAH, props);
 		consumer = new KafkaConsumer<K, V>(props); 	
 		this.partitions = partitions;
 		this.consumerPollTimeout = consumerPollTimeout;
