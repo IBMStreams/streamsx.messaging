@@ -26,7 +26,6 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 	
 	public KafkaConsumerV9(AttributeHelper topicAH, AttributeHelper keyAH, AttributeHelper messageAH, List<Integer> partitions, int consumerPollTimeout, Properties props) {
 		super(topicAH,keyAH,messageAH,props);
-		props = KafkaConfigUtilities.setDefaultDeserializers(keyAH, messageAH, props);
 		consumer = new KafkaConsumer<K, V>(props); 	
 		this.partitions = partitions;
 		this.consumerPollTimeout = consumerPollTimeout;
@@ -42,12 +41,7 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 		if (partitions == null || partitions.isEmpty()){
 			//subscribe to the topics
 			trace.log(TraceLevel.INFO, "Subscribing to topics: " + topics.toString());
-			try {
-				consumer.subscribe(topics); 
-			} catch (Exception e){
-				e.printStackTrace();
-				trace.log(TraceLevel.ERROR,"Failed to subscribe. Topics: " + topics.toString() + " consumer: " + consumer.toString());
-			}
+			consumer.subscribe(topics); 
 		} else {
 			//subscribe to specific partitions
 			List<TopicPartition> partitionList = new ArrayList<TopicPartition>();
@@ -56,24 +50,14 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 				partitionList.add(tPartition);
 			}
 			trace.log(TraceLevel.INFO, "Subscribing to partitions: " + partitionList.toString() + " in topic: " + topics.get(0));
-			try {
-				consumer.assign(partitionList);
-			} catch (Exception e){
-				e.printStackTrace();
-				trace.log(TraceLevel.ERROR,"Failed to subscribe to specified partitions. Make sure they exist.");
-			}
-		}
-			
+			consumer.assign(partitionList);
+		}	
 		
 		processThread = tf.newThread(new Runnable() {
 
 			@Override
 			public void run() {
-				try {
-					produceTuples();
-				} catch (Exception e) {
-					trace.log(TraceLevel.ERROR, "Operator error: " + e.getMessage() + "\n" + e.getStackTrace());
-				}
+				produceTuples();
 			}
 
 		});

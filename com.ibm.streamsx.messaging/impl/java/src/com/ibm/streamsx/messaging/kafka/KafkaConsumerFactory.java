@@ -15,6 +15,7 @@ public class KafkaConsumerFactory {
 			AttributeHelper keyAH, AttributeHelper messageAH, List<Integer> partitions, int consumerPollTimeout, Properties props) throws UnsupportedStreamsKafkaConfigurationException {
 
 		if (props.containsKey("bootstrap.servers")){
+			props = KafkaConfigUtilities.setDefaultDeserializers(keyAH, messageAH, props);
 			if (KafkaConfigUtilities.getStringProperty("value.deserializer",
 					props).equalsIgnoreCase(
 					"org.apache.kafka.common.serialization.StringDeserializer")) {
