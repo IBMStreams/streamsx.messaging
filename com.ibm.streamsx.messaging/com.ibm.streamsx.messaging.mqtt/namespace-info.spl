@@ -47,7 +47,7 @@
  *       and the quality of service (QoS) to be provided for each of the topics.
  *     * The QoS applies only for ADD, REPLACE, and UPDATE operations.
  *       For ADD and REPLACE operations, the QoS is applied to the topics that are added or replaced.
- *     * **Tip**: To update the QoS for all the subscribed topics, use asterisk (*) as a wildcard character for the topics element.
+ *     * **Tip**: To update the QoS for all the subscribed topics, use asterisk (\*) as a wildcard character for the topics element.
  * 
  * The following list contains descriptions of the configuration options for the control port.
  * The updated configuration options are used immediately and the operator does not wait until a connection failure to apply these values.
@@ -91,7 +91,7 @@
  *        }
  *     }
  * 
- * The following example shows how to update QoS for all the existing topics by using the wildcard character (*):
+ * The following example shows how to update QoS for all the existing topics by using the wildcard character (\*):
  * 
  *     stream<MQTTSourceUpdate.ControlPortType> ControlOp_out2 = Custom(){
  *       logic

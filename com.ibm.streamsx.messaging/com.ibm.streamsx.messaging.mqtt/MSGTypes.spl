@@ -14,7 +14,7 @@ type MQTTBlobMsg = blob data;
 type MQTTRStringMsg = rstring data;
 
 
-/*
+/**
 * Composite that defines types to be used to update MQTTSource operator using control port
 */
 public composite MQTTSourceUpdate
@@ -44,13 +44,13 @@ public composite MQTTSourceUpdate
             rstring> mqttConfig;
 }
 
-/*
+/**
 * Composite that contains types to be used to update MQTTSink operator using control port
 */
 public composite MQTTSinkUpdate
 {
     type
-       /*
+       /**
        * The expected schema for the control input port in the MQTTSink operator
        */
         static ControlPortType = map<rstring, rstring> mqttConfig;
@@ -58,7 +58,10 @@ public composite MQTTSinkUpdate
 
 /** Convenience method for creating a control signal that modifies
  * subscription setting for MQTTSource operator
- * 
+ * @param action the action to apply for the topics specified
+ * @param topics list of topics to add / remove / update or replace
+ * @param qos qos of the topics to be added, updated or replaced
+ * @return a control signal with expected schema value populated for the control port
  */
 public MQTTSourceUpdate.ControlPortType
 	newControlSignal(MQTTSourceUpdate.TopicsUpdateAction action,
