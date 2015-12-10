@@ -33,9 +33,9 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 	
 
 	
-	public void init(
+	protected void init(
 			StreamingOutput<OutputTuple> so,
-			ThreadFactory tf, List<String> topics, int threadsPerTopic){
+			ThreadFactory tf, List<String> topics){
 		streamingOutput = so;
 		
 		if (partitions == null || partitions.isEmpty()){

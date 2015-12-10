@@ -17,21 +17,18 @@ public class KafkaConsumerFactory {
 		if (props.containsKey("bootstrap.servers")){
 			props = KafkaConfigUtilities.setDefaultDeserializers(keyAH, messageAH, props);
 			if (KafkaConfigUtilities.getStringProperty("value.deserializer",
-					props).equalsIgnoreCase(
-					"org.apache.kafka.common.serialization.StringDeserializer")) {
+					props).equalsIgnoreCase("org.apache.kafka.common.serialization.StringDeserializer")) {
 				if (!messageAH.isString())
 					trace.log(
 							TraceLevel.WARN,
 							"Using new 0.9 String consumer client even though output attribute is not of type String. This could hurt performance and we recommend using the same attribute type as your value.deserializer property.");
-				trace.log(TraceLevel.INFO,
-						"Using new 0.9 String consumer client.");
+				trace.log(TraceLevel.INFO, "Using new 0.9 String consumer client.");
 				client = new KafkaStringConsumerV9(topicAH, keyAH, messageAH,
 						partitions, consumerPollTimeout, props);
 			} else {
 				if (!KafkaConfigUtilities
 						.getStringProperty("value.deserializer", props)
-						.equalsIgnoreCase(
-								"org.apache.kafka.common.serialization.ByteArrayDeserializer"))
+						.equalsIgnoreCase("org.apache.kafka.common.serialization.ByteArrayDeserializer"))
 					throw new UnsupportedStreamsKafkaConfigurationException(
 							"The specified deserializer is not supported by the KafkaSource.");
 				
@@ -47,10 +44,8 @@ public class KafkaConsumerFactory {
 			}
 		} else {
 			if(partitions != null && !partitions.isEmpty()){
-				throw new UnsupportedOperationException("You are trying to use the high level consumer with a specified partions. Either remove partition arguments or make sure your bootstrap.servers property is set to use the Kafka 0.9 consumer.");
+				throw new UnsupportedOperationException("Missing required bootstrap.servers properties.");
 			}
-				trace.log(TraceLevel.INFO, "Using High Level consumer client.");
-				client = new KafkaHighLevelConsumer(topicAH, keyAH, messageAH, props);
 		}
 
 		return client;

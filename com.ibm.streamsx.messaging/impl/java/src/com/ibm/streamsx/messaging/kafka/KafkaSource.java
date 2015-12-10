@@ -116,12 +116,7 @@ public class KafkaSource extends KafkaBaseOper {
 		streamsKafkaConsumer = clientFactory.getClient(topicAH, keyAH, messageAH,
 				partitions, consumerPollTimeout, finalProperties);
 		streamsKafkaConsumer.init(getOutput(0), getOperatorContext()
-				.getThreadFactory(), topics, threadsPerTopic);
-	}
-
-	@Parameter(name = "threadsPerTopic", optional = true, description = "Number of threads per topic. This parameter is only valid when using the HighLevelConsumer (specified zookeeper.connect instead of bootstrap.servers). Default is 1.")
-	public void setThreadsPerTopic(int value) {
-		this.threadsPerTopic = value;
+				.getThreadFactory(), topics);
 	}
 
 	@Parameter(name = "consumerPollTimeout", optional = true, description = "The time, in milliseconds, spent waiting in poll if data is not available. If 0, returns immediately with any records that are available now. Must not be negative. This parameter is only valid when using the KafkaConsumer(0.9) (specified bootstrap.servers instead of zookeeper.connect). Default is 100.")
@@ -143,7 +138,7 @@ public class KafkaSource extends KafkaBaseOper {
 	}
 
 	public static final String DESC = 
-			"This operator acts as a Kafka consumer receiving messages for a single topic. " +
+			"This operator acts as a Kafka consumer receiving messages for one or more topics. " +
 			"Note that there may be multiple threads receiving messages depending on the configuration specified. " +
 			"Ordering of messages is not guaranteed." + 
 			"\\n\\n**Behavior in a Consistent Region**" + 
