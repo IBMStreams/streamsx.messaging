@@ -33,6 +33,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	protected Properties properties = new Properties(),
 			finalProperties = new Properties();
 	protected String propertiesFile = null;
+	protected String jaasFile = null;
 	protected AttributeHelper topicAH = new AttributeHelper("topic"),
 			keyAH = new AttributeHelper("key"),
 			messageAH = new AttributeHelper("message");
@@ -40,8 +41,27 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	private final Logger trace = Logger.getLogger(KafkaBaseOper.class
 			.getCanonicalName());
 
+
+	
+	protected static void checkForMessageAttribute(OperatorContext operContext, StreamSchema operSchema) throws Exception {
+		List<String> messageAttrParameter = operContext.getParameterValues("messageAttribute");
+		String messageAttrString = "message";
+		if (!messageAttrParameter.isEmpty()){
+			messageAttrString = messageAttrParameter.get(0);
+		}
+		if ( !operSchema.getAttributeNames().contains(messageAttrString)
+				|| !operSchema.getAttributeNames().contains(messageAttrString)){
+			throw new UnsupportedStreamsKafkaAttributeException("Attribute called message or described by the \"messageAttribute\" parameter is REQUIRED.");
+		}		
+	}
+
 	public void initialize(OperatorContext context) throws Exception {
 		super.initialize(context);
+		
+		String jaasFile = getJaasFile();
+		if(jaasFile != null) {
+			System.setProperty("java.security.auth.login.config", jaasFile);
+		}
 
 		String propFile = getPropertiesFile();
 		if (propFile != null) {
@@ -51,7 +71,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		finalProperties = transformTrustStoreProperty(finalProperties);
 		
 		if (finalProperties == null || finalProperties.isEmpty())
-			throw new Exception(
+			throw new UnsupportedStreamsKafkaConfigurationException(
 					"Kafka connection properties must be specified.");
 
 	}
@@ -67,7 +87,8 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 			trustStoreFile = getAbsoluteFilePath(trustStoreFile);
 			props.setProperty(trustorePropertyName, trustStoreFile);
 			trace.log(TraceLevel.INFO, "TrustStore location set to " + trustStoreFile);
-		} else if (securityProtocol.equalsIgnoreCase("SSL")){
+		} else if (securityProtocol != null && (securityProtocol.equalsIgnoreCase("SSL")
+												|| securityProtocol.equalsIgnoreCase("SASL_SSL"))){
 			Map<String, String> env = System.getenv();
 			//get java default truststore
 			trustStoreFile = env.get("STREAMS_INSTALL") + "/java/jre/lib/security/cacerts";
@@ -97,11 +118,11 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 
 	@Parameter(cardinality = -1, optional = true, description = "Specify a Kafka property \\\"key=value\\\" form. "
 			+ "This will override any property specified in the properties file.")
-	public void setKafkaProperty(List<String> values) {
+	public void setKafkaProperty(List<String> values) throws UnsupportedStreamsKafkaConfigurationException {
 		for (String value : values) {
 			int idx = value.indexOf("=");
 			if (idx == -1)
-				throw new IllegalArgumentException("Invalid property: " + value
+				throw new UnsupportedStreamsKafkaConfigurationException("Invalid property: " + value
 						+ ", not in the key=value format");
 			String name = value.substring(0, idx);
 			String v = value.substring(idx + 1, value.length());
@@ -119,6 +140,18 @@ public abstract class KafkaBaseOper extends AbstractOperator {
     	if (propertiesFile == null) return null;
     	propertiesFile = getAbsoluteFilePath(propertiesFile);
 		return propertiesFile;
+	}
+
+	@Parameter(optional = true, description = "Location of the jaas file to be used for SASL connections. Jaas file is recommended to be stored in the etc directory.  If a relative path is specified, the path is relative to the application directory.")
+	public void setJaasFile(String value) {
+		jaasFile = value;
+	}
+
+	public String getJaasFile() {
+		trace.log(TraceLevel.TRACE, "Jaas file: " + jaasFile);
+    		if (jaasFile == null) return null;
+    		jaasFile = getAbsoluteFilePath(jaasFile);
+		return jaasFile;
 	}
 	
 	public String getAbsoluteFilePath(String filePath){

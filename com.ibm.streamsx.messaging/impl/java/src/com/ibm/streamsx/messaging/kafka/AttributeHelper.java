@@ -6,7 +6,7 @@
 package com.ibm.streamsx.messaging.kafka;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Set;
 
@@ -57,7 +57,7 @@ class AttributeHelper {
 			return;
 		}
 		this.mType = a.getType().getMetaType();
-		isString = mType == MetaType.RSTRING || mType == MetaType.USTRING;
+		isString = (mType == MetaType.RSTRING) || (mType == MetaType.USTRING);
 		
 		if(!supportedTypes.contains(mType)){
 			throw new Exception("Attribute \"" + name + "\" must be one of:  " + supportedTypes);
@@ -102,18 +102,19 @@ class AttributeHelper {
 			return tuple.getString(name);
         return new String(getBytesFromBlob(tuple, name));
 	}
+	
 	byte[] getBytes(Tuple tuple) throws IOException {
 		if(!isAvailable) return null;
 		if(isString)
 			return tuple.getString(name).getBytes(CS);
 		return getBytesFromBlob(tuple, name);
 	}
+	
 	private static byte[] getBytesFromBlob(Tuple tuple, String name) throws IOException {
 		Blob blockMsg = tuple.getBlob(name);
-        InputStream inputStream = blockMsg.getInputStream();
-        int length = (int) blockMsg.getLength();
-        byte[] byteArray = new byte[length];
-        inputStream.read(byteArray, 0, length);
-        return byteArray;
+		ByteBuffer msgBuffer = blockMsg.getByteBuffer();
+		byte[] msgBytes = new byte[(int) blockMsg.getLength()];
+		msgBuffer.get(msgBytes);
+        return msgBytes;
 	}
 }

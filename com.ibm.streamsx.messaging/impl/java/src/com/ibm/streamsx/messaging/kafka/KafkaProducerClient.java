@@ -12,41 +12,14 @@ import com.ibm.streams.operator.logging.TraceLevel;
 public abstract class KafkaProducerClient extends KafkaBaseClient {
 	
 	public KafkaProducerClient(AttributeHelper topicAH, AttributeHelper keyAH,
-			AttributeHelper messageAH, Properties props) {
+			AttributeHelper messageAH, Properties props){
 		super(topicAH, keyAH, messageAH, props);
+		props = KafkaConfigUtilities.setDefaultSerializers(keyAH, messageAH, props);
 	}
 
 	abstract void send(Tuple tuple, List<String> topics) throws Exception;
 
 	abstract void send(Tuple tuple) throws Exception;
-
-	void init() throws Exception{
-		trace.log(TraceLevel.INFO, "Initializing Kafka Producer: " + props);
-		setDefaultSerializers(props);
-	}
-
-	
-	
-	private void setDefaultSerializers(Properties finalProperties2) {
-		if (!props.containsKey("key.serializer")){
-			if(messageAH.isString()){
-				props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-			}
-			else{
-				props.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
-			}
-		}
-		
-		if (!props.containsKey("value.serializer")){
-			if(messageAH.isString()){
-				props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-			}
-			else{
-				props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
-			}
-		}
-		
-	}
 
 }
 
@@ -58,6 +31,7 @@ class ProducerStringHelper extends KafkaProducerClient{
 			AttributeHelper messageAH, Properties props) {
 		super(topicAH, keyAH, messageAH, props);
 		producer = new KafkaProducer<String, String>(props);
+		trace.log(TraceLevel.INFO, "Creating producer of type KafkaProducer<String,String>" );
 	}
 
 
@@ -97,6 +71,7 @@ class ProducerByteHelper extends KafkaProducerClient{
 			AttributeHelper messageAH, Properties props) {
 		super(topicAH, keyAH, messageAH, props);
 		producer = new KafkaProducer<byte[],byte[]>(props);
+		trace.log(TraceLevel.INFO, "Creating producer of type KafkaProducer<Byte,Byte>" );
 	}
 
 

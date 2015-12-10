@@ -16,8 +16,8 @@ public abstract class KafkaConsumerClient extends KafkaBaseClient {
 		super(topicAH,keyAH,messageAH,props);
 	}
 
-	abstract void init(
+	protected abstract void init(
 			StreamingOutput<OutputTuple> so,
-			ThreadFactory tf, List<String> topics, int threadsPerTopic);
+			ThreadFactory tf, List<String> topics);
 	
 }
