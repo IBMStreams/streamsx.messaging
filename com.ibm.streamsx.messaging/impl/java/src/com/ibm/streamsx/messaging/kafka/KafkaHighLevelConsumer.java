@@ -26,8 +26,10 @@ public class KafkaHighLevelConsumer extends KafkaConsumerClient{
 	}
 
 	@Override
+	protected
 	void init(StreamingOutput<OutputTuple> so, ThreadFactory tf,
-			List<String> topics, int threadsPerTopic) {
+			List<String> topics) {
+		int threadsPerTopic = 1;
 		this.streamingOutput = so;
 		trace.log(TraceLevel.INFO, "Initializing Kafka consumer: " + props.toString());
 		consumer = kafka.consumer.Consumer.createJavaConsumerConnector( new ConsumerConfig(props) );
