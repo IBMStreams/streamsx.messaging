@@ -165,7 +165,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		return filePath;
 	}
 
-	@Parameter(optional = true, description = "Name of the attribute for the message. If this parameter is not specified, then by default the operator will look for an attribute named \\\"message\\\". If the \\\"message\\\" attribute is not found, messages will not be sent. Default is \\\"message\\\".")
+	@Parameter(optional = true, description = "Name of the attribute for the message. If this parameter is not specified, then by default the operator will look for an attribute named \\\"message\\\". If the \\\"message\\\" attribute is not found, a runtime error will be returned.")
 	public void setMessageAttribute(String value) {
 		messageAH.setName(value);
 	}
