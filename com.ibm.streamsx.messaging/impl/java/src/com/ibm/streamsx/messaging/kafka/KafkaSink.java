@@ -73,16 +73,16 @@ public class KafkaSink extends KafkaBaseOper {
 	}
 
 	@Override
-	public void initialize(OperatorContext context)
-			throws Exception {
+	public void initialize(OperatorContext context) throws Exception
+			{
 		super.initialize(context);
 		super.initSchema(getInput(0).getStreamSchema());
 		
 		if(topics.size() == 0 && !topicAH.isAvailable())
-			throw new Exception("Topic has not been specified. Specify either the \"topicAttribute\" or \"topic\" parameters.");
+			throw new IllegalArgumentException("Topic has not been specified. Specify either the \"topicAttribute\" or \"topic\" parameters.");
 		
 		if(keyAH.isAvailable() && ( keyAH.isString() != messageAH.isString())) {
-			throw new Exception("Key and Message attributes must have compatible types.");
+			throw new IllegalArgumentException("Key and Message attributes must have compatible types.");
 		}
 		
 		if(!topics.isEmpty())
