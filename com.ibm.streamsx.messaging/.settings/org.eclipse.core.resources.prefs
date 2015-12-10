@@ -2,7 +2,6 @@ eclipse.preferences.version=1
 encoding//.settings/org.eclipse.core.runtime.prefs=UTF-8
 encoding//.settings/org.eclipse.jdt.apt.core.prefs=UTF-8
 encoding//.settings/org.eclipse.jdt.core.prefs=UTF-8
-encoding//com.ibm.streamsx.messaging.mqtt/MQTTSink/MQTTSink.xml=UTF-8
 encoding//doc/spldoc/html/OperatorModel.html=UTF-8
 encoding//doc/spldoc/html/com.ibm.streamsx.messaging.kafka$.html=UTF-8
 encoding//doc/spldoc/html/com.ibm.streamsx.messaging.kafka$KafkaReceiver.html=UTF-8
