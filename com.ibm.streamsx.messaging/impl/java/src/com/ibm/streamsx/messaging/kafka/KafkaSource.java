@@ -6,13 +6,15 @@
 package com.ibm.streamsx.messaging.kafka;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.ibm.streams.operator.OperatorContext;
-import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
+import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.logging.TraceLevel;
 import com.ibm.streams.operator.model.Icons;
@@ -20,13 +22,15 @@ import com.ibm.streams.operator.model.OutputPortSet;
 import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
+import com.ibm.streams.operator.state.Checkpoint;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
+import com.ibm.streams.operator.state.StateHandler;
 
 @OutputPorts(@OutputPortSet(cardinality=1, optional=false, 
 	description="Messages received from Kafka are sent on this output port."))
 @PrimitiveOperator(name=KafkaSource.OPER_NAME, description=KafkaSource.DESC)
 @Icons(location16="icons/KafkaConsumer_16.gif", location32="icons/KafkaConsumer_32.gif")
-public class KafkaSource extends KafkaBaseOper {
+public class KafkaSource extends KafkaBaseOper implements StateHandler{
 
 	static final String OPER_NAME = "KafkaConsumer";
 	private int threadsPerTopic = 1;
@@ -35,19 +39,19 @@ public class KafkaSource extends KafkaBaseOper {
 	
 	KafkaConsumerClient streamsKafkaConsumer;
 	private int consumerPollTimeout = 100;
-	
+	private int triggerCount = -1;
 	
 	//consistent region checks
-	@ContextCheck(compile = true)
-	public static void checkInConsistentRegion(OperatorContextChecker checker) {
-		ConsistentRegionContext consistentRegionContext = 
-				checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
-
-		if(consistentRegionContext != null ) {
-			checker.setInvalidContext( OPER_NAME + " operator cannot be used inside a consistent region.", 
-					new String[] {});
-		}
-	}
+//	@ContextCheck(compile = true)
+//	public static void checkInConsistentRegion(OperatorContextChecker checker) {
+//		ConsistentRegionContext consistentRegionContext = 
+//				checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
+//
+//		if(consistentRegionContext != null ) {
+//			checker.setInvalidContext( OPER_NAME + " operator cannot be used inside a consistent region.", 
+//					new String[] {});
+//		}
+//	}
 	
 	//simple consumer client checks
 	@ContextCheck(runtime = false, compile = true)
@@ -100,28 +104,41 @@ public class KafkaSource extends KafkaBaseOper {
 			throw new IllegalArgumentException(
 					"Number of threads per topic cannot be less than one: "
 							+ threadsPerTopic);
-		ConsistentRegionContext crContext = getOperatorContext()
-				.getOptionalContext(ConsistentRegionContext.class);
-		if (crContext != null) {
-			throw new IllegalArgumentException(
-					"This operator does not support consistent region.");
-		}
-	}
 
-	@Override
-	public void allPortsReady() throws Exception {
 		// initialize the client
 		trace.log(TraceLevel.INFO, "Initializing source client");
 		KafkaConsumerFactory clientFactory = new KafkaConsumerFactory();
 		streamsKafkaConsumer = clientFactory.getClient(topicAH, keyAH, messageAH,
 				partitions, consumerPollTimeout, finalProperties);
+		consistentRegionCheckAndSetup();
+
+	}
+
+	@Override
+	public void allPortsReady() throws Exception {
 		streamsKafkaConsumer.init(getOutput(0), getOperatorContext()
 				.getThreadFactory(), topics);
+	}
+
+	
+	
+	private void consistentRegionCheckAndSetup() {
+		ConsistentRegionContext crContext = getOperatorContext()
+				.getOptionalContext(ConsistentRegionContext.class);
+		if (crContext != null){
+			streamsKafkaConsumer.setConsistentRegionContext(crContext, triggerCount);
+		}
 	}
 
 	@Parameter(name = "consumerPollTimeout", optional = true, description = "The time, in milliseconds, spent waiting in poll if data is not available. If 0, returns immediately with any records that are available now. Must not be negative. This parameter is only valid when using the KafkaConsumer(0.9) (specified bootstrap.servers instead of zookeeper.connect). Default is 100.")
 	public void setConsumerPollTimeout(int value) {
 		this.consumerPollTimeout = value;
+	}
+	
+    @Parameter(name="triggerCount", optional=true, 
+			description="Approximate number of messages between checkpointing for consistent region. This is only relevant to operator driven checkpointing. Checkpointing is done after a buffer of messages is submitted, so actual triggerCount at checkpoint time may be slightly above specified triggerCount.")
+	public void setTriggerCount(int value) {
+	   	this.triggerCount = value;
 	}
 
 	@Parameter(name = "topic", cardinality = -1, optional = false, description = "Topic to be subscribed to. 1 or more can be provided using comma separation. Ex: \\\"mytopic1\\\",\\\"mytopic2\\\"")
@@ -150,6 +167,45 @@ public class KafkaSource extends KafkaBaseOper {
 		if (streamsKafkaConsumer != null){
 			streamsKafkaConsumer.shutdown();
 		}
+	}
+
+	@Override
+	public void close() throws IOException {
+		System.out.println("Closing...");
+		
+	}
+
+	@Override
+	public void checkpoint(Checkpoint checkpoint) throws Exception {
+		Map<Integer, Long> offsetMap = streamsKafkaConsumer.getOffsetPositions();
+		System.out.println("Checkpointing offsetMap.");
+		checkpoint.getOutputStream().writeObject(offsetMap);
+	}
+
+	@Override
+	public void drain() throws Exception {
+		System.out.println("Draining....");
+	}
+
+	@Override
+	public void reset(Checkpoint checkpoint) throws Exception {
+		@SuppressWarnings("unchecked")
+		Map<Integer, Long> offsetMap = (Map<Integer, Long>) checkpoint.getInputStream().readObject();
+		System.out.println("Resetting...");
+		streamsKafkaConsumer.seekToPositions(offsetMap);		
+	}
+
+	@Override
+	public void resetToInitialState() throws Exception {
+		// TODO Auto-generated method stub
+		System.out.println("Resetting to initial state. Consumer will begin consuming from the latest offset.");
+		
+	}
+
+	@Override
+	public void retireCheckpoint(long id) throws Exception {
+		// TODO Auto-generated method stub
+		System.out.println("Retiring Checkpoint.");
 	}
 
 }
