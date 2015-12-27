@@ -22,6 +22,8 @@ import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.logging.TraceLevel;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
 
+/* This class provides an implementation of the Kafka 0.9 KafkaConsumer client. It is parametrized with 
+ * the expectation of being extended by a <String,String> consumer and a <Byte[],Byte[]> consumer.*/
 public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 	protected KafkaConsumer<K,V> consumer;
 	private List<Integer> partitions;
@@ -84,14 +86,6 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 		triggerCount = trigCount;
 	}
 	
-//	protected synchronized long getOffsetPosition() throws InterruptedException{
-//		Set<TopicPartition> partitionSet = consumer.assignment();
-//		TopicPartition partition = partitionSet.iterator().next();
-//		System.out.println("Retrieving offset: " + consumer.position(partition) + " for topic: " + partition.topic());
-//		long position = consumer.position(partition);
-//		return position;
-//	}
-	
 	@Override
 	protected synchronized Map<Integer, Long> getOffsetPositions() throws InterruptedException{
 		Set<TopicPartition> partitionSet = consumer.assignment();
@@ -106,13 +100,6 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 		
 		return offsetMap;
 	}
-	
-//	protected synchronized void seekToPosition(long position){
-//		Set<TopicPartition> partitionSet = consumer.assignment();
-//		TopicPartition partition = partitionSet.iterator().next();
-//		System.out.println("Seeking to offset: " + position + " for topic: " + partition.topic() + " from postion: " + consumer.position(partition));
-//		consumer.seek(partition, position);
-//	}
 	
 	@Override
 	protected synchronized void seekToPositions(Map<Integer, Long> offsetMap){

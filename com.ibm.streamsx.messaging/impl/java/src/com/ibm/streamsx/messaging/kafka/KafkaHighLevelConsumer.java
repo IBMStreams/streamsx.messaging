@@ -7,8 +7,6 @@ import java.util.Properties;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
 
-import org.apache.kafka.common.TopicPartition;
-
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.KafkaStream;
 import kafka.javaapi.consumer.ConsumerConnector;

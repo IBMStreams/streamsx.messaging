@@ -42,16 +42,18 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	private int triggerCount = -1;
 	
 	//consistent region checks
-//	@ContextCheck(compile = true)
-//	public static void checkInConsistentRegion(OperatorContextChecker checker) {
-//		ConsistentRegionContext consistentRegionContext = 
-//				checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
-//
-//		if(consistentRegionContext != null ) {
-//			checker.setInvalidContext( OPER_NAME + " operator cannot be used inside a consistent region.", 
-//					new String[] {});
-//		}
-//	}
+	@ContextCheck(compile = true)
+	public static void checkInConsistentRegion(OperatorContextChecker checker) {
+		ConsistentRegionContext consistentRegionContext = 
+				checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
+		OperatorContext operContext = checker.getOperatorContext();
+
+		if(consistentRegionContext != null ) {
+			if (!operContext.getParameterNames().contains("partition")){
+				checker.setInvalidContext("The partition parameter must be specified in consistent regions.", new String[] {});
+			}
+		}
+	}
 	
 	//simple consumer client checks
 	@ContextCheck(runtime = false, compile = true)
@@ -156,10 +158,14 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 
 	public static final String DESC = 
 			"This operator acts as a Kafka consumer receiving messages for one or more topics. " +
-			"Note that there may be multiple threads receiving messages depending on the configuration specified. " +
-			"Ordering of messages is not guaranteed." + 
+			"For parallel consumption, we strongly recommend specifying partitions on each Consumer operator, " +
+			"as we have found the automatic partition assignment strategies from Kafka to be unreliable." + 
+			"Ordering of messages is only guaranteed per Kafka topic partition." + 
 			"\\n\\n**Behavior in a Consistent Region**" + 
-			"\\nThis operator cannot be used inside a consistent region."
+			"\\nThis operator can be used inside a consistent region. Operator driven and periodical checkpointing " +
+			"are supported. Partitions to be read from must be specified. " +
+			"Resetting to initial state is not supported because the intial offset cannot be saved and may not be present in the Kafka log. " + 
+			"In the case of a reset to initial state after operator crash, messages will start being read from the time of reset."
 			;
 	
 	@Override
@@ -197,14 +203,12 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 
 	@Override
 	public void resetToInitialState() throws Exception {
-		// TODO Auto-generated method stub
 		System.out.println("Resetting to initial state. Consumer will begin consuming from the latest offset.");
 		
 	}
 
 	@Override
 	public void retireCheckpoint(long id) throws Exception {
-		// TODO Auto-generated method stub
 		System.out.println("Retiring Checkpoint.");
 	}
 
