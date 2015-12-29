@@ -5,8 +5,6 @@
  *******************************************************************************/
 package com.ibm.streamsx.messaging.rabbitmq;
 
-//import org.apache.log4j.Logger;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +23,7 @@ import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
 
+import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.AMQP;
@@ -56,7 +55,7 @@ import java.util.logging.Logger;
  * </p>
  */
 @OutputPorts(@OutputPortSet(cardinality = 1, optional = false, description = "Messages received from Kafka are sent on this output port."))
-@PrimitiveOperator(name = "RabbitMQSource", description = "something")
+@PrimitiveOperator(name = "RabbitMQSource", description = RabbitMQSource.DESC)
 public class RabbitMQSource extends RabbitBaseOper {
 
 	private List<String> routingKeys = new ArrayList<String>();
@@ -68,7 +67,7 @@ public class RabbitMQSource extends RabbitBaseOper {
 	 */
 	private Thread processThread;
 	private String queueName = "";
-	private Boolean queueIsDurable = false;
+	
 	/**
 	 * Initialize this operator. Called once before any tuples are processed.
 	 * 
@@ -80,6 +79,7 @@ public class RabbitMQSource extends RabbitBaseOper {
 	@Override
 	public synchronized void initialize(OperatorContext context)
 			throws Exception {
+		
 		super.initialize(context);
 		super.initSchema(getOutput(0).getStreamSchema());
 		trace.log(TraceLevel.INFO, this.getClass().getName() + "Operator " + context.getName()
@@ -110,22 +110,53 @@ public class RabbitMQSource extends RabbitBaseOper {
 	}
 
 	private void initRabbitChannel() throws IOException {
-		if (queueName == "") {
-			queueName = channel.queueDeclare().getQueue();
-		} else {
-			channel.queueDeclare(queueName, queueIsDurable, false, false, null);
-		}
 		
-		if (routingKeys.isEmpty())
-			routingKeys.add("");//receive all messages by default
+		boolean createdQueue = initializeQueue(connection);
+		
+		//Only want to bind to routing keys or exchanges if we created the queue
+		//We don't want to modify routing keys of existing queues. 
+		if (createdQueue){
+			if (routingKeys.isEmpty())
+				routingKeys.add("");//add a blank routing key
 
-		//You can't bind to a default exchange
-		if (!usingDefaultExchange){
-			for (String routingKey : routingKeys){
-				channel.queueBind(queueName, exchangeName, routingKey);
-				trace.log(TraceLevel.INFO, "Queue: " + queueName + " Exchange: " + exchangeName);
+			//You can't bind to a default exchange
+			if (!usingDefaultExchange){
+				for (String routingKey : routingKeys){
+					channel.queueBind(queueName, exchangeName, routingKey);
+					trace.log(TraceLevel.INFO, "Queue: " + queueName + " Exchange: " + exchangeName + " RoutingKey " + routingKey);
+				}
+			}
+		} else {
+			if (!routingKeys.isEmpty()) {
+				trace.log(
+						TraceLevel.WARNING,
+						"Queue already exists, therefore specified routing key arguments have been ignored. "
+								+ "To use specified routing key/keys, you must either configure the existing queue "
+								+ "to bind to those keys, or restart this operator using a queue that does not already exist.");
 			}
 		}
+	}
+
+	//this function returns true if we create a queue, false if we use a queue that already exists
+	private boolean initializeQueue(Connection connection) throws IOException {
+		boolean createdQueue = true;
+		
+		if (queueName.isEmpty()) {
+			queueName = channel.queueDeclare().getQueue();
+		} else {
+			try {
+				channel.queueDeclarePassive(queueName);
+				trace.log(TraceLevel.INFO, "Queue was found, therefore no queue will be declared and user queue configurations will be ignored.");
+				createdQueue = false;
+			} catch (IOException e) {
+				channel = connection.createChannel();
+				channel.queueDeclare(queueName, false, false, true, null);
+				trace.log(TraceLevel.INFO, "Queue was not found, therefore non-durable, auto-delete queue will be declared.");
+				//e.printStackTrace();
+			}
+		}
+		return createdQueue;
+		
 	}
 
 	/**
@@ -153,41 +184,40 @@ public class RabbitMQSource extends RabbitBaseOper {
 			public void handleDelivery(String consumerTag, Envelope envelope,
 					AMQP.BasicProperties properties, byte[] body)
 					throws IOException {
-				String message = new String(body, "UTF-8");
 				StreamingOutput<OutputTuple> out = getOutput(0);
-						
 				OutputTuple tuple = out.newTuple();
-				trace.log(TraceLevel.INFO, "Schema: " + tuple.getStreamSchema().getAttributeNames().toString());
 
-				tuple.setString(messageAH.getName(), message);
+				messageAH.setValue(tuple, body);
 				
 				if (routingKeyAH.isAvailable()) {
 					tuple.setString(routingKeyAH.getName(),
 							envelope.getRoutingKey());
-					trace.log(TraceLevel.INFO, routingKeyAH.getName() + ":"
-							+ envelope.getRoutingKey());
+					if (trace.isLoggable(TraceLevel.DEBUG))
+						trace.log(TraceLevel.DEBUG, routingKeyAH.getName() + ":"
+								+ envelope.getRoutingKey());
 				} 				
 				
 				if (messageHeaderAH.isAvailable()){
+					System.out.println("Trying to print headers...");
 					Map<String, Object> msgHeader = properties.getHeaders();
 					if (msgHeader != null && !msgHeader.isEmpty()){
 						Map<String, String> headers = new HashMap<String,String>();
 						Iterator<Entry<String,Object>> it = msgHeader.entrySet().iterator();
 						while (it.hasNext()){
 							Map.Entry<String, Object> pair = it.next();
-							trace.log(TraceLevel.INFO, "Header: " + pair.getKey() + ":" + pair.getValue().toString());
+							if (trace.isLoggable(TraceLevel.DEBUG))
+								trace.log(TraceLevel.DEBUG, "Header: " + pair.getKey() + ":" + pair.getValue().toString());
 							headers.put(pair.getKey(), pair.getValue().toString());
 						}
 						tuple.setMap(messageHeaderAH.getName(), headers);
 					}
 				}
 
-				trace.log(TraceLevel.INFO, "message: " + message);
 				// Submit tuple to output stream
 				try {
 					out.submit(tuple);
 				} catch (Exception e) {
-					trace.log(TraceLevel.INFO, "Catching submit exception");
+					trace.log(TraceLevel.ERROR, "Catching submit exception");
 					e.printStackTrace();
 				}
 			}
@@ -206,9 +236,9 @@ public class RabbitMQSource extends RabbitBaseOper {
 		queueName = value;
 	}
 	
-	@Parameter(optional = true, description = "Defines whether a queue is durable or not. False by default.")
-	public void setQueueIsDurable(Boolean value) {
-		queueIsDurable = value;
+	@Parameter(optional = true, description = "Name of the RabbitMQ exchange. If consuming from an already existing queue, this parameter is ignored. To use default RabbitMQ exchange, do not specify this parameter or use empty quotes: \\\"\\\".")
+	public void setExchangeName(String value) {
+		exchangeName = value;
 	}
 
 	/**
@@ -231,4 +261,19 @@ public class RabbitMQSource extends RabbitBaseOper {
 		// Must call super.shutdown()
 		super.shutdown();
 	}
+	
+	public static final String DESC = 
+			"This operator acts as a RabbitMQ consumer, pulling messages from a RabbitMQ broker. " + 
+			"The broker is assumed to be already configured and running. " +
+			"The outgoing stream can have three attributes: message, routing_key, and messageHeader. " +
+			"The message is a required attribute. " +
+			"The exchange name, queue name, and routing key can be specified using parameters. " +
+			"If a specified exchange does not exist, it will be created as a non-durable exchange. " + 
+			"If a queue name is specified for a queue that already exists, all binding parameters (exchangeName and routing_key) " + 
+			"will be ignored. Only queues created by this operator will result in exchange/routing key bindings. " + 
+			"All exchanges and queues created by this operator are non-durable and auto-delete." + 
+			"This operator supports direct, fanout, and topic exchanges. It does not support header exchanges. " + 
+			"\\n\\n**Behavior in a Consistent Region**" + 
+			"\\nThis operator cannot participate in a consistent region."
+			;
 }

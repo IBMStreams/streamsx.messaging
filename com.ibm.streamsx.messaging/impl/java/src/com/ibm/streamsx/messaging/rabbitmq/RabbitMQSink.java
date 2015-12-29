@@ -47,7 +47,7 @@ import com.rabbitmq.client.AMQP.BasicProperties;
  * </p>
  */
 @InputPorts(@InputPortSet(cardinality = 1, optional = false, description = ""))
-@PrimitiveOperator(name = "RabbitMQSink", description = "something")
+@PrimitiveOperator(name = "RabbitMQSink", description = RabbitMQSink.DESC)
 public class RabbitMQSink extends RabbitBaseOper {
 
 	private final Logger trace = Logger.getLogger(RabbitMQSink.class
@@ -110,7 +110,9 @@ public class RabbitMQSink extends RabbitBaseOper {
 	public void process(StreamingInput<Tuple> stream, Tuple tuple) throws Exception
 			{
 
-		String message = tuple.getString(messageAH.getName());
+		byte[] message = messageAH.getBytes(tuple);
+				
+		tuple.getString(messageAH.getName());
 		String routingKey = "";
 		Map<String, Object> headers = new HashMap<String,Object>();
 		
@@ -127,10 +129,11 @@ public class RabbitMQSink extends RabbitBaseOper {
 		propsBuilder.deliveryMode(deliveryMode);
 		
 		try {
-			trace.log(TraceLevel.TRACE, "Producing message: " + message + " in thread: "
-					+ Thread.currentThread().getName());
+			if (trace.isLoggable(TraceLevel.DEBUG))
+				trace.log(TraceLevel.DEBUG, "Producing message: " + message.toString() + " in thread: "
+						+ Thread.currentThread().getName());
 			channel.basicPublish(exchangeName, routingKey, propsBuilder.build(),
-					message.getBytes());
+					message);
 		} catch (Exception e) {
 			trace.log(TraceLevel.ERROR, "Exception message:" + e.getMessage() + "\r\n");
 			Boolean failedToSend = true;
@@ -141,7 +144,7 @@ public class RabbitMQSink extends RabbitBaseOper {
 					Thread.sleep(messageSendRetryDelay);
 					trace.log(TraceLevel.ERROR, "Attempting to resend. Try number: " + attemptCount);
 					channel.basicPublish(exchangeName, routingKey, propsBuilder.build(),
-							message.getBytes());
+							message);
 					failedToSend = false;
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
@@ -161,6 +164,11 @@ public class RabbitMQSink extends RabbitBaseOper {
 		} 
 	}
 
+	@Parameter(optional = true, description = "Name of the RabbitMQ exchange. To use default RabbitMQ exchange, use empty quotes or do not specify: \\\"\\\".")
+	public void setExchangeName(String value) {
+		exchangeName = value;
+	}
+	
 	@Parameter(optional = true, description = "Marks message as persistent(2) or non-persistent(1). Default as 1. ")
 	public void setDeliveryMode(Integer value) {
 		deliveryMode = value; 
@@ -188,5 +196,16 @@ public class RabbitMQSink extends RabbitBaseOper {
 		super.shutdown();
 	}
 	
-
+	public static final String DESC = 
+			"This operator acts as a RabbitMQ producer, sending messages to a RabbitMQ broker. " + 
+			"The broker is assumed to be already configured and running. " +
+			"The incoming stream can have three attributes: message, routing_key, and messageHeader. " +
+			"The message is a required attribute. " +
+			"The exchange name, queue name, and routing key can be specified using parameters. " +
+			"If a specified exchange does not exist, it will be created as a non-durable exchange. " + 
+			"All exchanges created by this operator are non-durable and auto-delete." + 
+			"This operator supports direct, fanout, and topic exchanges. It does not support header exchanges. " + 
+			"\\n\\n**Behavior in a Consistent Region**" + 
+			"\\nThis operator can participate in a consistent region."
+			;
 }
