@@ -32,7 +32,7 @@ public class RabbitBaseOper extends AbstractOperator {
 
 	protected Channel channel;
 	protected Connection connection;
-	protected String hostName = "localhost", username = "",
+	protected String username = "",
 			password = "", exchangeName = "", exchangeType = "direct";
 			
 	protected List<String> hostAndPortList = new ArrayList<String>();
@@ -60,10 +60,9 @@ public class RabbitBaseOper extends AbstractOperator {
 			connectionFactory.setVirtualHost(vHost);
 		
 		addressArr = buildAddressArray(hostAndPortList);
-		trace.log(TraceLevel.INFO, "Addr Array: " + addressArr[0].getHost() + ":" + addressArr[0].getPort());
 		
 		connection = connectionFactory.newConnection(addressArr);
-		channel = initializeExchange(connection);
+		channel = initializeExchange();
 		
 		trace.log(TraceLevel.INFO,
 				"Initializing channel connection to exchange: " + exchangeName
@@ -83,8 +82,8 @@ public class RabbitBaseOper extends AbstractOperator {
 		}
 	}
 
-	private Channel initializeExchange(Connection connection2) throws IOException {
-		Channel channel = connection2.createChannel();
+	private Channel initializeExchange() throws IOException {
+		Channel channel = connection.createChannel();
 		try{
 			//check to see if the exchange exists if not then it is the default exchange
 			if ( !exchangeName.isEmpty()){
@@ -96,8 +95,8 @@ public class RabbitBaseOper extends AbstractOperator {
 			}
 		} catch (IOException e){
 			//if exchange doesn't exits, we will create it
-			//we must also create a new channel since last one errored
-			channel = connection2.createChannel();
+			//we must also create a new channel since last one erred
+			channel = connection.createChannel();
 			//declare non-durable, auto-delete exchange
 			channel.exchangeDeclare(exchangeName, exchangeType, false, true, null);
 			trace.log(TraceLevel.INFO, "Exchange was not found, therefore non-durable exchange will be declared.");
