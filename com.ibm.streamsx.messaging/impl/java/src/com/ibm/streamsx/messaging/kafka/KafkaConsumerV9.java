@@ -1,8 +1,13 @@
 package com.ibm.streamsx.messaging.kafka;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -15,14 +20,19 @@ import org.apache.kafka.common.errors.WakeupException;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.logging.TraceLevel;
+import com.ibm.streams.operator.state.ConsistentRegionContext;
 
+/* This class provides an implementation of the Kafka 0.9 KafkaConsumer client. It is parametrized with 
+ * the expectation of being extended by a <String,String> consumer and a <Byte[],Byte[]> consumer.*/
 public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 	protected KafkaConsumer<K,V> consumer;
 	private List<Integer> partitions;
 	
 	private final AtomicBoolean shutdown = new AtomicBoolean(false);
 	private long consumerPollTimeout;
-	
+	private ConsistentRegionContext crContext; 
+	private int triggerCount;
+	private long triggerIteration = 0;
 	
 	public KafkaConsumerV9(AttributeHelper topicAH, AttributeHelper keyAH, AttributeHelper messageAH, List<Integer> partitions, int consumerPollTimeout, Properties props) {
 		super(topicAH,keyAH,messageAH,props);
@@ -71,9 +81,50 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 		processThread.start();
 	}
 	
+	protected void setConsistentRegionContext(ConsistentRegionContext operatorCrContext, int trigCount){
+		crContext = operatorCrContext;
+		triggerCount = trigCount;
+	}
+	
+	@Override
+	protected synchronized Map<Integer, Long> getOffsetPositions() throws InterruptedException{
+		Set<TopicPartition> partitionSet = consumer.assignment();
+		Iterator<TopicPartition> partitionIterator = partitionSet.iterator();
+		Map<Integer, Long> offsetMap = new HashMap<Integer, Long>();
+		while(partitionIterator.hasNext()){
+			TopicPartition partition = partitionIterator.next();		
+			Long offset = consumer.position(partition);
+			offsetMap.put(partition.partition(), offset);
+			System.out.println("Retrieving offset: " + offset + " for topic: " + partition.topic());
+		}
+		
+		return offsetMap;
+	}
+	
+	@Override
+	protected synchronized void seekToPositions(Map<Integer, Long> offsetMap){
+		Set<TopicPartition> partitionSet = consumer.assignment();
+		String topic = partitionSet.iterator().next().topic();
+		
+		Iterator<Entry<Integer, Long>> partitionOffsetIterator = offsetMap.entrySet().iterator();
+		while (partitionOffsetIterator.hasNext()){
+			Entry<Integer, Long> entry = partitionOffsetIterator.next();
+			TopicPartition partition = new TopicPartition(topic, entry.getKey());
+			Long offset = entry.getValue();
+			System.out.println("Seeking to offset: " + offset + " for topic: " + partition.topic() + " from postion: " + consumer.position(partition));
+			consumer.seek(partition, offset);
+		}
+	}
+	
+	
 	public void produceTuples(){
 		while (!shutdown.get()) {
 			try {
+				if (crContext != null){
+					if(trace.isLoggable(TraceLevel.DEBUG))
+						trace.log(TraceLevel.TRACE, "Acquiring consistent region permit.");
+					crContext.acquirePermit();
+				}
 				ConsumerRecords<K,V> records = consumer.poll(consumerPollTimeout);
 				process(records);
 			} catch (WakeupException e) {
@@ -85,6 +136,12 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 	        } catch (Exception e) {
 				trace.log(TraceLevel.ERROR, "Error processing messages: " + e.getMessage());
 				e.printStackTrace();
+			} finally {
+				if (crContext != null){
+					crContext.releasePermit();
+					if(trace.isLoggable(TraceLevel.DEBUG))
+						trace.log(TraceLevel.TRACE, "Released consistent region permit.");
+				}
 			}
 		}
 	}
@@ -105,6 +162,16 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 				
 			setMessageValue(messageAH, otup, record.value());
 			streamingOutput.submit(otup);
+		}
+		
+		if (crContext != null
+				&& crContext.isTriggerOperator()) {
+			triggerIteration += records.count();
+			if (triggerIteration >= triggerCount) {
+				trace.log(TraceLevel.INFO, "Making consistent..." );
+				crContext.makeConsistent();
+				triggerIteration = 0;
+			}
 		}
 	}
 	

@@ -15,6 +15,7 @@ import kafka.message.MessageAndMetadata;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.logging.TraceLevel;
+import com.ibm.streams.operator.state.ConsistentRegionContext;
 
 public class KafkaHighLevelConsumer extends KafkaConsumerClient{
 	private  ConsumerConnector consumer;
@@ -109,5 +110,25 @@ public class KafkaHighLevelConsumer extends KafkaConsumerClient{
 			}
 			logger.log(TraceLevel.INFO,baseMsg + "Thread Stopping");
 		}
+	}
+
+	@Override
+	protected void setConsistentRegionContext(ConsistentRegionContext crContext, int trigCount) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected Map<Integer, Long> getOffsetPositions()
+			throws InterruptedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	protected void seekToPositions(Map<Integer, Long> offsetMap) {
+		// TODO Auto-generated method stub
+		
 	}	
 }

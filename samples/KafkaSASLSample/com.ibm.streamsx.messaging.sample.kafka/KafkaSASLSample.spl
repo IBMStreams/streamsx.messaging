@@ -33,7 +33,7 @@ composite KafkaSASLSample {
 			param
 				initDelay : 5.0;
 				period : 0.2;
-			output OutputStream: topic = $topic, message = "Reality is merely an illusion, albeit a very persistent one." , key = "Einstein";
+			output OutputStream: topic = $topic, message = "Whenever anyone says 'theorectically,' they really mean, 'not really.'" , key = "Dave Parnas";
 		}
 
 
