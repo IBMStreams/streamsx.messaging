@@ -148,9 +148,9 @@ public class RabbitMQSink extends RabbitBaseOper {
 			"The message is a required attribute. " +
 			"The exchange name, queue name, and routing key can be specified using parameters. " +
 			"If a specified exchange does not exist, it will be created as a non-durable exchange. " + 
-			"All exchanges created by this operator are non-durable and auto-delete." + 
+			"All exchanges created by this operator are non-durable and auto-delete."  +  
 			"This operator supports direct, fanout, and topic exchanges. It does not support header exchanges. " +
-			"\nMessages are non-persistent and sending will only be attempted once by default. " + 
+			"Messages are non-persistent and sending will only be attempted once by default. " + 
 			"This behavior can be modified using the deliveryMode and maxMessageSendRetries parameters. " + 
 			"\\n\\n**Behavior in a Consistent Region**" + 
 			"\\nThis operator can participate in a consistent region."
