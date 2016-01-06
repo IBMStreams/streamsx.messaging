@@ -23,31 +23,9 @@ import com.rabbitmq.client.AMQP.BasicProperties;
 
 /**
  * This operator was originally contributed by Mohamed-Ali Said @saidmohamedali
- * Class for an operator that consumes tuples and does not produce an output
- * stream. This pattern supports a number of input streams and no output
- * streams.
- * <P>
- * The following event methods from the Operator interface can be called:
- * </p>
- * <ul>
- * <li><code>initialize()</code> to perform operator initialization</li>
- * <li>allPortsReady() notification indicates the operator's ports are ready to
- * process and submit tuples</li>
- * <li>process() handles a tuple arriving on an input port
- * <li>processPuncuation() handles a punctuation mark arriving on an input port
- * <li>shutdown() to shutdown the operator. A shutdown request may occur at any
- * time, such as a request to stop a PE or cancel a job. Thus the shutdown() may
- * occur while the operator is processing tuples, punctuation marks, or even
- * during port ready notification.</li>
- * </ul>
- * <p>
- * With the exception of operator initialization, all the other events may occur
- * concurrently with each other, which lead to these methods being called
- * concurrently by different threads.
- * </p>
  */
 @InputPorts(@InputPortSet(cardinality = 1, optional = false, description = ""))
-@PrimitiveOperator(name = "RabbitMQSink", description = "something")
+@PrimitiveOperator(name = "RabbitMQSink", description = RabbitMQSink.DESC)
 public class RabbitMQSink extends RabbitBaseOper {
 
 	private final Logger trace = Logger.getLogger(RabbitMQSink.class
@@ -55,14 +33,7 @@ public class RabbitMQSink extends RabbitBaseOper {
 	Integer deliveryMode = 1;
 	int maxMessageSendRetries = 0;
 	int messageSendRetryDelay = 10000;
-	/**
-	 * Initialize this operator. Called once before any tuples are processed.
-	 * 
-	 * @param context
-	 *            OperatorContext for this operator.
-	 * @throws Exception
-	 *             Operator failure, will cause the enclosing PE to terminate.
-	 */
+	
 	@Override
 	public synchronized void initialize(OperatorContext context)
 			throws Exception {
@@ -76,13 +47,6 @@ public class RabbitMQSink extends RabbitBaseOper {
 
 	}
 
-	/**
-	 * Notification that initialization is complete and all input and output
-	 * ports are connected and ready to receive and submit tuples.
-	 * 
-	 * @throws Exception
-	 *             Operator failure, will cause the enclosing PE to terminate.
-	 */
 	@Override
 	public synchronized void allPortsReady() throws Exception {
 		// This method is commonly used by source operators.
@@ -95,22 +59,12 @@ public class RabbitMQSink extends RabbitBaseOper {
 
 	}
 
-	/**
-	 * Process an incoming tuple that arrived on the specified port.
-	 * 
-	 * @param stream
-	 *            Port the tuple is arriving on.
-	 * @param tuple
-	 *            Object representing the incoming tuple.
-	 * @throws Exception
-	 *             Operator failure, will cause the enclosing PE to terminate.
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public void process(StreamingInput<Tuple> stream, Tuple tuple) throws Exception
 			{
 
-		String message = tuple.getString(messageAH.getName());
+		byte[] message = messageAH.getBytes(tuple);
 		String routingKey = "";
 		Map<String, Object> headers = new HashMap<String,Object>();
 		
@@ -124,36 +78,37 @@ public class RabbitMQSink extends RabbitBaseOper {
 			headers = (Map<String, Object>) tuple.getMap(messageHeaderAH.getName());
 			propsBuilder.headers(headers);
 		}
-		propsBuilder.deliveryMode(deliveryMode);
 		
+		propsBuilder.deliveryMode(deliveryMode);
+
 		try {
-			trace.log(TraceLevel.TRACE, "Producing message: " + message + " in thread: "
-					+ Thread.currentThread().getName());
-			channel.basicPublish(exchangeName, routingKey, propsBuilder.build(),
-					message.getBytes());
+			if (trace.isLoggable(TraceLevel.DEBUG))
+				trace.log(TraceLevel.DEBUG,
+						"Producing message: " + message.toString()
+								+ " in thread: "
+								+ Thread.currentThread().getName());
+			channel.basicPublish(exchangeName, routingKey,
+					propsBuilder.build(), message);
 		} catch (Exception e) {
-			trace.log(TraceLevel.ERROR, "Exception message:" + e.getMessage() + "\r\n");
+			trace.log(TraceLevel.ERROR, "Exception message:" + e.getMessage()
+					+ "\r\n");
 			Boolean failedToSend = true;
 			int attemptCount = 0;
-			while (failedToSend
-					&& attemptCount < maxMessageSendRetries){
+			while (failedToSend && attemptCount < maxMessageSendRetries) {
 				try {
 					Thread.sleep(messageSendRetryDelay);
-					trace.log(TraceLevel.ERROR, "Attempting to resend. Try number: " + attemptCount);
-					channel.basicPublish(exchangeName, routingKey, propsBuilder.build(),
-							message.getBytes());
+					trace.log(TraceLevel.ERROR,
+							"Attempting to resend. Try number: " + attemptCount);
+					channel.basicPublish(exchangeName, routingKey,
+							propsBuilder.build(), message);
 					failedToSend = false;
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
 				} catch (Exception e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				attemptCount++;
 			}
 			
-			//if we still can't send after the number of maxMessageSendRetries, we want to fail
+			//if we still can't send after the number of maxMessageSendRetries, we want to log error and move on
 			if (failedToSend){
 				trace.log(TraceLevel.ERROR, "Failed to send message after " + attemptCount + " attempts.");
 			}
@@ -161,6 +116,11 @@ public class RabbitMQSink extends RabbitBaseOper {
 		} 
 	}
 
+	@Parameter(optional = true, description = "Name of the RabbitMQ exchange to send messages to. To use default RabbitMQ exchange, use empty quotes or do not specify: \\\"\\\".")
+	public void setExchangeName(String value) {
+		exchangeName = value;
+	}
+	
 	@Parameter(optional = true, description = "Marks message as persistent(2) or non-persistent(1). Default as 1. ")
 	public void setDeliveryMode(Integer value) {
 		deliveryMode = value; 
@@ -176,17 +136,23 @@ public class RabbitMQSink extends RabbitBaseOper {
 		messageSendRetryDelay = value; 
 	}
 
-	
-	/**
-	 * Shutdown this operator.
-	 * 
-	 * @throws TimeoutException
-	 * @throws IOException
-	 */
 	@Override
 	public synchronized void shutdown() throws IOException, TimeoutException {
 		super.shutdown();
 	}
 	
-
+	public static final String DESC = 
+			"This operator acts as a RabbitMQ producer, sending messages to a RabbitMQ broker. " + 
+			"The broker is assumed to be already configured and running. " +
+			"The incoming stream can have three attributes: message, routing_key, and messageHeader. " +
+			"The message is a required attribute. " +
+			"The exchange name, queue name, and routing key can be specified using parameters. " +
+			"If a specified exchange does not exist, it will be created as a non-durable exchange. " + 
+			"All exchanges created by this operator are non-durable and auto-delete."  +  
+			"This operator supports direct, fanout, and topic exchanges. It does not support header exchanges. " +
+			"Messages are non-persistent and sending will only be attempted once by default. " + 
+			"This behavior can be modified using the deliveryMode and maxMessageSendRetries parameters. " + 
+			"\\n\\n**Behavior in a Consistent Region**" + 
+			"\\nThis operator can participate in a consistent region."
+			;
 }

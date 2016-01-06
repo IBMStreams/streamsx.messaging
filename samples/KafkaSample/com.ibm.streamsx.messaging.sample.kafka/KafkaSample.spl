@@ -14,6 +14,8 @@ use com.ibm.streamsx.messaging.kafka::*;
  */
 
 composite KafkaSample {
+	param
+		expression<rstring> $topic : "mytopic";
     graph
 
 	  //create some messages and send to Kafka
@@ -21,7 +23,7 @@ composite KafkaSample {
 			param
 				iterations : 10 ;
 				period : 1.0 ;
-			output OutputStream: topic = "mytopic", message = "this is from kafka sink", key = "abc";
+			output OutputStream: topic = $topic, message = "this is from kafka sink", key = "abc";
 		}
 
 
@@ -34,7 +36,7 @@ composite KafkaSample {
 		{
 			param
 				propertiesFile : "etc/consumer.properties" ;
-				topic : "mytopic" ;
+				topic : $topic ;
 		}
 
 		() as SinkOp = Custom(KafkaStream)
