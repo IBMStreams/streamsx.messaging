@@ -95,7 +95,8 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 			TopicPartition partition = partitionIterator.next();		
 			Long offset = consumer.position(partition);
 			offsetMap.put(partition.partition(), offset);
-			System.out.println("Retrieving offset: " + offset + " for topic: " + partition.topic());
+			if(trace.isLoggable(TraceLevel.INFO))
+				trace.log(TraceLevel.INFO, "Retrieving offset: " + offset + " for topic: " + partition.topic());
 		}
 		
 		return offsetMap;
@@ -111,7 +112,7 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 			Entry<Integer, Long> entry = partitionOffsetIterator.next();
 			TopicPartition partition = new TopicPartition(topic, entry.getKey());
 			Long offset = entry.getValue();
-			System.out.println("Seeking to offset: " + offset + " for topic: " + partition.topic() + " from postion: " + consumer.position(partition));
+			trace.log(TraceLevel.INFO, "Seeking to offset: " + offset + " for topic: " + partition.topic() + " from postion: " + consumer.position(partition));
 			consumer.seek(partition, offset);
 		}
 	}

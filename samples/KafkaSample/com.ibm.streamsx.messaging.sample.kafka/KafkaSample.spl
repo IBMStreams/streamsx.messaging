@@ -28,16 +28,14 @@ composite KafkaSample {
 
 		() as KafkaSinkOp = KafkaProducer(OutputStream) {
 			param
-				propertiesFile : getThisToolkitDir() + "/etc/producer.properties";
+				propertiesFile : "etc/producer.properties";
 		}
 		
 		stream<rstring key, rstring message> KafkaStream = KafkaConsumer()
 		{
 			param
-				propertiesFile : getThisToolkitDir() + "/etc/consumer.properties" ;
+				propertiesFile : "etc/consumer.properties" ;
 				topic : $topic;
-//				vmArg :
-//                    "-agentlib:jdwp=transport=dt_socket,suspend=n,server=y,address=h0811:7777" ;
 		}
 
 		() as SinkOp = Custom(KafkaStream)
