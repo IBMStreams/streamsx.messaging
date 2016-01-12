@@ -169,47 +169,46 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 			;
 	
 	@Override
-	public void shutdown(){
+	public void shutdown() throws Exception{
 		if (streamsKafkaConsumer != null){
 			streamsKafkaConsumer.shutdown();
 		}
-	}
-
-	@Override
-	public void close() throws IOException {
-		System.out.println("Closing...");
-		
+		super.shutdown();
 	}
 
 	@Override
 	public void checkpoint(Checkpoint checkpoint) throws Exception {
 		Map<Integer, Long> offsetMap = streamsKafkaConsumer.getOffsetPositions();
-		System.out.println("Checkpointing offsetMap.");
+		trace.log(TraceLevel.INFO, "Checkpointing offsetMap.");
 		checkpoint.getOutputStream().writeObject(offsetMap);
 	}
 
 	@Override
 	public void drain() throws Exception {
-		System.out.println("Draining....");
+		trace.log(TraceLevel.INFO,"Draining....");
 	}
 
 	@Override
 	public void reset(Checkpoint checkpoint) throws Exception {
 		@SuppressWarnings("unchecked")
 		Map<Integer, Long> offsetMap = (Map<Integer, Long>) checkpoint.getInputStream().readObject();
-		System.out.println("Resetting...");
+		trace.log(TraceLevel.INFO, "Resetting...");
 		streamsKafkaConsumer.seekToPositions(offsetMap);		
 	}
 
 	@Override
 	public void resetToInitialState() throws Exception {
-		System.out.println("Resetting to initial state. Consumer will begin consuming from the latest offset.");
-		
+		trace.log(TraceLevel.INFO, "Resetting to initial state. Consumer will begin consuming from the latest offset.");
 	}
 
 	@Override
 	public void retireCheckpoint(long id) throws Exception {
-		System.out.println("Retiring Checkpoint.");
+		trace.log(TraceLevel.INFO, "Retiring Checkpoint.");
+	}
+
+	@Override
+	public void close() throws IOException {
+		
 	}
 
 }
