@@ -127,8 +127,8 @@
 		<tar compression="gzip" longfile="gnu"
              destfile="${releasefilename}"
     	     basedir="${basedir}"
-             includes="${tkinfo.info:identity.info:name}/** samples/**"
-             excludes="**/.gitignore **/.settings/** **/.settings **/.project **/.classpath"
+             includes="${tkinfo.info:identity.info:name}/** samples/** samples/**/.settings/**"
+             excludes="**/.gitignore **/.project **/.classpath ${tkinfo.info:identity.info:name}/.settings/**"
     	/>		
 		<checksum file="${releasefilename}" />
 		<checksum algorithm="sha1" file="${releasefilename}" />

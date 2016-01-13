@@ -21,7 +21,30 @@ and sends it to the output stream. A single message is converted into a single t
 
 # Behavior in a consistent region
 
-The `JMSSource` operator is not supported in a consistent region.
+The `JMSSource` operator can participate in a consistent region. The operator must be at the start of a consistent region.
+
+The operator supports periodic and operator-driven consistent region policies. If the consistent region policy is set as operatorDriven, the triggerCount parameter must be specified. The operator initiates a checkpoint after number of tuples specified by the triggerCount parameter have been processed. 
+If the consistent region policy is set as periodic, the operator respects the period setting and establishes consistent states accordingly. 
+
+When a message queue is consumed by multiple message consumers, i.e. multiple `JMSSource` instances are used to read messages from a same queue, then deterministic routing is required. This requirement can be achieved through the messageSelector parameter. For example, if an SPL application has two JMSSource operator instances and a JMS property named "group" is present on messages that can take value of either 'g1' or 'g2', then each JMSSource operator instance can be assigned in the following manner:
+
+MyPersonNamesStream1 = JMSSource()
+	{
+		param
+			connectionDocument :"/home/streamsuser/connections/JMSconnections.xml";
+			connection         : "amqConn"; 		
+			access             : "amqAccess";
+			messageSelector    : "group = 'g1'";
+	}
+	
+MyPersonNamesStream2 = JMSSource()
+    {
+		param
+	        connectionDocument :"/home/streamsuser/connections/JMSconnections.xml";
+			connection         : "amqConn"; 		
+			access             : "amqAccess";
+			messageSelector    : "group = 'g2'";
+	}
 
 # Exceptions
 
@@ -48,6 +71,7 @@ The following types of exceptions can occur:
      * If an attribute occurs more than once in the &lt;native_schema&gt; element.
      * The **connectionsDocument** parameter refers to an file that does not exist.
      * The **connectionsDocument** parameter is not specified and the `connections.xml` file is not present in the default location.
+     * The **messageIDOutAttrName** parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.
  * Run time errors that cause a message to be dropped and an error message to be logged.
    * The `JMSSource` operator throws an exception and discards the message in the following cases.
      The trace and log information for these exceptions is logged in the console logs
@@ -261,6 +285,33 @@ This mandatory parameter identifies the name of the connection specification tha
 This optional parameter specifies the path name of the file that contains the connection and access specifications,
 which are identified by the **connection** and **access** parameters.
 If this parameter is not specified, the operator uses the file that is in the default location `./etc/connections.xml`.</description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>triggerCount</name>
+        <description>
+This optional parameter specifies how many messages are submitted before the JMSSource operator starts to drain the pipeline and establish a consistent state. 
+This parameter must be greater than zero and must be set if the JMSSource operator is the start operator of an operatorDriven consistent region.</description>
+        <optional>true</optional>
+        <type>int32</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+	  <name>messageSelector</name>
+        <description>
+        This optional parameter is used as JMS Message Selector.
+        </description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+       <parameter>
+	  <name>messageIDOutAttrName</name>
+        <description>
+        Output attribute on output data stream to assign message ID to, the specified attribute in output stream must be of type rstring.
+        </description>
         <optional>true</optional>
         <type>rstring</type>
         <cardinality>1</cardinality>

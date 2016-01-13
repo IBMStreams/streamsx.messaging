@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
+import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
@@ -32,7 +33,7 @@ public class KafkaSink extends KafkaBaseOper {
 	static final String OPER_NAME =  "KafkaProducer";
 	
 	private static final Logger trace = Logger.getLogger(KafkaSink.class.getName());
-
+	private KafkaProducerClient producerClient;
 	
 	@Parameter(name="topic", cardinality=-1, optional=true, 
 			description="Topic to be published to. A topic can also be specified as an input stream attribute.")
@@ -62,51 +63,58 @@ public class KafkaSink extends KafkaBaseOper {
 					new String[] {});
 		}
 	}
+	
+	//check for message attribute
+	@ContextCheck(runtime = true, compile=false)
+	public static void checkIncomingMessageAttribute(OperatorContextChecker checker) throws Exception {
+		OperatorContext operContext = checker.getOperatorContext();
+		StreamSchema operSchema = operContext.getStreamingInputs().get(0).getStreamSchema();
+		checkForMessageAttribute(operContext, operSchema);		
+	}
 
 	@Override
-	public void initialize(OperatorContext context)
-			throws Exception {
+	public void initialize(OperatorContext context) throws Exception
+			{
 		super.initialize(context);
 		super.initSchema(getInput(0).getStreamSchema());
 		
 		if(topics.size() == 0 && !topicAH.isAvailable())
-			throw new Exception("Topic has not been specified. Specify either the \"topicAttribute\" or \"topic\" parameters.");
+			throw new IllegalArgumentException("Topic has not been specified. Specify either the \"topicAttribute\" or \"topic\" parameters.");
 		
 		if(keyAH.isAvailable() && ( keyAH.isString() != messageAH.isString())) {
-			throw new Exception("Key and Message attributes must have compatible types.");
+			throw new IllegalArgumentException("Key and Message attributes must have compatible types.");
 		}
 		
 		if(!topics.isEmpty())
 			trace.log(TraceLevel.INFO, "Topics: " + topics.toString());
 		//TODO: check for minimum properties
 		trace.log(TraceLevel.INFO, "Initializing producer");
-		client.initProducer();
+		KafkaProducerFactory producerFactory = new KafkaProducerFactory();
+		producerClient = producerFactory.getClient(topicAH, keyAH, messageAH, finalProperties);
 	}
 	
 	@Override
-	public void process(StreamingInput<Tuple> stream, Tuple tuple)
-			throws Exception {
-		try {
-		
+	public void process(StreamingInput<Tuple> stream, Tuple tuple){
+		try {	
 			if(trace.isLoggable(TraceLevel.DEBUG))
 				trace.log(TraceLevel.DEBUG, "Sending message: " + tuple);
 			
 			if(!topics.isEmpty()) 
-				client.send(tuple, topics);
+				producerClient.send(tuple, topics);
 			else 
-				client.send(tuple);
+				producerClient.send(tuple);
 		}catch(Exception e) {
-			//ideally we should not get here since the kafka client doesnt seem to be throwing any exceptions
 			trace.log(TraceLevel.ERROR, "Could not send message: " + tuple, e);
 		}
 	}	
 	
 	public static final String DESC = 
-			"This operator acts as a Kafka producer sending tuples as mesages to a Kafka broker. " + 
+			"This operator acts as a Kafka producer sending tuples as messages to a Kafka broker. " + 
 			"The broker is assumed to be already configured and running. " +
 			"The incoming stream can have three attributes: topic, key and message. " +
-			"The message is a required attribute. If the key attribute is not specified, the message is used as the key. " +
-			"A topic can be specified as either an input stream attribute or as a parameter." +
+			"The message is a required attribute. " +
+			"A topic can be specified as either an input stream attribute or as a parameter. " +
+			"Specify properties as described here: http://kafka.apache.org/documentation.html#newproducerconfigs. " + 
 			"\\n\\n**Behavior in a Consistent Region**" + 
 			"\\nThis operator can participate in a consistent region.  This operator cannot be placed at the start of a consistent region."
 			;

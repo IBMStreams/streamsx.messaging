@@ -12,9 +12,11 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
+import javax.jms.InvalidSelectorException;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
+import javax.jms.MessageFormatException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.naming.Context;
@@ -70,6 +72,50 @@ class JMSConnectionHelper {
 
 	// Time to wait before try to resend failed message
 	private final long messageRetryDelay;
+	
+	// Indicate message ack mode is client or not
+	private final boolean useClientAckMode;
+	
+	// JMS message selector
+	private String messageSelector;
+	
+	// Timestamp of session creation
+	private long sessionCreationTime;
+	
+	// Consistent region destination object
+	private Destination destCR = null;
+	
+	// message producer of the CR queue
+	private MessageProducer producerCR = null;
+	
+	// message consumer of the CR queue
+	private MessageConsumer consumerCR = null;
+
+	private synchronized MessageConsumer getConsumerCR() {
+		return consumerCR;
+	}
+
+	private synchronized void setConsumerCR(MessageConsumer consumerCR) {
+		this.consumerCR = consumerCR;
+	}
+
+	// getter for CR queue producer
+	private synchronized MessageProducer getProducerCR() {
+		return producerCR;
+	}
+
+	// setter for CR queue producer
+	private synchronized void setProducerCR(MessageProducer producer) {
+		this.producerCR = producer;
+	}
+
+	public long getSessionCreationTime() {
+		return sessionCreationTime;
+	}
+
+	private void setSessionCreationTime(long sessionCreationTime) {
+		this.sessionCreationTime = sessionCreationTime;
+	}
 
 	// procedure to detrmine if there exists a valid connection or not
 	private boolean isConnectValid() {
@@ -107,6 +153,7 @@ class JMSConnectionHelper {
 	// object
 	private synchronized void setSession(Session session) {
 		this.session = session;
+		this.setSessionCreationTime(System.currentTimeMillis());
 	}
 
 	// setter for connect
@@ -128,7 +175,7 @@ class JMSConnectionHelper {
 	JMSConnectionHelper(ReconnectionPolicies reconnectionPolicy,
 			int reconnectionBound, double period, boolean isProducer,
 			int maxMessageRetry, long messageRetryDelay,
-			String deliveryMode, Metric nReconnectionAttempts, Logger logger) {
+			String deliveryMode, Metric nReconnectionAttempts, Logger logger, boolean useClientAckMode, String messageSelector) {
 		this.reconnectionPolicy = reconnectionPolicy;
 		this.reconnectionBound = reconnectionBound;
 		this.period = period;
@@ -138,6 +185,8 @@ class JMSConnectionHelper {
 		this.nReconnectionAttempts = nReconnectionAttempts;
 		this.maxMessageRetries = maxMessageRetry;
 		this.messageRetryDelay = messageRetryDelay;
+		this.useClientAckMode = useClientAckMode;
+		this.messageSelector = messageSelector;
 	}
 
 	// This constructor sets the parameters required to create a connection for
@@ -145,9 +194,9 @@ class JMSConnectionHelper {
 	JMSConnectionHelper(ReconnectionPolicies reconnectionPolicy,
 			int reconnectionBound, double period, boolean isProducer,
 			int maxMessageRetry, long messageRetryDelay, String deliveryMode, 
-			Metric nReconnectionAttempts, Metric nFailedInserts, Logger logger) {
+			Metric nReconnectionAttempts, Metric nFailedInserts, Logger logger, boolean useClientAckMode, String msgSelectorCR) {
 		this(reconnectionPolicy, reconnectionBound, period, isProducer,
-			 maxMessageRetry, messageRetryDelay, deliveryMode, nReconnectionAttempts, logger);
+			 maxMessageRetry, messageRetryDelay, deliveryMode, nReconnectionAttempts, logger, useClientAckMode, msgSelectorCR);
 		this.nFailedInserts = nFailedInserts;
 
 	}
@@ -158,13 +207,19 @@ class JMSConnectionHelper {
 		createConnection();
 		return;
 	}
+	
+	
+	// Method to create initial connection without retry
+	public void createInitialConnectionNoRetry() throws ConnectionException {
+		createConnectionNoRetry();
+	}
 
 	// this subroutine creates the initial jndi context by taking the mandatory
 	// and optional parameters
 
 	public void createAdministeredObjects(String initialContextFactory,
 			String providerURL, String userPrincipal, String userCredential,
-			String connectionFactory, String destination)
+			String connectionFactory, String destination, String destinationCR)
 			throws NamingException {
 
 		this.userPrincipal = userPrincipal;
@@ -195,6 +250,11 @@ class JMSConnectionHelper {
 
 		connFactory = (ConnectionFactory) jndiContext.lookup(connectionFactory);
 		dest = (Destination) jndiContext.lookup(destination);
+		
+		// Look up CR queue only for producer and when producer is in a CR
+		if(this.isProducer && this.useClientAckMode) {
+			destCR = (Destination) jndiContext.lookup(destinationCR);
+		}
 
 		return;
 	}
@@ -223,6 +283,9 @@ class JMSConnectionHelper {
 						break;
 					}
 
+				} catch (InvalidSelectorException e) {
+					throw new ConnectionException(
+							"Connection to JMS failed. Invalid message selector");
 				} catch (JMSException e) {
 					logger.log(LogLevel.ERROR, "RECONNECTION_EXCEPTION",
 							new Object[] { e.toString() });
@@ -258,6 +321,19 @@ class JMSConnectionHelper {
 
 		}
 	}
+	
+	private synchronized void createConnectionNoRetry() throws ConnectionException {
+		
+		if (!isConnectValid()) {
+			try {
+				connect(isProducer);
+			} catch (JMSException e) {
+				logger.log(LogLevel.ERROR, "Connection to JMS failed", new Object[] { e.toString() });
+				throw new ConnectionException(
+						"Connection to JMS failed. Did not try to reconnect as the policy is reconnection policy does not apply here.");
+			}
+		}
+	}
 
 	// this subroutine creates the connection, producer and consumer, throws a
 	// JMSException if it fails
@@ -272,12 +348,31 @@ class JMSConnectionHelper {
 		
 		// Create session from connection; false means
 		// session is not transacted.
-		setSession(getConnect().createSession(false, Session.AUTO_ACKNOWLEDGE));
+		
+		if(isProducer) {
+			setSession(getConnect().createSession(this.useClientAckMode, Session.AUTO_ACKNOWLEDGE));
+		}
+		else {
+			setSession(getConnect().createSession(false, (this.useClientAckMode) ? Session.CLIENT_ACKNOWLEDGE : Session.AUTO_ACKNOWLEDGE));
+		}
+		
 
 		if (isProducer == true) {
 			// Its JMSSink, So we will create a producer
 			setProducer(getSession().createProducer(dest));
-
+			
+			if(useClientAckMode) {
+				// Create producer/consumer of the CR queue
+				setConsumerCR(getSession().createConsumer(destCR, messageSelector));
+			    setProducerCR(getSession().createProducer(destCR));
+			   
+			    // Set time to live to 1 week for CR messages and delivery mode to persistent
+			    getProducerCR().setTimeToLive(TimeUnit.MILLISECONDS.convert(7L, TimeUnit.DAYS));
+			    getProducerCR().setDeliveryMode(DeliveryMode.PERSISTENT);
+			    // start the connection
+				getConnect().start();
+			}
+			
 			// set the delivery mode if it is specified
 			// default is non-persistent
 			if (deliveryMode == null) {
@@ -294,7 +389,7 @@ class JMSConnectionHelper {
 
 		} else {
 			// Its JMSSource, So we will create a consumer
-			setConsumer(getSession().createConsumer(dest));
+			setConsumer(getSession().createConsumer(dest, messageSelector));
 			// start the connection
 			getConnect().start();
 		}
@@ -352,16 +447,15 @@ class JMSConnectionHelper {
 	}
 
 	// this subroutine receives messages from a message consumer
-	Message receiveMessage() throws ConnectionException, InterruptedException,
+	// This method supports the receive method with timeout
+	Message receiveMessage(long timeout) throws ConnectionException, InterruptedException,
 			JMSException {
 		try {
-			// try to receive a message
+			// try to receive a message via blocking method
 			synchronized (getSession()) {
-				return (getConsumer().receive());
+				return (getConsumer().receive(timeout));
 			}
-
 		}
-
 		catch (JMSException e) {
 			// If the JMSSource operator was interrupted in middle
 			if (e.toString().contains("java.lang.InterruptedException")) {
@@ -374,10 +468,98 @@ class JMSConnectionHelper {
 					new Object[] { e.toString() });
 			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
 			createConnection();
-			// retry to receive
+			// retry to receive again
+			
+			// try to receive a message via blocking method
 			synchronized (getSession()) {
-				return (getConsumer().receive());
+				return (getConsumer().receive(timeout));
 			}
+			
+		}
+	}
+	
+	// Send message without retry in case of failure
+	// i.e connection problems, this method raise the error back to caller.
+	// No connection or message retry will be attempted.
+	boolean sendMessageNoRetry(Message message) throws JMSException {
+		
+		boolean res = false;
+		
+		try {
+				
+			// try to send the message
+			synchronized (getSession()) {
+				getProducer().send(message);
+				res = true;
+					
+			}
+		}
+		catch (JMSException e) {
+			// error has occurred, log error and try sending message again
+			logger.log(LogLevel.WARN, "ERROR_DURING_SEND", new Object[] { e.toString() });
+			
+			// If the exception is caused by message format, then we can return peacefully as connection is still good.
+			if(!(e instanceof MessageFormatException)) {
+				throw e;
+			}
+			
+		}
+
+		if(!res) {
+			nFailedInserts.incrementValue(1);
+		}
+		
+		return res;
+	}
+	
+	// send a consistent region message to the consistent region queue
+	void sendCRMessage(Message message) throws JMSException {
+			
+		synchronized (getSession()) {
+			getProducerCR().send(message);
+		}
+
+	}
+		
+	// receive a message from consistent region queue
+	Message receiveCRMessage(long timeout) throws JMSException {
+		
+		synchronized (getSession()) {
+			return (getConsumerCR().receive(timeout));
+		}
+	}
+	
+	// Recovers session causing unacknowledged message to be re-delivered
+	public void recoverSession() throws JMSException, ConnectionException, InterruptedException {
+
+		try {
+			synchronized (getSession()) {
+				getSession().recover();
+			}
+		} catch (JMSException e) {
+			
+			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
+			setConnect(null);
+			createConnection();
+			
+			synchronized (getSession()) {
+				getSession().recover();
+			}
+			
+		}
+	}
+	
+	public void commitSession() throws JMSException {
+		
+		synchronized (getSession()) {
+			getSession().commit();
+		}
+	}
+	
+	public void roolbackSession() throws JMSException {
+		
+		synchronized (getSession()) {
+			getSession().rollback();
 		}
 	}
 
