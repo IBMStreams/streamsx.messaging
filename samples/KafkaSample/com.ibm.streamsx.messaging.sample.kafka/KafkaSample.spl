@@ -14,16 +14,15 @@ use com.ibm.streamsx.messaging.kafka::*;
  */
 
 composite KafkaSample {
-	param
-		expression<rstring> $topic : "mytopic";
+	param 
+		expression<rstring> $topic : "sampleTopic" ;
     graph
-
 	  //create some messages and send to Kafka
 		stream<rstring topic, rstring key, rstring message> OutputStream = Beacon() {
 			param
-				iterations : 10 ;
-				period : 1.0 ;
-			output OutputStream: topic = $topic, message = "this is from kafka sink", key = "abc";
+				initDelay : 5.0;
+				period : 0.2;
+			output OutputStream: topic = $topic, message = "Reality is merely an illusion, albeit a very persistent one." , key = "Einstein";
 		}
 
 
@@ -35,13 +34,18 @@ composite KafkaSample {
 		stream<rstring key, rstring message> KafkaStream = KafkaConsumer()
 		{
 			param
-				propertiesFile : "etc/consumer.properties" ;
-				topic : $topic ;
+				propertiesFile : "etc/consumer.properties";
+				topic : $topic;
 		}
 
 		() as SinkOp = Custom(KafkaStream)
 		{
+		
 			logic
-				onTuple KafkaStream : println("Message: " +(rstring) KafkaStream) ;
+				onTuple KafkaStream :
+				{
+					printStringLn("Message: " + (rstring) KafkaStream);
+				}
+			
 		}
 }
