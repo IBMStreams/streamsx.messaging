@@ -34,7 +34,7 @@ composite KafkaSample {
 		stream<rstring key, rstring message> KafkaStream = KafkaConsumer()
 		{
 			param
-				propertiesFile : "etc/consumer.properties" ;
+				propertiesFile : "etc/consumer.properties";
 				topic : $topic;
 		}
 
@@ -44,7 +44,7 @@ composite KafkaSample {
 			logic
 				onTuple KafkaStream :
 				{
-					printStringLn("Message: " + (rstring) KafkaStream) ;
+					printStringLn("Message: " + (rstring) KafkaStream);
 				}
 			
 		}
