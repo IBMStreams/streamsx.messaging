@@ -50,6 +50,8 @@ import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streams.operator.state.StateHandler;
 import com.ibm.streams.operator.types.Blob;
 import com.ibm.streams.operator.types.RString;
+import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
+import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 
 /**
  * Class for an operator that consumes tuples and does not produce an output stream. 
@@ -461,7 +463,44 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
        initRelaunching(context);
        // do not connect here... connection is done on the publish thread when a message
        // is ready to be published
-	} 
+    
+		// register for data governance
+		// if static topic, then register topic, else only register the server
+		if (topicAttributeName == null) {
+			registerForDataGovernance();
+		} else {
+			// register the "server" for governance
+			registerServerForDataGovernance();
+		}
+	}
+
+	private void registerForDataGovernance() {
+		String uri = getServerUri();
+		String topic = getTopics();
+		TRACE.log(TraceLevel.INFO,
+				"MQTTSink - Registering for data governance with server uri: " + uri + " and topic: " + topic);
+
+		if (topic != null && !topic.isEmpty() && uri != null && !uri.isEmpty()) {
+			DataGovernanceUtil.registerForDataGovernance(this, topic, IGovernanceConstants.ASSET_MQTT_TOPIC_TYPE, uri,
+					IGovernanceConstants.ASSET_MQTT_SERVER_TYPE, false, "MQTTSink");
+		} else {
+			TRACE.log(TraceLevel.INFO,
+					"MQTTSink - Registering for data governance -- aborted. topic and/or url is null");
+		}
+	}
+
+	private void registerServerForDataGovernance() {
+		String uri = getServerUri();
+		TRACE.log(TraceLevel.INFO, "MQTTSource - Registering only server for data governance with server uri: " + uri);
+
+		if (uri != null && !uri.isEmpty()) {
+			DataGovernanceUtil.registerForDataGovernance(this, uri, IGovernanceConstants.ASSET_MQTT_SERVER_TYPE, null,
+					null, false, "MQTTSink");
+		} else {
+			TRACE.log(TraceLevel.INFO,
+					"MQTTSource - Registering only server for data governance -- aborted. uri is null");
+		}
+	}
 	
 	/**
      * Notification that initialization is complete and all input and output ports 

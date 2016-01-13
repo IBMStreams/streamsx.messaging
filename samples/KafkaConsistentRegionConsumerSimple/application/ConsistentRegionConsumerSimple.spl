@@ -24,6 +24,8 @@ use com.ibm.streamsx.messaging.kafka::* ;
  */
 composite ConsistentRegionSimple
 {
+	param 
+		expression<rstring> $topic : "mySimpleTopic";
 	graph
 		//generate data to be written to a kafka server
 		@consistent(trigger = operatorDriven)
@@ -34,8 +36,8 @@ composite ConsistentRegionSimple
 				initDelay : 4.0 ;
 				triggerCount : 20u ;
 			output
-				OutputStream : topic = "mySimpleTopic", message =(rstring)
-					IterationCount(), key =(rstring)(int32)(random() * 10.0) ;
+				OutputStream : topic = $topic, message = "The distance between insanity and genius is measured only by success. -Bruce Feirstein"
+					, key =(rstring)(int32)(random() * 10.0) ;
 			}
 
 		//Write to Kafka Server
@@ -51,7 +53,7 @@ composite ConsistentRegionSimple
 		{
 			param
 				propertiesFile : "etc/consumer.properties" ;
-				topic : "mySimpleTopic" ;
+				topic : $topic ;
 				partition : 0 ;
 				triggerCount : 20 ;
 		}

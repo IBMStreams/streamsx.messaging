@@ -29,6 +29,8 @@ use com.ibm.streamsx.messaging.kafka::* ;
  */
 composite ConsistentRegionParallelConsumers
 {
+	param 
+		expression<rstring> $topic : "myParallelTopic";
 	graph
 		//generate data to be written to a kafka server
 		@consistent(trigger = operatorDriven)
@@ -39,8 +41,8 @@ composite ConsistentRegionParallelConsumers
 				initDelay : 4.0 ;
 				triggerCount : 20u ;
 			output
-				OutputStream : topic = "myParallelTopic", message =(rstring)
-					IterationCount(), key =(rstring)(int32)(random() * 10.0) ;
+				OutputStream : topic = $topic, message =(rstring)
+					"Your theory is crazy, but it's not crazy enough to be true. -Niels Bohr", key =(rstring)(int32)(random() * 10.0) ;
 			}
 		
 		//Write to Kafka Server
@@ -56,7 +58,7 @@ composite ConsistentRegionParallelConsumers
 		{
 			param
 				propertiesFile : "etc/consumer.properties" ;
-				topic : "myParallelTopic" ;
+				topic : $topic;
 				partition : getChannel() ;
 		}
 

@@ -22,6 +22,8 @@ use com.ibm.streamsx.messaging.kafka::* ;
  */
 composite ParallelConsumers
 {
+	param 
+		expression<rstring> $topic : "myParallelTopic";
 	graph
 		//generate data to be written to a kafka server
 		stream<rstring topic, rstring key, rstring message> OutputStream = Beacon()
@@ -30,8 +32,8 @@ composite ParallelConsumers
 				period : 0.25 ;
 				initDelay : 4.0 ;
 			output
-				OutputStream : topic = "myParallelTopic", message =(rstring)
-					IterationCount(), key =(rstring)(int32)(random() * 10.0) ;
+				OutputStream : topic = $topic, message = "The important thing is not to stop questioning. Curiosity has its own reason for existing. -Albert Einstein", 
+					key =(rstring)(int32)(random() * 10.0) ;
 			}
 		
 		//Write to Kafka Server
@@ -47,7 +49,7 @@ composite ParallelConsumers
 		{
 			param
 				propertiesFile : "etc/consumer.properties" ;
-				topic : "myParallelTopic" ;
+				topic : $topic ;
 				partition : getChannel() ;
 		}
 

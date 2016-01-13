@@ -121,16 +121,16 @@
 	</target>
 
 	<!-- Targets to build releases -->
-		<target name="release" depends="clean, all, spldoc, toolkitIndexOnly">		
-			<mkdir dir="${tmp}" />
-			<property name="releasefilename" value="${tmp}/streamsx.messaging.toolkits-${tkinfo.info:identity.info:version}-${DSTAMP}-${TSTAMP}.tgz" />
-			<tar compression="gzip" longfile="gnu"
-	             destfile="${releasefilename}"
-	    	     basedir="${basedir}"
-	             includes="${tkinfo.info:identity.info:name}/** samples/** samples/**/.settings/**"
-	             excludes="**/.gitignore **/.project **/.classpath ${tkinfo.info:identity.info:name}/.settings/**"
-	    	/>		
-			<checksum file="${releasefilename}" />
-			<checksum algorithm="sha1" file="${releasefilename}" />
-		</target>
+	<target name="release" depends="clean, all, spldoc, toolkitIndexOnly">		
+		<mkdir dir="${tmp}" />
+		<property name="releasefilename" value="${tmp}/streamsx.messaging.toolkits-${tkinfo.info:identity.info:version}-${DSTAMP}-${TSTAMP}.tgz" />
+		<tar compression="gzip" longfile="gnu"
+             destfile="${releasefilename}"
+    	     basedir="${basedir}"
+             includes="${tkinfo.info:identity.info:name}/** samples/** samples/**/.settings/**"
+             excludes="**/.gitignore **/.project **/.classpath ${tkinfo.info:identity.info:name}/.settings/**"
+    	/>		
+		<checksum file="${releasefilename}" />
+		<checksum algorithm="sha1" file="${releasefilename}" />
+	</target>
 </project>
