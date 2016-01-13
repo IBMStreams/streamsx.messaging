@@ -22,14 +22,15 @@ import org.xml.sax.SAXException;
 
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
-import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.Type;
+import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.logging.LogLevel;
 import com.ibm.streams.operator.logging.LoggerNames;
+import com.ibm.streams.operator.logging.TraceLevel;
 import com.ibm.streams.operator.metrics.Metric;
 import com.ibm.streams.operator.model.CustomMetric;
 import com.ibm.streams.operator.model.Parameter;
@@ -38,6 +39,8 @@ import com.ibm.streams.operator.state.Checkpoint;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streams.operator.state.StateHandler;
 import com.ibm.streams.operator.types.RString;
+import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
+import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 
 //The JMSSource operator converts a message JMS queue or topic to stream
 public class JMSSource extends ProcessTupleProducer implements StateHandler{	
@@ -551,6 +554,17 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 			default:
 				throw new RuntimeException("No valid message class is specified.");
 		}
+		
+		// register for data governance
+		registerForDataGovernance(connectionDocumentParser.getProviderURL(), connectionDocumentParser.getDestination());
+
+	}
+
+	private void registerForDataGovernance(String providerURL, String destination) {
+		logger.log(TraceLevel.INFO, "JMSSource - Registering for data governance with providerURL: " + providerURL
+				+ " destination: " + destination);
+		DataGovernanceUtil.registerForDataGovernance(this, destination, IGovernanceConstants.ASSET_JMS_MESSAGE_TYPE,
+				providerURL, IGovernanceConstants.ASSET_JMS_SERVER_TYPE, true, "JMSSource");
 	}
 
 	@Override

@@ -47,6 +47,8 @@ import com.ibm.streams.operator.model.PrimitiveOperator;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streams.operator.types.RString;
 import com.ibm.streams.operator.types.ValueFactory;
+import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
+import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 import com.ibm.streamsx.messaging.mqtt.MqttClientRequest.MqttClientRequestType;
 
 /**
@@ -307,6 +309,9 @@ public class MqttSourceOperator extends AbstractMqttOperator {
         mqttWrapper.setCommandTimeout(getCommandTimeout());
         mqttWrapper.setKeepAliveInterval(getKeepAliveInterval());
         
+        // register for data governance
+        registerForDataGovernance();
+        
         /*
          * Create the thread for producing tuples. 
          * The thread is created at initialize time but started.
@@ -356,6 +361,21 @@ public class MqttSourceOperator extends AbstractMqttOperator {
         clientRequestThread.setDaemon(true);       
     }
 
+    private void registerForDataGovernance() {
+		String uri = getServerUri();
+		List<String> topics = getTopics();
+		TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance with server uri: " + uri + " and topics: " + topics.toArray().toString());
+		
+		if(topics != null && uri != null && !uri.isEmpty()) {		
+			for (String topic : topics) {			
+				TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance with server uri: " + uri + " and topic: " + topic);
+				DataGovernanceUtil.registerForDataGovernance(this, topic, IGovernanceConstants.ASSET_MQTT_TOPIC_TYPE, uri, IGovernanceConstants.ASSET_MQTT_SERVER_TYPE, true, "MQTTSource");
+			}
+		} else {
+			TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance -- aborted. topic and/or uri is null");
+		}
+	}
+    
 	protected void handleClientRequests() {
 		while (!shutdown)
         {
