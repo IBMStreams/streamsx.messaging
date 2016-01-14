@@ -7,13 +7,9 @@ package com.ibm.streamsx.messaging.kafka;
 
 
 import java.io.IOException;
-<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-=======
-import java.util.List;
->>>>>>> origin/master
 import java.util.logging.Logger;
 
 import com.ibm.streams.operator.OperatorContext;
