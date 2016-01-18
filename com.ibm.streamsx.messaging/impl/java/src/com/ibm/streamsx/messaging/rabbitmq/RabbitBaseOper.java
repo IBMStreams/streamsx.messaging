@@ -32,7 +32,7 @@ public class RabbitBaseOper extends AbstractOperator {
 
 	protected Channel channel;
 	protected Connection connection;
-	protected String hostName = "localhost", username = "",
+	protected String username = "",
 			password = "", exchangeName = "", exchangeType = "direct";
 			
 	protected List<String> hostAndPortList = new ArrayList<String>();
@@ -40,18 +40,39 @@ public class RabbitBaseOper extends AbstractOperator {
 	private String vHost;
 	private Boolean autoRecovery = true;
 
-	protected AttributeHelper messageHeaderAH = new AttributeHelper("msg_header"),
+	protected AttributeHelper messageHeaderAH = new AttributeHelper("message_header"),
 			routingKeyAH = new AttributeHelper("routing_key"),
 			messageAH = new AttributeHelper("message");
 
 	private final Logger trace = Logger.getLogger(RabbitBaseOper.class
 			.getCanonicalName());
-
+	protected Boolean usingDefaultExchange = false;
+	
 	public synchronized void initialize(OperatorContext context)
 			throws Exception {
 		// Must call super.initialize(context) to correctly setup an operator.
 		super.initialize(context);
 		ConnectionFactory connectionFactory = new ConnectionFactory();
+		configureUsernameAndPassword(connectionFactory);
+		connectionFactory.setAutomaticRecoveryEnabled(autoRecovery);
+		
+		if (vHost != null)
+			connectionFactory.setVirtualHost(vHost);
+		
+		addressArr = buildAddressArray(hostAndPortList);
+		
+		connection = connectionFactory.newConnection(addressArr);
+		channel = initializeExchange();
+		
+		trace.log(TraceLevel.INFO,
+				"Initializing channel connection to exchange: " + exchangeName
+						+ " of type: " + exchangeType + " as user: " + connectionFactory.getUsername());
+		trace.log(TraceLevel.INFO,
+				"Connection to host: " + connection.getAddress());
+	}
+
+	private void configureUsernameAndPassword(
+			ConnectionFactory connectionFactory) {
 		if (username != ""){
 			connectionFactory.setUsername(username);
 			connectionFactory.setPassword(password);
@@ -59,21 +80,28 @@ public class RabbitBaseOper extends AbstractOperator {
 		} else {
 			trace.log(TraceLevel.INFO, "Defaults: " + connectionFactory.getUsername() + " " + connectionFactory.getPassword());				
 		}
-		connectionFactory.setAutomaticRecoveryEnabled(autoRecovery);
-		if (vHost != null)
-			connectionFactory.setVirtualHost(vHost);
-		addressArr = buildAddressArray(hostAndPortList);
-		trace.log(TraceLevel.INFO, "Addr Array: " + addressArr[0].getHost() + ":" + addressArr[0].getPort());
-		connection = connectionFactory.newConnection(addressArr);
-		channel = connection.createChannel();
-		System.out.println("Name: "+ exchangeName);
-		if (!exchangeName.isEmpty() && exchangeName != "")
-			channel.exchangeDeclare(exchangeName, exchangeType);
-		trace.log(TraceLevel.INFO,
-				"Initializing channel connection to exchange: " + exchangeName
-						+ " of type: " + exchangeType + " as user: " + connectionFactory.getUsername());
-		trace.log(TraceLevel.INFO,
-				"Connection to host: " + connection.getAddress());
+	}
+
+	private Channel initializeExchange() throws IOException {
+		Channel channel = connection.createChannel();
+		try{
+			//check to see if the exchange exists if not then it is the default exchange
+			if ( !exchangeName.isEmpty()){
+				channel.exchangeDeclarePassive(exchangeName);
+				trace.log(TraceLevel.INFO, "Exchange was found, therefore no exchange will be declared.");
+			} else {
+				usingDefaultExchange = true;
+				trace.log(TraceLevel.INFO, "Using the default exchange. Name \"\"");
+			}
+		} catch (IOException e){
+			//if exchange doesn't exits, we will create it
+			//we must also create a new channel since last one erred
+			channel = connection.createChannel();
+			//declare non-durable, auto-delete exchange
+			channel.exchangeDeclare(exchangeName, exchangeType, false, true, null);
+			trace.log(TraceLevel.INFO, "Exchange was not found, therefore non-durable exchange will be declared.");
+		}
+		return channel;
 	}
 
 	private Address[] buildAddressArray(List<String> hostsAndPorts) throws MalformedURLException {
@@ -107,9 +135,11 @@ public class RabbitBaseOper extends AbstractOperator {
 		
 		supportedTypes.add(MetaType.RSTRING);
 		supportedTypes.add(MetaType.USTRING);
-		supportedTypes.add(MetaType.BLOB);
-
+		
 		routingKeyAH.initialize(ss, false, supportedTypes);
+		
+		supportedTypes.add(MetaType.BLOB);
+		
 		messageAH.initialize(ss, true, supportedTypes);
 
 	}
@@ -127,11 +157,6 @@ public class RabbitBaseOper extends AbstractOperator {
 	@Parameter(optional = true, description = "Password for RabbitMQ authentication.")
 	public void setPassword(String value) {
 		password = value;
-	}
-
-	@Parameter(optional = false, description = "Required attribute. Name of the RabbitMQ exchange.")
-	public void setExchangeName(String value) {
-		exchangeName = value;
 	}
 	
 	@Parameter(optional = true, description = "Optional attribute. Name of the RabbitMQ exchange type. Default direct.")
