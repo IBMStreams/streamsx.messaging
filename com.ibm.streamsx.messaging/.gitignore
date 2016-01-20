@@ -1,6 +1,7 @@
 /output
 impl/lib
 com.ibm.streamsx.messaging.kafka
+com.ibm.streamsx.messaging.rabbitmq
 opt/downloaded
 /target
 /.externalToolBuilders
