@@ -41,6 +41,7 @@ import com.ibm.streams.operator.state.StateHandler;
 import com.ibm.streams.operator.types.RString;
 import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
 import com.ibm.streamsx.messaging.common.IGovernanceConstants;
+import com.ibm.streamsx.messaging.common.PropertyProvider;
 
 //The JMSSource operator converts a message JMS queue or topic to stream
 public class JMSSource extends ProcessTupleProducer implements StateHandler{	
@@ -178,6 +179,39 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	private String messageIDOutAttrName = null;
 	
 	private Object resetLock = new Object();
+	
+    private String credentialFile;
+    
+    private String userPropName;
+    
+    private String passwordPropName;
+
+	public String getCredentialFile() {
+		return credentialFile;
+	}
+
+	@Parameter(optional = true)
+	public void setCredentialFile(String credentialFile) {
+		this.credentialFile = credentialFile;
+	}
+
+	public String getUserPropName() {
+		return userPropName;
+	}
+
+	@Parameter(optional = true)
+	public void setUserPropName(String userPropName) {
+		this.userPropName = userPropName;
+	}
+
+	public String getPasswordPropName() {
+		return passwordPropName;
+	}
+
+	@Parameter(optional = true)
+	public void setPasswordPropName(String passwordPropName) {
+		this.passwordPropName = passwordPropName;
+	}
 
 	public String getMessageIDOutAttrName() {
 		return messageIDOutAttrName;
@@ -462,6 +496,9 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		checker.checkDependentParameters("period", "reconnectionPolicy");
 		checker.checkDependentParameters("reconnectionBound",
 				"reconnectionPolicy");
+		
+		// Make sure if credentialFile is specified then both userPropName and passwordPropName are needed
+		checker.checkDependentParameters("credentialFile", "userPropName", "passwordPropName");
 	}
 
 	@Override
@@ -512,21 +549,20 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 
 		messageType = connectionDocumentParser.getMessageType();
 		isAMQ = connectionDocumentParser.isAMQ();
+		
+		// initialize PropertyProvider object if credential file is provided
+		PropertyProvider propertyProvider = null;
+		if(this.getCredentialFile() != null) {
+			propertyProvider = PropertyProvider.getFilePropertyProvider(this.getCredentialFile());
+		}
+				
 		// parsing connection document is successful, we can go ahead and create
 		// connection
 		// isProducer, false implies Consumer
-		jmsConnectionHelper = new JMSConnectionHelper(reconnectionPolicy,
-				reconnectionBound, period, false, 0,
-				0, connectionDocumentParser.getDeliveryMode(),
-				nReconnectionAttempts, logger, (consistentRegionContext != null), messageSelector);
-		jmsConnectionHelper.createAdministeredObjects(
-				connectionDocumentParser.getInitialContextFactory(),
-				connectionDocumentParser.getProviderURL(),
-				connectionDocumentParser.getUserPrincipal(),
-				connectionDocumentParser.getUserCredential(),
-				connectionDocumentParser.getConnectionFactory(),
-				connectionDocumentParser.getDestination(),
-				null);
+		jmsConnectionHelper = new JMSConnectionHelper(connectionDocumentParser, reconnectionPolicy,
+				reconnectionBound, period, false, 0, 0, nReconnectionAttempts, logger, (consistentRegionContext != null), 
+				null, messageSelector, propertyProvider, this.userPropName, this.passwordPropName);
+		jmsConnectionHelper.createAdministeredObjects();
 
 		// Create the appropriate JMS message handlers as specified by the
 		// messageType.
@@ -855,7 +891,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		
 	}
 	
-	private void deduplicateMsg(long lastSentMsgTs, List<String> lastSentMsgIDs) throws JMSException, ConnectionException, InterruptedException {
+	private void deduplicateMsg(long lastSentMsgTs, List<String> lastSentMsgIDs) throws JMSException, ConnectionException, InterruptedException, IOException, NamingException {
 		logger.log(LogLevel.INFO, "Deduplicate messages...");
 		
 		boolean stop = false;

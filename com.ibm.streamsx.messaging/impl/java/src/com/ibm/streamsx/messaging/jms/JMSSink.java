@@ -38,6 +38,7 @@ import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streams.operator.state.StateHandler;
 import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
 import com.ibm.streamsx.messaging.common.IGovernanceConstants;
+import com.ibm.streamsx.messaging.common.PropertyProvider;
 
 
 //The JMSSink operator publishes data from Streams to a JMS Provider queue or a topic.
@@ -179,6 +180,39 @@ public class JMSSink extends AbstractOperator implements StateHandler{
     
     // unique id to identify messages on CR queue
     private String operatorUniqueID;
+    
+    private String credentialFile;
+    
+    private String userPropName;
+    
+    private String passwordPropName;
+
+	public String getCredentialFile() {
+		return credentialFile;
+	}
+
+	@Parameter(optional = true)
+	public void setCredentialFile(String credentialFile) {
+		this.credentialFile = credentialFile;
+	}
+
+	public String getUserPropName() {
+		return userPropName;
+	}
+
+	@Parameter(optional = true)
+	public void setUserPropName(String userPropName) {
+		this.userPropName = userPropName;
+	}
+
+	public String getPasswordPropName() {
+		return passwordPropName;
+	}
+
+	@Parameter(optional = true)
+	public void setPasswordPropName(String passwordPropName) {
+		this.passwordPropName = passwordPropName;
+	}
 
 	public String getConsistentRegionQueueName() {
 		return consistentRegionQueueName;
@@ -417,13 +451,14 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		}
 	}
 
-	// add compile time check for either period or reconnectionBound to be
-	// present only when reconnectionPolicy is present
-	// and messageRetryDelay to be present only when maxMessageRetriesis present
+	
 	@ContextCheck(compile = true)
 	public static void checkParameters(OperatorContextChecker checker) {
 		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
 		
+		// add compile time check for either period or reconnectionBound to be
+		// present only when reconnectionPolicy is present
+		// and messageRetryDelay to be present only when maxMessageRetriesis present
 		if(consistentRegionContext == null) {
 			checker.checkDependentParameters("period", "reconnectionPolicy");
 			checker.checkDependentParameters("reconnectionBound",
@@ -432,6 +467,9 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			checker.checkDependentParameters("maxMessageSendRetries", "messageSendRetryDelay");
 			checker.checkDependentParameters("messageSendRetryDelay", "maxMessageSendRetries");
 		}
+		
+		// Make sure if credentialFile is specified then both userPropName and passwordPropName are needed
+		checker.checkDependentParameters("credentialFile", "userPropName", "passwordPropName");
 	}
 
 	@Override
@@ -479,23 +517,21 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			throw new ParseConnectionDocumentException(
 					"codepage appears only when the message class is bytes");
 		}
+		
+		PropertyProvider propertyProvider = null;
+		if(this.getCredentialFile() != null) {
+			propertyProvider = PropertyProvider.getFilePropertyProvider(credentialFile);
+		}
 
 		// parsing connection document is successful, we can go ahead and create
 		// connection
 		// The jmsConnectionHelper will throw a runtime error and abort the
 		// application in case of errors.
-		jmsConnectionHelper = new JMSConnectionHelper(reconnectionPolicy,
-				reconnectionBound, period, true, maxMessageSendRetries, 
-				messageSendRetryDelay, connectionDocumentParser.getDeliveryMode(),
-				nReconnectionAttempts, nFailedInserts, logger, (consistentRegionContext != null), msgSelectorCR);
-		jmsConnectionHelper.createAdministeredObjects(
-				connectionDocumentParser.getInitialContextFactory(),
-				connectionDocumentParser.getProviderURL(),
-				connectionDocumentParser.getUserPrincipal(),
-				connectionDocumentParser.getUserCredential(),
-				connectionDocumentParser.getConnectionFactory(),
-				connectionDocumentParser.getDestination(),
-				getConsistentRegionQueueName());
+		jmsConnectionHelper = new JMSConnectionHelper(connectionDocumentParser, reconnectionPolicy,
+				reconnectionBound, period, true, maxMessageSendRetries, messageSendRetryDelay, nReconnectionAttempts, 
+				nFailedInserts, logger, (consistentRegionContext != null), getConsistentRegionQueueName(), msgSelectorCR, 
+				propertyProvider, this.userPropName, this.passwordPropName);
+		jmsConnectionHelper.createAdministeredObjects();
 		
 		// Initialize JMS connection if operator is in a consistent region.
 		// When this operator is in a consistent region, a transacted session is used,
