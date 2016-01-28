@@ -209,6 +209,7 @@ class JMSConnectionHelper {
 		this.connectionDocumentParser = connectionDocumentParser;
 		this.userPrincipal = connectionDocumentParser.getUserPrincipal();
 		this.userCredential = connectionDocumentParser.getUserCredential();
+		this.destinationCR = destinationCR;
 		
 		if(credentialFile != null) {
 			propertyProvider = PropertyProvider.getFilePropertyProvider(credentialFile);
