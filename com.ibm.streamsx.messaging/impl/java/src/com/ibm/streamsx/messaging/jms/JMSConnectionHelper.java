@@ -300,10 +300,9 @@ class JMSConnectionHelper {
 					nConnectionAttempts++;
 					
 					// if property provider is specified, prior to a connection attempt
-					// recreate the administered object first.
-					if(refreshUserCredential()) {
-						createAdministeredObjects();
-					}
+					// update user credential.
+					
+					refreshUserCredential();
 					
 					if (connect(isProducer)) {
 						// got a successfull connection,
@@ -314,7 +313,7 @@ class JMSConnectionHelper {
 				} catch (InvalidSelectorException e) {
 					throw new ConnectionException(
 							"Connection to JMS failed. Invalid message selector");
-				} catch (JMSException | IOException | NamingException e) {
+				} catch (JMSException | IOException e) {
 					logger.log(LogLevel.ERROR, "RECONNECTION_EXCEPTION",
 							new Object[] { e.toString() });
 					// Get the reconnectionPolicy
