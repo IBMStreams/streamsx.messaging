@@ -38,7 +38,6 @@ import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streams.operator.state.StateHandler;
 import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
 import com.ibm.streamsx.messaging.common.IGovernanceConstants;
-import com.ibm.streamsx.messaging.common.PropertyProvider;
 
 
 //The JMSSink operator publishes data from Streams to a JMS Provider queue or a topic.
@@ -517,11 +516,6 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			throw new ParseConnectionDocumentException(
 					"codepage appears only when the message class is bytes");
 		}
-		
-		PropertyProvider propertyProvider = null;
-		if(this.getCredentialFile() != null) {
-			propertyProvider = PropertyProvider.getFilePropertyProvider(credentialFile);
-		}
 
 		// parsing connection document is successful, we can go ahead and create
 		// connection
@@ -530,7 +524,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		jmsConnectionHelper = new JMSConnectionHelper(connectionDocumentParser, reconnectionPolicy,
 				reconnectionBound, period, true, maxMessageSendRetries, messageSendRetryDelay, nReconnectionAttempts, 
 				nFailedInserts, logger, (consistentRegionContext != null), getConsistentRegionQueueName(), msgSelectorCR, 
-				propertyProvider, this.userPropName, this.passwordPropName);
+				credentialFile, this.userPropName, this.passwordPropName);
 		jmsConnectionHelper.createAdministeredObjects();
 		
 		// Initialize JMS connection if operator is in a consistent region.

@@ -41,7 +41,6 @@ import com.ibm.streams.operator.state.StateHandler;
 import com.ibm.streams.operator.types.RString;
 import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
 import com.ibm.streamsx.messaging.common.IGovernanceConstants;
-import com.ibm.streamsx.messaging.common.PropertyProvider;
 
 //The JMSSource operator converts a message JMS queue or topic to stream
 public class JMSSource extends ProcessTupleProducer implements StateHandler{	
@@ -549,19 +548,13 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 
 		messageType = connectionDocumentParser.getMessageType();
 		isAMQ = connectionDocumentParser.isAMQ();
-		
-		// initialize PropertyProvider object if credential file is provided
-		PropertyProvider propertyProvider = null;
-		if(this.getCredentialFile() != null) {
-			propertyProvider = PropertyProvider.getFilePropertyProvider(this.getCredentialFile());
-		}
 				
 		// parsing connection document is successful, we can go ahead and create
 		// connection
 		// isProducer, false implies Consumer
 		jmsConnectionHelper = new JMSConnectionHelper(connectionDocumentParser, reconnectionPolicy,
 				reconnectionBound, period, false, 0, 0, nReconnectionAttempts, logger, (consistentRegionContext != null), 
-				null, messageSelector, propertyProvider, this.userPropName, this.passwordPropName);
+				null, messageSelector, this.credentialFile, this.userPropName, this.passwordPropName);
 		jmsConnectionHelper.createAdministeredObjects();
 
 		// Create the appropriate JMS message handlers as specified by the

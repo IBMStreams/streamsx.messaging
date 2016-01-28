@@ -192,7 +192,7 @@ class JMSConnectionHelper {
 	JMSConnectionHelper(ConnectionDocumentParser connectionDocumentParser, ReconnectionPolicies reconnectionPolicy,
 			int reconnectionBound, double period, boolean isProducer, int maxMessageRetry, long messageRetryDelay,
 			Metric nReconnectionAttempts, Logger logger, boolean useClientAckMode, String destinationCR, String messageSelector, 
-			PropertyProvider propertyProvider, String userPropName, String passwordPropName) throws IOException {
+			String credentialFile, String userPropName, String passwordPropName) throws IOException {
 		this.reconnectionPolicy = reconnectionPolicy;
 		this.reconnectionBound = reconnectionBound;
 		this.period = period;
@@ -206,10 +206,13 @@ class JMSConnectionHelper {
 		this.messageSelector = messageSelector;
 		this.userPropName = userPropName;
 		this.passwordPropName = passwordPropName;
-		this.propertyProvider = propertyProvider;
 		this.connectionDocumentParser = connectionDocumentParser;
 		this.userPrincipal = connectionDocumentParser.getUserPrincipal();
 		this.userCredential = connectionDocumentParser.getUserCredential();
+		
+		if(credentialFile != null) {
+			propertyProvider = PropertyProvider.getFilePropertyProvider(credentialFile);
+		}
 		
 		refreshUserCredential();
 	}
@@ -219,10 +222,10 @@ class JMSConnectionHelper {
 	JMSConnectionHelper(ConnectionDocumentParser connectionDocumentParser, ReconnectionPolicies reconnectionPolicy, 
 			int reconnectionBound, double period, boolean isProducer, int maxMessageRetry, long messageRetryDelay, 
 			Metric nReconnectionAttempts, Metric nFailedInserts, Logger logger, boolean useClientAckMode, String destinationCR, String msgSelectorCR, 
-			PropertyProvider propertyProvider, String userPropName, String passwordPropName) throws IOException {
+			String credentialFile, String userPropName, String passwordPropName) throws IOException {
 		this(connectionDocumentParser, reconnectionPolicy, reconnectionBound, period, isProducer,
 			 maxMessageRetry, messageRetryDelay, nReconnectionAttempts, 
-			 logger, useClientAckMode, destinationCR, msgSelectorCR, propertyProvider, userPropName, passwordPropName);
+			 logger, useClientAckMode, destinationCR, msgSelectorCR, credentialFile, userPropName, passwordPropName);
 		this.nFailedInserts = nFailedInserts;
 
 	}
@@ -300,9 +303,11 @@ class JMSConnectionHelper {
 					nConnectionAttempts++;
 					
 					// if property provider is specified, prior to a connection attempt
-					// update user credential.
+					// update user credential if there is a change and recreate admin objects.
 					
-					refreshUserCredential();
+					if(refreshUserCredential()) {
+						createAdministeredObjects();
+					}
 					
 					if (connect(isProducer)) {
 						// got a successfull connection,
@@ -313,7 +318,7 @@ class JMSConnectionHelper {
 				} catch (InvalidSelectorException e) {
 					throw new ConnectionException(
 							"Connection to JMS failed. Invalid message selector");
-				} catch (JMSException | IOException e) {
+				} catch (JMSException | IOException | NamingException e) {
 					logger.log(LogLevel.ERROR, "RECONNECTION_EXCEPTION",
 							new Object[] { e.toString() });
 					// Get the reconnectionPolicy
