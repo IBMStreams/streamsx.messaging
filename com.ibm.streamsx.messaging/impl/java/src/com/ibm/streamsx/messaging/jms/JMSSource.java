@@ -498,6 +498,8 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		
 		// Make sure if credentialFile is specified then both userPropName and passwordPropName are needed
 		checker.checkDependentParameters("credentialFile", "userPropName", "passwordPropName");
+		checker.checkDependentParameters("userPropName", "credentialFile", "passwordPropName");
+		checker.checkDependentParameters("passwordPropName", "credentialFile", "userPropName");
 	}
 
 	@Override
