@@ -192,7 +192,7 @@ class JMSConnectionHelper {
 	JMSConnectionHelper(ConnectionDocumentParser connectionDocumentParser, ReconnectionPolicies reconnectionPolicy,
 			int reconnectionBound, double period, boolean isProducer, int maxMessageRetry, long messageRetryDelay,
 			Metric nReconnectionAttempts, Logger logger, boolean useClientAckMode, String destinationCR, String messageSelector, 
-			String credentialFile, String userPropName, String passwordPropName) throws IOException {
+			String credentialFile, String userPropName, String passwordPropName) throws IOException, NamingException {
 		this.reconnectionPolicy = reconnectionPolicy;
 		this.reconnectionBound = reconnectionBound;
 		this.period = period;
@@ -212,10 +212,11 @@ class JMSConnectionHelper {
 		this.destinationCR = destinationCR;
 		
 		if(credentialFile != null) {
-			propertyProvider = PropertyProvider.getFilePropertyProvider(credentialFile);
+			propertyProvider = PropertyProvider.getPropertyProvider(credentialFile);
 		}
 		
 		refreshUserCredential();
+		createAdministeredObjects();
 	}
 
 	// This constructor sets the parameters required to create a connection for
@@ -223,7 +224,7 @@ class JMSConnectionHelper {
 	JMSConnectionHelper(ConnectionDocumentParser connectionDocumentParser, ReconnectionPolicies reconnectionPolicy, 
 			int reconnectionBound, double period, boolean isProducer, int maxMessageRetry, long messageRetryDelay, 
 			Metric nReconnectionAttempts, Metric nFailedInserts, Logger logger, boolean useClientAckMode, String destinationCR, String msgSelectorCR, 
-			String credentialFile, String userPropName, String passwordPropName) throws IOException {
+			String credentialFile, String userPropName, String passwordPropName) throws IOException, NamingException {
 		this(connectionDocumentParser, reconnectionPolicy, reconnectionBound, period, isProducer,
 			 maxMessageRetry, messageRetryDelay, nReconnectionAttempts, 
 			 logger, useClientAckMode, destinationCR, msgSelectorCR, credentialFile, userPropName, passwordPropName);
@@ -247,7 +248,7 @@ class JMSConnectionHelper {
 	// this subroutine creates the initial jndi context by taking the mandatory
 	// and optional parameters
 
-	public void createAdministeredObjects()
+	private void createAdministeredObjects()
 			throws NamingException, IOException {
 
 		// Create a JNDI API InitialContext object if none exists

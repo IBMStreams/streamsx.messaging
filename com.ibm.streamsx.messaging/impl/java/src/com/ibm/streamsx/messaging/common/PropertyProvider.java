@@ -11,7 +11,7 @@ public class PropertyProvider {
 	}
 
 	// Create a file based property provider
-	public synchronized static PropertyProvider getFilePropertyProvider(String fileName) throws IOException {
+	public synchronized static PropertyProvider getPropertyProvider(String fileName) throws IOException {
 		PropertyProvider p = new PropertyProvider();
 		p.loadFileProperties(fileName);
 		return p;

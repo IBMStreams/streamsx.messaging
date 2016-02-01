@@ -555,7 +555,6 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		jmsConnectionHelper = new JMSConnectionHelper(connectionDocumentParser, reconnectionPolicy,
 				reconnectionBound, period, false, 0, 0, nReconnectionAttempts, logger, (consistentRegionContext != null), 
 				null, messageSelector, this.credentialFile, this.userPropName, this.passwordPropName);
-		jmsConnectionHelper.createAdministeredObjects();
 
 		// Create the appropriate JMS message handlers as specified by the
 		// messageType.

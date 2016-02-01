@@ -525,7 +525,6 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 				reconnectionBound, period, true, maxMessageSendRetries, messageSendRetryDelay, nReconnectionAttempts, 
 				nFailedInserts, logger, (consistentRegionContext != null), getConsistentRegionQueueName(), msgSelectorCR, 
 				credentialFile, this.userPropName, this.passwordPropName);
-		jmsConnectionHelper.createAdministeredObjects();
 		
 		// Initialize JMS connection if operator is in a consistent region.
 		// When this operator is in a consistent region, a transacted session is used,
