@@ -400,12 +400,14 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	}
 
 	protected String toAbsolute(String path) {
-		if (path != null && !path.startsWith("/")) //$NON-NLS-1$
-		{
-			File appDir = getOperatorContext().getPE().getApplicationDirectory();
-			return appDir.getAbsolutePath() + "/" + path; //$NON-NLS-1$
-		}
-		return path;
+            if (path == null)
+                return null;
+            File fPath = new File(path);
+            if (!fPath.isAbsolute()) {
+                File appDir = getOperatorContext().getPE().getApplicationDirectory();
+                fPath = new File(appDir, fPath.getPath());
+            }
+            return fPath.getAbsolutePath();
 	}
 
 	/**
