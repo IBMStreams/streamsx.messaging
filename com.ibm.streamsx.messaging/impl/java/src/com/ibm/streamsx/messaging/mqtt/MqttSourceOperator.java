@@ -47,6 +47,8 @@ import com.ibm.streams.operator.model.PrimitiveOperator;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streams.operator.types.RString;
 import com.ibm.streams.operator.types.ValueFactory;
+import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
+import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 import com.ibm.streamsx.messaging.mqtt.MqttClientRequest.MqttClientRequestType;
 
 /**
@@ -257,11 +259,18 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 				StreamingOutput<OutputTuple> dataPort = outputPorts.get(0);
 				StreamSchema streamSchema = dataPort.getStreamSchema();
 				
-				Attribute data = streamSchema.getAttribute("data");
+				Attribute dataAttribute = null;
+				
+				if(streamSchema.getAttributeCount() == 1) {
+					dataAttribute = streamSchema.getAttribute(0);
+				}
+				else {
+					dataAttribute = streamSchema.getAttribute("data");
+				}
 				
 				// the default data attribute must be present and must be either BLOB or RSTRING
-				if(data != null) {
-					checker.checkAttributeType(data, MetaType.RSTRING, MetaType.BLOB );
+				if(dataAttribute != null) {
+					checker.checkAttributeType(dataAttribute, MetaType.RSTRING, MetaType.BLOB );
 				}
 				else {
 					checker.setInvalidContext(Messages.getString("Error_MqttSourceOperator.0"), new Object[]{}); //$NON-NLS-1$
@@ -299,6 +308,9 @@ public class MqttSourceOperator extends AbstractMqttOperator {
         mqttWrapper.setClientID(getClientID());
         mqttWrapper.setCommandTimeout(getCommandTimeout());
         mqttWrapper.setKeepAliveInterval(getKeepAliveInterval());
+        
+        // register for data governance
+        registerForDataGovernance();
         
         /*
          * Create the thread for producing tuples. 
@@ -349,6 +361,21 @@ public class MqttSourceOperator extends AbstractMqttOperator {
         clientRequestThread.setDaemon(true);       
     }
 
+    private void registerForDataGovernance() {
+		String uri = getServerUri();
+		List<String> topics = getTopics();
+		TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance with server uri: " + uri + " and topics: " + topics.toArray().toString());
+		
+		if(topics != null && uri != null && !uri.isEmpty()) {		
+			for (String topic : topics) {			
+				TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance with server uri: " + uri + " and topic: " + topic);
+				DataGovernanceUtil.registerForDataGovernance(this, topic, IGovernanceConstants.ASSET_MQTT_TOPIC_TYPE, uri, IGovernanceConstants.ASSET_MQTT_SERVER_TYPE, true, "MQTTSource");
+			}
+		} else {
+			TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance -- aborted. topic and/or uri is null");
+		}
+	}
+    
 	protected void handleClientRequests() {
 		while (!shutdown)
         {
@@ -549,7 +576,12 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 		String dataAttributeName = this.getDataAttributeName() == null ? IMqttConstants.MQTT_DEFAULT_DATA_ATTRIBUTE_NAME : this.getDataAttributeName();
 		
 		int dataAttrIndex = streamSchema.getAttributeIndex(dataAttributeName);
-		Type.MetaType dataAttributeType = streamSchema.getAttribute(dataAttributeName).getType().getMetaType();
+		
+		if(dataAttrIndex == -1) {
+			dataAttrIndex = 0;
+		}
+		
+		Type.MetaType dataAttributeType = streamSchema.getAttribute(dataAttrIndex).getType().getMetaType();
 		
 		boolean isBlob = false;
 		if(dataAttributeType.equals(MetaType.BLOB))

@@ -222,6 +222,10 @@ The &lt;JMS&gt; element has the following attributes:
        Use this format if your application sends data to or receive messages from a WebSphere MQ queue or topic.
        This format specifies that the administered objects are stored in a file called `.bindings`,
        which is in the `/homes/abc/xyz/wef` directory.
+     * `file:abc/xyz/wef`:
+       Use this format if your application sends data to or receive messages from a WebSphere MQ queue or topic.
+       This format specifies that the administered objects are stored in a file called `.bindings`,
+       which is in the `abc/xyz/wef` directory relative to the application directory.
      * `tcp://machinename.com:61616`:
        Use this format if your application sends data to or receives messages from Apache ActiveMQ.
 * user
@@ -292,11 +296,15 @@ The &lt;XMS&gt; element has four attributes:
 * initial_context
   * This mandatory attribute value is a URL that points to the directory service that contains the administered objects.
     It uses the reference JNDI implementation, which stores objects in the file system.
-    The syntax of the URL can take two forms:
+    The syntax of the URL can take four forms:
     * `file:///xxx/yyy/zzz`:
       This format specifies that the JNDI objects are stored in a file that is called `zzz`, which is in the directory `xxx/yyy`.
+    * `file:xxx/yyy/zzz`:
+      This format specifies that the JNDI objects are stored in a file that is called `zzz`, which is in the directory `xxx/yyy` relative to the application directory.
     * `file:///xxx/yyy/`:
       This format specifies that the JNDI objects are stored in a file that is called `.bindings`, which is in the directory `xxx/yyy`.
+    * `file:xxx/yyy/`:
+      This format specifies that the JNDI objects are stored in a file that is called `.bindings`, which is in the directory `xxx/yyy` relative to the application directory.
       By default, the MQExplorer tool puts its entries in a file called `.bindings`.
 * connection_factory
   * This mandatory attribute value is the name of the ConnectionFactory administered object.
@@ -672,8 +680,8 @@ The &lt;attribute&gt; element has three possible attributes:
      * composite types
      * xml
 </info:description>
-    <info:version>2.0.0</info:version>
-    <info:requiredProductVersion>4.0.0.0</info:requiredProductVersion>
+    <info:version>5.0.0</info:version>
+    <info:requiredProductVersion>4.1.0.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>
   <info:resources>

@@ -3,7 +3,7 @@
                 
 .PHONY: all clean
 
-STREAMS_MESSAGING_TOOLKIT ?= ../../com.ibm.streamsx.messaging
+STREAMS_MESSAGING_TOOLKIT ?= ../../com.ibm.streamsx.messaging:${STREAMS_INSTALL}/toolkits/com.ibm.streamsx.messaging
 
 SPLC_FLAGS ?= -a -t ${STREAMS_MESSAGING_TOOLKIT}
 

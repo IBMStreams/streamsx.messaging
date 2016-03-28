@@ -14,6 +14,10 @@
 	    <url>http://repository.apache.org/content/repositories/snapshots/</url>
 	  </repository>
 	  <repository>
+	    <id>apache.releases</id>
+	    <url>https://repository.apache.org/content/repositories/releases/</url>
+	  </repository>
+	  <repository>
 	    <id>Eclipse Paho Repo releases</id>
 	    <url>https://repo.eclipse.org/content/repositories/paho-releases</url>
 	  </repository>
@@ -23,9 +27,13 @@
 	<dependencies>
 	  <dependency>
 	    <groupId>org.apache.kafka</groupId>
-	    <artifactId>kafka_2.8.0</artifactId>
-	    <version>0.8.1.1</version>
-	    <exclusions>
+	    <artifactId>kafka_2.10</artifactId>
+	    <version>0.9.0.0</version>
+	    <exclusions>     	
+	     <exclusion>
+		<groupId>com.sun.jmx</groupId>
+		<artifactId>jmxri</artifactId>
+	      </exclusion>
 	      <exclusion>
 		<groupId>com.sun.jmx</groupId>
 		<artifactId>jmxri</artifactId>
@@ -43,8 +51,13 @@
 	  <dependency>
 	    <groupId>org.apache.activemq</groupId>
 	    <artifactId>activemq-client</artifactId>
-	    <version>5.11-SNAPSHOT</version>
+	    <version>5.14.0-SNAPSHOT</version>
 	  </dependency>
+	  <dependency>
+		  <groupId>com.rabbitmq</groupId>
+		  <artifactId>amqp-client</artifactId>
+		  <version>3.5.6</version>
+		</dependency>
 	  <dependency>
 	    <groupId>org.eclipse.paho</groupId>
 	    <artifactId>org.eclipse.paho.client.mqttv3</artifactId>

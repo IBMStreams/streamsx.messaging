@@ -32,6 +32,7 @@ import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.Type;
 import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
+import com.ibm.streams.operator.log4j.LoggerNames;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.Icons;
 import com.ibm.streams.operator.model.InputPortSet;
@@ -49,6 +50,8 @@ import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streams.operator.state.StateHandler;
 import com.ibm.streams.operator.types.Blob;
 import com.ibm.streams.operator.types.RString;
+import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
+import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 
 /**
  * Class for an operator that consumes tuples and does not produce an output stream. 
@@ -80,7 +83,9 @@ description=SPLDocConstants.MQTTSINK_OP_DESCRIPTION)
 @Icons(location16="icons/MQTTSink_16.gif", location32="icons/MQTTSink_32.gif")
 public class MqttSinkOperator extends AbstractMqttOperator implements StateHandler{
 	 
+	private static final String CLASS_NAME = "com.ibm.streamsx.messaging.mqtt.MqttSinkOperator";
 	static Logger TRACE = Logger.getLogger(MqttSinkOperator.class);
+	static Logger LOGGER = Logger.getLogger(LoggerNames.LOG_FACILITY + "." + CLASS_NAME);
 	
 	// Parameters
 	private String topic;
@@ -122,7 +127,14 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 			String dataAttributeName = getDataAttributeName() == null ? IMqttConstants.MQTT_DEFAULT_DATA_ATTRIBUTE_NAME : getDataAttributeName();
 			
 			int dataAttrIndex = streamSchema.getAttributeIndex(dataAttributeName);
-			Type.MetaType dataAttributeType = streamSchema.getAttribute(dataAttributeName).getType().getMetaType();
+			
+			// if neither dataAttributeName is specified or schema attribute named "data" can be found
+			// then it is assumed this schema contains only a single attribute and it is the data attribute
+			if(dataAttrIndex == -1) {
+				dataAttrIndex = 0;
+			}
+			
+			Type.MetaType dataAttributeType = streamSchema.getAttribute(dataAttrIndex).getType().getMetaType();
 			
 			boolean isBlob = false;
 			if(dataAttributeType.equals(MetaType.BLOB))
@@ -311,7 +323,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 			
 			// if there is a control port, a warning message is issued as control port is not supported in a consistent region
 			if(inputPorts.size() > 1) {
-				TRACE.warn("Having a control port in a consistent region is not supported. The control information may not be replayed, persisted and restored correctly.  You may need to manually replay the control signals to bring the operator back to a consistent state.");
+				LOGGER.warn("Having a control port in a consistent region is not supported. The control information may not be replayed, persisted and restored correctly.  You may need to manually replay the control signals to bring the operator back to a consistent state.");
 			}
 			
 			if(cContext.isStartOfRegion()) {
@@ -381,17 +393,25 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 		
 		if (inputPorts.size() > 0)
 		{
-			// if user is not specifying dataAttributeName attribute, then we check if stream schema contains default data attribute
+			// if user is not specifying dataAttributeName attribute
+			// then we check if stream schema contains default data attribute
+			// or if schema contains only single attribute
 			if(!checker.getOperatorContext().getParameterNames().contains("dataAttributeName")) { //$NON-NLS-1$
 							
 				StreamingInput<Tuple> dataPort = inputPorts.get(0);
 			    StreamSchema streamSchema = dataPort.getStreamSchema();
-							
-			    Attribute data = streamSchema.getAttribute("data");
-							
+			    
+			    Attribute dataAttribute = null;
+			    if(streamSchema.getAttributeCount() == 1) {
+			    	dataAttribute = streamSchema.getAttribute(0);
+			    }
+			    else {
+			    	dataAttribute = streamSchema.getAttribute("data");
+			    }
+			    							
 			    // the default data attribute must be present and must be either BLOB or RSTRING
-			    if(data != null) {
-			    	checker.checkAttributeType(data, MetaType.RSTRING, MetaType.BLOB );
+			    if(dataAttribute != null) {
+			    	checker.checkAttributeType(dataAttribute, MetaType.RSTRING, MetaType.BLOB );
 			    }
 			    else {
 				    checker.setInvalidContext(Messages.getString("Error_MqttSinkOperator.5"), new Object[]{}); //$NON-NLS-1$
@@ -443,7 +463,44 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
        initRelaunching(context);
        // do not connect here... connection is done on the publish thread when a message
        // is ready to be published
-	} 
+    
+		// register for data governance
+		// if static topic, then register topic, else only register the server
+		if (topicAttributeName == null) {
+			registerForDataGovernance();
+		} else {
+			// register the "server" for governance
+			registerServerForDataGovernance();
+		}
+	}
+
+	private void registerForDataGovernance() {
+		String uri = getServerUri();
+		String topic = getTopics();
+		TRACE.log(TraceLevel.INFO,
+				"MQTTSink - Registering for data governance with server uri: " + uri + " and topic: " + topic);
+
+		if (topic != null && !topic.isEmpty() && uri != null && !uri.isEmpty()) {
+			DataGovernanceUtil.registerForDataGovernance(this, topic, IGovernanceConstants.ASSET_MQTT_TOPIC_TYPE, uri,
+					IGovernanceConstants.ASSET_MQTT_SERVER_TYPE, false, "MQTTSink");
+		} else {
+			TRACE.log(TraceLevel.INFO,
+					"MQTTSink - Registering for data governance -- aborted. topic and/or url is null");
+		}
+	}
+
+	private void registerServerForDataGovernance() {
+		String uri = getServerUri();
+		TRACE.log(TraceLevel.INFO, "MQTTSource - Registering only server for data governance with server uri: " + uri);
+
+		if (uri != null && !uri.isEmpty()) {
+			DataGovernanceUtil.registerForDataGovernance(this, uri, IGovernanceConstants.ASSET_MQTT_SERVER_TYPE, null,
+					null, false, "MQTTSink");
+		} else {
+			TRACE.log(TraceLevel.INFO,
+					"MQTTSource - Registering only server for data governance -- aborted. uri is null");
+		}
+	}
 	
 	/**
      * Notification that initialization is complete and all input and output ports 

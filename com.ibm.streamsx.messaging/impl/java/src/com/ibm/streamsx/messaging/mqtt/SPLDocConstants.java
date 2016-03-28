@@ -14,7 +14,7 @@ public class SPLDocConstants {
 	static final String MQTTSRC_OUTPUT_PORT_1 = "The optional output port is an error port where the operator submits a single tuple for each failed message. The tuple contains a single attribute of type rstring or ustring, which contains the details of the error message.";
 	static final String MQTTSRC_OUPUT_PORT_0 = "This is the data port and is mandatory.";
 	static final String MQTTSRC_INPUT_PORT0 = "This is the optional control port.  You can use the control port to update information at run time, such as the connection information that the operator uses to connect to an MQTT server, the topics that the operator subscribes to, or the QoS levels of the subscribed topics.";
-	static final String MQTTSRC_PARAM_PERIOD_DESC = "This parameter specifies the time period in seconds the operator waits before it tries to reconnect. It is an optional parameter of type float64. Default value is 60000 ms.";
+	static final String MQTTSRC_PARAM_PERIOD_DESC = "This parameter specifies the time period in milliseconds the operator waits before it tries to reconnect. It is an optional parameter of type int64. Default value is 60000 ms.";
 	static final String MQTTSRC_PARAM_RECONN_BOUND_DESC = "This optional parameter of type int32 specifies the number of successive connections that are attempted for an operator.  Specify 0 for no retry, n for n number of retries, -1 for inifinite retry.";
 	static final String MQTTSRC_PARAM_TOPICATTRNAME_DESC = "Output attribute on output data stream to assign message topic to.";
 	static final String MQTTSRC_PARAM_ERRORATTRNAME_DESC = "Output attribute on optional error output port to assign error message to.";
@@ -40,7 +40,7 @@ public class SPLDocConstants {
 
 	static final String MQTTSINK_PARAM_RETAIN_DESC = "Indicates if messages should be retained on the MQTT server.  Default is false.";
 
-	static final String MQTTSINK_PARAM_PERIOD_DESC = "This parameter specifies the time period in seconds the operator waits before it tries to reconnect. It is an optional parameter of type float64. Default value is 60000 ms.";
+	static final String MQTTSINK_PARAM_PERIOD_DESC = "This parameter specifies the time period in milliseconds the operator waits before it tries to reconnect. It is an optional parameter of type int64. Default value is 60000 ms.";
 
 	static final String MQTTSINK_PARAM_RECONN_BOUND_DESC = "This optional parameter of type int32 specifies the number of successive connections that are attempted for an operator.  Specify 0 for no retry, n for n number of retries, -1 for inifinite retry.";
 
@@ -72,5 +72,5 @@ public class SPLDocConstants {
 	public static final String MQTT_PARAM_PASSWORD_DESC = "This optional parameter sets the password to use for the connection. Must be specified when userID parameter is used, or compile time error will occur";
 	public static final String MQTT_PARAM_COMMAND_TIMEOUT_DESC = "This optional parameter is used to specify maximum time in millisecond to wait for an MQTT action to complete.  A MQTT action can include connecting to a server, or publshing to a message.  A value of 0 will cause the operator to wait indefinitely for an  action to complete.  A negative number will cause a runtime error. If unspecified, the default value for this parameter is 0.";
 	public static final String MQTT_PARAM_KEEP_ALIVE_INTERVAL_DESC = "This optional parameter, measured in seconds, sets the maximum time interval between messages sent or received. It enables the client to detect if the server is no longer available. By default, it is set to 60 seconds. A value of 0 will disable it. Negative number will cause a runtime error.";
-	public static final String MQTT_PARAM_DATA_ATTRIBUTE_DESC = "This optional parameter specifies the name of the attribute that is used to hold actual content of message, if not specified, default data attribute name is data";
+	public static final String MQTT_PARAM_DATA_ATTRIBUTE_DESC = "This optional parameter specifies the name of the attribute that is used to hold actual content of message, if not specified, in the case where multiple attributes are defined for the streams schema, the operator will look for attribute named data and use it as data attribute. In the case where the schema contains only a signle attribute, the operator will assume that the attribute is the data attribute";
 }

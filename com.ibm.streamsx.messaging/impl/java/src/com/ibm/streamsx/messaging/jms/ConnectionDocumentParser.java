@@ -4,8 +4,11 @@
  *******************************************************************************/
 package com.ibm.streamsx.messaging.jms;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -192,11 +195,45 @@ class ConnectionDocumentParser {
 		return msgClass;
 
 	}
+	
+	// Convert relative provider url path to absolute path for wmq only.
+	// non-absolute path should be relative to application directory.
+	// i.e file:./etc/ will be converted to applicationDir + ./etc/
+	private void convertProviderURLPath(File applicationDir) throws ParseConnectionDocumentException {
+		
+	   if(!isAMQ()) {
+		   
+		   // provider_url can not be empty
+		   if(this.providerURL == null || this.providerURL.trim().length() == 0) { 
+			   throw new ParseConnectionDocumentException("A value must be specified for provider_url attribute in connection document");
+		   }
+		   
+		   // provider_url has a value specified
+		   try {
+		       URL url = new URL(providerURL);
+		       
+		       // We only care about url with file scheme.
+		       if("file".equalsIgnoreCase(url.getProtocol())) {
+		    	   String path = url.getPath();
+		    	   
+		    	   // relative path is considered being relative to the application directory
+		    	   if(!path.startsWith("/")) {
+				          URL absProviderURL = new URL(url.getProtocol(), url.getHost(), applicationDir.getAbsolutePath() + File.separator + path);
+				    	  this.providerURL = absProviderURL.toExternalForm();
+				      }
+		       }
+		       
+		   } catch (MalformedURLException e) {
+			   throw new ParseConnectionDocumentException("Invalid provider_url value detected: " + e.getMessage());
+		   }
+		   
+	   }
+	}
 
 	// subroutine to parse and validate the connection document
 	// called by both the JMSSink and JMSSource
 	public void parseAndValidateConnectionDocument(String connectionDocument, String connection, String access,
-			StreamSchema streamSchema, boolean isProducer) throws ParseConnectionDocumentException, SAXException,
+			StreamSchema streamSchema, boolean isProducer, File applicationDir) throws ParseConnectionDocumentException, SAXException,
 			IOException, ParserConfigurationException {
 		// validate the connections document against the xsd
 		validateConnectionsXML(connectionDocument);
@@ -217,6 +254,8 @@ class ConnectionDocumentParser {
 		if (msgClass != MessageClass.empty) {
 			nativeSchemaChecks(isProducer, streamSchema, nativeSchema);
 		}
+		// convert provider_url to absolute if needed
+		convertProviderURLPath(applicationDir);
 	}
 
 	// subroutine to validate the connections document against the xsd
