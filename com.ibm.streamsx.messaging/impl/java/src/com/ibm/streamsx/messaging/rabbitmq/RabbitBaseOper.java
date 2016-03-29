@@ -47,21 +47,30 @@ public class RabbitBaseOper extends AbstractOperator {
 	private final Logger trace = Logger.getLogger(RabbitBaseOper.class
 			.getCanonicalName());
 	protected Boolean usingDefaultExchange = false;
+	private String URI = "";
 	
 	public synchronized void initialize(OperatorContext context)
 			throws Exception {
 		// Must call super.initialize(context) to correctly setup an operator.
 		super.initialize(context);
 		ConnectionFactory connectionFactory = new ConnectionFactory();
-		configureUsernameAndPassword(connectionFactory);
 		connectionFactory.setAutomaticRecoveryEnabled(autoRecovery);
 		
-		if (vHost != null)
-			connectionFactory.setVirtualHost(vHost);
 		
-		addressArr = buildAddressArray(hostAndPortList);
+		if (URI.isEmpty()){
+			configureUsernameAndPassword(connectionFactory);
+			if (vHost != null)
+				connectionFactory.setVirtualHost(vHost);
+			
+			addressArr = buildAddressArray(hostAndPortList);
+			connection = connectionFactory.newConnection(addressArr);
+		} else{
+			//use specified URI rather than username, password, vHost, hostname, etc
+			System.out.println("URI: " + URI);
+			connectionFactory.setUri(URI);
+			connection = connectionFactory.newConnection();
+		}
 		
-		connection = connectionFactory.newConnection(addressArr);
 		channel = initializeExchange();
 		
 		trace.log(TraceLevel.INFO,
@@ -144,7 +153,7 @@ public class RabbitBaseOper extends AbstractOperator {
 
 	}
 
-	@Parameter(optional = false, description = "List of host and port in form: \\\"myhost1:3456\\\",\\\"myhost2:3456\\\".")
+	@Parameter(optional = true, description = "List of host and port in form: \\\"myhost1:3456\\\",\\\"myhost2:3456\\\".")
 	public void setHostAndPort(List<String> value) {
 		hostAndPortList.addAll(value);
 	}
@@ -162,6 +171,11 @@ public class RabbitBaseOper extends AbstractOperator {
 	@Parameter(optional = true, description = "Optional attribute. Name of the RabbitMQ exchange type. Default direct.")
 	public void setExchangeType(String value) {
 		exchangeType = value;
+	}
+	
+	@Parameter(optional = true, description = "Convenience URI of form: amqp://userName:password@hostName:portNumber/virtualHost. If URI is specified, you cannot specify username, password, and host.")
+	public void setURI(String value) {
+		URI  = value;
 	}
 
 	@Parameter(optional = true, description = "Name of the attribute for the message. Default is \\\"message\\\".")
