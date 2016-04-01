@@ -66,7 +66,10 @@ public class RabbitBaseOper extends AbstractOperator {
 			connection = connectionFactory.newConnection(addressArr);
 		} else{
 			//use specified URI rather than username, password, vHost, hostname, etc
-			System.out.println("URI: " + URI);
+			if (!username.isEmpty() | !password.isEmpty() | vHost != null | !hostAndPortList.isEmpty()){
+				trace.log(TraceLevel.WARNING, "You specified a URI, therefore username, password"
+						+ ", vHost, and hostname parameters will be ignored.");
+			}
 			connectionFactory.setUri(URI);
 			connection = connectionFactory.newConnection();
 		}
