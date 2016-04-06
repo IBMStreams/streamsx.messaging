@@ -1,0 +1,186 @@
+namespace com.ibm.streamsx.messaging.perf.kafka;
+
+composite PerfBlobDataGenerator (output Out0 )
+{
+	param
+		expression<int32> $packetSize ;
+		expression<int32> $numTuples : -1 ;
+	graph
+		(stream<blob message> Out0) as Custom_1 = Custom()
+		{
+			logic
+				onProcess :
+				{
+					mutable int32 i = 0 ;
+					mutable rstring value = "" ;
+					mutable blob blobValue;
+					while(i < $packetSize)
+					{
+						value += "a" ;
+						i ++ ;
+					}
+					blobValue = convertToBlob(value);
+					printStringLn("Generated Tuple to submit.") ;
+					mutable int32 tupleCnt = 0 ;
+					
+					if ($numTuples == -1)
+					{
+						while (!isShutdown())
+						{
+							submit({ message = blobValue}, Out0) ;
+							tupleCnt ++ ;	
+						}
+					}
+					else {
+						while(tupleCnt < $numTuples)
+						{
+							submit({ message = blobValue}, Out0) ;
+							tupleCnt ++ ;						
+						}
+					}
+
+					printStringLn("Submitted all tuples: " +(rstring) tupleCnt) ;
+				}
+
+		}
+
+}
+
+public composite PerfDataGenerator(output Out0 )
+{
+	param
+		expression<int32> $packetSize ;
+		expression<int32> $numTuples : -1 ;
+	graph
+		(stream<rstring message> Out0) as Custom_1 = Custom()
+		{
+			logic
+				onProcess :
+				{
+					mutable int32 i = 0 ;
+					mutable rstring value = "" ;
+					while(i < $packetSize)
+					{
+						value += "a" ;
+						i ++ ;
+					}
+
+					printStringLn("Generated Tuple to submit.") ;
+					mutable int32 tupleCnt = 0 ;
+					
+					if ($numTuples == -1)
+					{
+						while (!isShutdown())
+						{
+							submit({ message = value }, Out0) ;
+							tupleCnt ++ ;	
+						}
+					}
+					else {
+						while(tupleCnt < $numTuples)
+						{
+							submit({ message = value }, Out0) ;
+							tupleCnt ++ ;						
+						}
+					}
+
+					printStringLn("Submitted all tuples: " +(rstring) tupleCnt) ;
+				}
+
+		}
+
+}
+
+public composite FlowCalculator(input In0 ; output Out0)
+{
+	param
+		expression<float64> $period;
+		
+	graph
+		(stream<In0> Out0 ; stream<float64 flowRate> Custom_2_out1) as
+			Custom_2 = Custom(In0)
+		{			
+			logic 
+			state: {
+				mutable timestamp lastTimeStamp;
+				mutable int64 lastTupleCnt=0;
+				mutable int64 tupleCnt=0;
+			}
+			
+			onTuple In0: {									
+				timestamp current = getTimestamp();
+				if (tupleCnt == 0l)
+				{
+					lastTimeStamp = current;
+				}
+				
+				tupleCnt++;
+				
+				float64 seconds = diffAsSecs(current,lastTimeStamp);
+				if (seconds >= $period)
+				{
+					float64 flowRate = ((float64)(tupleCnt-lastTupleCnt))/seconds;
+					lastTupleCnt = tupleCnt;
+					lastTimeStamp = current;
+					submit({flowRate=flowRate},Custom_2_out1 );
+				}
+				
+				submit(In0, Out0);
+			}
+		}
+
+		() as FileSink_3 = Custom(Custom_2_out1)
+		{
+			logic 
+				onTuple Custom_2_out1 : {
+					printStringLn(ctime(getTimestamp()) + " FlowRate: " + (rstring)flowRate);
+				}
+		}
+
+}
+
+public composite FlowCalculatorNoOutput(input In0)
+{
+	param
+		expression<float64> $period;
+		
+	graph
+		(stream<float64 flowRate> Custom_2_out1) as
+			Custom_2 = Custom(In0)
+		{			
+			logic 
+			state: {
+				mutable timestamp lastTimeStamp;
+				mutable int64 lastTupleCnt=0;
+				mutable int64 tupleCnt=0;
+			}
+			
+			onTuple In0: {									
+				timestamp current = getTimestamp();
+				if (tupleCnt == 0l)
+				{
+					lastTimeStamp = current;
+				}
+				
+				tupleCnt++;
+				
+				float64 seconds = diffAsSecs(current,lastTimeStamp);
+				if (seconds >= $period)
+				{
+					float64 flowRate = ((float64)(tupleCnt-lastTupleCnt))/seconds;
+					lastTupleCnt = tupleCnt;
+					lastTimeStamp = current;
+					submit({flowRate=flowRate},Custom_2_out1 );
+				}
+			}
+		}
+
+		() as FileSink_3 = Custom(Custom_2_out1)
+		{
+			logic 
+				onTuple Custom_2_out1 : {
+					printStringLn(ctime(getTimestamp()) + " FlowRate: " + (rstring)flowRate);
+				}
+		}
+
+}
