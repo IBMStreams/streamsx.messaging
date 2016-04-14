@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="spldoc_operator">
+<title>Operator <tt>JMSSink</tt></title>
+<refbody>
+<section>
+<p>
+<xref href="../toolkits/toolkits.xml">IBMStreams com.ibm.streamsx.messaging Toolkit</xref> &gt; <xref href="tk$com.ibm.streamsx.messaging.xml">com.ibm.streamsx.messaging 2.0.0</xref> &gt; <xref href="ns$com.ibm.streamsx.messaging.jms.xml">com.ibm.streamsx.messaging.jms</xref> &gt; JMSSink</p>
+</section>
+<section>
+
+<p>The <tt>JMSSink</tt> operator creates messages from InfoSphere Streams tuples and writes the messages to a WebSphere MQ or an Apache Active MQ queue or topic.
+</p>
+<p>The incoming tuple from InfoSphere Streams can contain one or more attributes, each of which can be of the following data types: int8, uint8, int16, uint16, int32, uint32, int64, uint64, float32, float64, boolean, blob, rstring, decimal32, decimal64, decimal128, ustring, or timestamp. The input tuple is serialized into a JMS message. For the <tt>JMSSink</tt> operator, the following message classes are supported: map, stream, bytes, xml, wbe, wbe22, and empty. The type of message is specified as the value of the message_class attribute in the connection specifications document.
+</p>
+<p><b>Exceptions</b>
+</p>
+<p>The following list describes the common types of exceptions that can occur:
+<ul>
+<li> Runtime errors that halt the operator execution.
+<ul>
+<li> The <tt>JMSSink</tt> operator throws an exception and terminates in the following cases. For some exceptions, the trace and log information is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
+<ul>
+<li> During the initial connection attempt or during transient reconnection failures, if the <b>reconnectionPolicy</b> is set to <tt>NoRetry</tt> and the operator does not have a successful connection, or the <b>reconnectionPolicy</b> is set to <tt>BoundedRetry</tt> and the operator does not have a successful connection after the number of attempts that are specified in the <b>reconnectionBound</b> parameter. Successive data is lost.</li>
+<li> The queue name is unknown.</li>
+<li> The queue manager name is unknown.</li>
+<li> The operator is unable to connect to the host.</li>
+<li> The operator is unable to connect o the port.</li>
+<li> There is a mismatch between the data type of one or more attributes in the native schema and the data type of attributes in the input stream.</li>
+<li> One or more native schema attributes do not have a matching attribute in the input stream schema.</li>
+<li> The <b>connectionsDocument</b> parameter refers to an file that does not exist.</li>
+<li> The <b>connectionsDocument</b> parameter is not specified and the <tt>connections.xml</tt> file is not present in the default location.</li>
+<li> An invalid value is specified for the message_class attribute of the access specification.</li>
+<li> A negative length is specified for a string or blob data types in the native schema for a map, stream, xml, wbe, or wbe22 message class.</li>
+<li> A negative length other than -2 or -4 is specified for a string/blob data type in the native_schema for a bytes message class.</li>
+<li> The message_class attribute is empty, but the &lt;native_schema&gt; element is not empty.</li>
+</ul></li>
+</ul></li>
+<li> Runtime errors that cause a message to be dropped and an error message to be logged.
+<ul>
+<li> The <tt>JMSink</tt> operator throws an exception and discards the message in the following cases. The trace and log information for these exceptions is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
+<ul>
+<li>  The data being written is longer than the maximum message length specified in the queue. The discarded message is not sent to the WebSphere MQ or Apache Active MQ queue or topic.</li>
+<li> The <b>reconnectionBound</b> parameter is specified, but the <b>reconnectionPolicy</b> parameter is set to a value other than <tt>BoundedRetry</tt>.</li>
+</ul></li>
+</ul></li>
+<li> Compile-time errors.
+<ul>
+<li> The <tt>JMSink</tt> operator throws a compile-time error in the following cases. The trace and log information for these exceptions is logged in the console logs and also output to the optional output port if the application is configured to use the optional port.
+<ul>
+<li> The mandatory parameters, connection and access are not specified.</li>
+<li> The <b>period</b> parameter is specified, but the <b>reconnectionPolicy</b> parameter is not specified.</li>
+<li> The <b>reconnectionBound</b> parameter is specified, but the <b>reconnectionPolicy</b> parameter is not specified.</li>
+<li> The environment variables <b>STREAMS_MESSAGING_WMQ_HOME</b> and <b>STREAMS_MESSAGING_AMQ_HOME</b> are not set to the locations where the WMQ and AMQ libraries are installed.</li>
+</ul></li>
+</ul></li>
+</ul>
+</p>
+<p><b>Examples</b>
+</p>
+<p>The following example show the use of multiple JMSSink operators with different parameter combinations:
+</p>
+<p>
+<codeblock>
+<![CDATA[composite Main {
+graph	
+
+stream <int32 id, rstring fname, rstring lname>
+MyPersonNamesStream  = Beacon()
+{
+param
+	iterations:10u;
+}	
+
+// JMSSink operator with connections document in the default directory ../etc/connections.xml
+// (relative to the data directory)
+() as  MySink1 = JMSSink( MyPersonNamesStream )
+{
+param
+	connection : "amqConn";	
+	access     : "amqAccess";
+}	
+
+// JMSSink operator with fully qualified name of connections document
+() as  MySink2 = JMSSink( MyPersonNamesStream )
+{
+param
+	connectionDocument   : "/home/streamsuser/connections/JMSconnections.xml";
+	connection           : "amqConn";
+	access               : "amqAccess";
+}	
+
+// JMSSink operator with optional output error port specified
+stream <tuple< int32 id, rstring fname, rstring lname> inTuple, rstring errorMessage>
+MySink3  = JMSSink(MyPersonNamesStream )
+{
+param
+	connection : "amqConn";	
+	access     : "amqAccess";
+}
+// JMSSink operator with reconnectionPolicy specified as  NoRetry
+() as  MySink4 = JMSSink( MyPersonNamesStream )
+{
+param
+	connection         : "amqConn";
+	access             : "amqAccess";
+	reconnectionPolicy : "NoRetry";
+}	
+
+// JMSSink operator with optional period and reconnectionPolicy specified
+() as  MySink5 = JMSSink( MyPersonNamesStream )
+{
+param
+	connection: "amqConn";	
+	access: "amqAccess";
+	reconnectionPolicy : "InfiniteRetry";
+	period: 1.20;
+}
+// JMSSink operator with reconnectionPolicy specified as BoundedRetry
+() as  MySink6 = JMSSink( MyPersonNamesStream )
+{
+param
+	connection: "amqConn";	
+	access: "amqAccess"; 
+	reconnectionPolicy : "BoundedRetry";
+	reconnectionBound : 2;
+	period: 1.20;
+}
+}
+]]></codeblock>
+
+</p>
+<p>The following example shows a sample connections.xml file:
+</p>
+<p>
+<codeblock>
+<![CDATA[<st:connections 	xmlns:st="http://www.ibm.com/xmlns/prod/streams/adapters"
+					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">	
+
+<connection_specifications>
+	<connection_specification name="amqConn">
+	 <JMS initial_context="org.apache.activemq.jndi.ActiveMQInitialContextFactory"
+		provider_url = "tcp://machine1.com:61616"
+		connection_factory="ConnectionFactory"/>
+	</connection_specification>
+</connection_specifications>	
+
+<access_specifications>
+	<access_specification name="amqAccess">
+		<destination identifier="dynamicQueues/MapQueue" message_class="bytes" />
+			<uses_connection connection="amqConn"/>
+			<native_schema>
+				<attribute name="id" type="Int" />
+				<attribute name="fname" type="Bytes" length="15" />
+				<attribute name="lname" type="Bytes" length="20" />
+				<attribute name="age" type="Int" />
+				<attribute name="gender" type="Bytes" length="1" />
+				<attribute name="score" type="Float" />
+				<attribute name="total" type="Double" />
+			</native_schema>
+	</access_specification>
+</access_specifications>
+</st:connections>
+]]></codeblock>
+
+</p>
+</section>
+<section outputclass="splprimop">
+<object type="image/svg+xml" data="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSink.svg" width="672" height="112">
+<desc>Primitive operator image not displayed. Problem loading file: ../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSink.svg
+</desc>
+</object>
+</section>
+<section>
+<title outputclass="splhead-1">Summary</title>
+<dl compact="yes">
+ <dlentry>
+  <dt>Ports</dt>
+  <dd>This operator has 1 input port and 1 output port.</dd>
+ </dlentry>
+ <dlentry>
+  <dt>Windowing</dt>
+  <dd>This operator does not accept any windowing configurations.</dd>
+ </dlentry>
+ <dlentry>
+  <dt>Parameters</dt>
+  <dd>This operator supports 7 parameters. (<tt>codepage, reconnectionPolicy, reconnectionBound, period, access, connection, connectionDocument</tt>)
+</dd>
+ </dlentry>
+ <dlentry>
+  <dt>Metrics</dt>
+  <dd>This operator reports 3 metrics.</dd>
+ </dlentry>
+</dl></section>
+<section>
+<title outputclass="splhead-1">Properties</title>
+<dl compact="yes">
+ <dlentry>
+  <dt>Implementation</dt>
+  <dd>Java</dd>
+ </dlentry>
+</dl>
+</section>
+<section>
+<p outputclass="splhead-1"><b><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/input_port_set">Input Ports</xref></b></p><dl>
+  <dlentry>
+   <dt>Ports (0)</dt>
+   <dd>
+
+<p>The JMSSink operator is configurable with a single input port.  This input port is a data port and is required. The input port is non-mutating and its punctuation mode is Oblivious.		 
+</p>   </dd>
+  </dlentry>
+    <dlentry>
+      <dt>Properties</dt>
+      <dd>
+   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/input_port_set__optional">Optional</xref>: false
+     </sli>
+   </sl>
+   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/input_port_set__controlport">ControlPort</xref>: false
+</sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/input_port_set__windowingmode">WindowingMode</xref>: NonWindowed
+</sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/input_port_set__windowpunctuationinputmode">WindowPunctuationInputMode</xref>: Oblivious
+</sli>
+   </sl>
+      </dd>
+    </dlentry>
+</dl>
+</section>
+<section>
+<p outputclass="splhead-1"><b><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/output_port_set">Output Ports</xref></b></p><dl>
+  <dlentry>
+     <dt>Assignments</dt>
+       <dd>Java operators do not support output assignments.
+       </dd>
+  </dlentry>
+</dl>
+<dl>
+  <dlentry>
+   <dt>Ports (0)</dt>
+   <dd>
+
+<p>The JMSSink operator is configurable with an optional output port that submits the error message and the tuple(optional) that caused this error. The optional output port is mutating and its punctuation mode is Free. This optional error output port contains an optional first attribute that contains the input tuple that caused the error and a second attribute of type rstring that contains the error message. Only one error message is sent for each failed tuple.
+</p>
+<p></p>
+   <dl>
+    <dlentry>
+      <dt>Properties</dt>
+      <dd>
+   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/output_port_set__optional">Optional</xref>: true
+     </sli>
+   </sl>
+   <sl>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/output_port_set__windowpunctuationoutputmode">WindowPunctuationOutputMode</xref>: Free
+     </sli>
+   </sl>
+      </dd>
+    </dlentry>
+   </dl>
+   <p></p>
+   </dd>
+  </dlentry>
+</dl>
+</section>
+<section>
+<p outputclass="splhead-1"><b><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters">Parameters</xref></b></p>
+<dl>
+<dlentry>
+<dt id="parameter_codepage"><tt>codepage</tt></dt>
+<dd>
+<p>This optional parameter specifies the code page of the target system that is used to convert ustring for a Bytes message type. If this parameter is specified, it must have exactly one value, which is a String constant. If the parameter is not specified, the operator uses the default value of UTF8.
+</p><dl>
+<dlentry>
+ <dt>Properties </dt>
+ <dd>
+  <sl>
+  <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__type">Type</xref>: rstring
+  </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__cardinality">Cardinality</xref>: 1
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__optional">Optional</xref>: true
+     </sli>
+  </sl>
+ </dd>
+</dlentry>
+</dl>
+</dd>
+</dlentry>
+<dlentry>
+<dt id="parameter_reconnectionPolicy"><tt>reconnectionPolicy</tt></dt>
+<dd>
+<p>This is an optional parameter that specifies the reconnection policy. The valid values are <tt>NoRetry</tt>, <tt>InfiniteRetry</tt>, and <tt>BoundedRetry</tt>. If the parameter is not specified, the reconnection policy is set to <tt>BoundedRetry</tt> with a <b>reconnectionBound</b> of <tt>5</tt> and a <b>period</b> of 60 seconds.
+</p><dl>
+<dlentry>
+ <dt>Properties </dt>
+ <dd>
+  <sl>
+  <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__type">Type</xref>: rstring
+  </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__cardinality">Cardinality</xref>: 1
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__optional">Optional</xref>: true
+     </sli>
+  </sl>
+ </dd>
+</dlentry>
+</dl>
+</dd>
+</dlentry>
+<dlentry>
+<dt id="parameter_reconnectionBound"><tt>reconnectionBound</tt></dt>
+<dd>
+<p>This optional parameter of type int32 specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the <b>reconnectionPolicy</b> parameter is specified and set to <tt>BoundedRetry</tt>, otherwise a runtime error occurs. If the <b>reconnectionBound</b> parameter is specified and the <b>reconnectionPolicy</b> parameter is not set, a compile-time error occurs. The default value for the <b>reconnectionBound</b> parameter is <tt>5</tt>. 
+</p><dl>
+<dlentry>
+ <dt>Properties </dt>
+ <dd>
+  <sl>
+  <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__type">Type</xref>: int32
+  </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__cardinality">Cardinality</xref>: 1
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__optional">Optional</xref>: true
+     </sli>
+  </sl>
+ </dd>
+</dlentry>
+</dl>
+</dd>
+</dlentry>
+<dlentry>
+<dt id="parameter_period"><tt>period</tt></dt>
+<dd>
+<p>This parameter specifies the time period in seconds the operator waits before it tries to reconnect. It is an optional parameter of type float64. You can use this parameter only when the <b>reconnectionPolicy</b> parameter is specified, otherwise a compile-time error occurs. The default value for the <b>period</b> parameter is <tt>60</tt>.		 
+</p><dl>
+<dlentry>
+ <dt>Properties </dt>
+ <dd>
+  <sl>
+  <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__type">Type</xref>: float64
+  </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__cardinality">Cardinality</xref>: 1
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__optional">Optional</xref>: true
+     </sli>
+  </sl>
+ </dd>
+</dlentry>
+</dl>
+</dd>
+</dlentry>
+<dlentry>
+<dt id="parameter_access"><tt>access</tt></dt>
+<dd>
+<p>This mandatory parameter identifies the access specification name.
+</p><dl>
+<dlentry>
+ <dt>Properties </dt>
+ <dd>
+  <sl>
+  <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__type">Type</xref>: rstring
+  </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__cardinality">Cardinality</xref>: 1
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__optional">Optional</xref>: false
+     </sli>
+  </sl>
+ </dd>
+</dlentry>
+</dl>
+</dd>
+</dlentry>
+<dlentry>
+<dt id="parameter_connection"><tt>connection</tt></dt>
+<dd>
+<p>This mandatory parameter identifies the name of the connection specification that contains a JMS element.
+</p><dl>
+<dlentry>
+ <dt>Properties </dt>
+ <dd>
+  <sl>
+  <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__type">Type</xref>: rstring
+  </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__cardinality">Cardinality</xref>: 1
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__optional">Optional</xref>: false
+     </sli>
+  </sl>
+ </dd>
+</dlentry>
+</dl>
+</dd>
+</dlentry>
+<dlentry>
+<dt id="parameter_connectionDocument"><tt>connectionDocument</tt></dt>
+<dd>
+<p>This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the connection and access parameters. If the parameter is not specified, the operator uses the file that is in the default location <tt>../etc/connections.xml</tt>.
+</p><dl>
+<dlentry>
+ <dt>Properties </dt>
+ <dd>
+  <sl>
+  <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__type">Type</xref>: rstring
+  </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__cardinality">Cardinality</xref>: 1
+     </sli>
+     <sli><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/parameters__parameter__optional">Optional</xref>: true
+     </sli>
+  </sl>
+ </dd>
+</dlentry>
+</dl>
+</dd>
+</dlentry>
+</dl>
+</section>
+<section>
+<p outputclass="splhead-1"><b><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__codetemplate">Code Templates</xref></b></p>  <dl>
+    <dlentry>
+     <dt>JMSSink</dt>
+     <dd>
+       <codeblock>
+<![CDATA[() as ${sinkPrefix}Sink = JMSSink(${inputStream})   {
+            param
+            	connection : "${ConnectionSpecificationName}";
+                access : "${AccessSpecificationName}";
+        }]]>
+      </codeblock>
+     <p></p>
+     </dd>
+    </dlentry>
+  </dl>
+</section>
+<section>
+<p outputclass="splhead-1"><b><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__metrics">Metrics</xref></b></p><dl>
+  <dlentry>
+    <dt><tt>nTruncatedInserts</tt> - <xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__metrics_kind_counter">Counter</xref></dt>
+    <dd>
+
+<p>The number of tuples that had truncated attributes when they were converted to a message.
+</p>
+     <p></p>
+     </dd>
+  </dlentry>
+  <dlentry>
+    <dt><tt>nFailedInserts</tt> - <xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__metrics_kind_counter">Counter</xref></dt>
+    <dd>
+
+<p>The number of failed inserts to the WebSphere MQ or the Apache ActiveMQ. Failed insertions can occur when a message is dropped because of a runtime error.
+</p>
+     <p></p>
+     </dd>
+  </dlentry>
+  <dlentry>
+    <dt><tt>nReconnectionAttempts</tt> - <xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__metrics_kind_counter">Counter</xref></dt>
+    <dd>
+
+<p>The number of reconnection attempts that are made before a successful connection.
+</p>
+     <p></p>
+     </dd>
+  </dlentry>
+</dl>
+</section>
+<section>
+<p outputclass="splhead-1"><b><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__dependencies">Libraries</xref></b></p>
+ <dl>
+ <dlentry>
+  <dt>Java operator class library
+  </dt>
+  <dd/>
+  <dd><xref href="../references/OperatorModel.xml#spldoc_reference_operator_model/context__dependencies__managedlibrary__libpath">Library Path</xref>: <tt>../../impl/java/bin, ../../impl/lib/com.ibm.streamsx.messaging.jar</tt></dd>
+ </dlentry>
+ </dl>
+</section>
+</refbody>
+</reference>
+

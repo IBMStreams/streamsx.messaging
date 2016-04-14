@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<map id="spldoc_map">
+<title>IBMStreams com.ibm.streamsx.messaging Toolkit</title>
+<topicref navtitle="IBMStreams com.ibm.streamsx.messaging Toolkit" locktitle="yes" href="toolkits/toolkits.xml" toc="yes" linking="normal">
+<topicref navtitle="Functions" locktitle="yes" href="toolkits/ix$Function.xml" toc="yes" linking="none">
+</topicref>
+<topicref navtitle="Operators" locktitle="yes" href="toolkits/ix$Operator.xml" toc="yes" linking="none">
+</topicref>
+<topicref navtitle="Types" locktitle="yes" href="toolkits/ix$Type.xml" toc="yes" linking="none">
+</topicref>
+<topicref navtitle="com.ibm.streamsx.messaging 2.0.0" locktitle="yes" href="tk$com.ibm.streamsx.messaging/tk$com.ibm.streamsx.messaging.xml" toc="yes" linking="none">
+<topicref navtitle="Functions" locktitle="yes" href="tk$com.ibm.streamsx.messaging/ix$Function.xml" toc="yes" linking="none">
+</topicref>
+<topicref navtitle="Operators" locktitle="yes" href="tk$com.ibm.streamsx.messaging/ix$Operator.xml" toc="yes" linking="none">
+</topicref>
+<topicref navtitle="Types" locktitle="yes" href="tk$com.ibm.streamsx.messaging/ix$Type.xml" toc="yes" linking="none">
+</topicref>
+<topicref navtitle="com.ibm.streamsx.messaging.jms" locktitle="yes" href="tk$com.ibm.streamsx.messaging/ns$com.ibm.streamsx.messaging.jms.xml" toc="yes" linking="none">
+<topicref navtitle="JMSSink" locktitle="yes" href="tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSink.xml" toc="yes" linking="none">
+</topicref>
+<topicref navtitle="JMSSource" locktitle="yes" href="tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSource.xml" toc="yes" linking="none">
+</topicref>
+</topicref>
+<topicref navtitle="com.ibm.streamsx.messaging.kafka" locktitle="yes" href="tk$com.ibm.streamsx.messaging/ns$com.ibm.streamsx.messaging.kafka.xml" toc="yes" linking="none">
+<topicref navtitle="KafkaConsumer" locktitle="yes" href="tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.kafka$KafkaConsumer.xml" toc="yes" linking="none">
+</topicref>
+<topicref navtitle="KafkaProducer" locktitle="yes" href="tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.kafka$KafkaProducer.xml" toc="yes" linking="none">
+</topicref>
+</topicref>
+<topicref navtitle="com.ibm.streamsx.messaging.mqtt" locktitle="yes" href="tk$com.ibm.streamsx.messaging/ns$com.ibm.streamsx.messaging.mqtt.xml" toc="yes" linking="none">
+<topicref navtitle="MQTTSink" locktitle="yes" href="tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.mqtt$MQTTSink.xml" toc="yes" linking="none">
+</topicref>
+<topicref navtitle="MQTTSource" locktitle="yes" href="tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.mqtt$MQTTSource.xml" toc="yes" linking="none">
+</topicref>
+<topicref navtitle="MSGTypes.spl" locktitle="yes" href="tk$com.ibm.streamsx.messaging/spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml" toc="yes" linking="none">
+</topicref>
+</topicref>
+<topicref navtitle="com.ibm.streamsx.messaging.xms" locktitle="yes" href="tk$com.ibm.streamsx.messaging/ns$com.ibm.streamsx.messaging.xms.xml" toc="yes" linking="none">
+<topicref navtitle="XMSSink" locktitle="yes" href="tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSink.xml" toc="yes" linking="none">
+</topicref>
+<topicref navtitle="XMSSource" locktitle="yes" href="tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSource.xml" toc="yes" linking="none">
+</topicref>
+</topicref>
+</topicref>
+<topicref navtitle="Operator Model" locktitle="yes" href="references/OperatorModel.xml" toc="yes" linking="none">
+</topicref>
+</topicref>
+</map>
+

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="spldoc_toolkit">
+<title outputclass="spltoolkitname">Toolkit <tt>com.ibm.streamsx.messaging 2.0.0</tt></title>
+<refbody>
+<section>
+<p>
+<xref href="../toolkits/toolkits.xml">IBMStreams com.ibm.streamsx.messaging Toolkit</xref> &gt; com.ibm.streamsx.messaging 2.0.0</p>
+</section>
+<section>
+<title outputclass="splhead-1">General Information</title>
+
+<p>The Messaging toolkit project is an open source IBM InfoSphere Streams toolkit project. It is focused on the development of operators and functions that help you use InfoSphere Streams to interact with messaging systems such as JMS, XMS, and MQTT. 
+</p>
+<p>The operators provide the ability for InfoSphere Streams applications to send and receive data from a queue or topic that is posted on WebSphere MQ, Apache ActiveMQ or MQ Telemetry Transport (MQTT) server.
+</p>
+<p>In particular, the XMSSource and XMSSink operators in the Messaging Toolkit use the standard XMS architecture and APIs to read and write data from WebSphere MQ 7.0, 7.1, and 7.5. The JMSource and JMSSink operators use the standard JMS architecture and JMS 1.1 APIs to read and write data from WebSphere MQ v7.5 and Apache ActiveMQ v5.7. The MQTTSource and MQTTSink operators use the MQTT architecture and APIs to read and write to MQTT 3.1.
+</p>
+<p><b>Restriction</b>: The XMSSource, XMSSink, MQTTSource and MQTTSink operators in the Messaging Toolkit are not supported on POWER7 Systems. You must use x86_64 systems. The JMSource and JMSSink operators do not support reading and writing data from Apache Active MQ on POWER7 Systems.
+</p>
+<p>The following figure shows how the XMSSink and XMSSource operators in the Messaging Toolkit use standard XMS architecture and APIs.  {file:doc/images/8751_dgm1.gif|This diagram illustrates the XMS APIs that are used to communicate between InfoSphere Streams, an XMS client, and a WebSphere MQ server.}
+</p>
+<p>For example:
+<ul>
+<li> The CreateProducer API creates a message producer to send messages to the specified destination.</li>
+<li> The CreateConsumer API creates a message consumer for the specified destination.</li>
+<li> The CreateConnection API creates a connection that uses a specified user identity. The specified user identifier and password are used to authenticate the application.</li>
+</ul>
+</p>
+<p>The following figure shows how the JMSSource and JMSSink operators in the Messaging Toolkit use standard JMS architecture and APIs. {file:doc/images/architecture_diagram_JMSadpaters.gif|This figure shows JMSSource and JMSSink operators that use Apache ActiveMQ and WebSphere MQ libraries to read and write from JMS providers.}
+</p>
+<p>The Messaging Toolkit operators must be configured to connect to messaging systems. This configuration information is specified in an XML document, called a connection specifications document. The connection specifications document is similar to but separate from the document that is used by the Database Toolkit. 
+</p>
+<dl>
+  <dlentry>
+  <dt>Version</dt>
+  <dd>2.0.0</dd>
+  </dlentry>
+  <dlentry>
+  <dt>Required Product Version</dt>
+  <dd>3.2.2</dd>
+  </dlentry>
+  <dlentry>
+  <dt>Author</dt>
+  <dd>IBMStreams Open Source Community at GitHub - https://github.com/IBMStreams/streamsx.messaging</dd>
+  </dlentry>
+</dl>
+</section>
+<section>
+  <title outputclass="splhead-1">Indexes</title>
+<dl>
+  <dlentry><dt><xref href="ix$Function.xml">Functions</xref></dt><dd></dd></dlentry>
+  <dlentry><dt><xref href="ix$Operator.xml">Operators</xref></dt><dd></dd></dlentry>
+  <dlentry><dt><xref href="ix$Type.xml">Types</xref></dt><dd></dd></dlentry>
+</dl>
+</section>
+<section>
+  <title outputclass="splhead-1">Namespaces</title>
+  <dl>
+    <dlentry>
+      <dt outputclass="splpart"><xref href="ns$com.ibm.streamsx.messaging.jms.xml">com.ibm.streamsx.messaging.jms</xref></dt>
+      <dd><dl><dlentry>
+        <dt>Operators</dt>
+        <dd><sl>
+          <sli><xref href="op$com.ibm.streamsx.messaging.jms$JMSSink.xml">JMSSink</xref></sli>
+          <sli><xref href="op$com.ibm.streamsx.messaging.jms$JMSSource.xml">JMSSource</xref></sli>
+        </sl></dd>
+      </dlentry></dl></dd>
+     </dlentry>    <dlentry>
+      <dt outputclass="splpart"><xref href="ns$com.ibm.streamsx.messaging.kafka.xml">com.ibm.streamsx.messaging.kafka</xref></dt>
+      <dd><dl><dlentry>
+        <dt>Operators</dt>
+        <dd><sl>
+          <sli><xref href="op$com.ibm.streamsx.messaging.kafka$KafkaConsumer.xml">KafkaConsumer</xref></sli>
+          <sli><xref href="op$com.ibm.streamsx.messaging.kafka$KafkaProducer.xml">KafkaProducer</xref></sli>
+        </sl></dd>
+      </dlentry></dl></dd>
+     </dlentry>    <dlentry>
+      <dt outputclass="splpart"><xref href="ns$com.ibm.streamsx.messaging.mqtt.xml">com.ibm.streamsx.messaging.mqtt</xref></dt>
+      <dd><dl><dlentry>
+        <dt>Operators</dt>
+        <dd><sl>
+          <sli><xref href="op$com.ibm.streamsx.messaging.mqtt$MQTTSink.xml">MQTTSink</xref></sli>
+          <sli><xref href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml#spldoc_compilationunit/composite_operator__MQTTSinkUpdate">MQTTSinkUpdate</xref></sli>
+          <sli><xref href="op$com.ibm.streamsx.messaging.mqtt$MQTTSource.xml">MQTTSource</xref></sli>
+          <sli><xref href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml#spldoc_compilationunit/composite_operator__MQTTSourceUpdate">MQTTSourceUpdate</xref></sli>
+        </sl></dd>
+      </dlentry></dl></dd>
+      <dd><dl><dlentry>
+        <dt>Functions</dt>
+        <dd><sl>
+          <sli><xref href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml#spldoc_compilationunit/function__newControlSignal.MQTTSourceUpdate.TopicsUpdateAction.list:.:rstring:.:.uint32"><![CDATA[public MQTTSourceUpdate.ControlPortType newControlSignal(MQTTSourceUpdate.TopicsUpdateAction action, list<rstring> topics, uint32 qos)]]></xref></sli>
+        </sl></dd>
+      </dlentry></dl></dd>
+      <dd><dl><dlentry>
+        <dt>Types</dt>
+        <dd><sl>
+          <sli><xref href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml#spldoc_compilationunit/composite_type__MQTTSinkUpdate.ControlPortType">MQTTSinkUpdate.ControlPortType</xref></sli>
+          <sli><xref href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml#spldoc_compilationunit/composite_type__MQTTSourceUpdate.TopicsUpdateDesc">MQTTSourceUpdate.TopicsUpdateDesc</xref></sli>
+          <sli><xref href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml#spldoc_compilationunit/composite_type__MQTTSourceUpdate.TopicsUpdateAction">MQTTSourceUpdate.TopicsUpdateAction</xref></sli>
+          <sli><xref href="spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml#spldoc_compilationunit/composite_type__MQTTSourceUpdate.ControlPortType">MQTTSourceUpdate.ControlPortType</xref></sli>
+        </sl></dd>
+      </dlentry></dl></dd>
+     </dlentry>    <dlentry>
+      <dt outputclass="splpart"><xref href="ns$com.ibm.streamsx.messaging.xms.xml">com.ibm.streamsx.messaging.xms</xref></dt>
+      <dd><dl><dlentry>
+        <dt>Operators</dt>
+        <dd><sl>
+          <sli><xref href="op$com.ibm.streamsx.messaging.xms$XMSSink.xml">XMSSink</xref></sli>
+          <sli><xref href="op$com.ibm.streamsx.messaging.xms$XMSSource.xml">XMSSource</xref></sli>
+        </sl></dd>
+      </dlentry></dl></dd>
+     </dlentry></dl>
+</section>
+</refbody>
+</reference>
+

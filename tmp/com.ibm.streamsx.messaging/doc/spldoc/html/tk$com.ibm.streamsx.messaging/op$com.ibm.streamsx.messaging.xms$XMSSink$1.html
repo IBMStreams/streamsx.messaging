@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a> &gt; <a class="xref" href="op$com.ibm.streamsx.messaging.xms$XMSSink.html">XMSSink</a> &gt; Examples</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a> &gt; <a class="xref" href="op$com.ibm.streamsx.messaging.xms$XMSSink.html">XMSSink</a> &gt; Examples</p>
 
 </div>
 
@@ -51,7 +51,7 @@ MyPersonNamesStream=Beacon()
 	param
 		connection: "wbe";
 		access: "OutTrading";
-}
+}	
 
 //XMSSink Operator with the fully qualified 
 //name of connections.xml
@@ -61,7 +61,7 @@ MyPersonNamesStream=Beacon()
 		connectionDocument:"/home/streamsuser/connections/XMSconnections.xml";
 		connection: "wbe";
 		access: "OutTrading";
-}
+}	
 
 //XMSSink Operator with optional 
 //output error port specified
@@ -81,7 +81,7 @@ MySink3 = XMSSink(MyPersonNamesStream)
 		connection: "wbe";
 		access: "OutTrading";
 		reconnectionPolicy: NoRetry;
-}
+}	
 
 //XMSSink Operator with optional period 
 //and reconnectionPolicy specified
@@ -122,7 +122,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
       &lt;XMS initial_context="file:///opt/InitialContext/" 
         connection_factory="TestConFac"  /&gt;
 	&lt;/connection_specification&gt;
-  &lt;/connection_specifications&gt;
+  &lt;/connection_specifications&gt;	
 
   &lt;access_specifications&gt;
     &lt;access_specification name="OutTrading"&gt;

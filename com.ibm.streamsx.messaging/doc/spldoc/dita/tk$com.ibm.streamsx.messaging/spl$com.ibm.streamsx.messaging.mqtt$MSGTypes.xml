@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="spldoc_compilationunit">
+<title>SPL File <tt>MSGTypes.spl</tt></title>
+<refbody>
+<section>
+<p>
+<xref href="../toolkits/toolkits.xml">IBMStreams com.ibm.streamsx.messaging Toolkit</xref> &gt; <xref href="tk$com.ibm.streamsx.messaging.xml">com.ibm.streamsx.messaging 2.0.0</xref> &gt; <xref href="ns$com.ibm.streamsx.messaging.mqtt.xml">com.ibm.streamsx.messaging.mqtt</xref> &gt; MSGTypes.spl</p>
+</section>
+<section>
+  <title outputclass="splhead-1">Content</title>
+    <dl>
+    <dlentry><dt></dt><dd></dd></dlentry>
+    <dlentry>
+      <dt outputclass="splhead-2">Composite Operators</dt>
+      <dd><sl>
+<sli><b><xref href="#spldoc_compilationunit/composite_operator__MQTTSinkUpdate">public composite MQTTSinkUpdate</xref></b>: 
+</sli>
+<sli><b><xref href="#spldoc_compilationunit/composite_operator__MQTTSourceUpdate">public composite MQTTSourceUpdate</xref></b>: 
+</sli>
+     </sl></dd>
+    </dlentry>
+    <dlentry>
+      <dt outputclass="splhead-2">Functions</dt>
+      <dd><sl>
+<sli><b><xref href="#spldoc_compilationunit/function__newControlSignal.MQTTSourceUpdate.TopicsUpdateAction.list:.:rstring:.:.uint32">MQTTSourceUpdate.ControlPortType newControlSignal(MQTTSourceUpdate.TopicsUpdateAction action, list&lt;rstring&gt; topics, uint32 qos)</xref></b>: Convenience method for creating a control signal that modifies subscription setting for MQTTSource operator
+</sli>
+     </sl></dd>
+    </dlentry>
+    <dlentry>
+      <dt outputclass="splhead-2">Types</dt>
+      <dd><sl>
+<sli><b><xref href="#spldoc_compilationunit/composite_type__MQTTSinkUpdate.ControlPortType">MQTTSinkUpdate.ControlPortType</xref></b>: 
+</sli>
+<sli><b><xref href="#spldoc_compilationunit/composite_type__MQTTSourceUpdate.ControlPortType">MQTTSourceUpdate.ControlPortType</xref></b>: Expected schema for the control input port of the MQTTSource operator 
+</sli>
+<sli><b><xref href="#spldoc_compilationunit/composite_type__MQTTSourceUpdate.TopicsUpdateAction">MQTTSourceUpdate.TopicsUpdateAction</xref></b>: Actions that can be applied to update the topics / Qos for MQTTSource operator 
+</sli>
+<sli><b><xref href="#spldoc_compilationunit/composite_type__MQTTSourceUpdate.TopicsUpdateDesc">MQTTSourceUpdate.TopicsUpdateDesc</xref></b>: A descriptor to describe how the topics / qos should be updated in MQTTSource operator.
+</sli>
+     </sl></dd>
+    </dlentry>
+     </dl>
+</section>
+<section>
+  <title outputclass="splhead-1">Composite Operators</title>
+</section>
+<section id="composite_operator__MQTTSourceUpdate">
+  <title outputclass="splpart">public composite MQTTSourceUpdate</title>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+  <title>Static Types</title>
+</section>
+   <section id="composite_type__MQTTSourceUpdate.ControlPortType">
+     <dl>
+       <dlentry>
+         <dt>MQTTSourceUpdate.ControlPortType = list&lt;TopicsUpdateDesc&gt; topic, map&lt;rstring, rstring&gt; mqttConfig;</dt>
+         <dd>
+<p>Expected schema for the control input port of the MQTTSource operator 
+</p></dd>
+       </dlentry>
+     </dl>
+   </section>
+   <section id="composite_type__MQTTSourceUpdate.TopicsUpdateAction">
+     <dl>
+       <dlentry>
+         <dt>MQTTSourceUpdate.TopicsUpdateAction = enum { ADD, REMOVE, REPLACE, UPDATE };</dt>
+         <dd>
+<p>Actions that can be applied to update the topics / Qos for MQTTSource operator 
+</p></dd>
+       </dlentry>
+     </dl>
+   </section>
+   <section id="composite_type__MQTTSourceUpdate.TopicsUpdateDesc">
+     <dl>
+       <dlentry>
+         <dt>MQTTSourceUpdate.TopicsUpdateDesc = TopicsUpdateAction action, list&lt;rstring&gt; topics, uint32 qos;</dt>
+         <dd>
+<p>A descriptor to describe how the topics / qos should be updated in MQTTSource operator.  action - the action to apply for the topics specified topics - list of topics to add / remove / update or replace qos - qos of the topics to be added, updated or replace.  value is ignored for remove action. Valid value is 0,1 or 2. 
+</p></dd>
+       </dlentry>
+     </dl>
+   </section>
+<section id="composite_operator__MQTTSinkUpdate">
+  <title outputclass="splpart">public composite MQTTSinkUpdate</title>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+  <title>Static Types</title>
+</section>
+   <section id="composite_type__MQTTSinkUpdate.ControlPortType">
+     <dl>
+       <dlentry>
+         <dt>MQTTSinkUpdate.ControlPortType = map&lt;rstring, rstring&gt; mqttConfig;</dt>
+          <dd></dd>
+       </dlentry>
+     </dl>
+   </section>
+<section>
+  <title outputclass="splhead-1">Functions</title>
+</section>
+<section id="function__newControlSignal.MQTTSourceUpdate.TopicsUpdateAction.list:.:rstring:.:.uint32">
+  <title outputclass="splpart">MQTTSourceUpdate.ControlPortType newControlSignal(MQTTSourceUpdate.TopicsUpdateAction action, list&lt;rstring&gt; topics, uint32 qos)</title>
+</section><section>
+
+<p>Convenience method for creating a control signal that modifies subscription setting for MQTTSource operator
+</p>
+</section>
+<section>
+<title>Parameters</title>
+ <sl>
+   <sli>
+<b>action</b>: 
+   </sli>
+   <sli>
+<b>topics</b>: 
+   </sli>
+   <sli>
+<b>qos</b>: 
+   </sli>
+ </sl>
+</section>
+<section>
+<title>Returns</title>
+<sl><sli>
+<tt>MQTTSourceUpdate.ControlPortType</tt>
+</sli></sl>
+</section>
+</refbody>
+</reference>
+

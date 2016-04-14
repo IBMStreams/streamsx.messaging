@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="spldoc_index">
+<title>Functions: IBMStreams com.ibm.streamsx.messaging Toolkit</title>
+<refbody>
+<section>
+<p>
+<xref href="toolkits.xml">IBMStreams com.ibm.streamsx.messaging Toolkit</xref> &gt; Functions</p>
+</section>
+<section>
+<title outputclass="splhead-1">Functions</title>
+<dl>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml#spldoc_compilationunit/function__newControlSignal.MQTTSourceUpdate.TopicsUpdateAction.list:.:rstring:.:.uint32">newControlSignal(MQTTSourceUpdate.TopicsUpdateAction,list&lt;rstring&gt;,uint32)</xref></dt>
+<dd>Convenience method for creating a control signal that modifies subscription setting for MQTTSource operator</dd>
+</dlentry>
+</dl>
+</section>
+</refbody>
+</reference>
+

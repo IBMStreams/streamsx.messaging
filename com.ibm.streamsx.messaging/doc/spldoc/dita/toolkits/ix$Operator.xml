@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="spldoc_index">
+<title>Operators: IBMStreams com.ibm.streamsx.messaging Toolkit</title>
+<refbody>
+<section>
+<p>
+<xref href="toolkits.xml">IBMStreams com.ibm.streamsx.messaging Toolkit</xref> &gt; Operators</p>
+</section>
+<section>
+<title outputclass="splhead-1">Operators</title>
+<dl>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSink.xml">JMSSink</xref></dt>
+<dd>The <tt>JMSSink</tt> operator creates messages from InfoSphere Streams tuples and writes the messages to a WebSphere MQ or an Apache Active MQ queue or topic.</dd>
+</dlentry>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSource.xml">JMSSource</xref></dt>
+<dd>The <tt>JMSSource</tt> operator reads data from a WebSphere MQ or an Apache Active MQ queue or a topic and creates tuples from the read data.</dd>
+</dlentry>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.kafka$KafkaConsumer.xml">KafkaConsumer</xref></dt>
+<dd>This operator acts as a Kafka consumer recieving messages for one or more topics.</dd>
+</dlentry>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.kafka$KafkaProducer.xml">KafkaProducer</xref></dt>
+<dd>This operator acts as a Kafka producer sending tuples as mesages to a Kafka broker.</dd>
+</dlentry>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.mqtt$MQTTSink.xml">MQTTSink</xref></dt>
+<dd>MQTTSink operator publishes messages to MQTT Provider</dd>
+</dlentry>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml#spldoc_compilationunit/composite_operator__MQTTSinkUpdate">MQTTSinkUpdate</xref></dt>
+<dd></dd>
+</dlentry>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.mqtt$MQTTSource.xml">MQTTSource</xref></dt>
+<dd>Java Operator MqttSourceOperator</dd>
+</dlentry>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml#spldoc_compilationunit/composite_operator__MQTTSourceUpdate">MQTTSourceUpdate</xref></dt>
+<dd></dd>
+</dlentry>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSink.xml">XMSSink</xref></dt>
+<dd>The <tt>XMSSink</tt> operator takes messages from IBM InfoSphere Streams and can send them to a WebSphere MQ queue or topic.</dd>
+</dlentry>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSource.xml">XMSSource</xref></dt>
+<dd>The <tt>XMSSource</tt> operator reads data from a WebSphere MQ queue or topic and creates tuples out of it.</dd>
+</dlentry>
+</dl>
+</section>
+</refbody>
+</reference>
+
