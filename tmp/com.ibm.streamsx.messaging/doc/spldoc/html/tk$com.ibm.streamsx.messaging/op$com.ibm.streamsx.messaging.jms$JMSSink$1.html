@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; <a class="xref" href="op$com.ibm.streamsx.messaging.jms$JMSSink.html">JMSSink</a> &gt; Examples</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; <a class="xref" href="op$com.ibm.streamsx.messaging.jms$JMSSink.html">JMSSink</a> &gt; Examples</p>
 
 </div>
 
@@ -34,14 +34,14 @@
 <div class="p">
 <pre class="pre codeblock">
 composite Main {
-graph	
+graph
 
 stream &lt;int32 id, rstring fname, rstring lname&gt;
 MyPersonNamesStream  = Beacon()
 {
 param
 	iterations:10u;
-}	
+}
 
 // JMSSink operator with connections document in the default directory ../etc/connections.xml
 // (relative to the data directory)
@@ -50,7 +50,7 @@ param
 param
 	connection : "amqConn";	
 	access     : "amqAccess";
-}	
+}
 
 // JMSSink operator with fully qualified name of connections document
 () as  MySink2 = JMSSink( MyPersonNamesStream )
@@ -59,7 +59,7 @@ param
 	connectionDocument   : "/home/streamsuser/connections/JMSconnections.xml";
 	connection           : "amqConn";
 	access               : "amqAccess";
-}	
+}
 
 // JMSSink operator with optional output error port specified
 stream &lt;tuple&lt; int32 id, rstring fname, rstring lname&gt; inTuple, rstring errorMessage&gt;
@@ -76,7 +76,7 @@ param
 	connection         : "amqConn";
 	access             : "amqAccess";
 	reconnectionPolicy : "NoRetry";
-}	
+}
 
 // JMSSink operator with optional period and reconnectionPolicy specified
 () as  MySink5 = JMSSink( MyPersonNamesStream )
@@ -109,7 +109,7 @@ param
 <div class="p">
 <pre class="pre codeblock">
 &lt;st:connections 	xmlns:st="http://www.ibm.com/xmlns/prod/streams/adapters"
-					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;	
+					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
 
 &lt;connection_specifications&gt;
 	&lt;connection_specification name="amqConn"&gt;
@@ -117,7 +117,7 @@ param
 		provider_url = "tcp://machine1.com:61616"
 		connection_factory="ConnectionFactory"/&gt;
 	&lt;/connection_specification&gt;
-&lt;/connection_specifications&gt;	
+&lt;/connection_specifications&gt;
 
 &lt;access_specifications&gt;
 	&lt;access_specification name="amqAccess"&gt;
