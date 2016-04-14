@@ -22,8 +22,12 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSource</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSource</p>
 
+</div>
+
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSource.svg" width="672" height="112"/>
 </div>
 
 <div class="section">
@@ -39,8 +43,42 @@
 <div class="section"><h2 class="title sectiontitle">Behavior in a consistent region
 </h2>
 
-<p class="p">The <tt class="ph tt">JMSSource</tt> operator is not supported in a consistent region.
+<p class="p">The <tt class="ph tt">JMSSource</tt> operator can participate in a consistent region. The operator must be at the start of a consistent region.
 </p>
+
+<p class="p">The operator supports periodic and operator-driven consistent region policies. If the consistent region policy is set as operatorDriven, the triggerCount parameter must be specified. The operator initiates a checkpoint after number of tuples specified by the triggerCount parameter have been processed.  If the consistent region policy is set as periodic, the operator respects the period setting and establishes consistent states accordingly. 
+</p>
+
+<p class="p">When a message queue is consumed by multiple message consumers, i.e. multiple <tt class="ph tt">JMSSource</tt> instances are used to read messages from a same queue, then deterministic routing is required. This requirement can be achieved through the messageSelector parameter. For example, if an SPL application has two JMSSource operator instances and a JMS property named "group" is present on messages that can take value of either 'g1' or 'g2', then each JMSSource operator instance can be assigned in the following manner:
+</p>
+
+<div class="p">MyPersonNamesStream1 = JMSSource()
+<pre class="pre codeblock">
+{
+	param
+		connectionDocument :"/home/streamsuser/connections/JMSconnections.xml";
+		connection         : "amqConn"; 		
+		access             : "amqAccess";
+		messageSelector    : "group = 'g1'";
+}
+</pre>
+
+
+</div>
+
+<div class="p">MyPersonNamesStream2 = JMSSource()
+<pre class="pre codeblock">
+{
+	param
+        connectionDocument :"/home/streamsuser/connections/JMSconnections.xml";
+		connection         : "amqConn"; 		
+		access             : "amqAccess";
+		messageSelector    : "group = 'g2'";
+}
+</pre>
+
+
+</div>
 
 </div>
 
@@ -76,6 +114,8 @@
 <li class="li"> The <strong class="ph b">connectionsDocument</strong> parameter refers to an file that does not exist.</li>
 
 <li class="li"> The <strong class="ph b">connectionsDocument</strong> parameter is not specified and the <tt class="ph tt">connections.xml</tt> file is not present in the default location.</li>
+
+<li class="li"> The <strong class="ph b">messageIDOutAttrName</strong> parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.</li>
 
 </ul>
 </li>
@@ -131,10 +171,6 @@
 
 </div>
 
-<div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSource.svg" width="672" height="112"/>
-</div>
-
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
 
 <dl class="dl" compact="compact">
@@ -153,7 +189,7 @@
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 8 parameters. (<tt class="ph tt">codepage, reconnectionPolicy, reconnectionBound, period, initDelay, access, connection, connectionDocument</tt>)
+  <dd class="dd">This operator supports 14 parameters. (<tt class="ph tt">codepage, reconnectionPolicy, reconnectionBound, period, initDelay, access, connection, connectionDocument, triggerCount, messageSelector, messageIDOutAttrName, credentialFile, userPropName, passwordPropName</tt>)
 </dd>
 
  
@@ -275,7 +311,7 @@
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 8 parameters.<dl class="dl">
+This operator supports 14 parameters.<dl class="dl">
 
 <dt class="dt dlterm" id="spldoc_operator__parameter_codepage"><tt class="ph tt">codepage</tt></dt>
 
@@ -498,6 +534,192 @@ This operator supports 8 parameters.<dl class="dl">
 
 <dd class="dd">
 <p class="p">This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the <strong class="ph b">connection</strong> and <strong class="ph b">access</strong> parameters. If this parameter is not specified, the operator uses the file that is in the default location <tt class="ph tt">./etc/connections.xml</tt>.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_triggerCount"><tt class="ph tt">triggerCount</tt></dt>
+
+<dd class="dd">
+<p class="p">This optional parameter specifies how many messages are submitted before the JMSSource operator starts to drain the pipeline and establish a consistent state.  This parameter must be greater than zero and must be set if the JMSSource operator is the start operator of an operatorDriven consistent region.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_messageSelector"><tt class="ph tt">messageSelector</tt></dt>
+
+<dd class="dd">
+<p class="p">        This optional parameter is used as JMS Message Selector.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_messageIDOutAttrName"><tt class="ph tt">messageIDOutAttrName</tt></dt>
+
+<dd class="dd">
+<p class="p">        Output attribute on output data stream to assign message ID to, the specified attribute in output stream must be of type rstring.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_credentialFile"><tt class="ph tt">credentialFile</tt></dt>
+
+<dd class="dd">
+<p class="p">        A path pointing to a file that holds latest credential information for accessing messaging system, specify this file if the operator needs to handle dynamic credential changes.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_userPropName"><tt class="ph tt">userPropName</tt></dt>
+
+<dd class="dd">
+<p class="p">        This parameter specifies the property name of user name in the credential file. If the credentialFile parameter is specified and the userPropName parameter is not set, a compile time error occurs.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_passwordPropName"><tt class="ph tt">passwordPropName</tt></dt>
+
+<dd class="dd">
+<p class="p">        This parameter specifies the property name of password in the credential file. If the credentialFile parameter is specified and the passwordPropName parameter is not set, a compile time error occurs.
 </p>
 <dl class="dl">
 

@@ -22,22 +22,22 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.kafka.html">com.ibm.streamsx.messaging.kafka</a> &gt; KafkaProducer</p>
-
-</div>
-
-<div class="section">
-
-<p class="p">This operator acts as a Kafka producer sending tuples as mesages to a Kafka broker. The broker is assumed to be already configured and running. The incoming stream can have three attributes: topic, key and message. The message is a required attribute. If the key attribute is not specified, the message is used as the key. A topic can be specified as either an input stream attribute or as a parameter.
-</p>
-
-<p class="p"><strong class="ph b">Behavior in a Consistent Region</strong> This operator can participate in a consistent region.  This operator cannot be placed at the start of a consistent region.
-</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.kafka.html">com.ibm.streamsx.messaging.kafka</a> &gt; KafkaProducer</p>
 
 </div>
 
 <div class="section splprimop">
   <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.kafka$KafkaProducer.svg" width="672" height="112"/>
+</div>
+
+<div class="section">
+
+<p class="p">This operator acts as a Kafka producer sending tuples as messages to a Kafka broker. The broker is assumed to be already configured and running. The incoming stream can have three attributes: topic, key and message. The message is a required attribute. A topic can be specified as either an input stream attribute or as a parameter. Specify properties as described here: http://kafka.apache.org/documentation.html#newproducerconfigs. 
+</p>
+
+<p class="p"><strong class="ph b">Behavior in a Consistent Region</strong> This operator can participate in a consistent region.  This operator cannot be placed at the start of a consistent region.
+</p>
+
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
@@ -58,7 +58,7 @@
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 6 parameters. (<tt class="ph tt">kafkaProperty, keyAttribute, messageAttribute, propertiesFile, topic, topicAttribute</tt>)
+  <dd class="dd">This operator supports 7 parameters. (<tt class="ph tt">jaasFile, kafkaProperty, keyAttribute, messageAttribute, propertiesFile, topic, topicAttribute</tt>)
 </dd>
 
  
@@ -128,7 +128,38 @@
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 6 parameters.<dl class="dl">
+This operator supports 7 parameters.<dl class="dl">
+
+<dt class="dt dlterm" id="spldoc_operator__parameter_jaasFile"><tt class="ph tt">jaasFile</tt></dt>
+
+<dd class="dd">
+<p class="p">Location of the jaas file to be used for SASL connections. Jaas file is recommended to be stored in the etc directory.  If a relative path is specified, the path is relative to the application directory.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
 
 <dt class="dt dlterm" id="spldoc_operator__parameter_kafkaProperty"><tt class="ph tt">kafkaProperty</tt></dt>
 
@@ -161,7 +192,7 @@ This operator supports 6 parameters.<dl class="dl">
 <dt class="dt dlterm" id="spldoc_operator__parameter_keyAttribute"><tt class="ph tt">keyAttribute</tt></dt>
 
 <dd class="dd">
-<p class="p">Name of the attribute for the key. Default is "key"
+<p class="p">Name of the attribute for the key. Default is "key".
 </p>
 <dl class="dl">
 
@@ -192,7 +223,7 @@ This operator supports 6 parameters.<dl class="dl">
 <dt class="dt dlterm" id="spldoc_operator__parameter_messageAttribute"><tt class="ph tt">messageAttribute</tt></dt>
 
 <dd class="dd">
-<p class="p">Name of the attribute for the message. This attribute is required. Default is "message"
+<p class="p">Name of the attribute for the message. If this parameter is not specified, then by default the operator will look for an attribute named "message". If the "message" attribute is not found, a runtime error will be returned.
 </p>
 <dl class="dl">
 
@@ -323,7 +354,7 @@ This operator supports 6 parameters.<dl class="dl">
 
   <dd class="dd"/>
 
-  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">../../impl/lib/com.ibm.streamsx.messaging.jar, ../../opt/downloaded/*</tt></dd>
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">../../impl/lib/com.ibm.streamsx.messaging.jar, ../../opt/downloaded/*, ../../opt/*</tt></dd>
 
  
  </dl>
