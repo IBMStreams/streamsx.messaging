@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="spldoc_namespace">
+<title>Namespace <tt>com.ibm.streamsx.messaging.jms</tt></title>
+<refbody>
+<section>
+<p>
+<xref href="../toolkits/toolkits.xml">IBMStreams com.ibm.streamsx.messaging Toolkit</xref> &gt; <xref href="tk$com.ibm.streamsx.messaging.xml">com.ibm.streamsx.messaging 2.0.0</xref> &gt; com.ibm.streamsx.messaging.jms</p>
+</section>
+<section>
+  <title outputclass="splhead-1">Operators</title>
+<sl>
+<sli><b><xref href="op$com.ibm.streamsx.messaging.jms$JMSSink.xml">JMSSink</xref></b>: The <tt>JMSSink</tt> operator creates messages from InfoSphere Streams tuples and writes the messages to a WebSphere MQ or an Apache Active MQ queue or topic.
+</sli>
+<sli><b><xref href="op$com.ibm.streamsx.messaging.jms$JMSSource.xml">JMSSource</xref></b>: The <tt>JMSSource</tt> operator reads data from a WebSphere MQ or an Apache Active MQ queue or a topic and creates tuples from the read data.
+</sli>
+</sl>
+</section>
+</refbody>
+</reference>
+

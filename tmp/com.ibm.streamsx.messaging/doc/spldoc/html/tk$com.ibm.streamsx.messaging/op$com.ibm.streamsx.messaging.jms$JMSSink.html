@@ -22,12 +22,8 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSink</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSink</p>
 
-</div>
-
-<div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSink.svg" width="672" height="112"/>
 </div>
 
 <div class="section">
@@ -43,13 +39,7 @@
 <div class="section"><h2 class="title sectiontitle">Behavior in a consistent region
 </h2>
 
-<p class="p">The <tt class="ph tt">JMSSink</tt> operator can be an operator within the reachability graph of a operator-driven consistent region. It cannot be the start of a consistent region.
-</p>
-
-<p class="p">When this operator is participating in a consistent region, the parameter <strong class="ph b">consistentRegionQueueName</strong> must be specified.
-</p>
-
-<p class="p"><tt class="ph tt">JMSSink</tt> operator is using transacted session to achieve the purpose of consistent region and parameters <strong class="ph b">reconnectionPolicy</strong>, <strong class="ph b">reconnectionBound</strong>, <strong class="ph b">period</strong>, <strong class="ph b">maxMessageSendRetries</strong> and <strong class="ph b">messageSendRetryDelay</strong> must not be specified. This is due to the fact that if connection problem occurs, the messages sent since the last successful checkpoint would be lost and it is not necessary to continue to process message even after connection is established again. In this case the operator needs to reset to the last checkpoint and re-send the messages again, thus re-connection policy would not apply when it is participating in a consistent region
+<p class="p">The <tt class="ph tt">JMSSink</tt> operator can be an operator within the reachability graph of a consistent region. It cannot be the start of a consistent region.
 </p>
 
 </div>
@@ -139,6 +129,10 @@
 
 </div>
 
+<div class="section splprimop">
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSink.svg" width="672" height="112"/>
+</div>
+
 <div class="section"><h2 class="title sectiontitle splhead-1">Summary</h2>
 
 <dl class="dl" compact="compact">
@@ -157,7 +151,7 @@
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 13 parameters. (<tt class="ph tt">codepage, reconnectionPolicy, reconnectionBound, period, access, connection, connectionDocument, maxMessageSendRetries, messageSendRetryDelay, consistentRegionQueueName, credentialFile, userPropName, passwordPropName</tt>)
+  <dd class="dd">This operator supports 9 parameters. (<tt class="ph tt">codepage, reconnectionPolicy, reconnectionBound, period, access, connection, connectionDocument, maxMessageSendRetries, messageSendRetryDelay</tt>)
 </dd>
 
  
@@ -544,130 +538,6 @@
  <dd class="dd">
   <ul class="sl simple">
   <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int64
-  </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-  </ul>
-
- </dd>
-
-
-</dl>
-
-</dd>
-
-
-
-<dt class="dt dlterm" id="spldoc_operator__parameter_consistentRegionQueueName"><tt class="ph tt">consistentRegionQueueName</tt></dt>
-
-<dd class="dd">
-<p class="p">        This is a required parameter if this operator is participating in a consistent region. This parameter specifies the queue to be used to store consistent region specific information and the operator will perform a JNDI lookup with the queue name specified at initialization state. The queue name specified must also exist on the same messaging server where this operator is establishing the connection.
-</p>
-<dl class="dl">
-
- <dt class="dt dlterm">Properties </dt>
-
- <dd class="dd">
-  <ul class="sl simple">
-  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
-  </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-  </ul>
-
- </dd>
-
-
-</dl>
-
-</dd>
-
-
-
-<dt class="dt dlterm" id="spldoc_operator__parameter_credentialFile"><tt class="ph tt">credentialFile</tt></dt>
-
-<dd class="dd">
-<p class="p">        A absolute path pointing to a file that holds latest credential information for accessing messaging system, specify this file if the operator needs to handle dynamic credential changes.
-</p>
-<dl class="dl">
-
- <dt class="dt dlterm">Properties </dt>
-
- <dd class="dd">
-  <ul class="sl simple">
-  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
-  </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-  </ul>
-
- </dd>
-
-
-</dl>
-
-</dd>
-
-
-
-<dt class="dt dlterm" id="spldoc_operator__parameter_userPropName"><tt class="ph tt">userPropName</tt></dt>
-
-<dd class="dd">
-<p class="p">        This parameter specifies the property name of user name in the credential file. If the credentialFile parameter is specified and the userPropName parameter is not set, a compile time error occurs.
-</p>
-<dl class="dl">
-
- <dt class="dt dlterm">Properties </dt>
-
- <dd class="dd">
-  <ul class="sl simple">
-  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
-  </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-  </ul>
-
- </dd>
-
-
-</dl>
-
-</dd>
-
-
-
-<dt class="dt dlterm" id="spldoc_operator__parameter_passwordPropName"><tt class="ph tt">passwordPropName</tt></dt>
-
-<dd class="dd">
-<p class="p">        This parameter specifies the property name of password in the credential file. If the credentialFile parameter is specified and the passwordPropName parameter is not set, a compile time error occurs.
-</p>
-<dl class="dl">
-
- <dt class="dt dlterm">Properties </dt>
-
- <dd class="dd">
-  <ul class="sl simple">
-  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
   </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1

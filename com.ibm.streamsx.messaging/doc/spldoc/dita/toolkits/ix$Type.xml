@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="spldoc_index">
+<title>Types: IBMStreams com.ibm.streamsx.messaging Toolkit</title>
+<refbody>
+<section>
+<p>
+<xref href="toolkits.xml">IBMStreams com.ibm.streamsx.messaging Toolkit</xref> &gt; Types</p>
+</section>
+<section>
+<title outputclass="splhead-1">Types</title>
+<dl>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml#spldoc_compilationunit/composite_type__MQTTSinkUpdate.ControlPortType">MQTTSinkUpdate.ControlPortType</xref></dt>
+<dd></dd>
+</dlentry>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml#spldoc_compilationunit/composite_type__MQTTSourceUpdate.ControlPortType">MQTTSourceUpdate.ControlPortType</xref></dt>
+<dd>Expected schema for the control input port of the MQTTSource operator </dd>
+</dlentry>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml#spldoc_compilationunit/composite_type__MQTTSourceUpdate.TopicsUpdateAction">MQTTSourceUpdate.TopicsUpdateAction</xref></dt>
+<dd>Actions that can be applied to update the topics / Qos for MQTTSource operator </dd>
+</dlentry>
+<dlentry>
+<dt><xref href="../tk$com.ibm.streamsx.messaging/spl$com.ibm.streamsx.messaging.mqtt$MSGTypes.xml#spldoc_compilationunit/composite_type__MQTTSourceUpdate.TopicsUpdateDesc">MQTTSourceUpdate.TopicsUpdateDesc</xref></dt>
+<dd>A descriptor to describe how the topics / qos should be updated in MQTTSource operator.</dd>
+</dlentry>
+</dl>
+</section>
+</refbody>
+</reference>
+

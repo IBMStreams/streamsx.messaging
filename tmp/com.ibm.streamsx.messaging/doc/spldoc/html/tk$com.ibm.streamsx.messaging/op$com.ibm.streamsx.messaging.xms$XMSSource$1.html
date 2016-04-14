@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a> &gt; <a class="xref" href="op$com.ibm.streamsx.messaging.xms$XMSSource.html">XMSSource</a> &gt; Examples</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 2.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a> &gt; <a class="xref" href="op$com.ibm.streamsx.messaging.xms$XMSSource.html">XMSSource</a> &gt; Examples</p>
 
 </div>
 
@@ -45,7 +45,7 @@ MyPersonNamesStream  = XMSSource(){
 	param 
 		connection: "wbe";
 		access: "OutTrading";
-}    
+}    	
 
 //XMSSource operator with fully 
 //qualified name of connections.xml
@@ -55,7 +55,7 @@ MyPersonNamesStream = XMSSource(){
 		connectionDocument:"/home/streamsuser/connections/XMSconnections.xml";
 		connection: "wbe";  
 		access: "OutTrading";
-}    
+}    	
 
 //XMSSource Operator with the optional 
 //error output port specified 
@@ -64,7 +64,7 @@ stream &lt;rstring errorMessage&gt; ErrorStream)  = XMSSource(){
 	param                     
 		connection: "wbe";
 		access: "OutTrading";
-}    
+}    	
 
 //XMSSource operator with the optional 
 //initDelay and reconnectionPolicy specified
@@ -75,7 +75,7 @@ MyPersonNamesStream = XMSSource(){
 		access: "OutTrading";
 		reconnectionPolicy: NoRetry;
 		initDelay: 10.0;
-}
+}	
 
 //XMSSource operator with the optional period 
 //and reconnectionPolicy specified

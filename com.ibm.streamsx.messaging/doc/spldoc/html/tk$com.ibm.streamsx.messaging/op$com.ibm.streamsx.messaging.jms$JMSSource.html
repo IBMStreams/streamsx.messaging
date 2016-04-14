@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSource</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSource</p>
 
 </div>
 
@@ -189,7 +189,7 @@
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 14 parameters. (<tt class="ph tt">codepage, reconnectionPolicy, reconnectionBound, period, initDelay, access, connection, connectionDocument, triggerCount, messageSelector, messageIDOutAttrName, credentialFile, userPropName, passwordPropName</tt>)
+  <dd class="dd">This operator supports 11 parameters. (<tt class="ph tt">codepage, reconnectionPolicy, reconnectionBound, period, initDelay, access, connection, connectionDocument, triggerCount, messageSelector, messageIDOutAttrName</tt>)
 </dd>
 
  
@@ -311,7 +311,7 @@
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 14 parameters.<dl class="dl">
+This operator supports 11 parameters.<dl class="dl">
 
 <dt class="dt dlterm" id="spldoc_operator__parameter_codepage"><tt class="ph tt">codepage</tt></dt>
 
@@ -627,99 +627,6 @@ This operator supports 14 parameters.<dl class="dl">
 
 <dd class="dd">
 <p class="p">        Output attribute on output data stream to assign message ID to, the specified attribute in output stream must be of type rstring.
-</p>
-<dl class="dl">
-
- <dt class="dt dlterm">Properties </dt>
-
- <dd class="dd">
-  <ul class="sl simple">
-  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
-  </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-  </ul>
-
- </dd>
-
-
-</dl>
-
-</dd>
-
-
-
-<dt class="dt dlterm" id="spldoc_operator__parameter_credentialFile"><tt class="ph tt">credentialFile</tt></dt>
-
-<dd class="dd">
-<p class="p">        A path pointing to a file that holds latest credential information for accessing messaging system, specify this file if the operator needs to handle dynamic credential changes.
-</p>
-<dl class="dl">
-
- <dt class="dt dlterm">Properties </dt>
-
- <dd class="dd">
-  <ul class="sl simple">
-  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
-  </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-  </ul>
-
- </dd>
-
-
-</dl>
-
-</dd>
-
-
-
-<dt class="dt dlterm" id="spldoc_operator__parameter_userPropName"><tt class="ph tt">userPropName</tt></dt>
-
-<dd class="dd">
-<p class="p">        This parameter specifies the property name of user name in the credential file. If the credentialFile parameter is specified and the userPropName parameter is not set, a compile time error occurs.
-</p>
-<dl class="dl">
-
- <dt class="dt dlterm">Properties </dt>
-
- <dd class="dd">
-  <ul class="sl simple">
-  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
-  </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-  </ul>
-
- </dd>
-
-
-</dl>
-
-</dd>
-
-
-
-<dt class="dt dlterm" id="spldoc_operator__parameter_passwordPropName"><tt class="ph tt">passwordPropName</tt></dt>
-
-<dd class="dd">
-<p class="p">        This parameter specifies the property name of password in the credential file. If the credentialFile parameter is specified and the passwordPropName parameter is not set, a compile time error occurs.
 </p>
 <dl class="dl">
 
