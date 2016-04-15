@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (C) 2016, International Business Machines Corporation
+ * All Rights Reserved
+ *******************************************************************************/
+
 package com.ibm.streamsx.messaging.common;
 
 public interface IGovernanceConstants {
