@@ -17,12 +17,14 @@ import java.util.concurrent.TimeoutException;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamingOutput;
+import com.ibm.streams.operator.OperatorContext.ContextCheck;
+import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.logging.TraceLevel;
 import com.ibm.streams.operator.model.OutputPortSet;
 import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
-
+import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
@@ -44,6 +46,16 @@ public class RabbitMQSource extends RabbitBaseOper {
 	
 	private Thread processThread;
 	private String queueName = "";
+	
+	//consistent region checks
+	@ContextCheck(compile = true)
+	public static void checkInConsistentRegion(OperatorContextChecker checker) {
+		ConsistentRegionContext consistentRegionContext = 
+				checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
+		if (consistentRegionContext != null){
+			checker.setInvalidContext("This operator cannot be the start of a consistent region.", null);
+		}
+	}
 	
 	@Override
 	public synchronized void initialize(OperatorContext context)

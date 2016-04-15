@@ -5,7 +5,7 @@
 <entry key="com.ibm.streams.studio.splproject:STATIC_LINKING">F</entry>
 <entry key="com.ibm.streams.studio.splproject:OPTIMIZED_CODE">T</entry>
 <entry key="com.ibm.streams.studio.splproject:FUSION_MODE">FDEF</entry>
-<entry key="com.ibm.streams.studio.splproject:MAIN_COMPOSITE">com.ibm.streamsx.messaging.kafka.tests::BasicFunctionBlobTestMain</entry>
+<entry key="com.ibm.streams.studio.splproject:MAIN_COMPOSITE">com.ibm.streamsx.messaging.perf.kafka::ConsumerBlobBenchmark</entry>
 <entry key="com.ibm.streams.studio.splproject:NAME">Distributed</entry>
 <entry key="com.ibm.streams.studio.splproject:GCC_OPTS"/>
 <entry key="com.ibm.streams.studio.splproject:SC_OPTS"/>

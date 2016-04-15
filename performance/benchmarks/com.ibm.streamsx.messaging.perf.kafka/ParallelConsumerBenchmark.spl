@@ -1,0 +1,49 @@
+// *******************************************************************************
+// * Copyright (C)2016, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************
+//
+
+namespace com.ibm.streamsx.messaging.perf.kafka;
+
+use com.ibm.streamsx.messaging.kafka::* ;
+
+composite ParallelConsumerBenchmark {
+	param
+		expression<rstring> $topic : "3partition" ;
+		expression<int32> $partitions : 3 ;
+	graph
+		@parallel(width = $partitions)
+		() as Parallel = ParallelConsumer()
+		{
+			param
+				partition : getChannel() ;
+				topic : $topic ;
+		}
+
+}
+
+composite ParallelConsumer
+{
+	param
+		expression<int32> $partition ;
+		expression<rstring> $topic ;
+	graph
+		stream<blob message> KafkaStream = KafkaConsumer()
+		{
+			param
+				propertiesFile : "etc/consumer.properties" ;
+				topic : $topic ;
+				partition : $partition ;
+				kafkaProperty : "group.id=newGroup" +(rstring) getTimestampInSecs() ;
+			config
+				restartable : false ;
+		}
+
+		() as FlowCalculator_5 = FlowCalculatorNoOutput(KafkaStream)
+		{
+			param
+				period : 30.0 ;
+		}
+
+}

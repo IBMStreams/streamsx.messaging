@@ -10,6 +10,10 @@ Check out our newest operators KafkaProducer and KafkaConsumer!
 
 To get started with working with this toolkit:
 * https://github.com/IBMStreams/streamsx.messaging/wiki/Getting-Started-with-Toolkit-Development
+* [Kafka Operators Getting Started Guide](http://ibmstreams.github.io/streamsx.documentation/docs/4.1/messaging/kafka-operators-getting-started/)
+* [JMS Operators Getting Started Guide](http://ibmstreams.github.io/streamsx.documentation/docs/4.1/messaging/jms-operators-getting-started/)
+
+
 
 To learn more about Streams:
 

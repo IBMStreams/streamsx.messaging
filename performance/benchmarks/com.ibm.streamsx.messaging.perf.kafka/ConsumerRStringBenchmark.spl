@@ -1,0 +1,31 @@
+// *******************************************************************************
+// * Copyright (C)2016, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************
+//
+
+namespace com.ibm.streamsx.messaging.perf.kafka;
+
+use com.ibm.streamsx.messaging.kafka::* ;
+
+composite ConsumerRStringBenchmark {
+	param
+		expression<rstring> $topic : "ConsumerTest2" ;
+	graph
+		stream<rstring message> KafkaStream = KafkaConsumer()
+		{
+			param
+				propertiesFile : "etc/consumer.properties" ;
+				topic : $topic ;
+				kafkaProperty : "group.id=newGroup" +(rstring) getTimestampInSecs() ;
+			config
+				restartable : false ;
+		}
+
+		() as FlowCalculator_5 = FlowCalculatorNoOutput(KafkaStream)
+		{
+			param
+				period : 30.0 ;
+		}
+
+}

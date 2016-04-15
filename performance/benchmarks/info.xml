@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <info:toolkitInfoModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:info="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo">
   <info:identity>
-    <info:name>tests.kafka</info:name>
-    <info:description>tests.kafka</info:description>
+    <info:name>PerformanceBenchmarks</info:name>
+    <info:description>Performance benchmarks used in report. </info:description>
     <info:version>1.0.0</info:version>
-    <info:requiredProductVersion>3.0.0</info:requiredProductVersion>
+    <info:requiredProductVersion>4.0.0.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies>
     <info:toolkit>
       <common:name>com.ibm.streamsx.messaging</common:name>
-      <common:version>[3.0.0,4.0.0)</common:version>
+      <common:version>[5.0.0,6.0.0)</common:version>
     </info:toolkit>
   </info:dependencies>
 </info:toolkitInfoModel>

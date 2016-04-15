@@ -1,0 +1,39 @@
+// *******************************************************************************
+// * Copyright (C)2016, International Business Machines Corporation and *
+// * others. All Rights Reserved. *
+// *******************************************************************************
+//
+
+namespace com.ibm.streamsx.messaging.perf.kafka;
+
+use com.ibm.streamsx.messaging.kafka::* ;
+
+composite ProducerRStringBenchmark {
+	param
+		expression<rstring> $topic : "ProducerTest1" ;
+	graph
+
+		//create some messages and send to Kafka
+		stream<blob message> OutputStream = PerfBlobDataGenerator()
+		{
+			param
+				packetSize : 5020 ; 
+		} 
+
+		() as KafkaSinkOp = KafkaProducer(FlowCalculator_6_out0 as inPort0Alias)
+		{
+			param
+				propertiesFile : "etc/producer.properties" ;
+				topic : $topic ;
+			config
+				restartable : false ;
+		}
+
+		(stream<blob message> FlowCalculator_6_out0) as FlowCalculator_6 =
+			FlowCalculator(OutputStream)
+		{
+			param
+				period : 30.0 ;
+		}
+
+}
