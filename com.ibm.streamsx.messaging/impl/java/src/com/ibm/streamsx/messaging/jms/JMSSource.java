@@ -178,39 +178,6 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	private String messageIDOutAttrName = null;
 	
 	private Object resetLock = new Object();
-	
-    private String credentialFile;
-    
-    private String userPropName;
-    
-    private String passwordPropName;
-
-	public String getCredentialFile() {
-		return credentialFile;
-	}
-
-	@Parameter(optional = true)
-	public void setCredentialFile(String credentialFile) {
-		this.credentialFile = credentialFile;
-	}
-
-	public String getUserPropName() {
-		return userPropName;
-	}
-
-	@Parameter(optional = true)
-	public void setUserPropName(String userPropName) {
-		this.userPropName = userPropName;
-	}
-
-	public String getPasswordPropName() {
-		return passwordPropName;
-	}
-
-	@Parameter(optional = true)
-	public void setPasswordPropName(String passwordPropName) {
-		this.passwordPropName = passwordPropName;
-	}
 
 	public String getMessageIDOutAttrName() {
 		return messageIDOutAttrName;
@@ -495,11 +462,6 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		checker.checkDependentParameters("period", "reconnectionPolicy");
 		checker.checkDependentParameters("reconnectionBound",
 				"reconnectionPolicy");
-		
-		// Make sure if credentialFile is specified then both userPropName and passwordPropName are needed
-		checker.checkDependentParameters("credentialFile", "userPropName", "passwordPropName");
-		checker.checkDependentParameters("userPropName", "credentialFile", "passwordPropName");
-		checker.checkDependentParameters("passwordPropName", "credentialFile", "userPropName");
 	}
 
 	@Override
@@ -550,13 +512,21 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 
 		messageType = connectionDocumentParser.getMessageType();
 		isAMQ = connectionDocumentParser.isAMQ();
-				
 		// parsing connection document is successful, we can go ahead and create
 		// connection
 		// isProducer, false implies Consumer
-		jmsConnectionHelper = new JMSConnectionHelper(connectionDocumentParser, reconnectionPolicy,
-				reconnectionBound, period, false, 0, 0, nReconnectionAttempts, logger, (consistentRegionContext != null), 
-				null, messageSelector, this.credentialFile, this.userPropName, this.passwordPropName);
+		jmsConnectionHelper = new JMSConnectionHelper(reconnectionPolicy,
+				reconnectionBound, period, false, 0,
+				0, connectionDocumentParser.getDeliveryMode(),
+				nReconnectionAttempts, logger, (consistentRegionContext != null), messageSelector);
+		jmsConnectionHelper.createAdministeredObjects(
+				connectionDocumentParser.getInitialContextFactory(),
+				connectionDocumentParser.getProviderURL(),
+				connectionDocumentParser.getUserPrincipal(),
+				connectionDocumentParser.getUserCredential(),
+				connectionDocumentParser.getConnectionFactory(),
+				connectionDocumentParser.getDestination(),
+				null);
 
 		// Create the appropriate JMS message handlers as specified by the
 		// messageType.
@@ -885,7 +855,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		
 	}
 	
-	private void deduplicateMsg(long lastSentMsgTs, List<String> lastSentMsgIDs) throws JMSException, ConnectionException, InterruptedException, IOException, NamingException {
+	private void deduplicateMsg(long lastSentMsgTs, List<String> lastSentMsgIDs) throws JMSException, ConnectionException, InterruptedException {
 		logger.log(LogLevel.INFO, "Deduplicate messages...");
 		
 		boolean stop = false;

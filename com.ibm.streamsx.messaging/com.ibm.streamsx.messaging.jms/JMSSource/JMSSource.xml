@@ -316,33 +316,6 @@ This parameter must be greater than zero and must be set if the JMSSource operat
         <type>rstring</type>
         <cardinality>1</cardinality>
       </parameter>
-      <parameter>
-        <name>credentialFile</name>
-        <description>
-        A path pointing to a file that holds latest credential information for accessing messaging system, specify this file if the operator needs to handle dynamic credential changes.
-        </description>
-        <optional>true</optional>
-        <type>rstring</type>
-        <cardinality>1</cardinality>
-      </parameter>
-      <parameter>
-        <name>userPropName</name>
-        <description>
-        This parameter specifies the property name of user name in the credential file. If the credentialFile parameter is specified and the userPropName parameter is not set, a compile time error occurs.
-        </description>
-        <optional>true</optional>
-        <type>rstring</type>
-        <cardinality>1</cardinality>
-      </parameter>
-      <parameter>
-        <name>passwordPropName</name>
-        <description>
-        This parameter specifies the property name of password in the credential file. If the credentialFile parameter is specified and the passwordPropName parameter is not set, a compile time error occurs.
-        </description>
-        <optional>true</optional>
-        <type>rstring</type>
-        <cardinality>1</cardinality>
-      </parameter>
     </parameters>
     <inputPorts>
     </inputPorts>

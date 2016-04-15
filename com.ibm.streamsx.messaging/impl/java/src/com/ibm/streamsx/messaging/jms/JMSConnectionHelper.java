@@ -5,9 +5,6 @@
 package com.ibm.streamsx.messaging.jms;
 
 import com.ibm.streams.operator.metrics.Metric;
-import com.ibm.streamsx.messaging.common.PropertyProvider;
-
-import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -82,9 +79,6 @@ class JMSConnectionHelper {
 	// JMS message selector
 	private String messageSelector;
 	
-	// CR queue name
-	private String destinationCR;
-	
 	// Timestamp of session creation
 	private long sessionCreationTime;
 	
@@ -96,17 +90,6 @@ class JMSConnectionHelper {
 	
 	// message consumer of the CR queue
 	private MessageConsumer consumerCR = null;
-	
-	// PropertyProvider object
-	private PropertyProvider propertyProvider = null;
-	
-	// user credential property name
-	private String userPropName = null;
-	
-	// password credential property name
-	private String passwordPropName = null;
-	
-	private ConnectionDocumentParser connectionDocumentParser = null;
 
 	private synchronized MessageConsumer getConsumerCR() {
 		return consumerCR;
@@ -189,45 +172,31 @@ class JMSConnectionHelper {
 
 	// This constructor sets the parameters required to create a connection for
 	// JMSSource
-	JMSConnectionHelper(ConnectionDocumentParser connectionDocumentParser, ReconnectionPolicies reconnectionPolicy,
-			int reconnectionBound, double period, boolean isProducer, int maxMessageRetry, long messageRetryDelay,
-			Metric nReconnectionAttempts, Logger logger, boolean useClientAckMode, String destinationCR, String messageSelector, 
-			String credentialFile, String userPropName, String passwordPropName) throws IOException, NamingException {
+	JMSConnectionHelper(ReconnectionPolicies reconnectionPolicy,
+			int reconnectionBound, double period, boolean isProducer,
+			int maxMessageRetry, long messageRetryDelay,
+			String deliveryMode, Metric nReconnectionAttempts, Logger logger, boolean useClientAckMode, String messageSelector) {
 		this.reconnectionPolicy = reconnectionPolicy;
 		this.reconnectionBound = reconnectionBound;
 		this.period = period;
 		this.isProducer = isProducer;
-		this.deliveryMode = connectionDocumentParser.getDeliveryMode();
+		this.deliveryMode = deliveryMode;
 		this.logger = logger;
 		this.nReconnectionAttempts = nReconnectionAttempts;
 		this.maxMessageRetries = maxMessageRetry;
 		this.messageRetryDelay = messageRetryDelay;
 		this.useClientAckMode = useClientAckMode;
 		this.messageSelector = messageSelector;
-		this.userPropName = userPropName;
-		this.passwordPropName = passwordPropName;
-		this.connectionDocumentParser = connectionDocumentParser;
-		this.userPrincipal = connectionDocumentParser.getUserPrincipal();
-		this.userCredential = connectionDocumentParser.getUserCredential();
-		this.destinationCR = destinationCR;
-		
-		if(credentialFile != null) {
-			propertyProvider = PropertyProvider.getPropertyProvider(credentialFile);
-		}
-		
-		refreshUserCredential();
-		createAdministeredObjects();
 	}
 
 	// This constructor sets the parameters required to create a connection for
 	// JMSSink
-	JMSConnectionHelper(ConnectionDocumentParser connectionDocumentParser, ReconnectionPolicies reconnectionPolicy, 
-			int reconnectionBound, double period, boolean isProducer, int maxMessageRetry, long messageRetryDelay, 
-			Metric nReconnectionAttempts, Metric nFailedInserts, Logger logger, boolean useClientAckMode, String destinationCR, String msgSelectorCR, 
-			String credentialFile, String userPropName, String passwordPropName) throws IOException, NamingException {
-		this(connectionDocumentParser, reconnectionPolicy, reconnectionBound, period, isProducer,
-			 maxMessageRetry, messageRetryDelay, nReconnectionAttempts, 
-			 logger, useClientAckMode, destinationCR, msgSelectorCR, credentialFile, userPropName, passwordPropName);
+	JMSConnectionHelper(ReconnectionPolicies reconnectionPolicy,
+			int reconnectionBound, double period, boolean isProducer,
+			int maxMessageRetry, long messageRetryDelay, String deliveryMode, 
+			Metric nReconnectionAttempts, Metric nFailedInserts, Logger logger, boolean useClientAckMode, String msgSelectorCR) {
+		this(reconnectionPolicy, reconnectionBound, period, isProducer,
+			 maxMessageRetry, messageRetryDelay, deliveryMode, nReconnectionAttempts, logger, useClientAckMode, msgSelectorCR);
 		this.nFailedInserts = nFailedInserts;
 
 	}
@@ -248,17 +217,22 @@ class JMSConnectionHelper {
 	// this subroutine creates the initial jndi context by taking the mandatory
 	// and optional parameters
 
-	private void createAdministeredObjects()
-			throws NamingException, IOException {
+	public void createAdministeredObjects(String initialContextFactory,
+			String providerURL, String userPrincipal, String userCredential,
+			String connectionFactory, String destination, String destinationCR)
+			throws NamingException {
 
+		this.userPrincipal = userPrincipal;
+		this.userCredential = userCredential;
+		
 		// Create a JNDI API InitialContext object if none exists
 		// create a properties object and add all the mandatory and optional
 		// parameter
 		// required to create the jndi context as specified in connection
 		// document
 		Properties props = new Properties();
-		props.put(Context.INITIAL_CONTEXT_FACTORY, connectionDocumentParser.getInitialContextFactory());
-		props.put(Context.PROVIDER_URL, connectionDocumentParser.getProviderURL());
+		props.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
+		props.put(Context.PROVIDER_URL, providerURL);
 
 		// Add the optional elements
 
@@ -274,8 +248,8 @@ class JMSConnectionHelper {
 		// Look up connection factory and destination. If either does not exist,
 		// exit, throws a NamingException if lookup fails
 
-		connFactory = (ConnectionFactory) jndiContext.lookup(connectionDocumentParser.getConnectionFactory());
-		dest = (Destination) jndiContext.lookup(connectionDocumentParser.getDestination());
+		connFactory = (ConnectionFactory) jndiContext.lookup(connectionFactory);
+		dest = (Destination) jndiContext.lookup(destination);
 		
 		// Look up CR queue only for producer and when producer is in a CR
 		if(this.isProducer && this.useClientAckMode) {
@@ -303,14 +277,6 @@ class JMSConnectionHelper {
 				// nConnectionAttempts
 				try {
 					nConnectionAttempts++;
-					
-					// if property provider is specified, prior to a connection attempt
-					// update user credential if there is a change and recreate admin objects.
-					
-					if(refreshUserCredential()) {
-						createAdministeredObjects();
-					}
-					
 					if (connect(isProducer)) {
 						// got a successfull connection,
 						// come out of while loop.
@@ -320,7 +286,7 @@ class JMSConnectionHelper {
 				} catch (InvalidSelectorException e) {
 					throw new ConnectionException(
 							"Connection to JMS failed. Invalid message selector");
-				} catch (JMSException | IOException | NamingException e) {
+				} catch (JMSException e) {
 					logger.log(LogLevel.ERROR, "RECONNECTION_EXCEPTION",
 							new Object[] { e.toString() });
 					// Get the reconnectionPolicy
@@ -349,7 +315,8 @@ class JMSConnectionHelper {
 					Thread.sleep(delay);
 					// Incremet the metric nReconnectionAttempts
 					nReconnectionAttempts.incrementValue(1);
-				} 
+				}
+
 			}
 
 		}
@@ -435,7 +402,7 @@ class JMSConnectionHelper {
 	// nFailedInserts if the send fails
 
 	boolean sendMessage(Message message) throws ConnectionException,
-			InterruptedException, IOException, NamingException {
+			InterruptedException {
 
 		boolean res = false;
 		int count = 0;
@@ -482,7 +449,7 @@ class JMSConnectionHelper {
 	// this subroutine receives messages from a message consumer
 	// This method supports the receive method with timeout
 	Message receiveMessage(long timeout) throws ConnectionException, InterruptedException,
-			JMSException, IOException, NamingException {
+			JMSException {
 		try {
 			// try to receive a message via blocking method
 			synchronized (getSession()) {
@@ -500,7 +467,6 @@ class JMSConnectionHelper {
 			logger.log(LogLevel.WARN, "ERROR_DURING_RECEIVE",
 					new Object[] { e.toString() });
 			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
-			
 			createConnection();
 			// retry to receive again
 			
@@ -510,31 +476,6 @@ class JMSConnectionHelper {
 			}
 			
 		}
-	}
-	
-	private boolean refreshUserCredential() throws IOException {
-		
-		if(propertyProvider == null) {
-			return false;
-		}
-		
-		String userName = propertyProvider.getProperty(userPropName);
-		String password = propertyProvider.getProperty(passwordPropName);
-		
-		if(this.userPrincipal == userName && this.userCredential == password) {
-			return false;
-		}
-		
-		if((this.userPrincipal != null && userName != null && this.userPrincipal.equals(userName))
-			&& (this.userCredential != null && password != null && this.userCredential.equals(password))) {
-			return false;
-		}
-		
-		logger.log(LogLevel.INFO, "User credentials has been updated");
-		this.userPrincipal = userName;
-		this.userCredential = password;
-		
-		return true;
 	}
 	
 	// Send message without retry in case of failure
