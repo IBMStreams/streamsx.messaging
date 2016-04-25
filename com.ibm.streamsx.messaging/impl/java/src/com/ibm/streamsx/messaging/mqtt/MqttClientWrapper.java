@@ -312,7 +312,7 @@ public class MqttClientWrapper implements MqttCallback {
 		
 		TRACE.log(TraceLevel.WARN, "Connection Lost: " + brokerUri); //$NON-NLS-1$
 		
-		nConnectionLost.incrementValue(1L);
+		nConnectionLost.increment();;
 		isConnected.setValue(0);
 		for (Iterator iterator = callBackListeners.iterator(); iterator.hasNext();) {
 			MqttCallback callbackListener = (MqttCallback) iterator.next();
