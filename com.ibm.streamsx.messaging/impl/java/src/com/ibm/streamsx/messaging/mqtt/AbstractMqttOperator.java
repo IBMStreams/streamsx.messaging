@@ -23,6 +23,8 @@ import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.log4j.LogLevel;
 import com.ibm.streams.operator.log4j.LoggerNames;
 import com.ibm.streams.operator.log4j.TraceLevel;
+import com.ibm.streams.operator.metrics.Metric;
+import com.ibm.streams.operator.model.CustomMetric;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
 
@@ -65,9 +67,26 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	
 	private long commandTimeout = IMqttConstants.UNINITIALIZED_COMMAND_TIMEOUT;
 	private int keepAliveInterval = IMqttConstants.UNINITIALIZED_KEEP_ALIVE_INTERVAL;
+	
+	// Metrics keeping track of connection handling
+	// nConnectionLost is number of lost connections to current MQTT server
+	// isConnected indicates if operator currently connected to MQTT server, a value of 1 indicates it is connected and a value of 0 indicates it is not connected.
+	
+	Metric nConnectionLost;
+	Metric isConnected;
 
 	public AbstractMqttOperator() {
 		super();
+	}
+	
+	@CustomMetric(kind = Metric.Kind.COUNTER, description="The number of lost connections to current MQTT server.")
+	public void setnConnectionLost(Metric nConnectionLost) {
+		this.nConnectionLost = nConnectionLost;
+	}
+
+	@CustomMetric(kind = Metric.Kind.GAUGE, description="Indicates if operator currently connected to MQTT server, a value of 1 indicates it is connected and a value of 0 indicates it is not connected.")
+	public void setIsConnected(Metric isConnected) {
+		this.isConnected = isConnected;
 	}
 
 	@ContextCheck(compile = true, runtime = false)
