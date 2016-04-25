@@ -308,6 +308,8 @@ public class MqttSourceOperator extends AbstractMqttOperator {
         mqttWrapper.setClientID(getClientID());
         mqttWrapper.setCommandTimeout(getCommandTimeout());
         mqttWrapper.setKeepAliveInterval(getKeepAliveInterval());
+        mqttWrapper.setConnectionLostMetric(nConnectionLost);
+        mqttWrapper.setIsConnectedMetric(isConnected);
         
         // register for data governance
         registerForDataGovernance();

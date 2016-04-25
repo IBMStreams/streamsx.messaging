@@ -23,6 +23,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import com.ibm.streams.operator.log4j.LoggerNames;
 import com.ibm.streams.operator.log4j.TraceLevel;
+import com.ibm.streams.operator.metrics.Metric;
 
 public class MqttClientWrapper implements MqttCallback {
 	private static final int COMMAND_TIMEOUT = 5000;
@@ -46,12 +47,23 @@ public class MqttClientWrapper implements MqttCallback {
  
 	private boolean shutdown; 
 	
+	private Metric nConnectionLost;
+	private Metric isConnected;
+	
 	public MqttClientWrapper() {	
 
     	conOpt = new MqttConnectOptions();
     	conOpt.setCleanSession(true);
     	
     	callBackListeners = new ArrayList<MqttCallback>();
+	}
+	
+	public void setConnectionLostMetric(Metric nConnectionLost) {
+		this.nConnectionLost = nConnectionLost;
+	}
+	
+	public void setIsConnectedMetric(Metric isConnected) {
+		this.isConnected = isConnected;
 	}
 	
 	public void setKeepAliveInterval(int keepAliveInterval) {
@@ -209,8 +221,8 @@ public class MqttClientWrapper implements MqttCallback {
 
 		try {
 			TRACE.log(TraceLevel.DEBUG, "[Connect:] " + brokerUri + " Attempt: " + i); //$NON-NLS-1$ //$NON-NLS-2$
-			mqttClient.connect(conOpt);			
-
+			mqttClient.connect(conOpt);		
+			isConnected.setValue(1L);
 		} catch (MqttSecurityException e) {
 			TRACE.log(TraceLevel.ERROR, Messages.getString("Error_MqttClientWrapper.0"), e); //$NON-NLS-1$
 			LOG.log(TraceLevel.ERROR, Messages.getString("Error_MqttClientWrapper.0"), e); //$NON-NLS-1$
@@ -277,6 +289,7 @@ public class MqttClientWrapper implements MqttCallback {
     		if (mqttClient.isConnected())
     		{
 		    	TRACE.log(TraceLevel.INFO, "[Disconnect:] " + brokerUri); //$NON-NLS-1$
+		    	resetMetrics();
 				mqttClient.disconnect();
     		}
     	}
@@ -299,6 +312,8 @@ public class MqttClientWrapper implements MqttCallback {
 		
 		TRACE.log(TraceLevel.WARN, "Connection Lost: " + brokerUri); //$NON-NLS-1$
 		
+		nConnectionLost.increment();;
+		isConnected.setValue(0);
 		for (Iterator iterator = callBackListeners.iterator(); iterator.hasNext();) {
 			MqttCallback callbackListener = (MqttCallback) iterator.next();
 			callbackListener.connectionLost(cause);
@@ -376,6 +391,11 @@ public class MqttClientWrapper implements MqttCallback {
 	public void setSslProperties(Properties sslProperties)
 	{
 		conOpt.setSSLProperties(sslProperties);
+	}
+	
+	private void resetMetrics() {
+		this.nConnectionLost.setValue(0);
+		this.isConnected.setValue(0);
 	}
 
 }

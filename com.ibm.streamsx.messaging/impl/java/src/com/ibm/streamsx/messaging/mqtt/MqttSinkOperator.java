@@ -453,6 +453,8 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
        mqttWrapper.setClientID(getClientID());
        mqttWrapper.setCommandTimeout(getCommandTimeout());
        mqttWrapper.setKeepAliveInterval(getKeepAliveInterval());
+       mqttWrapper.setConnectionLostMetric(nConnectionLost);
+       mqttWrapper.setIsConnectedMetric(isConnected);
        
        setupSslProperties(mqttWrapper);
        
