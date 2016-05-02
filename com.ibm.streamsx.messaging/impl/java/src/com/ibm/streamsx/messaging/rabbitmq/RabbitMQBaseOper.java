@@ -28,7 +28,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
 @Libraries({ "opt/downloaded/*"/*, "@RABBITMQ_HOME@" */})
-public class RabbitBaseOper extends AbstractOperator {
+public class RabbitMQBaseOper extends AbstractOperator {
 
 	protected Channel channel;
 	protected Connection connection;
@@ -44,7 +44,7 @@ public class RabbitBaseOper extends AbstractOperator {
 			routingKeyAH = new AttributeHelper("routing_key"),
 			messageAH = new AttributeHelper("message");
 
-	private final Logger trace = Logger.getLogger(RabbitBaseOper.class
+	private final Logger trace = Logger.getLogger(RabbitMQBaseOper.class
 			.getCanonicalName());
 	protected Boolean usingDefaultExchange = false;
 	private String URI = "";
@@ -54,6 +54,7 @@ public class RabbitBaseOper extends AbstractOperator {
 		// Must call super.initialize(context) to correctly setup an operator.
 		super.initialize(context);
 		ConnectionFactory connectionFactory = new ConnectionFactory();
+		connectionFactory.setExceptionHandler(new RabbitMQConnectionExceptionHandler());
 		connectionFactory.setAutomaticRecoveryEnabled(autoRecovery);
 		
 		
