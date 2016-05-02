@@ -15,8 +15,7 @@ use com.ibm.streamsx.messaging.rabbitmq::* ;
 composite RabbitMQSample
 {
 	param
-		expression<rstring> $hostAndPort1 : "rabbitHost1:port";
-		expression<rstring> $hostAndPort2 : "rabbitHost2:port";
+		expression<rstring> $hostAndPort : "rabbitHost:5672";
 		expression<rstring> $exchangeName : "myPhilosophicalExchange"; 
 		expression<rstring> $routing_key :  "What is reality?";
 	graph
@@ -34,7 +33,7 @@ composite RabbitMQSample
 		() as RabbitMQSinkOp = RabbitMQSink(OutputStream)
 		{
 			param
-				hostAndPort : $hostAndPort1, $hostAndPort2 ;
+				hostAndPort : $hostAndPort;
 				exchangeName : $exchangeName;
 				/* You can also specify username, password, exchangeType.
 				 * See SPL Docs for more details. 
@@ -44,7 +43,7 @@ composite RabbitMQSample
 		stream<rstring message, rstring routing_key>  RabbitMQStream = RabbitMQSource()
 		{
 			param
-				hostAndPort : $hostAndPort1, $hostAndPort2 ;
+				hostAndPort : $hostAndPort;
 				exchangeName : $exchangeName;
 				routingKey : $routing_key; 
 				/* You can also specify username, password, exchangeType, queueName.
