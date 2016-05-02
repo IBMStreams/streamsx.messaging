@@ -54,6 +54,7 @@ public class RabbitMQBaseOper extends AbstractOperator {
 		// Must call super.initialize(context) to correctly setup an operator.
 		super.initialize(context);
 		ConnectionFactory connectionFactory = new ConnectionFactory();
+		connectionFactory.setExceptionHandler(new RabbitMQConnectionExceptionHandler());
 		connectionFactory.setAutomaticRecoveryEnabled(autoRecovery);
 		
 		
