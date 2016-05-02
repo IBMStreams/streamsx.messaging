@@ -8,7 +8,7 @@ namespace com.ibm.streamsx.messaging.sample.rabbitmq ;
 use com.ibm.streamsx.messaging.rabbitmq::* ;
 
 /**
- * Example of using a [RabbitMQProducer] and [RabbitMQConsumer]
+ * Example of using a [RabbitMQSource] and [RabbitMQSink]
  * This assumes that the topic has already been created
  * 
  */
