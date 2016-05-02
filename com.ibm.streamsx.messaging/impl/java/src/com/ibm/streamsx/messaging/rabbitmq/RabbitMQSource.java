@@ -37,11 +37,11 @@ import java.util.logging.Logger;
  */
 @OutputPorts(@OutputPortSet(cardinality = 1, optional = false, description = "Messages received from Kafka are sent on this output port."))
 @PrimitiveOperator(name = "RabbitMQSource", description = RabbitMQSource.DESC)
-public class RabbitMQSource extends RabbitBaseOper {
+public class RabbitMQSource extends RabbitMQBaseOper {
 
 	private List<String> routingKeys = new ArrayList<String>();
 	
-	private final Logger trace = Logger.getLogger(RabbitBaseOper.class
+	private final Logger trace = Logger.getLogger(RabbitMQSource.class
 			.getCanonicalName());
 	
 	private Thread processThread;
@@ -80,8 +80,8 @@ public class RabbitMQSource extends RabbitBaseOper {
 							produceTuples();
 							// rabbitMQWrapper.Consume();
 						} catch (Exception e) {
-							e.printStackTrace(); // Logger.getLogger(this.getClass()).error("Operator error",
-													// e);
+							e.printStackTrace();
+							trace.log(TraceLevel.ERROR, e.getMessage());
 						}
 					}
 
@@ -174,7 +174,6 @@ public class RabbitMQSource extends RabbitBaseOper {
 				} 				
 				
 				if (messageHeaderAH.isAvailable()){
-					System.out.println("Trying to print headers...");
 					Map<String, Object> msgHeader = properties.getHeaders();
 					if (msgHeader != null && !msgHeader.isEmpty()){
 						Map<String, String> headers = new HashMap<String,String>();

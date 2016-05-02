@@ -26,7 +26,7 @@ import com.rabbitmq.client.AMQP.BasicProperties;
  */
 @InputPorts(@InputPortSet(cardinality = 1, optional = false, description = ""))
 @PrimitiveOperator(name = "RabbitMQSink", description = RabbitMQSink.DESC)
-public class RabbitMQSink extends RabbitBaseOper {
+public class RabbitMQSink extends RabbitMQBaseOper {
 
 	private final Logger trace = Logger.getLogger(RabbitMQSink.class
 			.getCanonicalName());
@@ -95,6 +95,7 @@ public class RabbitMQSink extends RabbitBaseOper {
 			Boolean failedToSend = true;
 			int attemptCount = 0;
 			while (failedToSend && attemptCount < maxMessageSendRetries) {
+				attemptCount++;
 				try {
 					Thread.sleep(messageSendRetryDelay);
 					trace.log(TraceLevel.ERROR,
@@ -105,7 +106,6 @@ public class RabbitMQSink extends RabbitBaseOper {
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
-				attemptCount++;
 			}
 			
 			//if we still can't send after the number of maxMessageSendRetries, we want to log error and move on
