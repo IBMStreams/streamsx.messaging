@@ -25,4 +25,6 @@ public interface IMqttConstants {
 	public static final long CONSISTENT_REGION_DRAIN_WAIT_TIME = 180000;
 	public static final String MQTT_DEFAULT_DATA_ATTRIBUTE_NAME = "data";
 	public static final String COMMA = ",";
+	public static final String SSL_PROTOCOL = "com.ibm.ssl.protocol";
+	public static final String DEFAULT_SSL_PROTOCOL = "TLSv1.2";
 }
