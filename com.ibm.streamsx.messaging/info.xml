@@ -241,7 +241,7 @@ The following example shows a &lt;connection_specification> element that contain
 
     &lt;connection_specifications>
       &lt;connection_specification name=&quot;mqttconn&quot;>
-        &lt;MQTT serverURI=&quot;ssl://hostname:1883&quot; trustStore=&quot;../../etc/trustFile.pem&quot;/>
+        &lt;MQTT serverURI=&quot;ssl://hostname:1883&quot; trustStore=&quot;etc/trustFile.jks&quot;/>
       &lt;/connection_specification>
     &lt;/connection_specifications>
 
@@ -251,10 +251,10 @@ The &lt;MQTT> element has the following attributes:
     This attribute is specified when the keyStore attribute is specified and the keystore file it is protected by a password.
     If the keyStorePassword is invalid the operator terminates.
 * keyStore
-  * This optional attribute specifies the name of the keystore file, which is in PEM format.
+  * This optional attribute specifies the name of the keystore file, which is in one of the supported format by the JDK being used.
     The keystore file must contain the public certificate and the private key of the MQTT server that you want to connect to.
     If the keystore file does not exist, the operator terminates. The location of the keystore file can be absolute path
-    or a path that is relative to the data directory.
+    or a path that is relative to the application directory.
 * serverURI
   * This required attribute specifies the URI of the MQTT server that you want to connect to.
     The serverURI has the following format: *protocol*://*hostname* or *IP address*:*portnumber*
@@ -269,9 +269,8 @@ The &lt;MQTT> element has the following attributes:
       and keyStorePassword attributes in the MQTT element.
   * If you do not set the appropriate attributes, a run time error occurs. 
 * trustStore
-  * This optional attribute specifies the name of the truststore file, which is in PEM format.
-    You can specify an absolute path or a path that is relative to the data directory.
-    The operator supports PEM files that use base64 encoding.
+  * This optional attribute specifies the name of the truststore file, which is in one of the supported format by the JDK being used.
+    You can specify an absolute path or a path that is relative to the application directory.
     The truststore file must contain the public certificates of all the trusted MQTT servers.
     If the truststore does not contain a public certificate for an MQTT server, the connection to that server is terminated.
 
