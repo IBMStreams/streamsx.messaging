@@ -27,6 +27,7 @@ import com.ibm.streams.operator.metrics.Metric;
 import com.ibm.streams.operator.model.CustomMetric;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
+import com.ibm.streamsx.messaging.common.PropertyProvider;
 
 public abstract class AbstractMqttOperator extends AbstractOperator {
 
@@ -46,6 +47,10 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	public static final String PARAMNAME_KEEP_ALIVE = "keepAliveInterval"; //$NON-NLS-1$
 	public static final String PARAMNAME_DATA_ATTRIBUTE_NAME = "dataAttributeName"; //$NON-NLS-1$
 	public static final String PARAMNAME_SSL_PROTOCOL = "sslProtocol"; //$NON-NLS-1$
+	
+	public static final String PARAMNAME_APP_CONFIG_NAME = "appConfigName"; //$NON-NLS-1$
+	public static final String PARAMNAME_USER_PROP_NAME = "userPropName"; //$NON-NLS-1$
+	public static final String PARAMNAME_PASSWORD_PROP_NAME = "passwordPropName"; //$NON-NLS-1$
 
 	static Logger TRACE = Logger.getLogger(AbstractMqttOperator.class);
 
@@ -69,6 +74,15 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	
 	private long commandTimeout = IMqttConstants.UNINITIALIZED_COMMAND_TIMEOUT;
 	private int keepAliveInterval = IMqttConstants.UNINITIALIZED_KEEP_ALIVE_INTERVAL;
+	
+	// application configuration name
+    private String appConfigName;
+    
+    // user property name stored in application configuration
+    private String userPropName;
+    
+    // password property name stored in application configuration
+    private String passwordPropName;
 	
 	// Metrics keeping track of connection handling
 	// nConnectionLost is number of lost connections to current MQTT server
@@ -111,6 +125,10 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		
 		checker.checkDependentParameters(PARAMNAME_USER_ID, PARAMNAME_PASSWORD);
 		checker.checkDependentParameters(PARAMNAME_PASSWORD, PARAMNAME_USER_ID);
+		
+		checker.checkDependentParameters(PARAMNAME_APP_CONFIG_NAME, PARAMNAME_USER_PROP_NAME, PARAMNAME_PASSWORD_PROP_NAME);
+		checker.checkDependentParameters(PARAMNAME_USER_PROP_NAME, PARAMNAME_APP_CONFIG_NAME, PARAMNAME_PASSWORD_PROP_NAME);
+		checker.checkDependentParameters(PARAMNAME_PASSWORD_PROP_NAME, PARAMNAME_APP_CONFIG_NAME, PARAMNAME_USER_PROP_NAME);
 
 	}
 	
@@ -120,11 +138,68 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		validateStringNotNullOrEmpty(checker, PARAMNAME_CLIENT_ID);
     	validateStringNotNullOrEmpty(checker, PARAMNAME_USER_ID);
     	validateStringNotNullOrEmpty(checker, PARAMNAME_PASSWORD);
+    	validateStringNotNullOrEmpty(checker, PARAMNAME_APP_CONFIG_NAME);
+    	validateStringNotNullOrEmpty(checker, PARAMNAME_USER_PROP_NAME);
+    	validateStringNotNullOrEmpty(checker, PARAMNAME_PASSWORD_PROP_NAME);
+    	
+    	// Verify existence of user credentials if they are specified via application configuration
+    	validateAppConfiguration(checker);
     	
     	validateNumber(checker, PARAMNAME_COMMAND_TIMEOUT, 0, Long.MAX_VALUE);
     	validateNumber(checker, PARAMNAME_KEEP_ALIVE, 0, Integer.MAX_VALUE);
 	}
 
+	private static void validateAppConfiguration(OperatorContextChecker checker) {
+		
+		if ((checker.getOperatorContext().getParameterNames().contains(PARAMNAME_APP_CONFIG_NAME))) {
+			String appConfigName = checker.getOperatorContext().getParameterValues(PARAMNAME_APP_CONFIG_NAME).get(0);
+			String userPropName = checker.getOperatorContext().getParameterValues(PARAMNAME_USER_PROP_NAME).get(0);
+			String passwordPropName = checker.getOperatorContext().getParameterValues(PARAMNAME_PASSWORD_PROP_NAME).get(0);
+			
+			
+			PropertyProvider provider = new PropertyProvider(checker.getOperatorContext().getPE(), appConfigName);
+			
+			String userName = provider.getProperty(userPropName);
+			String password = provider.getProperty(passwordPropName);
+			
+			if(userName == null || userName.trim().length() == 0) {
+				checker.setInvalidContext(Messages.getString("Error_AbstractMqttOperator.12"), new Object[] {userPropName, appConfigName});
+			}
+			
+			if(password == null || password.trim().length() == 0) {
+				checker.setInvalidContext(Messages.getString("Error_AbstractMqttOperator.12"), new Object[] {passwordPropName, appConfigName});
+			}
+		}
+		
+	}
+
+	public String getAppConfigName() {
+		return appConfigName;
+	}
+    
+	@Parameter(name = PARAMNAME_APP_CONFIG_NAME, description = SPLDocConstants.MQTT_PARAM_APP_CONFIG_NAME_DESC, optional = true)
+	public void setAppConfigName(String appConfigName) {
+		this.appConfigName = appConfigName;
+	}
+
+	public String getUserPropName() {
+		return userPropName;
+	}
+    
+	@Parameter(name = PARAMNAME_USER_PROP_NAME, description = SPLDocConstants.MQTT_PARAM_USER_PROP_NAME_DESC, optional = true)
+	public void setUserPropName(String userPropName) {
+		this.userPropName = userPropName;
+	}
+
+	public String getPasswordPropName() {
+		return passwordPropName;
+	}
+    
+	@Parameter(name = PARAMNAME_PASSWORD_PROP_NAME, description = SPLDocConstants.MQTT_PARAM_PASSWORD_PROP_NAME_DESC, optional = true)
+	public void setPasswordPropName(String passwordPropName) {
+		this.passwordPropName = passwordPropName;
+	}
+	
 	@Parameter(name = PARAMNAME_SERVER_URI, description = SPLDocConstants.MQTTSRC_PARAM_SERVERIURI_DESC, optional = true)
 	public void setServerUri(String serverUri) {
 		this.serverUri = serverUri;

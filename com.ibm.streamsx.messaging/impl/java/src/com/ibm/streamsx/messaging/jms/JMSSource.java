@@ -41,6 +41,7 @@ import com.ibm.streams.operator.state.StateHandler;
 import com.ibm.streams.operator.types.RString;
 import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
 import com.ibm.streamsx.messaging.common.IGovernanceConstants;
+import com.ibm.streamsx.messaging.common.PropertyProvider;
 
 //The JMSSource operator converts a message JMS queue or topic to stream
 public class JMSSource extends ProcessTupleProducer implements StateHandler{	
@@ -178,6 +179,43 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	private String messageIDOutAttrName = null;
 	
 	private Object resetLock = new Object();
+	
+	 // application configuration name
+    private String appConfigName;
+    
+    // user property name stored in application configuration
+    private String userPropName;
+    
+    // password property name stored in application configuration
+    private String passwordPropName;
+    
+
+	public String getAppConfigName() {
+		return appConfigName;
+	}
+    
+	@Parameter(optional = true)
+	public void setAppConfigName(String appConfigName) {
+		this.appConfigName = appConfigName;
+	}
+
+	public String getUserPropName() {
+		return userPropName;
+	}
+    
+	@Parameter(optional = true)
+	public void setUserPropName(String userPropName) {
+		this.userPropName = userPropName;
+	}
+
+	public String getPasswordPropName() {
+		return passwordPropName;
+	}
+    
+	@Parameter(optional = true)
+	public void setPasswordPropName(String passwordPropName) {
+		this.passwordPropName = passwordPropName;
+	}
 
 	public String getMessageIDOutAttrName() {
 		return messageIDOutAttrName;
@@ -452,6 +490,34 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	    			checker.checkAttributeType(streamSchema.getAttribute(outAttributeName), MetaType.RSTRING);
 	    	}
     	}
+        
+        if((checker.getOperatorContext().getParameterNames().contains("appConfigName"))) {
+        	String appConfigName = checker.getOperatorContext().getParameterValues("appConfigName").get(0);
+			String userPropName = checker.getOperatorContext().getParameterValues("userPropName").get(0);
+			String passwordPropName = checker.getOperatorContext().getParameterValues("passwordPropName").get(0);
+			
+			
+			PropertyProvider provider = new PropertyProvider(checker.getOperatorContext().getPE(), appConfigName);
+			
+			String userName = provider.getProperty(userPropName);
+			String password = provider.getProperty(passwordPropName);
+			
+			if(userName == null || userName.trim().length() == 0) {
+				logger.log(LogLevel.ERROR, "Property " + userPropName + " is not found in application configuration " + appConfigName);
+				checker.setInvalidContext(
+						"Property {0} is not found in application configuration {1}.",
+						new Object[] {userPropName, appConfigName});
+				
+			}
+			
+			if(password == null || password.trim().length() == 0) {
+				logger.log(LogLevel.ERROR, "Property " + passwordPropName + " is not found in application configuration " + appConfigName);
+				checker.setInvalidContext(
+						"Property {0} is not found in application configuration {1}.",
+						new Object[] {passwordPropName, appConfigName});
+			
+			}
+        }
 		
 	}
 
@@ -462,6 +528,11 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		checker.checkDependentParameters("period", "reconnectionPolicy");
 		checker.checkDependentParameters("reconnectionBound",
 				"reconnectionPolicy");
+		
+		// Make sure if appConfigName is specified then both userPropName and passwordPropName are needed
+		checker.checkDependentParameters("appConfigName", "userPropName", "passwordPropName");
+		checker.checkDependentParameters("userPropName", "appConfigName", "passwordPropName");
+		checker.checkDependentParameters("passwordPropName", "appConfigName", "userPropName");
 	}
 
 	@Override
@@ -515,18 +586,16 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		// parsing connection document is successful, we can go ahead and create
 		// connection
 		// isProducer, false implies Consumer
-		jmsConnectionHelper = new JMSConnectionHelper(reconnectionPolicy,
-				reconnectionBound, period, false, 0,
-				0, connectionDocumentParser.getDeliveryMode(),
-				nReconnectionAttempts, logger, (consistentRegionContext != null), messageSelector);
-		jmsConnectionHelper.createAdministeredObjects(
-				connectionDocumentParser.getInitialContextFactory(),
-				connectionDocumentParser.getProviderURL(),
-				connectionDocumentParser.getUserPrincipal(),
-				connectionDocumentParser.getUserCredential(),
-				connectionDocumentParser.getConnectionFactory(),
-				connectionDocumentParser.getDestination(),
-				null);
+		
+        PropertyProvider propertyProvider = null;
+		
+		if(getAppConfigName() != null) {
+			propertyProvider = new PropertyProvider(context.getPE(), getAppConfigName());
+		}
+		
+		jmsConnectionHelper = new JMSConnectionHelper(connectionDocumentParser, reconnectionPolicy,
+				reconnectionBound, period, false, 0, 0, nReconnectionAttempts, logger, (consistentRegionContext != null), 
+				messageSelector, propertyProvider, userPropName , passwordPropName, null);
 
 		// Create the appropriate JMS message handlers as specified by the
 		// messageType.
