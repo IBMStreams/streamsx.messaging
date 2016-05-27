@@ -5,6 +5,8 @@
 
 package com.ibm.streamsx.messaging.kafka;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -126,9 +128,41 @@ public class KafkaSink extends KafkaBaseOper {
 				producerClient.send(tuple);
 		}catch(Exception e) {
 			trace.log(TraceLevel.ERROR, "Could not send message: " + tuple, e);
+			e.printStackTrace();
 		}
+		
+
+		try {
+			producerClient.checkConnectionCount();
+		} catch (NoKafkaBrokerConnectionsException e) {
+			e.printStackTrace();
+			OperatorContext context = this.getOperatorContext();
+			if (newPropertiesExist(context)){
+				System.out.println("New client!");
+				trace.log(TraceLevel.ERROR, "Lost connection, but properties have changed. Initializing producer with new properties.");
+				try {
+					populateKafkaProperties(context);
+					producerClient.shutdown();
+					KafkaProducerFactory producerFactory = new KafkaProducerFactory();
+					producerClient = producerFactory.getClient(topicAH, keyAH, messageAH, finalProperties);
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (UnsupportedStreamsKafkaConfigurationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+			} else {
+				System.out.println("Keep the same client!");
+			}
+		}
+
 	}	
-	
+
 	public static final String DESC = 
 			"This operator acts as a Kafka producer sending tuples as messages to a Kafka broker. " + 
 			"The broker is assumed to be already configured and running. " +

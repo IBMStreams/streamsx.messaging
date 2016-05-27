@@ -14,8 +14,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
+import org.apache.kafka.common.metrics.KafkaMetric;
 
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamingOutput;
@@ -128,6 +130,7 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 				}
 				ConsumerRecords<K,V> records = consumer.poll(consumerPollTimeout);
 				process(records);
+				checkConnectionCount();
 			} catch (WakeupException e) {
 	             // Ignore exception if closing
 	             if (!shutdown.get()){
@@ -142,6 +145,22 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 					crContext.releasePermit();
 					if(trace.isLoggable(TraceLevel.DEBUG))
 						trace.log(TraceLevel.TRACE, "Released consistent region permit.");
+				}
+			}
+		}
+	}
+	
+	void checkConnectionCount() throws NoKafkaBrokerConnectionsException {
+		@SuppressWarnings("unchecked")
+		Map<MetricName,KafkaMetric> metricsMap = (Map<MetricName, KafkaMetric>) consumer.metrics();
+		
+		for (Map.Entry<MetricName,KafkaMetric> metric : metricsMap.entrySet()){
+			if (metric.getKey().name().equals("connection-count")){
+				if (metric.getValue().value() == 0){
+					//System.out.println("*****Consumer 0!!!! Name: " + metric.getValue().metricName());
+					throw new NoKafkaBrokerConnectionsException();
+				} else {
+					//System.out.println("*****Consumer Not 0!");
 				}
 			}
 		}
