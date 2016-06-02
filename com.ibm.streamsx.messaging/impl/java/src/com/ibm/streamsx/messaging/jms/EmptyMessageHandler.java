@@ -16,7 +16,7 @@ import javax.jms.Session;
 import javax.jms.StreamMessage;
 import javax.jms.TextMessage;
 
-import com.ibm.rmi.corba.ObjectManager;
+//import com.ibm.rmi.corba.ObjectManager; ... not used
 import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.Type.MetaType;
