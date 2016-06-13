@@ -28,6 +28,13 @@ public class PropertyProvider {
 		return configuration.get(name);
 	}
 	
+	// get a property value by name
+	// reload configuration each time to get latest property value
+	public Map<String, String> getAllProperties() {
+		this.loadConfiguration();
+		return configuration;
+	}
+	
 	private void loadConfiguration() {
 		configuration = pe.getApplicationConfiguration(configurationName);
 	}
