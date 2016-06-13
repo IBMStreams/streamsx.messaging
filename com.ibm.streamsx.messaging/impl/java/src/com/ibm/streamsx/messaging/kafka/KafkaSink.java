@@ -8,6 +8,7 @@ package com.ibm.streamsx.messaging.kafka;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import com.ibm.streams.operator.OperatorContext;
@@ -93,12 +94,17 @@ public class KafkaSink extends KafkaBaseOper {
 			trace.log(TraceLevel.INFO, "Topics: " + topics.toString());
 
 		trace.log(TraceLevel.INFO, "Initializing producer");
-		KafkaProducerFactory producerFactory = new KafkaProducerFactory();
-		producerClient = producerFactory.getClient(topicAH, keyAH, messageAH, finalProperties);
+		producerClient = getNewProducerClient(topicAH, keyAH, messageAH, finalProperties);
 		
 		// register for data governance
 		// only register user specified topic in param
 		registerForDataGovernance();
+	}
+	
+	private static KafkaProducerClient getNewProducerClient(AttributeHelper topicAH, AttributeHelper keyAH, AttributeHelper messageAH, Properties finalProperties) {
+		KafkaProducerFactory producerFactory = new KafkaProducerFactory();
+		KafkaProducerClient producerClient = producerFactory.getClient(topicAH, keyAH, messageAH, finalProperties);
+		return producerClient;
 	}
 
 	private void registerForDataGovernance() {
@@ -117,7 +123,7 @@ public class KafkaSink extends KafkaBaseOper {
 	}
 	
 	@Override
-	public void process(StreamingInput<Tuple> stream, Tuple tuple){
+	public void process(StreamingInput<Tuple> stream, Tuple tuple) throws FileNotFoundException, IOException, UnsupportedStreamsKafkaConfigurationException{
 		try {	
 			if(trace.isLoggable(TraceLevel.DEBUG))
 				trace.log(TraceLevel.DEBUG, "Sending message: " + tuple);
@@ -126,42 +132,39 @@ public class KafkaSink extends KafkaBaseOper {
 				producerClient.send(tuple, topics);
 			else 
 				producerClient.send(tuple);
-		}catch(Exception e) {
+		} catch(Exception e) {
 			trace.log(TraceLevel.ERROR, "Could not send message: " + tuple, e);
 			e.printStackTrace();
+			resetProducerIfPropertiesHaveChanged();
 		}
 		
-
-		try {
-			producerClient.checkConnectionCount();
-		} catch (NoKafkaBrokerConnectionsException e) {
-			e.printStackTrace();
-			OperatorContext context = this.getOperatorContext();
-			if (newPropertiesExist(context)){
-				System.out.println("New client!");
-				trace.log(TraceLevel.ERROR, "Lost connection, but properties have changed. Initializing producer with new properties.");
-				try {
-					populateKafkaProperties(context);
-					producerClient.shutdown();
-					KafkaProducerFactory producerFactory = new KafkaProducerFactory();
-					producerClient = producerFactory.getClient(topicAH, keyAH, messageAH, finalProperties);
-				} catch (FileNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (UnsupportedStreamsKafkaConfigurationException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				
-			} else {
-				System.out.println("Keep the same client!");
-			}
+		if(producerClient.hasMessageException() == true){
+			System.out.println("Found message exception");
+			resetProducerIfPropertiesHaveChanged();
 		}
 
-	}	
+	}
+	private void resetProducerIfPropertiesHaveChanged()
+			throws FileNotFoundException, IOException, UnsupportedStreamsKafkaConfigurationException {
+		OperatorContext context = this.getOperatorContext();
+		if (newPropertiesExist(context)){
+			trace.log(TraceLevel.INFO,
+					"Properties have changed. Initializing producer with new properties.");
+			resetProducerClient(context);
+		} else {
+			trace.log(TraceLevel.INFO, "Properties have not changed, so we are keeping the same producer client and resetting the message exception.");
+			producerClient.resetMessageException();
+		}
+	}
+
+	private void resetProducerClient(OperatorContext context) throws FileNotFoundException, IOException, UnsupportedStreamsKafkaConfigurationException {
+		
+		// Not catching exceptions because we want to fail
+		// if we can't initialize a new producer
+		populateKafkaProperties(context);
+		producerClient.shutdown();
+		producerClient = getNewProducerClient(topicAH, keyAH, messageAH, finalProperties);
+	}
 
 	public static final String DESC = 
 			"This operator acts as a Kafka producer sending tuples as messages to a Kafka broker. " + 
@@ -170,7 +173,8 @@ public class KafkaSink extends KafkaBaseOper {
 			"The message is a required attribute. " +
 			"A topic can be specified as either an input stream attribute or as a parameter. " +
 			"Specify properties as described here: http://kafka.apache.org/documentation.html#newproducerconfigs. " + 
+			BASE_DESC + // common description between Source and Sink
 			"\\n\\n**Behavior in a Consistent Region**" + 
-			"\\nThis operator can participate in a consistent region.  This operator cannot be placed at the start of a consistent region."
+			"\\nThis operator can participate in a consistent region.  This operator cannot be placed at the start of a consistent region. "
 			;
 }

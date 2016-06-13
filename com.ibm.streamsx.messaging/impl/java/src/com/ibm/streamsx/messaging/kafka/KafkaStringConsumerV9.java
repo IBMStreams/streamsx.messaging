@@ -5,11 +5,11 @@ import java.util.Properties;
 
 import com.ibm.streams.operator.OutputTuple;
 
-public class KafkaStringConsumerV9 extends KafkaConsumerV9<String,String>{
+public class KafkaStringConsumerV9 extends KafkaConsumerClient<String,String>{
 	
 	public KafkaStringConsumerV9(AttributeHelper topicAH,
 			AttributeHelper keyAH, AttributeHelper messageAH, List<Integer> partitions, int consumerPollTimeout, Properties props) {
-		super(topicAH, keyAH, messageAH, partitions, consumerPollTimeout, props);
+		super(topicAH, keyAH, messageAH, partitions, props);
 	}
 
 	@Override
