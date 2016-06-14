@@ -3,7 +3,6 @@
 	<classpathentry kind="src" path="impl/java/src"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="opt/downloaded/jline-0.9.94.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/jopt-simple-3.2.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/junit-3.8.1.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/metrics-core-2.2.0.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/geronimo-j2ee-management_1.1_spec-1.0.1.jar"/>
@@ -15,16 +14,11 @@
 	<classpathentry kind="lib" path="opt/downloaded/zookeeper-3.4.6.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/log4j-1.2.15.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/lz4-1.2.0.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/mail-1.4.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/slf4j-log4j12-1.7.6.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/snappy-java-1.1.1.7.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/zkclient-0.7.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/amqp-client-3.5.6.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/activemq-client-5.14.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/slf4j-api-1.7.13.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/kafka-clients-0.9.0.1.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/kafka_2.10-0.9.0.1.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/scala-library-2.10.5.jar"/>
+	<classpathentry kind="lib" path="opt/downloaded/kafka_2.11-0.10.0.0.jar"/>
+	<classpathentry kind="lib" path="opt/downloaded/kafka-clients-0.10.0.0.jar"/>
 	<classpathentry kind="output" path="impl/java/bin"/>
 </classpath>
