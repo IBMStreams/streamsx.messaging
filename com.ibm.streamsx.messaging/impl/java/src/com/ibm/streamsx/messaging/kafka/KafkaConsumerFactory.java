@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import com.ibm.streams.operator.logging.TraceLevel;
 
+@SuppressWarnings("rawtypes")
 public class KafkaConsumerFactory {
 	KafkaConsumerClient client;
 	private final Logger trace = Logger.getLogger(KafkaConsumerFactory.class

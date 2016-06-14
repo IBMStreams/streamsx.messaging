@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.KafkaException;
+import org.apache.kafka.common.errors.WakeupException;
 
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
@@ -60,7 +61,6 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	// Need this because KafkaConsumer.close() hangs if we have lost connection
 	// to the broker. 
 	ExecutorService shutdownExecutor;
-	WakeupTimer wakeupTimer;
 	
 	@SuppressWarnings("rawtypes")
 	KafkaConsumerClient streamsKafkaConsumer;
@@ -201,7 +201,6 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	
 	@SuppressWarnings("unchecked")
 	public void produceTuples() throws FileNotFoundException, IOException, UnsupportedStreamsKafkaConfigurationException{	
-		wakeupTimer = new WakeupTimer(streamsKafkaConsumer);
 		while (!shutdown.get()) {
 			try {
 				if (crContext != null){
@@ -210,12 +209,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 					crContext.acquirePermit();
 				}
 				
-				// Give a 10 second buffer to the poll call if it hangs
-				// Only doing this because of a Kafka bug where poll doesn't return
-				// if lost connection to server. 
-				wakeupTimer.schedule(consumerPollTimeout + 10000);
 				ConsumerRecords<?,?> records = streamsKafkaConsumer.getRecords(consumerPollTimeout);
-				wakeupTimer.cancelAndPurgeTask();
 				
 				if (records.isEmpty()){
 					streamsKafkaConsumer.checkConnectionCount();
@@ -231,8 +225,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 						}
 					}
 				}
-			} catch (NoKafkaBrokerConnectionsException 
-					| KafkaException e) {
+			} catch (WakeupException e){
 	            // Close if we are shutting down, else error
 				if (shutdown.get()) {
 					trace.log(TraceLevel.ALL, "Shutting down consumer.");
@@ -249,6 +242,12 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 					e.printStackTrace();
 					resetConsumerIfPropertiesHaveChanges();
 				}
+			} catch (NoKafkaBrokerConnectionsException 
+					| KafkaException e){
+				// Let's see if we have new properties to reset the consumer
+				trace.log(TraceLevel.ERROR, e.getMessage());
+				e.printStackTrace();
+				resetConsumerIfPropertiesHaveChanges();
 	        } catch (InterruptedException e) {
 	        	// Interrupted while acquiring permit
 	        	trace.log(TraceLevel.ERROR, "Error while acquiring permit: " + e.getMessage());
@@ -272,7 +271,6 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 				consumerIsShutdown.notifyAll();
 			}
 		}
-		wakeupTimer.close();
 	}
 
 	private void resetConsumerIfPropertiesHaveChanges() throws FileNotFoundException, IOException, UnsupportedStreamsKafkaConfigurationException {
@@ -281,8 +279,6 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 			trace.log(TraceLevel.INFO,
 					"Properties have changed. Initializing consumer with new properties.");
 			resetConsumerClient(context);
-			wakeupTimer.close();
-			wakeupTimer = new WakeupTimer(streamsKafkaConsumer);
 		} else {
 			trace.log(TraceLevel.INFO, "P:roperties have not changed, so we are keeping the same consumer client!");
 		}
