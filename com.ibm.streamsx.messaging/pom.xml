@@ -27,8 +27,8 @@
 	<dependencies>
 	  <dependency>
 	    <groupId>org.apache.kafka</groupId>
-	    <artifactId>kafka_2.10</artifactId>
-	    <version>0.9.0.1</version>
+	    <artifactId>kafka_2.11</artifactId>
+	    <version>0.10.0.0</version>
 	    <exclusions>     	
 	     <exclusion>
 		<groupId>com.sun.jmx</groupId>
