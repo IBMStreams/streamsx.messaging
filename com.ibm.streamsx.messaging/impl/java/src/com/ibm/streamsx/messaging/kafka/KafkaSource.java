@@ -12,13 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
@@ -51,16 +44,11 @@ import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 public class KafkaSource extends KafkaBaseOper implements StateHandler{
 
 	static final String OPER_NAME = "KafkaConsumer";
-	private static final int MAX_SHUTDOWN_THREAD = 10;
 	private int threadsPerTopic = 1;
 	private List<Integer> partitions = new ArrayList<Integer>();
 	private static Logger trace = Logger.getLogger(KafkaSource.class.getName());
 	private final AtomicBoolean shutdown = new AtomicBoolean(false);
 	private AtomicBoolean consumerIsShutdown = new AtomicBoolean(false);
-	
-	// Need this because KafkaConsumer.close() hangs if we have lost connection
-	// to the broker. 
-	ExecutorService shutdownExecutor;
 	
 	@SuppressWarnings("rawtypes")
 	KafkaConsumerClient streamsKafkaConsumer;
@@ -164,11 +152,6 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	@Override
 	public void allPortsReady() throws Exception {	
 		
-		// Used to shutdown Kafka consumers since close hangs if we lose server connection
-		// (this is a bug in Kafka)
-		shutdownExecutor = Executors.newFixedThreadPool(MAX_SHUTDOWN_THREAD);
-		
-		
 		processThread = getOperatorContext()
 				.getThreadFactory().newThread(new Runnable() {
 
@@ -230,7 +213,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 				if (shutdown.get()) {
 					trace.log(TraceLevel.ALL, "Shutting down consumer.");
 					if (streamsKafkaConsumer != null) {
-						shutdownCurrentConsumer();
+						streamsKafkaConsumer.shutdown();
 						consumerIsShutdown.set(true);
 						synchronized(consumerIsShutdown){
 							consumerIsShutdown.notifyAll();
@@ -289,36 +272,11 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		// Not catching exceptions because we want to fail
 		// if we can't initialize a new consumer
 		populateKafkaProperties(context);		
-        shutdownCurrentConsumer();
+        streamsKafkaConsumer.shutdown();
 		trace.log(TraceLevel.INFO,
 				"Shut down consumer. Will attempt to create a new one.");
 		streamsKafkaConsumer = getNewConsumerClient(topicAH, keyAH, messageAH,
 				partitions, consumerPollTimeout, finalProperties, getOutput(0), topics);
-	}
-
-	private void shutdownCurrentConsumer() {
-		Future<String> future = shutdownExecutor.submit(new ShutdownTask(streamsKafkaConsumer));
-        try {
-            future.get(10, TimeUnit.SECONDS);
-        } catch (TimeoutException | InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            trace.log(TraceLevel.WARN,"Consumer didn't shutdown in the time expected. You have likely lost connection to the Kafka broker.");
-        }
-	}
-	
-	@SuppressWarnings("rawtypes")
-	class ShutdownTask implements Callable<String> {
-		KafkaConsumerClient consumer;
-		
-		public ShutdownTask(KafkaConsumerClient consumer){
-			this.consumer = consumer;
-		}
-		
-	    @Override
-	    public String call() throws Exception {
-	    	consumer.shutdown();
-	        return "Shutdown!";
-	    }
 	}
 
 	@Parameter(name = "consumerPollTimeout", optional = true, description = "The time, in milliseconds, spent waiting in poll if data is not available. If 0, returns immediately with any records that are available now. Must not be negative. This parameter is only valid when using the KafkaConsumer(0.9) (specified bootstrap.servers instead of zookeeper.connect). Default is 100.")
@@ -367,15 +325,12 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		
 		// Wait to make sure we have caught the wakeup exception
 		// and submitted shutdown task. 
-		if (!consumerIsShutdown.get()){
-			synchronized(consumerIsShutdown){
+		
+		synchronized (consumerIsShutdown) {
+			if (!consumerIsShutdown.get()) {
 				consumerIsShutdown.wait(); // Wait until shutdown task submitted
 			}
 		}
-		
-		shutdownExecutor.shutdown();
-		Boolean successfulTerm = shutdownExecutor.awaitTermination(5, TimeUnit.SECONDS);
-		trace.log(TraceLevel.INFO, "Executor termination success: " + successfulTerm);
 		
 		super.shutdown();
 	}
