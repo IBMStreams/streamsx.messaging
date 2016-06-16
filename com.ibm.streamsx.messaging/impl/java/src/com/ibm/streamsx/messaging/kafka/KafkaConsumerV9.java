@@ -130,7 +130,10 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 				process(records);
 			} catch (WakeupException e) {
 	             // Ignore exception if closing
-	             if (!shutdown.get()){
+	             if (shutdown.get()){
+	            	 trace.log(TraceLevel.INFO, "Shutting down consumer.");
+	            	 consumer.close();
+	             } else {
 	            	 trace.log(TraceLevel.ERROR, "WakeupException: " + e.getMessage());
 	            	 e.printStackTrace();
 	             }
@@ -186,7 +189,7 @@ public abstract class KafkaConsumerV9<K,V> extends KafkaConsumerClient {
 		trace.log(TraceLevel.ALL, "Shutting down...");
 		shutdown.set(true);
 		if (consumer != null){
-			consumer.close();
+			consumer.wakeup();
 		}
 	}
 }
