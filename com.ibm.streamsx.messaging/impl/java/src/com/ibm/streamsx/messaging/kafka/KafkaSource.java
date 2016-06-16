@@ -303,18 +303,23 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		}
 	}
 
-	public static final String DESC = 
-			"This operator acts as a Kafka consumer receiving messages for one or more topics. " +
-			"For parallel consumption, we strongly recommend specifying partitions on each Consumer operator, " +
-			"as we have found the automatic partition assignment strategies from Kafka to be unreliable." + 
-			"Ordering of messages is only guaranteed per Kafka topic partition." + 
-			BASE_DESC + // common description between Source and Sink
-			"\\n\\n**Behavior in a Consistent Region**" + 
-			"\\nThis operator can be used inside a consistent region. Operator driven and periodical checkpointing " +
-			"are supported. Partitions to be read from must be specified. " +
-			"Resetting to initial state is not supported because the intial offset cannot be saved and may not be present in the Kafka log. " + 
-			"In the case of a reset to initial state after operator crash, messages will start being read from the time of reset."
-			;
+	public static final String DESC = "This operator acts as a Kafka consumer receiving messages for one or more topics. "
+			+ "For parallel consumption, we strongly recommend specifying partitions on each Consumer operator, "
+			+ "as we have found the automatic partition assignment strategies from Kafka to be unreliable."
+			+ "Ordering of messages is only guaranteed per Kafka topic partition." + BASE_DESC + // common
+																									// description
+																									// between
+																									// Source
+																									// and
+																									// Sink
+			"Due to a bug in Kafka (eventually getting resolved by KAFKA-1894), when authentication failure occurs or "
+			+ "connection to Kafka brokers is lost, we will not be able to pick up new properties from the PropertyProvider. "
+			+ "The workaround is to manually restart the KafkaConsumer PE after properties have been updated. New properties will "
+			+ "then be picked up. " + "\\n\\n**Behavior in a Consistent Region**"
+			+ "\\nThis operator can be used inside a consistent region. Operator driven and periodical checkpointing "
+			+ "are supported. Partitions to be read from must be specified. "
+			+ "Resetting to initial state is not supported because the intial offset cannot be saved and may not be present in the Kafka log. "
+			+ "In the case of a reset to initial state after operator crash, messages will start being read from the time of reset.";
 	
 	@Override
 	public void shutdown() throws Exception {
