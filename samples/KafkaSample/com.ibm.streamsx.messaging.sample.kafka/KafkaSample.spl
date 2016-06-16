@@ -31,6 +31,15 @@ composite KafkaSample {
 				propertiesFile : "etc/producer.properties";
 		}
 		
+		
+		/*
+		 * If you want to have consumers running in parallel, just uncomment the 
+		 * @parallel and set the width to the number of consumers you want. 
+		 * Remember, there can be at most one consumer per partition in a 
+		 * consumer group, so width should never be greater than the number
+		 * of partitions in your topic. 
+		 */ 
+		// @parallel(width = 3)
 		stream<rstring key, rstring message> KafkaStream = KafkaConsumer()
 		{
 			param
