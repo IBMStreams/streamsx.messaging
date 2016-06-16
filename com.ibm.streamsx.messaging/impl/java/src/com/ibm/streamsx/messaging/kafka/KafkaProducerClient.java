@@ -3,8 +3,10 @@ package com.ibm.streamsx.messaging.kafka;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 
 import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.logging.TraceLevel;
@@ -20,6 +22,17 @@ public abstract class KafkaProducerClient extends KafkaBaseClient {
 	abstract void send(Tuple tuple, List<String> topics) throws Exception;
 
 	abstract void send(Tuple tuple) throws Exception;
+	
+	protected Callback getMessageCallback() {
+		return new Callback() {
+            public void onCompletion(RecordMetadata metadata, Exception e) {
+                if(e != null){
+                    e.printStackTrace();
+                    trace.log(TraceLevel.ERROR, "Message exception: " + e.getMessage());
+                }
+            }
+        };
+	}
 
 }
 
@@ -42,7 +55,7 @@ class ProducerStringHelper extends KafkaProducerClient{
 		String message = messageAH.getString(tuple);
 		String key = keyAH.getString(tuple);
 
-		producer.send(new ProducerRecord<String, String>(topic ,key, message));
+		producer.send(new ProducerRecord<String, String>(topic ,key, message), getMessageCallback());
 	}
 
 	@Override
@@ -51,7 +64,7 @@ class ProducerStringHelper extends KafkaProducerClient{
 		String key = keyAH.getString(tuple);
 
 		for(String topic : topics) {
-			producer.send(new ProducerRecord<String, String>(topic,key, message));
+			producer.send(new ProducerRecord<String, String>(topic,key, message), getMessageCallback());
 		}
 
 	}
@@ -81,7 +94,7 @@ class ProducerByteHelper extends KafkaProducerClient{
 		byte [] message = messageAH.getBytes(tuple);
 		byte [] key = keyAH.getBytes(tuple);
 
-		producer.send(new ProducerRecord<byte[],byte[]>(topic ,key, message));
+		producer.send(new ProducerRecord<byte[],byte[]>(topic ,key, message), getMessageCallback());
 	}
 
 	@Override
@@ -90,7 +103,7 @@ class ProducerByteHelper extends KafkaProducerClient{
 		byte [] key = keyAH.getBytes(tuple);
 
 		for(String topic : topics) {
-			producer.send(new ProducerRecord<byte[],byte[]>(topic,key, message));
+			producer.send(new ProducerRecord<byte[],byte[]>(topic,key, message), getMessageCallback());
 		}
 
 	}
