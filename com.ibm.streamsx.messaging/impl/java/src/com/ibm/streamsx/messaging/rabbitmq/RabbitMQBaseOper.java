@@ -56,7 +56,7 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	private String URI = "";
 	private long networkRecoveryInterval = -1;
 	
-	protected Metric isConnected;
+	private Metric isConnected;
 	
 	
 	public synchronized void initialize(OperatorContext context)
