@@ -33,6 +33,7 @@ public class RabbitMQSink extends RabbitMQBaseOper {
 	Integer deliveryMode = 1;
 	int maxMessageSendRetries = 0;
 	int messageSendRetryDelay = 10000;
+	private boolean firstProcess = true;
 	
 	@Override
 	public synchronized void initialize(OperatorContext context)
@@ -49,9 +50,6 @@ public class RabbitMQSink extends RabbitMQBaseOper {
 
 	@Override
 	public synchronized void allPortsReady() throws Exception {
-		// This method is commonly used by source operators.
-		// Operators that process incoming tuples generally do not need this
-		// notification.
 		OperatorContext context = getOperatorContext();
 		trace.log(TraceLevel.INFO, "Operator " + context.getName()
 				+ " all ports are ready in PE: " + context.getPE().getPEId()
@@ -63,7 +61,14 @@ public class RabbitMQSink extends RabbitMQBaseOper {
 	@Override
 	public void process(StreamingInput<Tuple> stream, Tuple tuple) throws Exception
 			{
-
+		
+		// Our first time, we need to setup our connection
+		if (firstProcess){
+			initializeRabbitChannelAndConnection();
+			firstProcess = false;
+		}
+		
+		
 		byte[] message = messageAH.getBytes(tuple);
 		String routingKey = "";
 		Map<String, Object> headers = new HashMap<String,Object>();
