@@ -5,3 +5,4 @@ com.ibm.streamsx.messaging.rabbitmq
 opt/downloaded
 /target
 /.externalToolBuilders
+/bin/
