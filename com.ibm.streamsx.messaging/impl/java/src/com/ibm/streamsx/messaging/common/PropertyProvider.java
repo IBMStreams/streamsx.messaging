@@ -28,7 +28,14 @@ public class PropertyProvider {
 		return configuration.get(name);
 	}
 	
-	// get a property value by name
+	// check if the property provider contains a certain property
+	// reload configuration each time to get latest property value
+	public boolean contains(String name) {
+		this.loadConfiguration();
+		return configuration.containsKey(name);
+	}
+	
+	// get a all properties
 	// reload configuration each time to get latest property value
 	public Map<String, String> getAllProperties() {
 		this.loadConfiguration();

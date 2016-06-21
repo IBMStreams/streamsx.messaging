@@ -253,6 +253,7 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 			"All exchanges and queues created by this operator are non-durable and auto-delete." + 
 			"This operator supports direct, fanout, and topic exchanges. It does not support header exchanges. " + 
 			"\\n\\n**Behavior in a Consistent Region**" + 
-			"\\nThis operator cannot participate in a consistent region."
+			"\\nThis operator cannot participate in a consistent region." + 
+			BASE_DESC
 			;
 }

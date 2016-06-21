@@ -158,6 +158,7 @@ public class RabbitMQSink extends RabbitMQBaseOper {
 			"Messages are non-persistent and sending will only be attempted once by default. " + 
 			"This behavior can be modified using the deliveryMode and maxMessageSendRetries parameters. " + 
 			"\\n\\n**Behavior in a Consistent Region**" + 
-			"\\nThis operator can participate in a consistent region."
+			"\\nThis operator can participate in a consistent region." + 
+			BASE_DESC
 			;
 }

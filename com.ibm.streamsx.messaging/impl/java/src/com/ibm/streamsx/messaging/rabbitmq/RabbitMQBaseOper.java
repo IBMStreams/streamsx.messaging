@@ -21,12 +21,15 @@ import java.util.logging.Logger;
 import com.ibm.streams.operator.AbstractOperator;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.StreamSchema;
+import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.Type.MetaType;
+import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.logging.TraceLevel;
 import com.ibm.streams.operator.metrics.Metric;
 import com.ibm.streams.operator.model.CustomMetric;
 import com.ibm.streams.operator.model.Libraries;
 import com.ibm.streams.operator.model.Parameter;
+import com.ibm.streamsx.messaging.common.PropertyProvider;
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -36,6 +39,9 @@ import com.rabbitmq.client.Recoverable;
 @Libraries({ "opt/downloaded/*"/*, "@RABBITMQ_HOME@" */})
 public class RabbitMQBaseOper extends AbstractOperator {
 
+	private static final String APP_CONFIG_NAME = "appConfigName";
+	private static final String PASSWORD = "password";
+	private static final String USERNAME = "username";
 	protected Channel channel;
 	protected Connection connection;
 	protected String username = "",
@@ -57,6 +63,22 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	private long networkRecoveryInterval = -1;
 	
 	private Metric isConnected;
+	private String appConfigName = "";
+	
+	
+	/*
+	 * The method checkParametersRuntime validates that the reconnection policy
+	 * parameters are appropriate
+	 */
+	@ContextCheck(compile = false)
+	public static void checkParametersRuntime(OperatorContextChecker checker) {
+		if((checker.getOperatorContext().getParameterNames().contains(APP_CONFIG_NAME))) {
+        	String appConfigName = checker.getOperatorContext().getParameterValues(APP_CONFIG_NAME).get(0);
+			
+			@SuppressWarnings("unused") // If it is empty, we will throw an exception
+			PropertyProvider provider = new PropertyProvider(checker.getOperatorContext().getPE(), appConfigName);
+        }
+	}
 	
 	
 	public synchronized void initialize(OperatorContext context)
@@ -150,14 +172,32 @@ public class RabbitMQBaseOper extends AbstractOperator {
 		return connection;
 	}
 
-	private void configureUsernameAndPassword(
-			ConnectionFactory connectionFactory) {
-		if (username != ""){
+	/*
+	 * Set the username and password either from the parameters provided or from
+	 * the appConfig. Parameters beat appConfig.
+	 */
+	private void configureUsernameAndPassword(ConnectionFactory connectionFactory) {
+		// Lowest priority PropertyProvider first
+		// We only write to username and appConfig from appConfig if they're already set
+		PropertyProvider propertyProvider = null;
+		if (!getAppConfigName().isEmpty()) {
+			OperatorContext context = getOperatorContext();
+			propertyProvider = new PropertyProvider(context.getPE(), getAppConfigName());
+			if (username.isEmpty() && propertyProvider.contains(USERNAME)) {
+				username = propertyProvider.getProperty(USERNAME);
+			}
+			if (password.isEmpty() && propertyProvider.contains(PASSWORD)) {
+				password = propertyProvider.getProperty(PASSWORD);
+			}
+		}
+
+		if (!username.isEmpty()) {
 			connectionFactory.setUsername(username);
 			connectionFactory.setPassword(password);
 			trace.log(TraceLevel.INFO, "Set username and password.");
 		} else {
-			trace.log(TraceLevel.INFO, "Defaults: " + connectionFactory.getUsername() + " " + connectionFactory.getPassword());				
+			trace.log(TraceLevel.INFO,
+					"Defaults: " + connectionFactory.getUsername() + " " + connectionFactory.getPassword());
 		}
 	}
 
@@ -197,12 +237,17 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	}
 
 	public void shutdown() throws IOException, TimeoutException {
-		channel.close();
+		try {
+			channel.close();
+		} catch (Exception e){
+			e.printStackTrace();
+			trace.log(TraceLevel.ALL, "Exception at channel close: " + e.toString());
+		}
 		try {
 			connection.close();
 		} catch (Exception e) {
 			e.printStackTrace();
-			trace.log(TraceLevel.ALL, "Exception at close: " + e.toString());
+			trace.log(TraceLevel.ALL, "Exception at connection close: " + e.toString());
 		}
 	}
 
@@ -236,6 +281,18 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	@Parameter(optional = true, description = "Password for RabbitMQ authentication.")
 	public void setPassword(String value) {
 		password = value;
+	}
+	
+	@Parameter(optional = true, description = "This parameter specifies the name of application configuration that stores client credentials, "
+			+ "the property specified via application configuration is overridden by the application parameters. "
+			+ "The hierarchy of properties goes: parameter (username and password) beats out appConfigName. "
+			+ "The valid key-value pairs in the appConfig are username=<username> and password=<password>. ")
+	public void setAppConfigName(String appConfigName) {
+		this.appConfigName  = appConfigName;
+	}
+	
+	public String getAppConfigName() {
+		return appConfigName;
 	}
 	
 	@Parameter(optional = true, description = "Optional attribute. Name of the RabbitMQ exchange type. Default direct.")
@@ -283,4 +340,10 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	public void setIsConnectedMetric(Metric isConnected) {
 		this.isConnected = isConnected;
 	}
+	
+	
+	public static final String BASE_DESC = 
+			"\\n**AppConfig**: The valid key-value pairs in the appConfig are username=<username> and password=<password>. ";
+			
+
 }
