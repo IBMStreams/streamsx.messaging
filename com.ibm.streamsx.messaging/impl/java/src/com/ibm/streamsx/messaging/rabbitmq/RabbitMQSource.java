@@ -67,7 +67,6 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 				+ " initializing in PE: " + context.getPE().getPEId()
 				+ " in Job: " + context.getPE().getJobId());
 
-		initRabbitChannel();
 		// produce tuples returns immediately, but we don't want ports to close
 		createAvoidCompletionThread();
 
@@ -78,7 +77,6 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 					public void run() {
 						try {
 							produceTuples();
-							// rabbitMQWrapper.Consume();
 						} catch (Exception e) {
 							e.printStackTrace();
 							trace.log(TraceLevel.ERROR, e.getMessage());
@@ -90,12 +88,30 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 		processThread.setDaemon(false);
 	}
 
-	private void initRabbitChannel() throws IOException {
+	
+	/**
+	 * Notification that initialization is complete and all input and output
+	 * ports are connected and ready to receive and submit tuples.
+	 * 
+	 * @throws Exception
+	 *             Operator failure, will cause the enclosing PE to terminate.
+	 */
+	@Override
+	public synchronized void allPortsReady() throws Exception {
+		// After all the ports are ready, but before we start 
+		// sending messages, setup our connection, channel, exchange and queue
+		super.initializeRabbitChannelAndConnection();		
+		bindAndSetupQueue();
+		
+		processThread.start();
+	}
+
+	private void bindAndSetupQueue() throws IOException {
 		
 		boolean createdQueue = initializeQueue(connection);
 		
-		//Only want to bind to routing keys or exchanges if we created the queue
-		//We don't want to modify routing keys of existing queues. 
+		// Only want to bind to routing keys or exchanges if we created the queue
+		// We don't want to modify routing keys of existing queues. 
 		if (createdQueue){
 			if (routingKeys.isEmpty())
 				routingKeys.add("");//add a blank routing key
@@ -138,18 +154,7 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 		return createdQueue;
 	}
 
-	/**
-	 * Notification that initialization is complete and all input and output
-	 * ports are connected and ready to receive and submit tuples.
-	 * 
-	 * @throws Exception
-	 *             Operator failure, will cause the enclosing PE to terminate.
-	 */
-	@Override
-	public synchronized void allPortsReady() throws Exception {
-		processThread.start();
-	}
-
+	
 	/**
 	 * Submit new tuples to the output stream
 	 * @throws IOException 
@@ -223,7 +228,7 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 	 * @throws TimeoutException
 	 * @throws IOException
 	 */
-	public synchronized void shutdown() throws IOException, TimeoutException {
+	public synchronized void shutdown() throws IOException, TimeoutException {		
 		if (processThread != null) {
 			processThread.interrupt();
 			processThread = null;

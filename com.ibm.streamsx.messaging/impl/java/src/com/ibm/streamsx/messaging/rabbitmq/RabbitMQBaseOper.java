@@ -7,7 +7,10 @@ package com.ibm.streamsx.messaging.rabbitmq;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,12 +23,15 @@ import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.logging.TraceLevel;
+import com.ibm.streams.operator.metrics.Metric;
+import com.ibm.streams.operator.model.CustomMetric;
 import com.ibm.streams.operator.model.Libraries;
 import com.ibm.streams.operator.model.Parameter;
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.Recoverable;
 
 @Libraries({ "opt/downloaded/*"/*, "@RABBITMQ_HOME@" */})
 public class RabbitMQBaseOper extends AbstractOperator {
@@ -44,36 +50,29 @@ public class RabbitMQBaseOper extends AbstractOperator {
 			routingKeyAH = new AttributeHelper("routing_key"),
 			messageAH = new AttributeHelper("message");
 
-	private final Logger trace = Logger.getLogger(RabbitMQBaseOper.class
+	private final Logger trace = Logger.getLogger(this.getClass()
 			.getCanonicalName());
 	protected Boolean usingDefaultExchange = false;
 	private String URI = "";
+	private long networkRecoveryInterval = -1;
+	
+	private Metric isConnected;
+	
 	
 	public synchronized void initialize(OperatorContext context)
 			throws Exception {
 		// Must call super.initialize(context) to correctly setup an operator.
 		super.initialize(context);
-		ConnectionFactory connectionFactory = new ConnectionFactory();
-		connectionFactory.setExceptionHandler(new RabbitMQConnectionExceptionHandler());
-		connectionFactory.setAutomaticRecoveryEnabled(autoRecovery);
+	}
+
+	public void initializeRabbitChannelAndConnection() throws MalformedURLException, URISyntaxException, NoSuchAlgorithmException,
+			KeyManagementException, IOException, TimeoutException, InterruptedException, Exception {
+		ConnectionFactory connectionFactory = setupConnectionFactory();
 		
-		
-		if (URI.isEmpty()){
-			configureUsernameAndPassword(connectionFactory);
-			if (vHost != null)
-				connectionFactory.setVirtualHost(vHost);
-			
-			addressArr = buildAddressArray(hostAndPortList);
-			connection = connectionFactory.newConnection(addressArr);
-		} else{
-			//use specified URI rather than username, password, vHost, hostname, etc
-			if (!username.isEmpty() | !password.isEmpty() | vHost != null | !hostAndPortList.isEmpty()){
-				trace.log(TraceLevel.WARNING, "You specified a URI, therefore username, password"
-						+ ", vHost, and hostname parameters will be ignored.");
-			}
-			connectionFactory.setUri(URI);
-			connection = connectionFactory.newConnection();
-		}
+		// If we return from this without throwing an exception, then we 
+		// have successfully connected
+		connection = setupNewConnection(connectionFactory, URI, addressArr, isConnected);
+		isConnected.setValue(1);
 		
 		channel = initializeExchange();
 		
@@ -82,6 +81,73 @@ public class RabbitMQBaseOper extends AbstractOperator {
 						+ " of type: " + exchangeType + " as user: " + connectionFactory.getUsername());
 		trace.log(TraceLevel.INFO,
 				"Connection to host: " + connection.getAddress());
+	}
+
+	private ConnectionFactory setupConnectionFactory()
+			throws MalformedURLException, URISyntaxException, NoSuchAlgorithmException, KeyManagementException {
+		ConnectionFactory connectionFactory = new ConnectionFactory();
+		connectionFactory.setExceptionHandler(new RabbitMQConnectionExceptionHandler(isConnected));
+		connectionFactory.setAutomaticRecoveryEnabled(autoRecovery);
+		if (networkRecoveryInterval >= 0){
+			connectionFactory.setNetworkRecoveryInterval(networkRecoveryInterval);
+		}
+		
+		if (URI.isEmpty()){
+			configureUsernameAndPassword(connectionFactory);
+			if (vHost != null)
+				connectionFactory.setVirtualHost(vHost);
+			
+			addressArr = buildAddressArray(hostAndPortList);
+			
+		} else{
+			//use specified URI rather than username, password, vHost, hostname, etc
+			if (!username.isEmpty() | !password.isEmpty() | vHost != null | !hostAndPortList.isEmpty()){
+				trace.log(TraceLevel.WARNING, "You specified a URI, therefore username, password"
+						+ ", vHost, and hostname parameters will be ignored.");
+			}
+			connectionFactory.setUri(URI);
+		}
+		return connectionFactory;
+	}
+
+	/*
+	 * We will reconnect indefinitely following the same timeout that the connectionFactory uses
+	 * for the automatic reconnection policy (if automatic recovery is enabled). 
+	 */
+	private Connection setupNewConnection(ConnectionFactory connectionFactory, String URI, Address[] addressArr, Metric isConnected) throws IOException, TimeoutException, InterruptedException {
+		Connection connection = null;
+		
+		if (connectionFactory.isAutomaticRecoveryEnabled()){
+			boolean connected = false;
+			while (!connected){
+				try{
+					connection = getConnection(connectionFactory, URI, addressArr);
+					connected = true;
+				} catch (Exception e){
+					e.printStackTrace();
+					trace.log(TraceLevel.ERROR, "Failed to setup connection: " + e.getMessage());
+					Thread.sleep(connectionFactory.getNetworkRecoveryInterval());
+				}
+			}
+			((Recoverable) connection).addRecoveryListener(new AutoRecoveryListener(isConnected));
+		} else {
+			connection = getConnection(connectionFactory, URI, addressArr);
+		}
+		
+		return connection;
+	}
+
+	private Connection getConnection(ConnectionFactory connectionFactory, String URI, Address[] addressArr)
+			throws IOException, TimeoutException {
+		Connection connection;
+		if (URI.isEmpty()){
+			connection = connectionFactory.newConnection(addressArr);
+			trace.log(TraceLevel.INFO, "Creating a new connection based on an address list.");
+		} else {
+			connection = connectionFactory.newConnection();
+			trace.log(TraceLevel.INFO, "Creating a new connection based on a provided URI.");
+		}
+		return connection;
 	}
 
 	private void configureUsernameAndPassword(
@@ -107,10 +173,10 @@ public class RabbitMQBaseOper extends AbstractOperator {
 				trace.log(TraceLevel.INFO, "Using the default exchange. Name \"\"");
 			}
 		} catch (IOException e){
-			//if exchange doesn't exits, we will create it
-			//we must also create a new channel since last one erred
+			// if exchange doesn't exist, we will create it
+			// we must also create a new channel since last one erred
 			channel = connection.createChannel();
-			//declare non-durable, auto-delete exchange
+			// declare non-durable, auto-delete exchange
 			channel.exchangeDeclare(exchangeName, exchangeType, false, true, null);
 			trace.log(TraceLevel.INFO, "Exchange was not found, therefore non-durable exchange will be declared.");
 		}
@@ -207,4 +273,14 @@ public class RabbitMQBaseOper extends AbstractOperator {
 		autoRecovery = value; 
 	}
 
+	@Parameter(optional = true, description = "If automaticRecovery is set to true, this is the interval (in ms) that will be used between reconnection attempts. The default is 5000 ms.")
+	public void setSetNetworkRecoveryInterval(long value) {
+		networkRecoveryInterval  = value; 
+	}
+	
+	@CustomMetric(name = "isConnected", kind = Metric.Kind.GAUGE,
+		    description = "Describes whether we are currently connected to the RabbitMQ server.")
+	public void setIsConnectedMetric(Metric isConnected) {
+		this.isConnected = isConnected;
+	}
 }
