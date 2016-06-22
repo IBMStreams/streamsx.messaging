@@ -237,6 +237,11 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	}
 
 	public void shutdown() throws IOException, TimeoutException {
+		closeRabbitConnections();
+	}
+
+
+	private void closeRabbitConnections() {
 		try {
 			channel.close();
 		} catch (Exception e){
