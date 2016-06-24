@@ -10,10 +10,10 @@ import com.rabbitmq.client.RecoveryListener;
 public class AutoRecoveryListener implements RecoveryListener {
 	private final Logger trace = Logger.getLogger(this.getClass()
 			.getCanonicalName());
-	private Metric isConnected;
+	private SynchronizedConnectionMetric isConnected;
 	
-	public AutoRecoveryListener(Metric isConnected) {
-		this.isConnected = isConnected;
+	public AutoRecoveryListener(SynchronizedConnectionMetric isConnected2) {
+		this.isConnected = isConnected2;
 	}
 	
 	@Override

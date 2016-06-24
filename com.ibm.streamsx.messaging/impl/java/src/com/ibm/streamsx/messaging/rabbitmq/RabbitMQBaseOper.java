@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 import com.ibm.streams.operator.AbstractOperator;
@@ -44,13 +45,18 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	private static final String USERNAME = "username";
 	protected Channel channel;
 	protected Connection connection;
-	protected String username = "",
-			password = "", exchangeName = "", exchangeType = "direct";
+	protected String usernameParameter = "",
+			passwordParameter = "", 
+			usernamePP = "", // username from propertyProvider
+			passwordPP = "", // password from propertyProvider
+			exchangeName = "", exchangeType = "direct";
 			
 	protected List<String> hostAndPortList = new ArrayList<String>();
 	protected Address[] addressArr; 
 	private String vHost;
 	private Boolean autoRecovery = true;
+	private AtomicBoolean shuttingDown = new AtomicBoolean(false);
+	protected boolean readyForShutdown = true;
 
 	protected AttributeHelper messageHeaderAH = new AttributeHelper("message_header"),
 			routingKeyAH = new AttributeHelper("routing_key"),
@@ -60,9 +66,10 @@ public class RabbitMQBaseOper extends AbstractOperator {
 			.getCanonicalName());
 	protected Boolean usingDefaultExchange = false;
 	private String URI = "";
-	private long networkRecoveryInterval = -1;
+	private long networkRecoveryInterval = 5000;
 	
-	private Metric isConnected;
+	protected SynchronizedConnectionMetric isConnected;
+	private Metric reconnectionAttempts;
 	private String appConfigName = "";
 	
 	
@@ -83,26 +90,85 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	
 	public synchronized void initialize(OperatorContext context)
 			throws Exception {
+		isConnected.setReconnectionAttempts(reconnectionAttempts);
 		// Must call super.initialize(context) to correctly setup an operator.
 		super.initialize(context);
 	}
+	
+	protected boolean newCredentialsExist() {
+		PropertyProvider propertyProvider = null;
+		boolean newProperties = false;
+		
+		if (!getAppConfigName().isEmpty()) {
+			OperatorContext context = getOperatorContext();
+			propertyProvider = new PropertyProvider(context.getPE(), getAppConfigName());
+			if (propertyProvider.contains(USERNAME)
+					&& !usernamePP.equals(propertyProvider.getProperty(USERNAME))) {
+				newProperties = true;
+			}
+			if (propertyProvider.contains(PASSWORD)
+					&& !passwordPP.equals(propertyProvider.getProperty(PASSWORD))) {
+				newProperties = true;
+			}
+		}
+		
+		trace.log(TraceLevel.INFO,
+				"newPropertiesExist() is returning a value of: " + newProperties);
+		
+		
+		return newProperties;
+	}
+	
+	public void resetRabbitClient() throws KeyManagementException, MalformedURLException, NoSuchAlgorithmException, URISyntaxException, IOException, TimeoutException, InterruptedException, Exception {
+		if (autoRecovery){
+			trace.log(TraceLevel.WARN, "Resetting Rabbit Client.");
+			closeRabbitConnections();
+			initializeRabbitChannelAndConnection();
+			
+		} else {
+			trace.log(TraceLevel.INFO, "AutoRecovery was not enabled, so we are not resetting client.");
+		}
+	}
+	
 
+	/*
+	 * Setup connection and channel. If automatic recovery is enabled, we will reattempt 
+	 * to connect every networkRecoveryInterval
+	 */
 	public void initializeRabbitChannelAndConnection() throws MalformedURLException, URISyntaxException, NoSuchAlgorithmException,
-			KeyManagementException, IOException, TimeoutException, InterruptedException, Exception {
-		ConnectionFactory connectionFactory = setupConnectionFactory();
+			KeyManagementException, IOException, TimeoutException, InterruptedException, OperatorShutdownException, FailedToConnectToRabbitMQException {
+		do {
+			try {
+				ConnectionFactory connectionFactory = setupConnectionFactory();
+				
+				// If we return from this without throwing an exception, then we 
+				// have successfully connected
+				connection = setupNewConnection(connectionFactory, URI, addressArr, isConnected);
+				
+				
+				channel = initializeExchange();
+				
+				isConnected.setValue(1);
+				
+				trace.log(TraceLevel.INFO,
+						"Initializing channel connection to exchange: " + exchangeName
+								+ " of type: " + exchangeType + " as user: " + connectionFactory.getUsername());
+				trace.log(TraceLevel.INFO,
+						"Connection to host: " + connection.getAddress());
+			} catch (IOException | TimeoutException e) {
+				e.printStackTrace();
+				trace.log(TraceLevel.ERROR, "Failed to setup connection: " + e.getMessage());
+				if (autoRecovery == true){
+					Thread.sleep(networkRecoveryInterval);
+				}
+			}
+		} while (autoRecovery == true 
+				&& (connection == null || channel == null)
+				&& !shuttingDown.get());
 		
-		// If we return from this without throwing an exception, then we 
-		// have successfully connected
-		connection = setupNewConnection(connectionFactory, URI, addressArr, isConnected);
-		isConnected.setValue(1);
-		
-		channel = initializeExchange();
-		
-		trace.log(TraceLevel.INFO,
-				"Initializing channel connection to exchange: " + exchangeName
-						+ " of type: " + exchangeType + " as user: " + connectionFactory.getUsername());
-		trace.log(TraceLevel.INFO,
-				"Connection to host: " + connection.getAddress());
+		if (connection == null || channel == null){
+			throw new FailedToConnectToRabbitMQException("Failed to initialize connection or channel to RabbitMQ Server.");
+		}
 	}
 
 	private ConnectionFactory setupConnectionFactory()
@@ -110,7 +176,7 @@ public class RabbitMQBaseOper extends AbstractOperator {
 		ConnectionFactory connectionFactory = new ConnectionFactory();
 		connectionFactory.setExceptionHandler(new RabbitMQConnectionExceptionHandler(isConnected));
 		connectionFactory.setAutomaticRecoveryEnabled(autoRecovery);
-		if (networkRecoveryInterval >= 0){
+		if (autoRecovery){
 			connectionFactory.setNetworkRecoveryInterval(networkRecoveryInterval);
 		}
 		
@@ -123,7 +189,7 @@ public class RabbitMQBaseOper extends AbstractOperator {
 			
 		} else{
 			//use specified URI rather than username, password, vHost, hostname, etc
-			if (!username.isEmpty() | !password.isEmpty() | vHost != null | !hostAndPortList.isEmpty()){
+			if (!usernameParameter.isEmpty() | !passwordParameter.isEmpty() | vHost != null | !hostAndPortList.isEmpty()){
 				trace.log(TraceLevel.WARNING, "You specified a URI, therefore username, password"
 						+ ", vHost, and hostname parameters will be ignored.");
 			}
@@ -133,29 +199,15 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	}
 
 	/*
-	 * We will reconnect indefinitely following the same timeout that the connectionFactory uses
-	 * for the automatic reconnection policy (if automatic recovery is enabled). 
+	 * Attempts to make a connection and throws an exception if it fails 
 	 */
-	private Connection setupNewConnection(ConnectionFactory connectionFactory, String URI, Address[] addressArr, Metric isConnected) throws IOException, TimeoutException, InterruptedException {
+	private Connection setupNewConnection(ConnectionFactory connectionFactory, String URI, Address[] addressArr, SynchronizedConnectionMetric isConnected2) throws IOException, TimeoutException, InterruptedException, OperatorShutdownException {
 		Connection connection = null;
-		
-		if (connectionFactory.isAutomaticRecoveryEnabled()){
-			boolean connected = false;
-			while (!connected){
-				try{
-					connection = getConnection(connectionFactory, URI, addressArr);
-					connected = true;
-				} catch (Exception e){
-					e.printStackTrace();
-					trace.log(TraceLevel.ERROR, "Failed to setup connection: " + e.getMessage());
-					Thread.sleep(connectionFactory.getNetworkRecoveryInterval());
-				}
-			}
-			((Recoverable) connection).addRecoveryListener(new AutoRecoveryListener(isConnected));
-		} else {
-			connection = getConnection(connectionFactory, URI, addressArr);
+		connection = getConnection(connectionFactory, URI, addressArr);
+		if (connectionFactory.isAutomaticRecoveryEnabled()) {
+			((Recoverable) connection).addRecoveryListener(new AutoRecoveryListener(isConnected2));
 		}
-		
+
 		return connection;
 	}
 
@@ -180,24 +232,40 @@ public class RabbitMQBaseOper extends AbstractOperator {
 		// Lowest priority PropertyProvider first
 		// We only write to username and appConfig from appConfig if they're already set
 		PropertyProvider propertyProvider = null;
+		String configuredUsername = usernameParameter;
+		String configuredPassword = passwordParameter;
+		
 		if (!getAppConfigName().isEmpty()) {
 			OperatorContext context = getOperatorContext();
 			propertyProvider = new PropertyProvider(context.getPE(), getAppConfigName());
-			if (username.isEmpty() && propertyProvider.contains(USERNAME)) {
-				username = propertyProvider.getProperty(USERNAME);
+			if (propertyProvider.contains(USERNAME)) {
+				usernamePP = propertyProvider.getProperty(USERNAME);
+				if (configuredUsername.isEmpty()){
+					configuredUsername = usernamePP;
+				}
 			}
-			if (password.isEmpty() && propertyProvider.contains(PASSWORD)) {
-				password = propertyProvider.getProperty(PASSWORD);
+			if (propertyProvider.contains(PASSWORD)) {
+				passwordPP = propertyProvider.getProperty(PASSWORD);
+				if (configuredPassword.isEmpty()){
+					configuredPassword = passwordPP;
+				}
 			}
 		}
 
-		if (!username.isEmpty()) {
-			connectionFactory.setUsername(username);
-			connectionFactory.setPassword(password);
-			trace.log(TraceLevel.INFO, "Set username and password.");
+		if (!configuredUsername.isEmpty()) {
+			connectionFactory.setUsername(configuredUsername);
+			trace.log(TraceLevel.INFO, "Set username.");
 		} else {
 			trace.log(TraceLevel.INFO,
-					"Defaults: " + connectionFactory.getUsername() + " " + connectionFactory.getPassword());
+					"Default username: " + connectionFactory.getUsername() );
+		}
+		
+		if (!configuredPassword.isEmpty()) {
+			connectionFactory.setPassword(configuredPassword);
+			trace.log(TraceLevel.INFO, "Set password.");
+		} else {
+			trace.log(TraceLevel.INFO,
+					"Default password: " + connectionFactory.getPassword());
 		}
 	}
 
@@ -236,24 +304,42 @@ public class RabbitMQBaseOper extends AbstractOperator {
 		return addrArr;
 	}
 
-	public void shutdown() throws IOException, TimeoutException {
+	public void shutdown() throws Exception {
+		shuttingDown.set(true);
 		closeRabbitConnections();
+		// Need this to make sure that we return from the process method
+		// before exiting shutdown
+		while(!readyForShutdown){
+			Thread.sleep(100);
+		}
+		super.shutdown();
 	}
 
 
 	private void closeRabbitConnections() {
-		try {
-			channel.close();
-		} catch (Exception e){
-			e.printStackTrace();
-			trace.log(TraceLevel.ALL, "Exception at channel close: " + e.toString());
+		if (channel != null){
+			try {
+				channel.close();
+			} catch (Exception e){
+				e.printStackTrace();
+				trace.log(TraceLevel.ALL, "Exception at channel close: " + e.toString());
+			} finally {
+				channel = null;
+			}
 		}
-		try {
-			connection.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-			trace.log(TraceLevel.ALL, "Exception at connection close: " + e.toString());
+				
+		if (connection != null){
+			try {
+				connection.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+				trace.log(TraceLevel.ALL, "Exception at connection close: " + e.toString());
+			} finally {
+				connection = null;
+			}
 		}
+		
+		isConnected.setValue(0);
 	}
 
 	public void initSchema(StreamSchema ss) throws Exception {
@@ -272,6 +358,8 @@ public class RabbitMQBaseOper extends AbstractOperator {
 		messageAH.initialize(ss, true, supportedTypes);
 
 	}
+	
+
 
 	@Parameter(optional = true, description = "List of host and port in form: \\\"myhost1:3456\\\",\\\"myhost2:3456\\\".")
 	public void setHostAndPort(List<String> value) {
@@ -280,18 +368,21 @@ public class RabbitMQBaseOper extends AbstractOperator {
 
 	@Parameter(optional = true, description = "Username for RabbitMQ authentication.")
 	public void setUsername(String value) {
-		username = value;
+		usernameParameter = value;
 	}
 
 	@Parameter(optional = true, description = "Password for RabbitMQ authentication.")
 	public void setPassword(String value) {
-		password = value;
+		passwordParameter = value;
 	}
 	
 	@Parameter(optional = true, description = "This parameter specifies the name of application configuration that stores client credentials, "
 			+ "the property specified via application configuration is overridden by the application parameters. "
 			+ "The hierarchy of properties goes: parameter (username and password) beats out appConfigName. "
-			+ "The valid key-value pairs in the appConfig are username=<username> and password=<password>. ")
+			+ "The valid key-value pairs in the appConfig are username=<username> and password=<password>. "
+			+ "If the operator loses connection to the RabbitMQ server, or it fails authentication, it will "
+			+ "check for new credentials in the appConfig and attempt to reconnect if they exist. "
+			+ "The attempted reconnection will only take place if automaticRecovery is set to true (which it is by default).")
 	public void setAppConfigName(String appConfigName) {
 		this.appConfigName  = appConfigName;
 	}
@@ -334,6 +425,10 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	public void setAutomaticRecovery(Boolean value) {
 		autoRecovery = value; 
 	}
+	
+	public Boolean getAutoRecovery() {
+		return autoRecovery;
+	}
 
 	@Parameter(optional = true, description = "If automaticRecovery is set to true, this is the interval (in ms) that will be used between reconnection attempts. The default is 5000 ms.")
 	public void setSetNetworkRecoveryInterval(long value) {
@@ -343,12 +438,18 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	@CustomMetric(name = "isConnected", kind = Metric.Kind.GAUGE,
 		    description = "Describes whether we are currently connected to the RabbitMQ server.")
 	public void setIsConnectedMetric(Metric isConnected) {
-		this.isConnected = isConnected;
+		this.isConnected = new SynchronizedConnectionMetric(isConnected);
+	}
+	
+	@CustomMetric(name = "reconnectionAttempts", kind = Metric.Kind.COUNTER,
+		    description = "The number of times we have attempted to reconnect since the last successful connection.")
+	public void setReconnectionAttempts(Metric reconnectionAttempts) {
+		this.reconnectionAttempts = reconnectionAttempts;
 	}
 	
 	
 	public static final String BASE_DESC = 
 			"\\n**AppConfig**: The valid key-value pairs in the appConfig are username=<username> and password=<password>. ";
-			
+
 
 }

@@ -13,10 +13,10 @@ import com.rabbitmq.client.TopologyRecoveryException;
 public class RabbitMQConnectionExceptionHandler implements ExceptionHandler {
 	private final Logger trace = Logger.getLogger(this.getClass()
 			.getCanonicalName());
-	private Metric isConnected;
+	private SynchronizedConnectionMetric isConnected;
 	
-	public RabbitMQConnectionExceptionHandler(Metric isConnected){
-		this.isConnected = isConnected;
+	public RabbitMQConnectionExceptionHandler(SynchronizedConnectionMetric isConnected2){
+		this.isConnected = isConnected2;
 	}
 	
 	@Override
