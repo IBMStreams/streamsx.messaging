@@ -449,7 +449,9 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	
 	
 	public static final String BASE_DESC = 
-			"\\n**AppConfig**: The valid key-value pairs in the appConfig are username=<username> and password=<password>. ";
+			"\\n**AppConfig**: The valid key-value pairs in the appConfig are username=<username> and password=<password>. "
+			+ "This operator will only automatically recover with new credentials from the appConfig if automaticRecovery "
+			+ "is set to true.";
 
 
 }
