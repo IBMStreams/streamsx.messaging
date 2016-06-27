@@ -8,10 +8,10 @@
 	<classpathentry kind="con" path="com.ibm.streams.java/com.ibm.streams.operator"/>
 	<classpathentry kind="lib" path="opt/downloaded/hawtbuf-1.11.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/org.eclipse.paho.client.mqttv3-1.0.1.jar"/>
-	<classpathentry kind="lib" path="opt/downloaded/amqp-client-3.5.6.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/activemq-client-5.14.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/slf4j-api-1.7.13.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/kafka_2.11-0.10.0.0.jar"/>
 	<classpathentry kind="lib" path="opt/downloaded/kafka-clients-0.10.0.0.jar"/>
+	<classpathentry kind="lib" path="opt/downloaded/amqp-client-3.6.2.jar"/>
 	<classpathentry kind="output" path="impl/java/bin"/>
 </classpath>

@@ -17,6 +17,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import javax.security.auth.login.Configuration;
+
 import com.ibm.streams.operator.AbstractOperator;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.StreamSchema;
@@ -149,6 +151,10 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		String jaasFile = getJaasFile();
 		if(jaasFile != null) {
 			System.setProperty("java.security.auth.login.config", jaasFile);
+			// If we are not setting the java.security.auth.login.config
+			// we must refresh the Configuration to load the security change
+			Configuration config = Configuration.getConfiguration();
+			config.refresh();
 		}
 		
 		
@@ -301,10 +307,10 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 			jaasFile = jaasFileParam;
 		} else if (finalProperties.containsKey(JAAS_FILE_PROPERTY)){
 			jaasFile = finalProperties.getProperty(JAAS_FILE_PROPERTY);
-			System.out.println("Found jaasFile in properties!");
+			trace.log(TraceLevel.INFO, "Found jaasFile in properties!");
 		}
 		
-		trace.log(TraceLevel.TRACE, "Jaas file: " + jaasFile);		
+		trace.log(TraceLevel.INFO, "Jaas file: " + jaasFile);		
 		if (jaasFile == null) return null;
 		jaasFile = getAbsoluteFilePath(jaasFile);
 		return jaasFile;

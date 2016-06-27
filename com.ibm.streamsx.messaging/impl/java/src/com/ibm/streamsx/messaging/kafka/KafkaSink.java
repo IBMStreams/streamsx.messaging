@@ -139,7 +139,7 @@ public class KafkaSink extends KafkaBaseOper {
 		}
 		
 		if(producerClient.hasMessageException() == true){
-			System.out.println("Found message exception");
+			trace.log(TraceLevel.WARN, "Found message exception");
 			resetProducerIfPropertiesHaveChanged();
 		}
 
