@@ -271,7 +271,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	private void resetConsumerClient(OperatorContext context) throws FileNotFoundException, IOException, UnsupportedStreamsKafkaConfigurationException {
 		// Not catching exceptions because we want to fail
 		// if we can't initialize a new consumer
-		populateKafkaProperties(context);		
+		getKafkaProperties(context);		
         streamsKafkaConsumer.shutdown();
 		trace.log(TraceLevel.INFO,
 				"Shut down consumer. Will attempt to create a new one.");

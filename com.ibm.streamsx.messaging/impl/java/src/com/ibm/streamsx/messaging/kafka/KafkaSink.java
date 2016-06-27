@@ -161,7 +161,7 @@ public class KafkaSink extends KafkaBaseOper {
 		
 		// Not catching exceptions because we want to fail
 		// if we can't initialize a new producer
-		populateKafkaProperties(context);
+		getKafkaProperties(context);
 		producerClient.shutdown();
 		producerClient = getNewProducerClient(topicAH, keyAH, messageAH, finalProperties);
 	}

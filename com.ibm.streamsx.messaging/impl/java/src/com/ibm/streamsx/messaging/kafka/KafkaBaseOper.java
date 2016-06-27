@@ -113,37 +113,37 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	public void initialize(OperatorContext context) throws Exception {
 		super.initialize(context);
 
-		populateKafkaProperties(context);
+		getKafkaProperties(context);
 
 	}
 
 	/*
 	 * Order of precedence for properties that get used (when duplicate property values provided):
-	 * 1. Properties parameter properties which overwrite. 
-	 * 2. Config file properties. 
-	 * 3. PropertyProvider props overwrite
+	 * 1. PropertyProvider props overwrite
+	 * 2. Properties parameter properties which overwrite. 
+	 * 3. Config file properties. 
 	 */
-	protected void populateKafkaProperties(OperatorContext context)
+	protected void getKafkaProperties(OperatorContext context)
 			throws IOException, FileNotFoundException, UnsupportedStreamsKafkaConfigurationException {
 		String propFile = getPropertiesFile();
 		
-		// Lowest priority PropertyProvider first
+		// Lowest priority properties file first
+		if (propFile != null) {
+			finalProperties.load(new FileReader(propFile));
+		}
+		
+		// Next add properties that were input as parameters
+		finalProperties.putAll(properties);
+		
+		
+		// Highest priority PropertyProvider last
 		PropertyProvider propertyProvider = null;
 		if(getAppConfigName() != null) {
 			propertyProvider = new PropertyProvider(context.getPE(), getAppConfigName());
 			
 			appConfigProperties = getCurrentAppConfigProperties(propertyProvider);
 		}	
-		
 		finalProperties.putAll(appConfigProperties);
-		
-		// Middle priority properties file second
-		if (propFile != null) {
-			finalProperties.load(new FileReader(propFile));
-		}
-		
-		// Finally add properties that were input as parameters
-		finalProperties.putAll(properties);
 		
 		finalProperties = transformTrustStoreProperty(finalProperties);
 		
@@ -349,5 +349,5 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	
 	public static final String BASE_DESC = 
 			"You must provide properties for the operator using at least one of the following properties: kafkaProperty, propertiesFile, or appConfigName. "
-			+ "The hierarchy of properties goes: kafkaProperty beats out propertiesFile, which beats out appConfigName.";
+			+ "The hierarchy of properties goes: appConfig beats out kafkaProperty parameter, which out the propertiesFile.";
 }
