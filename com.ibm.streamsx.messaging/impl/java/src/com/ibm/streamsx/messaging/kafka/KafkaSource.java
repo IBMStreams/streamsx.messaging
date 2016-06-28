@@ -279,7 +279,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 				partitions, consumerPollTimeout, finalProperties, getOutput(0), topics);
 	}
 
-	@Parameter(name = "consumerPollTimeout", optional = true, description = "The time, in milliseconds, spent waiting in poll if data is not available. If 0, returns immediately with any records that are available now. Must not be negative. This parameter is only valid when using the KafkaConsumer(0.9) (specified bootstrap.servers instead of zookeeper.connect). Default is 100.")
+	@Parameter(name = "consumerPollTimeout", optional = true, description = "The time, in milliseconds, spent waiting in poll if data is not available. If 0, returns immediately with any records that are available now. Must not be negative. Default is 100.")
 	public void setConsumerPollTimeout(int value) {
 		this.consumerPollTimeout = value;
 	}
@@ -304,9 +304,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	}
 
 	public static final String DESC = "This operator acts as a Kafka consumer receiving messages for one or more topics. "
-			+ "For parallel consumption, we strongly recommend specifying partitions on each Consumer operator, "
-			+ "as we have found the automatic partition assignment strategies from Kafka to be unreliable."
-			+ "Ordering of messages is only guaranteed per Kafka topic partition." + BASE_DESC + // common
+			+ "Ordering of messages is only guaranteed per Kafka topic partition. " + BASE_DESC + // common
 																									// description
 																									// between
 																									// Source

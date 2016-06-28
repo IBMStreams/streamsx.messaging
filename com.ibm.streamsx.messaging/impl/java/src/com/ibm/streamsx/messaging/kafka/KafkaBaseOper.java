@@ -37,7 +37,6 @@ import com.ibm.streamsx.messaging.common.PropertyProvider;
 @Libraries({ "opt/downloaded/*","opt/*" })
 public abstract class KafkaBaseOper extends AbstractOperator {
 
-	private static final String JAAS_FILE_PROPERTY = "jaasFile";
 	protected Properties properties = new Properties(),
 			finalProperties = new Properties(),
 			appConfigProperties = new Properties();
@@ -49,7 +48,8 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 			messageAH = new AttributeHelper("message");
 	protected List<String> topics = new ArrayList<String>();
 	private List<String> appConfigPropName = new ArrayList<String>();
-	private String jaasFileParam = null;
+	private String jaasFile = null;
+	private String jaasFilePropName = "jaasFile";
 	private static final Logger trace = Logger.getLogger(KafkaBaseOper.class
 			.getCanonicalName());
 
@@ -68,6 +68,8 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 					new String[] {});
 
 		}
+		
+		checker.checkDependentParameters("jaasFilePropName", "appConfigName");
 
 	}
 	
@@ -241,7 +243,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 
 	@Parameter(cardinality = -1, optional = true, description = "Specify a Kafka property \\\"key=value\\\" form. "
 			+ "This will override any property specified in the properties file. "
-			+ "The hierarchy of properties goes: kafkaProperty beats out propertiesFile, which beats out appConfigName.")
+			+ "The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. ")
 	public void setKafkaProperty(List<String> values) throws UnsupportedStreamsKafkaConfigurationException {
 		for (String value : values) {
 			int idx = value.indexOf("=");
@@ -257,7 +259,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	@Parameter(optional = true, description = "Properties file containing kafka properties. "
 			+ "Properties file is recommended to be stored in the etc directory.  "
 			+ "If a relative path is specified, the path is relative to the application directory. "
-			+ "The hierarchy of properties goes: kafkaProperty beats out propertiesFile, which beats out appConfigName.")
+			+ "The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. ")
 	public void setPropertiesFile(String value) {
 		this.propertiesFile = value;
 	}
@@ -271,7 +273,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 
 	@Parameter(optional = true, description = "This parameter specifies the name of application configuration that stores client properties, "
 			+ "the property specified via application configuration is overridden by the properties file and kafkaProperty parameter. "
-			+ "The hierarchy of properties goes: kafkaProperty beats out propertiesFile, which beats out appConfigName.")
+			+ "The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. ")
 	public void setAppConfigName(String appConfigName) {
 		this.appConfigName = appConfigName;
 	}
@@ -288,12 +290,19 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 			this.appConfigPropName.addAll(propNames);
 	}
 
+	@Parameter(optional = true, description = "This parameter specifies the property name of the jaasFile location in the application configuration. "
+			+ "The default name is jaasFile. ")
+	public void setJaasFilePropName(String jaasFilePropName) {
+		this.jaasFilePropName  = jaasFilePropName;
+	}
+	
 	@Parameter(optional = true, description = "Location of the jaas file to be used for SASL connections. "
 			+ "Jaas file is recommended to be stored in the etc directory.  "
 			+ "If a relative path is specified, the path is relative to the application directory."
-			+ "This sets the system property java.security.auth.login.config.")
+			+ "This sets the system property java.security.auth.login.config. This can also be set using the appConfig by "
+			+ "specifying jaasFile=<jaas.conf location>.")
 	public void setJaasFile(String value) {
-		jaasFileParam = value;
+		jaasFile = value;
 	}
 
 	/*
@@ -301,12 +310,9 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	 * If not, check if it's in our properties list. 
 	 */
 	public String getJaasFile() {
-		String jaasFile = null;
 		
-		if (jaasFileParam != null){
-			jaasFile = jaasFileParam;
-		} else if (finalProperties.containsKey(JAAS_FILE_PROPERTY)){
-			jaasFile = finalProperties.getProperty(JAAS_FILE_PROPERTY);
+		if (finalProperties.containsKey(jaasFilePropName)){
+			jaasFile = finalProperties.getProperty(jaasFilePropName);
 			trace.log(TraceLevel.INFO, "Found jaasFile in properties!");
 		}
 		
@@ -347,7 +353,10 @@ public abstract class KafkaBaseOper extends AbstractOperator {
         super.shutdown();
 	}
 	
-	public static final String BASE_DESC = 
-			"You must provide properties for the operator using at least one of the following properties: kafkaProperty, propertiesFile, or appConfigName. "
-			+ "The hierarchy of properties goes: appConfig beats out kafkaProperty parameter, which out the propertiesFile.";
+	public static final String BASE_DESC = 	"Specify properties as described here: http://kafka.apache.org/documentation.html#configuration. "
+			+ "This operator is using Kafka 0.10.0.0 clients and is not backwards compatible with brokers lower than 0.10.0.0. "
+			+ "You may use older versions of the toolkit to integrate with brokers 0.9 and lower. " + 
+			"\\n\\n**AppConfig**: "
+			+ "You must provide properties for the operator using at least one of the following parameters: kafkaProperty, propertiesFile, or appConfigName. "
+			+ "The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. ";
 }

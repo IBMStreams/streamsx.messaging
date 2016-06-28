@@ -25,6 +25,7 @@ import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
+import com.ibm.streams.operator.logging.LogLevel;
 import com.ibm.streams.operator.logging.TraceLevel;
 import com.ibm.streams.operator.metrics.Metric;
 import com.ibm.streams.operator.model.CustomMetric;
@@ -40,15 +41,10 @@ import com.rabbitmq.client.Recoverable;
 @Libraries({ "opt/downloaded/*"/*, "@RABBITMQ_HOME@" */})
 public class RabbitMQBaseOper extends AbstractOperator {
 
-	private static final String APP_CONFIG_NAME = "appConfigName";
-	private static final String PASSWORD = "password";
-	private static final String USERNAME = "username";
 	protected Channel channel;
 	protected Connection connection;
-	protected String usernameParameter = "",
-			passwordParameter = "", 
-			usernamePP = "", // username from propertyProvider
-			passwordPP = "", // password from propertyProvider
+	protected String username = "",
+			password = "", 
 			exchangeName = "", exchangeType = "direct";
 			
 	protected List<String> hostAndPortList = new ArrayList<String>();
@@ -62,7 +58,7 @@ public class RabbitMQBaseOper extends AbstractOperator {
 			routingKeyAH = new AttributeHelper("routing_key"),
 			messageAH = new AttributeHelper("message");
 
-	private final Logger trace = Logger.getLogger(this.getClass()
+	private final static Logger trace = Logger.getLogger(RabbitMQBaseOper.class
 			.getCanonicalName());
 	protected Boolean usingDefaultExchange = false;
 	private String URI = "";
@@ -71,6 +67,8 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	protected SynchronizedConnectionMetric isConnected;
 	private Metric reconnectionAttempts;
 	private String appConfigName = "";
+	private String userPropName;
+	private String passwordPropName;
 	
 	
 	/*
@@ -78,15 +76,44 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	 * parameters are appropriate
 	 */
 	@ContextCheck(compile = false)
-	public static void checkParametersRuntime(OperatorContextChecker checker) {
-		if((checker.getOperatorContext().getParameterNames().contains(APP_CONFIG_NAME))) {
-        	String appConfigName = checker.getOperatorContext().getParameterValues(APP_CONFIG_NAME).get(0);
+	public static void checkParametersRuntime(OperatorContextChecker checker) {		
+		if((checker.getOperatorContext().getParameterNames().contains("appConfigName"))) {
+        	String appConfigName = checker.getOperatorContext().getParameterValues("appConfigName").get(0);
+			String userPropName = checker.getOperatorContext().getParameterValues("userPropName").get(0);
+			String passwordPropName = checker.getOperatorContext().getParameterValues("passwordPropName").get(0);
 			
-			@SuppressWarnings("unused") // If it is empty, we will throw an exception
+			
 			PropertyProvider provider = new PropertyProvider(checker.getOperatorContext().getPE(), appConfigName);
+			
+			String userName = provider.getProperty(userPropName);
+			String password = provider.getProperty(passwordPropName);
+			
+			if(userName == null || userName.trim().length() == 0) {
+				trace.log(LogLevel.ERROR, "Property " + userPropName + " is not found in application configuration " + appConfigName);
+				checker.setInvalidContext(
+						"Property {0} is not found in application configuration {1}.",
+						new Object[] {userPropName, appConfigName});
+				
+			}
+			
+			if(password == null || password.trim().length() == 0) {
+				trace.log(LogLevel.ERROR, "Property " + passwordPropName + " is not found in application configuration " + appConfigName);
+				checker.setInvalidContext(
+						"Property {0} is not found in application configuration {1}.",
+						new Object[] {passwordPropName, appConfigName});
+			
+			}
         }
 	}
 	
+	// add check for appConfig userPropName and passwordPropName
+	@ContextCheck(compile = true)
+	public static void checkParameters(OperatorContextChecker checker) {	
+		// Make sure if appConfigName is specified then both userPropName and passwordPropName are needed
+		checker.checkDependentParameters("appConfigName", "userPropName", "passwordPropName");
+		checker.checkDependentParameters("userPropName", "appConfigName", "passwordPropName");
+		checker.checkDependentParameters("passwordPropName", "appConfigName", "userPropName");
+	}
 	
 	public synchronized void initialize(OperatorContext context)
 			throws Exception {
@@ -102,12 +129,12 @@ public class RabbitMQBaseOper extends AbstractOperator {
 		if (!getAppConfigName().isEmpty()) {
 			OperatorContext context = getOperatorContext();
 			propertyProvider = new PropertyProvider(context.getPE(), getAppConfigName());
-			if (propertyProvider.contains(USERNAME)
-					&& !usernamePP.equals(propertyProvider.getProperty(USERNAME))) {
+			if (propertyProvider.contains(userPropName)
+					&& !username.equals(propertyProvider.getProperty(userPropName))) {
 				newProperties = true;
 			}
-			if (propertyProvider.contains(PASSWORD)
-					&& !passwordPP.equals(propertyProvider.getProperty(PASSWORD))) {
+			if (propertyProvider.contains(passwordPropName)
+					&& !password.equals(propertyProvider.getProperty(passwordPropName))) {
 				newProperties = true;
 			}
 		}
@@ -189,7 +216,7 @@ public class RabbitMQBaseOper extends AbstractOperator {
 			
 		} else{
 			//use specified URI rather than username, password, vHost, hostname, etc
-			if (!usernameParameter.isEmpty() | !passwordParameter.isEmpty() | vHost != null | !hostAndPortList.isEmpty()){
+			if (!username.isEmpty() | !password.isEmpty() | vHost != null | !hostAndPortList.isEmpty()){
 				trace.log(TraceLevel.WARNING, "You specified a URI, therefore username, password"
 						+ ", vHost, and hostname parameters will be ignored.");
 			}
@@ -226,42 +253,35 @@ public class RabbitMQBaseOper extends AbstractOperator {
 
 	/*
 	 * Set the username and password either from the parameters provided or from
-	 * the appConfig. Parameters beat appConfig.
+	 * the appConfig. appConfig credentials have higher precedence than parameter credentials. 
 	 */
 	private void configureUsernameAndPassword(ConnectionFactory connectionFactory) {
-		// Lowest priority PropertyProvider first
-		// We only write to username and appConfig from appConfig if they're already set
+		// Lowest priority parameters first
+		// We overwrite those values if we find them in the appConfig
 		PropertyProvider propertyProvider = null;
-		String configuredUsername = usernameParameter;
-		String configuredPassword = passwordParameter;
 		
+		// Overwrite with appConfig values if present. 
 		if (!getAppConfigName().isEmpty()) {
 			OperatorContext context = getOperatorContext();
 			propertyProvider = new PropertyProvider(context.getPE(), getAppConfigName());
-			if (propertyProvider.contains(USERNAME)) {
-				usernamePP = propertyProvider.getProperty(USERNAME);
-				if (configuredUsername.isEmpty()){
-					configuredUsername = usernamePP;
-				}
+			if (propertyProvider.contains(userPropName)) {
+				username = propertyProvider.getProperty(userPropName);
 			}
-			if (propertyProvider.contains(PASSWORD)) {
-				passwordPP = propertyProvider.getProperty(PASSWORD);
-				if (configuredPassword.isEmpty()){
-					configuredPassword = passwordPP;
-				}
+			if (propertyProvider.contains(passwordPropName)) {
+				password = propertyProvider.getProperty(passwordPropName);
 			}
 		}
 
-		if (!configuredUsername.isEmpty()) {
-			connectionFactory.setUsername(configuredUsername);
+		if (!username.isEmpty()) {
+			connectionFactory.setUsername(username);
 			trace.log(TraceLevel.INFO, "Set username.");
 		} else {
 			trace.log(TraceLevel.INFO,
 					"Default username: " + connectionFactory.getUsername() );
 		}
 		
-		if (!configuredPassword.isEmpty()) {
-			connectionFactory.setPassword(configuredPassword);
+		if (!password.isEmpty()) {
+			connectionFactory.setPassword(password);
 			trace.log(TraceLevel.INFO, "Set password.");
 		} else {
 			trace.log(TraceLevel.INFO,
@@ -368,18 +388,19 @@ public class RabbitMQBaseOper extends AbstractOperator {
 
 	@Parameter(optional = true, description = "Username for RabbitMQ authentication.")
 	public void setUsername(String value) {
-		usernameParameter = value;
+		username = value;
 	}
 
 	@Parameter(optional = true, description = "Password for RabbitMQ authentication.")
 	public void setPassword(String value) {
-		passwordParameter = value;
+		password = value;
 	}
 	
 	@Parameter(optional = true, description = "This parameter specifies the name of application configuration that stores client credentials, "
 			+ "the property specified via application configuration is overridden by the application parameters. "
-			+ "The hierarchy of properties goes: parameter (username and password) beats out appConfigName. "
-			+ "The valid key-value pairs in the appConfig are username=<username> and password=<password>. "
+			+ "The hierarchy of credentials goes: credentials from the appConfig beat out parameters (username and password). "
+			+ "The valid key-value pairs in the appConfig are <userPropName>=<username> and <passwordPropName>=<password>, where "
+			+ "<userPropName> and <passwordPropName> are specified by the corresponding parameters. "
 			+ "If the operator loses connection to the RabbitMQ server, or it fails authentication, it will "
 			+ "check for new credentials in the appConfig and attempt to reconnect if they exist. "
 			+ "The attempted reconnection will only take place if automaticRecovery is set to true (which it is by default).")
@@ -389,6 +410,16 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	
 	public String getAppConfigName() {
 		return appConfigName;
+	}
+	
+	@Parameter(optional = true, description = "This parameter specifies the property name of user name in the application configuration. If the appConfigName parameter is specified and the userPropName parameter is not set, a compile time error occurs.")
+	public void setUserPropName(String userPropName) {
+		this.userPropName = userPropName;
+	}
+    
+	@Parameter(optional = true, description = "This parameter specifies the property name of password in the application configuration. If the appConfigName parameter is specified and the passwordPropName parameter is not set, a compile time error occurs.")
+	public void setPasswordPropName(String passwordPropName) {
+		this.passwordPropName = passwordPropName;
 	}
 	
 	@Parameter(optional = true, description = "Optional attribute. Name of the RabbitMQ exchange type. Default direct.")
@@ -449,9 +480,12 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	
 	
 	public static final String BASE_DESC = 
-			"\\n**AppConfig**: The valid key-value pairs in the appConfig are username=<username> and password=<password>. "
+ "\\n\\n**AppConfig**: "
+			+ "The hierarchy of credentials goes: credentials from the appConfig beat out parameters (username and password). "
+			+ "The valid key-value pairs in the appConfig are <userPropName>=<username> and <passwordPropName>=<password>, where "
+			+ "<userPropName> and <passwordPropName> are specified by the corresponding parameters. "
 			+ "This operator will only automatically recover with new credentials from the appConfig if automaticRecovery "
-			+ "is set to true.";
+			+ "is set to true. ";
 
 
 }
