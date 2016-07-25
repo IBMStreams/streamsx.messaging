@@ -21,7 +21,7 @@
 	<property name="gensrc.dir" value="${basedir}/impl/java/src-gen" />
 	<property name="jarfile" value="com.ibm.streamsx.messaging.jar" />
 	<property name="spl-mt" value="${streams.install}/bin/spl-make-toolkit" />
-	
+
 	<target name="init">
 		<fail unless="env.M2_HOME" 
 			message="Environment variable M2_HOME not set. Please set this to point to the path of maven home directory"/>
@@ -56,24 +56,35 @@
 		<path refid="cp.streams" />
 		<path refid="cp.ext.libs" />
 	</path>
-	
-	<target name="all" depends="toolkit"/>
 
-     <target name="toolkit" depends="jar">
-         <echo message="Tookit to index: ${basedir}"/>
-         <exec executable="${spl-mt}">
-             <arg value="--directory"/>
-             <arg value="${basedir}"/>
-             <arg value="-m"/>
-         </exec>
-     </target>
+	<target name="all">
+		<property name="pom.file" value="pom.xml" />
+		<antcall target="toolkit">
+		</antcall>
+	</target>
+
+	<target name="kafka-0.9">
+		<property name="pom.file" value="pom-kafka-0.9.xml" />
+		<antcall target="toolkit">
+		</antcall>
+	</target>
+	
+	<target name="toolkit" depends="jar">
+		<echo message="Tookit to index: ${basedir}"/>
+		<exec executable="${spl-mt}">
+			<arg value="--directory"/>
+			<arg value="${basedir}"/>
+			<arg value="-m"/>
+		</exec>
+	</target>
+
 
 	<target name="cpp-clean">
 		<exec executable="${spl-mt}"  failonerror="true">
 			<arg value="-c"/>
 			<arg value="-i"/>
 			<arg value="."/>
-    </exec>
+		</exec>
 	</target>
 
 
@@ -81,10 +92,11 @@
 	<target name="maven-deps">
 		<exec executable="${maven.bin}"  failonerror="true">
 			<arg value="dependency:copy-dependencies"/>
-			<arg value="-DoutputDirectory=${ext.downloads.dir}"/>			
-	    </exec>
+			<arg value="-DoutputDirectory=${ext.downloads.dir}"/>
+			<arg value="-f${pom.file}"/>
+		</exec>
 	</target>
-	
+
 
 	<target name="compile" depends="init, maven-deps, copyresources">
 		<javac srcdir="${src.dir}" destdir="${build.dir}" debug="true"
@@ -98,17 +110,17 @@
 	</target>
 
 	<target name="jar" depends="compile">
-	<jar destfile="${impl.lib.dir}/${jarfile}" basedir="${build.dir}" includes="com/ibm/streamsx/messaging/**" filesonly="true" >
+		<jar destfile="${impl.lib.dir}/${jarfile}" basedir="${build.dir}" includes="com/ibm/streamsx/messaging/**" filesonly="true" >
 		</jar>
-		<delete dir="${build.dir}" />		
+		<delete dir="${build.dir}" />
 	</target>
-	
-	 <target name="copyresources">
-		<copy todir="${build.dir}">
-		    <fileset dir="${src.dir}" includes="**/*.xsd,**/*.properties" />
-		</copy>
-	  </target>
 
-	
+	<target name="copyresources">
+		<copy todir="${build.dir}">
+			<fileset dir="${src.dir}" includes="**/*.xsd,**/*.properties" />
+		</copy>
+	</target>
+
+
 </project>
 

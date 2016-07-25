@@ -1,0 +1,64 @@
+<!-- Copyright (C)2014, International Business Machines Corporation and * 
+	others. All Rights Reserved. * -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.ibm.streamsx.messaging</groupId>
+	<artifactId>streamsx.messaging</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0.0</version>
+	<name>com.ibm.streamsx.messaging</name>
+	<repositories>
+	  <repository>
+	    <id>apache.snapshots</id>
+	    <url>http://repository.apache.org/content/repositories/snapshots/</url>
+	  </repository>
+	  <repository>
+	    <id>apache.releases</id>
+	    <url>https://repository.apache.org/content/repositories/releases/</url>
+	  </repository>
+	  <repository>
+	    <id>Eclipse Paho Repo releases</id>
+	    <url>https://repo.eclipse.org/content/repositories/paho-releases</url>
+	  </repository>
+	</repositories>
+	<properties>
+	</properties>
+	<dependencies>
+	  <dependency>
+	    <groupId>org.apache.kafka</groupId>
+	    <artifactId>kafka_2.11</artifactId>
+	    <version>0.9.0.1</version>
+	    <exclusions> 
+			<exclusion>
+					<groupId>org.apache.zookeeper</groupId>
+					<artifactId>zookeeper</artifactId>
+			</exclusion>
+			<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+			</exclusion>
+	    </exclusions>
+	  </dependency>
+	  <dependency>
+	    <groupId>org.apache.activemq</groupId>
+	    <artifactId>activemq-client</artifactId>
+	    <version>5.14.0-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>com.rabbitmq</groupId>
+		  <artifactId>amqp-client</artifactId>
+		  <version>3.6.2</version>
+		</dependency>
+	  <dependency>
+	    <groupId>org.eclipse.paho</groupId>
+	    <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+	    <version>1.0.1</version>
+	  </dependency>
+	</dependencies>
+	<build>
+	  <sourceDirectory>.</sourceDirectory>
+	  <plugins>
+	  </plugins>
+	</build>
+</project>

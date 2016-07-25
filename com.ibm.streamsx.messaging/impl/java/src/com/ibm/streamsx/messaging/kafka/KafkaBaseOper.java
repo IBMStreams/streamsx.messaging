@@ -354,8 +354,13 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	}
 	
 	public static final String BASE_DESC = 	"Specify properties as described here: http://kafka.apache.org/documentation.html#configuration. "
-			+ "This operator is using Kafka 0.10.0.0 clients and is not backwards compatible with brokers lower than 0.10.0.0. "
-			+ "You may use older versions of the toolkit to integrate with brokers 0.9 and lower. " + 
+			+ "If you are using Java security modules for login/authentication, ensure that they are compatible with IBM Java, as IBM Streams only runs "
+			+ "with IBM Java." 
+			+ "\\n\\n**Kafka 0.9 Server Support**: "
+			+ "By default this toolkit builds with Kafka 0.10 client JARs. The Kafka 0.10 client is not compatible with Kafka 0.9 brokers. "
+			+ "To use this operator with Kafka 0.9 brokers, you must rebuild with the kafka-0.9 target after cleaning. From the toolkit root directory: "
+			+ "\\n\\n ant clean"
+			+ "\\n\\n ant kafka-0.9" + 
 			"\\n\\n**AppConfig**: "
 			+ "You must provide properties for the operator using at least one of the following parameters: kafkaProperty, propertiesFile, or appConfigName. "
 			+ "The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. ";
