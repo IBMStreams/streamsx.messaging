@@ -12,12 +12,7 @@ SPL_CMD_ARGS ?=
 SPL_MAIN_COMPOSITE = application::JmsWithXmlParse
 OUTPUT_DIR = output
 
-all: distributed
-
-standalone:
-	$(SPLC) $(SPLC_FLAGS) -T -M $(SPL_MAIN_COMPOSITE) $(SPL_CMD_ARGS)
-
-distributed:
+all: 
 	$(SPLC) $(SPLC_FLAGS) -M $(SPL_MAIN_COMPOSITE) --output-dir ./$(OUTPUT_DIR) $(SPL_CMD_ARGS)
 
 clean:
