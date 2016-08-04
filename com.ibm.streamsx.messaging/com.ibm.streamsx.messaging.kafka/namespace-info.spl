@@ -1,0 +1,14 @@
+/**
+* **Kafka Properties**
+*
+* Specify properties as described here: http://kafka.apache.org/documentation.html#configuration.
+* Properties are typically specified using a consumer.properties and producer.properties file in the etc 
+* directory of your application. See the samples for examples. 
+* 
+* Here are the required properties for each operator:
+* * **KafkaConsumer**: bootstrap.servers and group.id
+* * **KafkaProducer**: bootstrap.servers and acks
+* 
+*/
+
+namespace com.ibm.streamsx.messaging.kafka;
