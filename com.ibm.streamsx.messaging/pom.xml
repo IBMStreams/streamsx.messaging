@@ -27,18 +27,8 @@
 	<dependencies>
 	  <dependency>
 	    <groupId>org.apache.kafka</groupId>
-	    <artifactId>kafka_2.11</artifactId>
+	    <artifactId>kafka-clients</artifactId>
 	    <version>0.10.0.0</version>
-	    <exclusions> 
-			<exclusion>
-					<groupId>org.apache.zookeeper</groupId>
-					<artifactId>zookeeper</artifactId>
-			</exclusion>
-			<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-			</exclusion>
-	    </exclusions>
 	  </dependency>
 	  <dependency>
 	    <groupId>org.apache.activemq</groupId>
