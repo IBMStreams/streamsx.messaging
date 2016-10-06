@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.mqtt.html">com.ibm.streamsx.messaging.mqtt</a> &gt; MQTTSink</p>
+<a class="xref" href="../toolkits/toolkits.html">Messaging Toolkit Doc</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.mqtt.html">com.ibm.streamsx.messaging.mqtt</a> &gt; MQTTSink</p>
 
 </div>
 
@@ -64,14 +64,18 @@
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 20 parameters. (<tt class="ph tt">clientID, commandTimeout, connection, connectionDocument, dataAttributeName, keepAliveInterval, keyStore, keyStorePassword, password, period, qos, qosAttributeName, reconnectionBound, retain, serverURI, topicAttributeName, topic, trustStore, trustStorePassword, userID</tt>)
+  <dd class="dd">This operator supports 24 parameters.
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__appConfigName">appConfigName</a>, <a class="xref" href="#spldoc_operator__parameter__clientID">clientID</a>, <a class="xref" href="#spldoc_operator__parameter__commandTimeout">commandTimeout</a>, <a class="xref" href="#spldoc_operator__parameter__connection">connection</a>, <a class="xref" href="#spldoc_operator__parameter__connectionDocument">connectionDocument</a>, <a class="xref" href="#spldoc_operator__parameter__dataAttributeName">dataAttributeName</a>, <a class="xref" href="#spldoc_operator__parameter__keepAliveInterval">keepAliveInterval</a>, <a class="xref" href="#spldoc_operator__parameter__keyStore">keyStore</a>, <a class="xref" href="#spldoc_operator__parameter__keyStorePassword">keyStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__password">password</a>, <a class="xref" href="#spldoc_operator__parameter__passwordPropName">passwordPropName</a>, <a class="xref" href="#spldoc_operator__parameter__period">period</a>, <a class="xref" href="#spldoc_operator__parameter__qos">qos</a>, <a class="xref" href="#spldoc_operator__parameter__qosAttributeName">qosAttributeName</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionBound">reconnectionBound</a>, <a class="xref" href="#spldoc_operator__parameter__retain">retain</a>, <a class="xref" href="#spldoc_operator__parameter__serverURI">serverURI</a>, <a class="xref" href="#spldoc_operator__parameter__sslProtocol">sslProtocol</a>, <a class="xref" href="#spldoc_operator__parameter__topic">topic</a>, <a class="xref" href="#spldoc_operator__parameter__topicAttributeName">topicAttributeName</a>, <a class="xref" href="#spldoc_operator__parameter__trustStore">trustStore</a>, <a class="xref" href="#spldoc_operator__parameter__trustStorePassword">trustStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__userID">userID</a>, <a class="xref" href="#spldoc_operator__parameter__userPropName">userPropName</a>
+
+</p>
 </dd>
 
  
  
   <dt class="dt dlterm">Metrics</dt>
 
-  <dd class="dd">This operator does not report any metrics.</dd>
+  <dd class="dd">This operator reports 2 metrics.</dd>
 
  
 </dl>
@@ -220,9 +224,45 @@
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 20 parameters.<dl class="dl">
+This operator supports 24 parameters.
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__appConfigName">appConfigName</a>, <a class="xref" href="#spldoc_operator__parameter__clientID">clientID</a>, <a class="xref" href="#spldoc_operator__parameter__commandTimeout">commandTimeout</a>, <a class="xref" href="#spldoc_operator__parameter__connection">connection</a>, <a class="xref" href="#spldoc_operator__parameter__connectionDocument">connectionDocument</a>, <a class="xref" href="#spldoc_operator__parameter__dataAttributeName">dataAttributeName</a>, <a class="xref" href="#spldoc_operator__parameter__keepAliveInterval">keepAliveInterval</a>, <a class="xref" href="#spldoc_operator__parameter__keyStore">keyStore</a>, <a class="xref" href="#spldoc_operator__parameter__keyStorePassword">keyStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__password">password</a>, <a class="xref" href="#spldoc_operator__parameter__passwordPropName">passwordPropName</a>, <a class="xref" href="#spldoc_operator__parameter__period">period</a>, <a class="xref" href="#spldoc_operator__parameter__qos">qos</a>, <a class="xref" href="#spldoc_operator__parameter__qosAttributeName">qosAttributeName</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionBound">reconnectionBound</a>, <a class="xref" href="#spldoc_operator__parameter__retain">retain</a>, <a class="xref" href="#spldoc_operator__parameter__serverURI">serverURI</a>, <a class="xref" href="#spldoc_operator__parameter__sslProtocol">sslProtocol</a>, <a class="xref" href="#spldoc_operator__parameter__topic">topic</a>, <a class="xref" href="#spldoc_operator__parameter__topicAttributeName">topicAttributeName</a>, <a class="xref" href="#spldoc_operator__parameter__trustStore">trustStore</a>, <a class="xref" href="#spldoc_operator__parameter__trustStorePassword">trustStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__userID">userID</a>, <a class="xref" href="#spldoc_operator__parameter__userPropName">userPropName</a>
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_clientID"><tt class="ph tt">clientID</tt></dt>
+</p>
+<dl class="dl">
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__appConfigName"><!-- --></a><tt class="ph tt">appConfigName</tt></dt>
+
+<dd class="dd">
+<p class="p">This parameter specifies the name of application configuration that stores client credential information, the credential specified via application configruation overrides the one specified with userID and password parameters.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__clientID"><!-- --></a><tt class="ph tt">clientID</tt></dt>
 
 <dd class="dd">
 <p class="p">All clients connected to the same server must have a unique ID. This optional parameter allows user to specify a client id to use when connecting to a MQTT provider.  An ID will be generated by the operator if this parameter is not specified.
@@ -253,7 +293,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_commandTimeout"><tt class="ph tt">commandTimeout</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__commandTimeout"><!-- --></a><tt class="ph tt">commandTimeout</tt></dt>
 
 <dd class="dd">
 <p class="p">This optional parameter is used to specify maximum time in millisecond to wait for an MQTT action to complete.  A MQTT action can include connecting to a server, or publshing to a message.  A value of 0 will cause the operator to wait indefinitely for an  action to complete.  A negative number will cause a runtime error. If unspecified, the default value for this parameter is 0.
@@ -284,7 +324,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_connection"><tt class="ph tt">connection</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__connection"><!-- --></a><tt class="ph tt">connection</tt></dt>
 
 <dd class="dd">
 <p class="p">Name of the connection specification of the MQTT element in the connection document.
@@ -315,7 +355,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_connectionDocument"><tt class="ph tt">connectionDocument</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__connectionDocument"><!-- --></a><tt class="ph tt">connectionDocument</tt></dt>
 
 <dd class="dd">
 <p class="p">Path to connection document.  If unspecified, default to applicationDir/etc/connections.xml.  If a relative path is specified, the path is relative to the application directory.
@@ -346,7 +386,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_dataAttributeName"><tt class="ph tt">dataAttributeName</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__dataAttributeName"><!-- --></a><tt class="ph tt">dataAttributeName</tt></dt>
 
 <dd class="dd">
 <p class="p">This optional parameter specifies the name of the attribute that is used to hold actual content of message, if not specified, in the case where multiple attributes are defined for the streams schema, the operator will look for attribute named data and use it as data attribute. In the case where the schema contains only a signle attribute, the operator will assume that the attribute is the data attribute
@@ -377,7 +417,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_keepAliveInterval"><tt class="ph tt">keepAliveInterval</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__keepAliveInterval"><!-- --></a><tt class="ph tt">keepAliveInterval</tt></dt>
 
 <dd class="dd">
 <p class="p">This optional parameter, measured in seconds, sets the maximum time interval between messages sent or received. It enables the client to detect if the server is no longer available. By default, it is set to 60 seconds. A value of 0 will disable it. Negative number will cause a runtime error.
@@ -408,7 +448,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_keyStore"><tt class="ph tt">keyStore</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__keyStore"><!-- --></a><tt class="ph tt">keyStore</tt></dt>
 
 <dd class="dd">
 <p class="p">This optional parameter of type rstring specifies the file that contains the public and private key certificates of the MQTT client. If a relative path is specified, the path is relative to the application directory.
@@ -439,7 +479,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_keyStorePassword"><tt class="ph tt">keyStorePassword</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__keyStorePassword"><!-- --></a><tt class="ph tt">keyStorePassword</tt></dt>
 
 <dd class="dd">
 <p class="p">This optional parameter of type rstring specifies the password to decrypt the encrypted keyStore file.
@@ -470,7 +510,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_password"><tt class="ph tt">password</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__password"><!-- --></a><tt class="ph tt">password</tt></dt>
 
 <dd class="dd">
 <p class="p">This optional parameter sets the password to use for the connection. Must be specified when userID parameter is used, or compile time error will occur
@@ -501,7 +541,38 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_period"><tt class="ph tt">period</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__passwordPropName"><!-- --></a><tt class="ph tt">passwordPropName</tt></dt>
+
+<dd class="dd">
+<p class="p">This parameter specifies the property name of password in the application configuration. If the appConfigName parameter is specified and the passwordPropName parameter is not set, a compile time error occurs.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__period"><!-- --></a><tt class="ph tt">period</tt></dt>
 
 <dd class="dd">
 <p class="p">This parameter specifies the time period in milliseconds the operator waits before it tries to reconnect. It is an optional parameter of type int64. Default value is 60000 ms.
@@ -532,7 +603,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_qos"><tt class="ph tt">qos</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__qos"><!-- --></a><tt class="ph tt">qos</tt></dt>
 
 <dd class="dd">
 <p class="p">This optional parameter of type int32 specifies the quality of service that the MQTTSink operator provides for each MQTT message that it publishes to an MQTT topic. The valid values are 0, 1, and 2. The default value is 0.
@@ -569,7 +640,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_qosAttributeName"><tt class="ph tt">qosAttributeName</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__qosAttributeName"><!-- --></a><tt class="ph tt">qosAttributeName</tt></dt>
 
 <dd class="dd">
 <p class="p">Attribute name that contains the qos to publish the message with.  This parameter is mutually exclusive with the "qos" parameter.
@@ -600,7 +671,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_reconnectionBound"><tt class="ph tt">reconnectionBound</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__reconnectionBound"><!-- --></a><tt class="ph tt">reconnectionBound</tt></dt>
 
 <dd class="dd">
 <p class="p">This optional parameter of type int32 specifies the number of successive connections that are attempted for an operator.  Specify 0 for no retry, n for n number of retries, -1 for inifinite retry.
@@ -631,7 +702,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_retain"><tt class="ph tt">retain</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__retain"><!-- --></a><tt class="ph tt">retain</tt></dt>
 
 <dd class="dd">
 <p class="p">Indicates if messages should be retained on the MQTT server.  Default is false.
@@ -662,7 +733,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_serverURI"><tt class="ph tt">serverURI</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__serverURI"><!-- --></a><tt class="ph tt">serverURI</tt></dt>
 
 <dd class="dd">
 <p class="p">This optional parameter of type rstring specifies the URI of the MQTT server to connect to. The serverURI has the following format:  protocol://hostname or IP address:portnumber. The supported protocols are SSL and TCP. To use SSL authentication, set the protocol to ssl.
@@ -693,10 +764,10 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_topicAttributeName"><tt class="ph tt">topicAttributeName</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__sslProtocol"><!-- --></a><tt class="ph tt">sslProtocol</tt></dt>
 
 <dd class="dd">
-<p class="p">Attribute name that contains the topic to publish the message with.  This parameter is mutually exclusive with the "topic" parameter.
+<p class="p">This optional parameter of type rstring specifies the ssl protocol to use for making SSL connections. If this parameter is not specified, the default protocol TLSv1.2 will be used.
 </p>
 <dl class="dl">
 
@@ -724,7 +795,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_topic"><tt class="ph tt">topic</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__topic"><!-- --></a><tt class="ph tt">topic</tt></dt>
 
 <dd class="dd">
 <p class="p">This mandatory parameter of type rstring specifies the MQTT topic that you want to publish to. You can specify a static string, such as "traffic/freeway/880".  This parameter is mutually exclusive with the "topicAttributeName" parameter.
@@ -755,7 +826,38 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_trustStore"><tt class="ph tt">trustStore</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__topicAttributeName"><!-- --></a><tt class="ph tt">topicAttributeName</tt></dt>
+
+<dd class="dd">
+<p class="p">Attribute name that contains the topic to publish the message with.  This parameter is mutually exclusive with the "topic" parameter.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__trustStore"><!-- --></a><tt class="ph tt">trustStore</tt></dt>
 
 <dd class="dd">
 <p class="p">This optional parameter of type rstring specifies the name of the file that contains the public certificate of the trusted MQTT server.  If a relative path is specified, the path is relative to the application directory.
@@ -786,7 +888,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_trustStorePassword"><tt class="ph tt">trustStorePassword</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__trustStorePassword"><!-- --></a><tt class="ph tt">trustStorePassword</tt></dt>
 
 <dd class="dd">
 <p class="p">This optional parameter of type rstring specifies the password to decrypt the encrypted trustStore file.
@@ -817,7 +919,7 @@ This operator supports 20 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_userID"><tt class="ph tt">userID</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__userID"><!-- --></a><tt class="ph tt">userID</tt></dt>
 
 <dd class="dd">
 <p class="p">This optional parameter sets the user name to use for the connection. Must be specified when password parameter is used, or compile time error will occur
@@ -847,6 +949,70 @@ This operator supports 20 parameters.<dl class="dl">
 </dd>
 
 
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__userPropName"><!-- --></a><tt class="ph tt">userPropName</tt></dt>
+
+<dd class="dd">
+<p class="p">This parameter specifies the property name of user name in the application configuration. If the appConfigName parameter is specified and the userPropName parameter is not set, a compile time error occurs.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+</dl>
+
+</div>
+
+<div class="section">
+<p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics">Metrics</a></strong></p>
+<dl class="dl">
+  
+    <dt class="dt dlterm"><tt class="ph tt">isConnected</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_gauge">Gauge</a></dt>
+
+    <dd class="dd">
+
+<p class="p">Indicates if operator currently connected to MQTT server, a value of 1 indicates it is connected and a value of 0 indicates it is not connected.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+  
+    <dt class="dt dlterm"><tt class="ph tt">nConnectionLost</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">The number of lost connections to current MQTT server.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
 </dl>
 
 </div>

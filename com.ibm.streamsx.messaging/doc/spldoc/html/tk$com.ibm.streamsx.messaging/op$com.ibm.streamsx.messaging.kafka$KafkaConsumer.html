@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.kafka.html">com.ibm.streamsx.messaging.kafka</a> &gt; KafkaConsumer</p>
+<a class="xref" href="../toolkits/toolkits.html">Messaging Toolkit Doc</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.kafka.html">com.ibm.streamsx.messaging.kafka</a> &gt; KafkaConsumer</p>
 
 </div>
 
@@ -32,10 +32,22 @@
 
 <div class="section">
 
-<p class="p">This operator acts as a Kafka consumer receiving messages for a single topic. Note that there may be multiple threads receiving messages depending on the configuration specified. Ordering of messages is not guaranteed.
+<p class="p">This operator acts as a Kafka consumer receiving messages for one or more topics. Ordering of messages is only guaranteed per Kafka topic partition. Specify properties as described here: http://kafka.apache.org/documentation.html#configuration. If you are using Java security modules for login/authentication, ensure that they are compatible with IBM Java, as IBM Streams only runs with IBM Java. The SPL Attribute Types supported are rstring, ustring, and blob. The topic must be of type rstring/ustring, while the key and message must be of the same type (rstring, ustring, or blob). 
 </p>
 
-<p class="p"><strong class="ph b">Behavior in a Consistent Region</strong> This operator can be used inside a consistent region. Operator driven and periodical checkpointing are supported. Partition to be read from must be specified. To consume multiple partitions in a topic, use user defined parallelism or multiple consumers. Resetting to initial state is not supported because the intial offset cannot be saved and may not be present in the Kafka log. In the case of a reset to initial state after operator crash, messages will start being read from the time of reset.
+<p class="p"><strong class="ph b">Kafka 0.9 Server Support</strong>: By default this toolkit builds with Kafka 0.10 client JARs. The Kafka 0.10 client is not compatible with Kafka 0.9 brokers. To use this operator with Kafka 0.9 brokers, you must rebuild with the kafka-0.9 target after cleaning. From the toolkit root directory: 
+</p>
+
+<p class="p"> ant clean
+</p>
+
+<p class="p"> ant kafka-0.9
+</p>
+
+<p class="p"><strong class="ph b">AppConfig</strong>: You must provide properties for the operator using at least one of the following parameters: kafkaProperty, propertiesFile, or appConfigName. The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. The threadsPerTopic parameter has been removed since the upgrade to Kafka 0.9. This is because the new KafkaConsumer is single-threaded. Due to a bug in Kafka (eventually getting resolved by KAFKA-1894), when authentication failure occurs or connection to Kafka brokers is lost, we will not be able to pick up new properties from the PropertyProvider. The workaround is to manually restart the KafkaConsumer PE after properties have been updated. New properties will then be picked up. 
+</p>
+
+<p class="p"><strong class="ph b">Behavior in a Consistent Region</strong> This operator can be used inside a consistent region. Operator driven and periodical checkpointing are supported. Partitions to be read from must be specified. Resetting to initial state is not supported because the intial offset cannot be saved and may not be present in the Kafka log. In the case of a reset to initial state after operator crash, messages will start being read from the time of reset.
 </p>
 
 </div>
@@ -58,7 +70,16 @@
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 10 parameters. (<tt class="ph tt">connectionRetryInterval, kafkaProperty, keyAttribute, leaderConnectionRetries, messageAttribute, partition, propertiesFile, threadsPerTopic, topic, triggerCount</tt>)
+  <dd class="dd">This operator supports 12 parameters.
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__topic">topic</a>
+
+</p>
+
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__appConfigName">appConfigName</a>, <a class="xref" href="#spldoc_operator__parameter__appConfigPropertyName">appConfigPropertyName</a>, <a class="xref" href="#spldoc_operator__parameter__consumerPollTimeout">consumerPollTimeout</a>, <a class="xref" href="#spldoc_operator__parameter__jaasFile">jaasFile</a>, <a class="xref" href="#spldoc_operator__parameter__jaasFilePropName">jaasFilePropName</a>, <a class="xref" href="#spldoc_operator__parameter__kafkaProperty">kafkaProperty</a>, <a class="xref" href="#spldoc_operator__parameter__keyAttribute">keyAttribute</a>, <a class="xref" href="#spldoc_operator__parameter__messageAttribute">messageAttribute</a>, <a class="xref" href="#spldoc_operator__parameter__partition">partition</a>, <a class="xref" href="#spldoc_operator__parameter__propertiesFile">propertiesFile</a>, <a class="xref" href="#spldoc_operator__parameter__triggerCount">triggerCount</a>
+
+</p>
 </dd>
 
  
@@ -140,12 +161,81 @@
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 10 parameters.<dl class="dl">
+This operator supports 12 parameters.
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__topic">topic</a>
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_connectionRetryInterval"><tt class="ph tt">connectionRetryInterval</tt></dt>
+</p>
+
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__appConfigName">appConfigName</a>, <a class="xref" href="#spldoc_operator__parameter__appConfigPropertyName">appConfigPropertyName</a>, <a class="xref" href="#spldoc_operator__parameter__consumerPollTimeout">consumerPollTimeout</a>, <a class="xref" href="#spldoc_operator__parameter__jaasFile">jaasFile</a>, <a class="xref" href="#spldoc_operator__parameter__jaasFilePropName">jaasFilePropName</a>, <a class="xref" href="#spldoc_operator__parameter__kafkaProperty">kafkaProperty</a>, <a class="xref" href="#spldoc_operator__parameter__keyAttribute">keyAttribute</a>, <a class="xref" href="#spldoc_operator__parameter__messageAttribute">messageAttribute</a>, <a class="xref" href="#spldoc_operator__parameter__partition">partition</a>, <a class="xref" href="#spldoc_operator__parameter__propertiesFile">propertiesFile</a>, <a class="xref" href="#spldoc_operator__parameter__triggerCount">triggerCount</a>
+
+</p>
+<dl class="dl">
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__appConfigName"><!-- --></a><tt class="ph tt">appConfigName</tt></dt>
 
 <dd class="dd">
-<p class="p">Interval between each attempt to find a lead Kafka Broker in milliseconds. Number of attempts is set by the leaderConnectionRetries parameter. This is only valid when the partition parameter is set. Default is 1000 ms.
+<p class="p">This parameter specifies the name of application configuration that stores client properties, the property specified via application configuration is overridden by the properties file and kafkaProperty parameter. The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. 
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__appConfigPropertyName"><!-- --></a><tt class="ph tt">appConfigPropertyName</tt></dt>
+
+<dd class="dd">
+<p class="p">List of Kafka properties to retrieve from application configuration. The property name in the application configuration must the same as the Kafka property name. You may also supply jaasFile as a property name to act as the jaasFile parameter value.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__consumerPollTimeout"><!-- --></a><tt class="ph tt">consumerPollTimeout</tt></dt>
+
+<dd class="dd">
+<p class="p">The time, in milliseconds, spent waiting in poll if data is not available. If 0, returns immediately with any records that are available now. Must not be negative. Default is 100.
 </p>
 <dl class="dl">
 
@@ -173,10 +263,72 @@ This operator supports 10 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_kafkaProperty"><tt class="ph tt">kafkaProperty</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__jaasFile"><!-- --></a><tt class="ph tt">jaasFile</tt></dt>
 
 <dd class="dd">
-<p class="p">Specify a Kafka property "key=value" form. This will override any property specified in the properties file.
+<p class="p">Location of the jaas file to be used for SASL connections. Jaas file is recommended to be stored in the etc directory.  If a relative path is specified, the path is relative to the application directory.This sets the system property java.security.auth.login.config. This can also be set using the appConfig by specifying jaasFile=&lt;jaas.conf location&gt;.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__jaasFilePropName"><!-- --></a><tt class="ph tt">jaasFilePropName</tt></dt>
+
+<dd class="dd">
+<p class="p">This parameter specifies the property name of the jaasFile location in the application configuration. The default name is jaasFile. 
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__kafkaProperty"><!-- --></a><tt class="ph tt">kafkaProperty</tt></dt>
+
+<dd class="dd">
+<p class="p">Specify a Kafka property "key=value" form. This will override any property specified in the properties file. The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. 
 </p>
 <dl class="dl">
 
@@ -201,7 +353,7 @@ This operator supports 10 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_keyAttribute"><tt class="ph tt">keyAttribute</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__keyAttribute"><!-- --></a><tt class="ph tt">keyAttribute</tt></dt>
 
 <dd class="dd">
 <p class="p">Name of the attribute for the key. Default is "key".
@@ -232,41 +384,10 @@ This operator supports 10 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_leaderConnectionRetries"><tt class="ph tt">leaderConnectionRetries</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__messageAttribute"><!-- --></a><tt class="ph tt">messageAttribute</tt></dt>
 
 <dd class="dd">
-<p class="p">Number of attempts at finding a Kafka Broker before giving up. This is relevant when first looking for a broker, and in the case that a lead broker host goes down. This is only valid when the partition parameter is set. Default is 3.
-</p>
-<dl class="dl">
-
- <dt class="dt dlterm">Properties </dt>
-
- <dd class="dd">
-  <ul class="sl simple">
-  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
-  </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-  </ul>
-
- </dd>
-
-
-</dl>
-
-</dd>
-
-
-
-<dt class="dt dlterm" id="spldoc_operator__parameter_messageAttribute"><tt class="ph tt">messageAttribute</tt></dt>
-
-<dd class="dd">
-<p class="p">Name of the attribute for the message. If this parameter is not specified, then by default the operator will look for an attribute named "message". If the "message" attribute is not found, messages will not be sent. Default is "message".
+<p class="p">Name of the attribute for the message. If this parameter is not specified, then by default the operator will look for an attribute named "message". If the "message" attribute is not found, a runtime error will be returned.
 </p>
 <dl class="dl">
 
@@ -294,10 +415,10 @@ This operator supports 10 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_partition"><tt class="ph tt">partition</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__partition"><!-- --></a><tt class="ph tt">partition</tt></dt>
 
 <dd class="dd">
-<p class="p">Partition to subscribe to. This must be set when using consistent region.
+<p class="p">Partition to be subscribed to. 1 or more can be provided using comma separation. You may only specify 1 topic if you are specifying partitions. Ex: 0,2,3
 </p>
 <dl class="dl">
 
@@ -307,9 +428,6 @@ This operator supports 10 parameters.<dl class="dl">
   <ul class="sl simple">
   <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
   </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
      </li>
@@ -325,10 +443,10 @@ This operator supports 10 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_propertiesFile"><tt class="ph tt">propertiesFile</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__propertiesFile"><!-- --></a><tt class="ph tt">propertiesFile</tt></dt>
 
 <dd class="dd">
-<p class="p">Properties file containing kafka properties.  Properties file is recommended to be stored in the etc directory.  If a relative path is specified, the path is relative to the application directory.
+<p class="p">Properties file containing kafka properties. Properties file is recommended to be stored in the etc directory.  If a relative path is specified, the path is relative to the application directory. The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. 
 </p>
 <dl class="dl">
 
@@ -356,41 +474,10 @@ This operator supports 10 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_threadsPerTopic"><tt class="ph tt">threadsPerTopic</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__topic"><!-- --></a><tt class="ph tt">topic</tt></dt>
 
 <dd class="dd">
-<p class="p">Number of threads per topic. Default is 1.
-</p>
-<dl class="dl">
-
- <dt class="dt dlterm">Properties </dt>
-
- <dd class="dd">
-  <ul class="sl simple">
-  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int32
-  </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-  </ul>
-
- </dd>
-
-
-</dl>
-
-</dd>
-
-
-
-<dt class="dt dlterm" id="spldoc_operator__parameter_topic"><tt class="ph tt">topic</tt></dt>
-
-<dd class="dd">
-<p class="p">Topic to be subscribed to.
+<p class="p">Topic to be subscribed to. 1 or more can be provided using comma separation. Ex: "mytopic1","mytopic2"
 </p>
 <dl class="dl">
 
@@ -415,10 +502,10 @@ This operator supports 10 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_triggerCount"><tt class="ph tt">triggerCount</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__triggerCount"><!-- --></a><tt class="ph tt">triggerCount</tt></dt>
 
 <dd class="dd">
-<p class="p">Number of messages between checkpointing for consistent region. This is only relevant to operator driven checkpointing.
+<p class="p">Approximate number of messages between checkpointing for consistent region. This is only relevant to operator driven checkpointing. Checkpointing is done after a buffer of messages is submitted, so actual triggerCount at checkpoint time may be slightly above specified triggerCount.
 </p>
 <dl class="dl">
 
@@ -459,7 +546,7 @@ This operator supports 10 parameters.<dl class="dl">
 
   <dd class="dd"/>
 
-  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">../../impl/lib/com.ibm.streamsx.messaging.jar, ../../opt/downloaded/*</tt></dd>
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">../../impl/lib/com.ibm.streamsx.messaging.jar, ../../opt/downloaded/*, ../../opt/*</tt></dd>
 
  
  </dl>

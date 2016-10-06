@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.kafka.html">com.ibm.streamsx.messaging.kafka</a> &gt; KafkaProducer</p>
+<a class="xref" href="../toolkits/toolkits.html">Messaging Toolkit Doc</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.kafka.html">com.ibm.streamsx.messaging.kafka</a> &gt; KafkaProducer</p>
 
 </div>
 
@@ -32,10 +32,22 @@
 
 <div class="section">
 
-<p class="p">This operator acts as a Kafka producer sending tuples as messages to a Kafka broker. The broker is assumed to be already configured and running. The incoming stream can have three attributes: topic, key and message. The message is a required attribute. A topic can be specified as either an input stream attribute or as a parameter. Specify properties as described here: http://kafka.apache.org/documentation.html#newproducerconfigs. 
+<p class="p">This operator acts as a Kafka producer sending tuples as messages to a Kafka broker. The broker is assumed to be already configured and running. The incoming stream can have three attributes: topic, key and message. The message is a required attribute. A topic can be specified as either an input stream attribute or as a parameter. Specify properties as described here: http://kafka.apache.org/documentation.html#configuration. If you are using Java security modules for login/authentication, ensure that they are compatible with IBM Java, as IBM Streams only runs with IBM Java. The SPL Attribute Types supported are rstring, ustring, and blob. The topic must be of type rstring/ustring, while the key and message must be of the same type (rstring, ustring, or blob). 
 </p>
 
-<p class="p"><strong class="ph b">Behavior in a Consistent Region</strong> This operator can participate in a consistent region.  This operator cannot be placed at the start of a consistent region.
+<p class="p"><strong class="ph b">Kafka 0.9 Server Support</strong>: By default this toolkit builds with Kafka 0.10 client JARs. The Kafka 0.10 client is not compatible with Kafka 0.9 brokers. To use this operator with Kafka 0.9 brokers, you must rebuild with the kafka-0.9 target after cleaning. From the toolkit root directory: 
+</p>
+
+<p class="p"> ant clean
+</p>
+
+<p class="p"> ant kafka-0.9
+</p>
+
+<p class="p"><strong class="ph b">AppConfig</strong>: You must provide properties for the operator using at least one of the following parameters: kafkaProperty, propertiesFile, or appConfigName. The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. 
+</p>
+
+<p class="p"><strong class="ph b">Behavior in a Consistent Region</strong> This operator can participate in a consistent region.  This operator cannot be placed at the start of a consistent region. The KafkaProducer guarantees at-least-once delivery of messages to a Kafka topic.
 </p>
 
 </div>
@@ -58,7 +70,11 @@
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 6 parameters. (<tt class="ph tt">kafkaProperty, keyAttribute, messageAttribute, propertiesFile, topic, topicAttribute</tt>)
+  <dd class="dd">This operator supports 10 parameters.
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__appConfigName">appConfigName</a>, <a class="xref" href="#spldoc_operator__parameter__appConfigPropertyName">appConfigPropertyName</a>, <a class="xref" href="#spldoc_operator__parameter__jaasFile">jaasFile</a>, <a class="xref" href="#spldoc_operator__parameter__jaasFilePropName">jaasFilePropName</a>, <a class="xref" href="#spldoc_operator__parameter__kafkaProperty">kafkaProperty</a>, <a class="xref" href="#spldoc_operator__parameter__keyAttribute">keyAttribute</a>, <a class="xref" href="#spldoc_operator__parameter__messageAttribute">messageAttribute</a>, <a class="xref" href="#spldoc_operator__parameter__propertiesFile">propertiesFile</a>, <a class="xref" href="#spldoc_operator__parameter__topic">topic</a>, <a class="xref" href="#spldoc_operator__parameter__topicAttribute">topicAttribute</a>
+
+</p>
 </dd>
 
  
@@ -128,12 +144,48 @@
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 6 parameters.<dl class="dl">
+This operator supports 10 parameters.
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__appConfigName">appConfigName</a>, <a class="xref" href="#spldoc_operator__parameter__appConfigPropertyName">appConfigPropertyName</a>, <a class="xref" href="#spldoc_operator__parameter__jaasFile">jaasFile</a>, <a class="xref" href="#spldoc_operator__parameter__jaasFilePropName">jaasFilePropName</a>, <a class="xref" href="#spldoc_operator__parameter__kafkaProperty">kafkaProperty</a>, <a class="xref" href="#spldoc_operator__parameter__keyAttribute">keyAttribute</a>, <a class="xref" href="#spldoc_operator__parameter__messageAttribute">messageAttribute</a>, <a class="xref" href="#spldoc_operator__parameter__propertiesFile">propertiesFile</a>, <a class="xref" href="#spldoc_operator__parameter__topic">topic</a>, <a class="xref" href="#spldoc_operator__parameter__topicAttribute">topicAttribute</a>
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_kafkaProperty"><tt class="ph tt">kafkaProperty</tt></dt>
+</p>
+<dl class="dl">
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__appConfigName"><!-- --></a><tt class="ph tt">appConfigName</tt></dt>
 
 <dd class="dd">
-<p class="p">Specify a Kafka property "key=value" form. This will override any property specified in the properties file.
+<p class="p">This parameter specifies the name of application configuration that stores client properties, the property specified via application configuration is overridden by the properties file and kafkaProperty parameter. The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. 
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__appConfigPropertyName"><!-- --></a><tt class="ph tt">appConfigPropertyName</tt></dt>
+
+<dd class="dd">
+<p class="p">List of Kafka properties to retrieve from application configuration. The property name in the application configuration must the same as the Kafka property name. You may also supply jaasFile as a property name to act as the jaasFile parameter value.
 </p>
 <dl class="dl">
 
@@ -158,7 +210,97 @@ This operator supports 6 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_keyAttribute"><tt class="ph tt">keyAttribute</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__jaasFile"><!-- --></a><tt class="ph tt">jaasFile</tt></dt>
+
+<dd class="dd">
+<p class="p">Location of the jaas file to be used for SASL connections. Jaas file is recommended to be stored in the etc directory.  If a relative path is specified, the path is relative to the application directory.This sets the system property java.security.auth.login.config. This can also be set using the appConfig by specifying jaasFile=&lt;jaas.conf location&gt;.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__jaasFilePropName"><!-- --></a><tt class="ph tt">jaasFilePropName</tt></dt>
+
+<dd class="dd">
+<p class="p">This parameter specifies the property name of the jaasFile location in the application configuration. The default name is jaasFile. 
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__kafkaProperty"><!-- --></a><tt class="ph tt">kafkaProperty</tt></dt>
+
+<dd class="dd">
+<p class="p">Specify a Kafka property "key=value" form. This will override any property specified in the properties file. The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. 
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__keyAttribute"><!-- --></a><tt class="ph tt">keyAttribute</tt></dt>
 
 <dd class="dd">
 <p class="p">Name of the attribute for the key. Default is "key".
@@ -189,10 +331,10 @@ This operator supports 6 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_messageAttribute"><tt class="ph tt">messageAttribute</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__messageAttribute"><!-- --></a><tt class="ph tt">messageAttribute</tt></dt>
 
 <dd class="dd">
-<p class="p">Name of the attribute for the message. If this parameter is not specified, then by default the operator will look for an attribute named "message". If the "message" attribute is not found, messages will not be sent. Default is "message".
+<p class="p">Name of the attribute for the message. If this parameter is not specified, then by default the operator will look for an attribute named "message". If the "message" attribute is not found, a runtime error will be returned.
 </p>
 <dl class="dl">
 
@@ -220,10 +362,10 @@ This operator supports 6 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_propertiesFile"><tt class="ph tt">propertiesFile</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__propertiesFile"><!-- --></a><tt class="ph tt">propertiesFile</tt></dt>
 
 <dd class="dd">
-<p class="p">Properties file containing kafka properties.  Properties file is recommended to be stored in the etc directory.  If a relative path is specified, the path is relative to the application directory.
+<p class="p">Properties file containing kafka properties. Properties file is recommended to be stored in the etc directory.  If a relative path is specified, the path is relative to the application directory. The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. 
 </p>
 <dl class="dl">
 
@@ -251,7 +393,7 @@ This operator supports 6 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_topic"><tt class="ph tt">topic</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__topic"><!-- --></a><tt class="ph tt">topic</tt></dt>
 
 <dd class="dd">
 <p class="p">Topic to be published to. A topic can also be specified as an input stream attribute.
@@ -279,7 +421,7 @@ This operator supports 6 parameters.<dl class="dl">
 
 
 
-<dt class="dt dlterm" id="spldoc_operator__parameter_topicAttribute"><tt class="ph tt">topicAttribute</tt></dt>
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__topicAttribute"><!-- --></a><tt class="ph tt">topicAttribute</tt></dt>
 
 <dd class="dd">
 <p class="p">Name of the attribute for the topic. Default is "topic"
@@ -323,7 +465,7 @@ This operator supports 6 parameters.<dl class="dl">
 
   <dd class="dd"/>
 
-  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">../../impl/lib/com.ibm.streamsx.messaging.jar, ../../opt/downloaded/*</tt></dd>
+  <dd class="dd"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__dependencies__managedlibrary__libpath">Library Path</a>: <tt class="ph tt">../../impl/lib/com.ibm.streamsx.messaging.jar, ../../opt/downloaded/*, ../../opt/*</tt></dd>
 
  
  </dl>

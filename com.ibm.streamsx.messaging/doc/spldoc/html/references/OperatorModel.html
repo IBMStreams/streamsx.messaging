@@ -259,7 +259,7 @@ is true.
 
    
    
-    <dt class="dt dlterm"><a name="spldoc_reference_operator_model__context__codetemplate"><!-- --></a>Code Template (C++ only)</dt>
+    <dt class="dt dlterm"><a name="spldoc_reference_operator_model__context__codetemplate"><!-- --></a>Code Template</dt>
 
     <dd class="dd"><p class="p">This optional element specifies one or more code templates for the operator. 
 These will show up in IDE's context sensitive content assist menus and SPLDOC documents. 
@@ -356,7 +356,7 @@ These expressions represent the SPL expression, but are available in a form that
 Perl objects are derived from <tt class="ph tt">SPL::Operator::Instance::ExpressionTree</tt>, and have a kind, type, 
 and methods to access the fields of the expression. <tt class="ph tt">ExpressionTreeVisitor</tt> is a visitor pattern
 provided to allow easy walking of the expression tree. For more information, see the 
-<em class="ph i">IBM Streams Processing Language Code Generation API Documentation.</em>
+<em class="ph i">IBM Streams Processing Language Code Generation API Documentation</em>.
 </p>
 
       </li>
@@ -366,6 +366,22 @@ provided to allow easy walking of the expression tree. For more information, see
     </dd>
 
       
+   
+    <dt class="dt dlterm"><a name="spldoc_reference_operator_model__context__capability"><!-- --></a>Operating System Capabilities (C++ only)</dt>
+
+    <dd class="dd"><p class="p">This optional list of elements specifies special privileges for the
+operator. IBM Streams supports the Linux capabilities model via the
+capability element. You can include any number of elements to specify
+the exact privileges your operator requires. For example,
+<tt class="ph tt">&lt;capability&gt;CAP_NET_RAW+eip&lt;/capability&gt;</tt>
+indicates that the operator
+needs permission to access raw sockets. Note that the IBM Streams
+instance must be configured to allow PE processes to run with special
+operating system capabilities.
+    </p>
+</dd>
+
+   
 </dl>
 
 </div>
@@ -516,8 +532,9 @@ any input stream attributes. For example: output <tt class="ph tt">Out : x = 3 +
 <li class="li"><tt class="ph tt">Constant:</tt> This means that the assignments made to output attributes of this port need to be 
 compile-time evaluatable to a constant. For example: output <tt class="ph tt">Out : x = 3 + pow(2, 3);</tt>, but not <tt class="ph tt">x = random(3)</tt>.</li>
 
-<li class="li"><tt class="ph tt">Expression:</tt> This is the most flexible expression mode, any SPL expression of correct type can appear as an assignment to the output attributes of this port. For example: output Out : x = A.y + B.z;.
-Nonexistent: This means that output attribute assignments cannot be specified in the SPL source for this port.</li>
+<li class="li"><tt class="ph tt">Expression:</tt> This is the most flexible expression mode, any SPL expression of correct type can appear as an assignment to the output attributes of this port. For example: output Out : x = A.y + B.z;.</li>
+
+<li class="li"><tt class="ph tt">Nonexistent:</tt> This means that output attribute assignments cannot be specified in the SPL source for this port.</li>
 
 </ul>
 
@@ -623,7 +640,8 @@ preserving output port. This element may only be specified if the output port's 
 The windowPunctuationInputPort can be set to -1, which has the same semantics as a missing windowPunctuationInputPort element. 
 It is important to note that punctuation forwarding for window punctuations is not performed automatically by the SPL 
 language runtime (unlike final punctuations) and the operator model is used to inform the SPL compiler about the behavior 
-that is being implemented by the operator. For more information, see IBM Streams Processing Language Toolkit Development Reference.
+that is being implemented by the operator. For more information, see the
+<em class="ph i">IBM Streams Processing Language Toolkit Development Reference</em>.
     </dd>
 
   

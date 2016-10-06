@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a> &gt; XMSSink</p>
+<a class="xref" href="../toolkits/toolkits.html">Messaging Toolkit Doc</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a> &gt; XMSSink</p>
 
 </div>
 
@@ -132,7 +132,7 @@
 
   <dl class="dl"><dt class="dt dlterm"><a class="xref" href="op$com.ibm.streamsx.messaging.xms$XMSSink$1.html">Examples</a>
 </dt>
-<dd class="dd">These examples demonstrate how to use the <tt class="ph tt">XMSSink</tt> operator.
+<dd class="dd">
 </dd>
 </dl>
 
@@ -158,12 +158,12 @@
 
   <dd class="dd">This operator supports 6 parameters.
 <p class="p"> Required: 
-<a class="xref" href="#spldoc_operator__parameter__connection">connection</a>, <a class="xref" href="#spldoc_operator__parameter__access">access</a>
+<a class="xref" href="#spldoc_operator__parameter__access">access</a>, <a class="xref" href="#spldoc_operator__parameter__connection">connection</a>
 
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__reconnectionPolicy">reconnectionPolicy</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionBound">reconnectionBound</a>, <a class="xref" href="#spldoc_operator__parameter__period">period</a>, <a class="xref" href="#spldoc_operator__parameter__connectionDocument">connectionDocument</a>
+<a class="xref" href="#spldoc_operator__parameter__connectionDocument">connectionDocument</a>, <a class="xref" href="#spldoc_operator__parameter__period">period</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionBound">reconnectionBound</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionPolicy">reconnectionPolicy</a>
 
 </p>
 </dd>
@@ -303,12 +303,22 @@
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 6 parameters.<dl class="dl">
+This operator supports 6 parameters.
+<p class="p"> Required: 
+<a class="xref" href="#spldoc_operator__parameter__access">access</a>, <a class="xref" href="#spldoc_operator__parameter__connection">connection</a>
+
+</p>
+
+<p class="p"> Optional: 
+<a class="xref" href="#spldoc_operator__parameter__connectionDocument">connectionDocument</a>, <a class="xref" href="#spldoc_operator__parameter__period">period</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionBound">reconnectionBound</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionPolicy">reconnectionPolicy</a>
+
+</p>
+<dl class="dl">
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__reconnectionPolicy"><!-- --></a><tt class="ph tt">reconnectionPolicy</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__access"><!-- --></a><tt class="ph tt">access</tt></dt>
 
      <dd class="dd">
-<p class="p">This is an optional parameter that specifies the reconnection policy. The valid values are <tt class="ph tt">NoRetry</tt>, <tt class="ph tt">InfiniteRetry</tt>, and <tt class="ph tt">BoundedRetry</tt>. If the parameter is not specified, the reconnection policy is set to <tt class="ph tt">BoundedRetry</tt> with a <strong class="ph b">reconnectionBound</strong> of <tt class="ph tt">5</tt> and a <strong class="ph b">period</strong> of 60 seconds.
+<p class="p">This mandatory parameter identifies the access specification name.
 </p>
 
   <dl class="dl">
@@ -316,16 +326,16 @@ This operator supports 6 parameters.<dl class="dl">
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: ReconnectionPolicy
- (<tt class="ph tt">InfiniteRetry, NoRetry, BoundedRetry</tt>)     </li>
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
      </li>
 
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
      </li>
 
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: CustomLiteral
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
      </li>
 
    </ul>
@@ -340,10 +350,10 @@ This operator supports 6 parameters.<dl class="dl">
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__reconnectionBound"><!-- --></a><tt class="ph tt">reconnectionBound</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__connection"><!-- --></a><tt class="ph tt">connection</tt></dt>
 
      <dd class="dd">
-<p class="p">This optional parameter specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified and set to <tt class="ph tt">BoundedRetry</tt>, otherwise a compile time error occurs. If the <strong class="ph b">reconnectionBound</strong> parameter is specified and the <strong class="ph b">reconnectionPolicy</strong> parameter is not set, a compile time error occurs. The default value for the <strong class="ph b">reconnectionBound</strong> parameter is <tt class="ph tt">5</tt>.
+<p class="p">This mandatory parameter identifies the name of the connection specification that contains an XMS element.
 </p>
 
   <dl class="dl">
@@ -351,7 +361,42 @@ This operator supports 6 parameters.<dl class="dl">
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: uint32
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__connectionDocument"><!-- --></a><tt class="ph tt">connectionDocument</tt></dt>
+
+     <dd class="dd">
+<p class="p">This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the <strong class="ph b">connection</strong> and <strong class="ph b">access</strong> parameters. If the parameter is specified, it must have exactly one value that is a string constant. If the parameter is not specified, the operator uses the file that is in the default location <tt class="ph tt">../etc/connections.xml</tt>. If a relative path is specified, the path is relative to the root of the application directory. 
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
@@ -410,10 +455,10 @@ This operator supports 6 parameters.<dl class="dl">
 
   
   
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__connection"><!-- --></a><tt class="ph tt">connection</tt></dt>
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__reconnectionBound"><!-- --></a><tt class="ph tt">reconnectionBound</tt></dt>
 
      <dd class="dd">
-<p class="p">This mandatory parameter identifies the name of the connection specification that contains an XMS element.
+<p class="p">This optional parameter specifies the number of successive connections that are attempted for an operator. You can use this parameter only when the <strong class="ph b">reconnectionPolicy</strong> parameter is specified and set to <tt class="ph tt">BoundedRetry</tt>, otherwise a compile time error occurs. If the <strong class="ph b">reconnectionBound</strong> parameter is specified and the <strong class="ph b">reconnectionPolicy</strong> parameter is not set, a compile time error occurs. The default value for the <strong class="ph b">reconnectionBound</strong> parameter is <tt class="ph tt">5</tt>.
 </p>
 
   <dl class="dl">
@@ -421,77 +466,7 @@ This operator supports 6 parameters.<dl class="dl">
      <dt class="dt dlterm">Properties</dt>
 
      <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__access"><!-- --></a><tt class="ph tt">access</tt></dt>
-
-     <dd class="dd">
-<p class="p">This mandatory parameter identifies the access specification name.
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: false
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
-     </li>
-
-   </ul>
-
-     <p class="p"/>
-     </dd>
-
-    
-  </dl>
-
-     </dd>
-
-  
-  
-     <dt class="dt dlterm"><a name="spldoc_operator__parameter__connectionDocument"><!-- --></a><tt class="ph tt">connectionDocument</tt></dt>
-
-     <dd class="dd">
-<p class="p">This optional parameter specifies the path name of the file that contains the connection and access specifications, which are identified by the <strong class="ph b">connection</strong> and <strong class="ph b">access</strong> parameters. If the parameter is specified, it must have exactly one value that is a string constant. If the parameter is not specified, the operator uses the file that is in the default location <tt class="ph tt">../etc/connections.xml</tt>. If a relative path is specified, the path is relative to the root of the application directory. 
-</p>
-
-  <dl class="dl">
-    
-     <dt class="dt dlterm">Properties</dt>
-
-     <dd class="dd">   <ul class="sl simple">
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: uint32
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
@@ -501,6 +476,41 @@ This operator supports 6 parameters.<dl class="dl">
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+   </ul>
+
+     <p class="p"/>
+     </dd>
+
+    
+  </dl>
+
+     </dd>
+
+  
+  
+     <dt class="dt dlterm"><a name="spldoc_operator__parameter__reconnectionPolicy"><!-- --></a><tt class="ph tt">reconnectionPolicy</tt></dt>
+
+     <dd class="dd">
+<p class="p">This is an optional parameter that specifies the reconnection policy. The valid values are <tt class="ph tt">NoRetry</tt>, <tt class="ph tt">InfiniteRetry</tt>, and <tt class="ph tt">BoundedRetry</tt>. If the parameter is not specified, the reconnection policy is set to <tt class="ph tt">BoundedRetry</tt> with a <strong class="ph b">reconnectionBound</strong> of <tt class="ph tt">5</tt> and a <strong class="ph b">period</strong> of 60 seconds.
+</p>
+
+  <dl class="dl">
+    
+     <dt class="dt dlterm">Properties</dt>
+
+     <dd class="dd">   <ul class="sl simple">
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: ReconnectionPolicy
+ (<tt class="ph tt">InfiniteRetry, NoRetry, BoundedRetry</tt>)     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: CustomLiteral
      </li>
 
    </ul>

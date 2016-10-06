@@ -7,22 +7,22 @@
 <meta name="copyright" content="(C) Copyright 2005"/>
 <meta name="DC.rights.owner" content="(C) Copyright 2005"/>
 <meta name="DC.Type" content="reference"/>
-<meta name="DC.Title" content="Toolkit com.ibm.streamsx.messaging 3.0.0"/>
+<meta name="DC.Title" content="Toolkit com.ibm.streamsx.messaging 5.1.0"/>
 <meta name="DC.Format" content="XHTML"/>
 <meta name="DC.Identifier" content="spldoc_toolkit"/>
 <link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
 <link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
-<title>Toolkit com.ibm.streamsx.messaging 3.0.0</title>
+<title>Toolkit com.ibm.streamsx.messaging 5.1.0</title>
 </head>
 <body id="spldoc_toolkit">
 
 
-<h1 class="title topictitle1 spltoolkitname">Toolkit <tt class="ph tt">com.ibm.streamsx.messaging 3.0.0</tt></h1>
+<h1 class="title topictitle1 spltoolkitname">Toolkit <tt class="ph tt">com.ibm.streamsx.messaging 5.1.0</tt></h1>
 
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; com.ibm.streamsx.messaging 3.0.0</p>
+<a class="xref" href="../toolkits/toolkits.html">Messaging Toolkit Doc</a> &gt; com.ibm.streamsx.messaging 5.1.0</p>
 
 </div>
 
@@ -44,7 +44,7 @@
 <p class="p">The <tt class="ph tt">MQTTSource</tt> and <tt class="ph tt">MQTTSink</tt> operators use the MQTT architecture and APIs to read and write to MQTT providers.  The operators support  IBM MessageSight v1.1 and v1.2.
 </p>
 
-<p class="p">The <tt class="ph tt">KafkaProvider</tt> and <tt class="ph tt">KafkaConsumer</tt> operators supports Kafka v0.8.1.1.
+<p class="p">The <tt class="ph tt">KafkaProducer</tt> and <tt class="ph tt">KafkaConsumer</tt> operators support Kafka v0.10.0.0 brokers. For 0.9 brokers, you make rebuild the toolkit for Kafka 0.9 by running the following commands: <tt class="ph tt">ant clean; ant kafka-0.9</tt> For older versions of Kafka brokers, you must use older versions of this toolkit.  
 </p>
 
 <p class="p"><strong class="ph b">Restriction</strong>: The <tt class="ph tt">XMSSource</tt> and <tt class="ph tt">XMSSink</tt>, operators in the Messaging Toolkit are not supported on POWER7 or POWER 8 Systems. You must use x86_64 systems. 
@@ -53,7 +53,7 @@
 <p class="p"><strong class="ph b">Restriction</strong>: The <tt class="ph tt">XMSSource</tt> and <tt class="ph tt">XMSSink</tt>, operators in the Messaging Toolkit are not supported on RHEL 7 platforms.
 </p>
 
-<p class="p">The following figure shows how the <tt class="ph tt">XMSSink</tt> and <tt class="ph tt">XMSSource</tt> operators in the Messaging Toolkit use standard XMS architecture and APIs.  <br/><img class="image" src="../../image/copy/1$8751_dgm1.gif" alt="This diagram illustrates the XMS APIs that are used to communicate between InfoSphere Streams, an XMS client, and a WebSphere MQ server."/><br/>
+<p class="p">The following figure shows how the <tt class="ph tt">XMSSink</tt> and <tt class="ph tt">XMSSource</tt> operators in the Messaging Toolkit use standard XMS architecture and APIs.  <br/><img class="image" src="file:///homes/hny5/cooka/gitAlexNew/streamsx.messaging/com.ibm.streamsx.messaging/doc/images/8751_dgm1.gif" alt="This diagram illustrates the XMS APIs that are used to communicate between InfoSphere Streams, an XMS client, and a WebSphere MQ server."/><br/>
 </p>
 
 <div class="p">For example:
@@ -68,7 +68,7 @@
 
 </div>
 
-<p class="p">The following figure shows how the <tt class="ph tt">JMSSource</tt> and <tt class="ph tt">JMSSink</tt> operators in the Messaging Toolkit use standard JMS architecture and APIs. <br/><img class="image" src="../../image/copy/1$architecture_diagram_JMSadpaters.gif" alt="This figure shows JMSSource and JMSSink operators that use Apache ActiveMQ and WebSphere MQ libraries to read and write from JMS providers."/><br/>
+<p class="p">The following figure shows how the <tt class="ph tt">JMSSource</tt> and <tt class="ph tt">JMSSink</tt> operators in the Messaging Toolkit use standard JMS architecture and APIs. <br/><img class="image" src="file:///homes/hny5/cooka/gitAlexNew/streamsx.messaging/com.ibm.streamsx.messaging/doc/images/architecture_diagram_JMSadpaters.gif" alt="This figure shows JMSSource and JMSSink operators that use Apache ActiveMQ and WebSphere MQ libraries to read and write from JMS providers."/><br/>
 </p>
 
 <p class="p">The Messaging Toolkit operators (JMS, XMS and MQTT) must be configured to connect to messaging systems. This configuration information is specified in an XML document, called a connection specifications document.  The connection specifications document is similar to but separate from the document that is used by the Database Toolkit.
@@ -76,13 +76,13 @@
 
   <dl class="dl"><dt class="dt dlterm"><a class="xref" href="tk$com.ibm.streamsx.messaging$1.html">Developing and running applications that use the Messaging Toolkit</a>
 </dt>
-<dd class="dd">To create applications that use the Messaging Toolkit, you must configure either Streams Studio or the SPL compiler to be aware of the location of the toolkit.
+<dd class="dd">
 </dd>
 </dl>
 
   <dl class="dl"><dt class="dt dlterm"><a class="xref" href="tk$com.ibm.streamsx.messaging$2.html">Connection specifications document</a>
 </dt>
-<dd class="dd">A connection specifications document is an XML document that describes how operators in the Messaging Toolkit connect to and access messaging systems.
+<dd class="dd">
 </dd>
 </dl>
 
@@ -90,19 +90,19 @@
   
   <dt class="dt dlterm">Version</dt>
 
-  <dd class="dd">3.0.0</dd>
+  <dd class="dd">5.1.0</dd>
 
   
   
   <dt class="dt dlterm">Required Product Version</dt>
 
-  <dd class="dd">4.1.0.0</dd>
+  <dd class="dd">4.2.0.0</dd>
 
   
   
   <dt class="dt dlterm">Author</dt>
 
-  <dd class="dd">IBMStreams Open Source Community at GitHub - https://github.com/IBMStreams/streamsx.messaging</dd>
+  <dd class="dd">Alexander Cook</dd>
 
   
 </dl>
@@ -140,7 +140,7 @@
       <dd class="dd"/>
 
       <dd class="dd">
-<strong class="ph b">Conversions between JMS messages and tuples in IBM InfoSphere Streams</strong>When you send data to or receive data from WebSphere MQ or an Apache Active MQ queue or topic by using <tt class="ph tt">JMSSink</tt> or <tt class="ph tt">JMSSource</tt> operators, IBM InfoSphere Streams must convert tuples to JMS messages, or vice-versa.
+<strong class="ph b">Conversions between JMS messages and tuples in IBM InfoSphere Streams</strong> 
       </dd>
 
       <dd class="dd"><dl class="dl">
@@ -163,6 +163,10 @@
       <dt class="dt dlterm splpart"><a class="xref" href="ns$com.ibm.streamsx.messaging.kafka.html">com.ibm.streamsx.messaging.kafka</a></dt>
 
       <dd class="dd"/>
+
+      <dd class="dd">
+<strong class="ph b">Kafka Properties</strong> 
+      </dd>
 
       <dd class="dd"><dl class="dl">
         <dt class="dt dlterm">Operators</dt>
@@ -244,12 +248,33 @@ Operator control input port: Some of the operators in the Messaging Toolkit prov
 </dd>
 
          
+      <dt class="dt dlterm splpart"><a class="xref" href="ns$com.ibm.streamsx.messaging.rabbitmq.html">com.ibm.streamsx.messaging.rabbitmq</a></dt>
+
+      <dd class="dd"/>
+
+      <dd class="dd"><dl class="dl">
+        <dt class="dt dlterm">Operators</dt>
+
+        <dd class="dd">
+<ul class="sl simple">
+<li class="sli"><a class="xref" href="op$com.ibm.streamsx.messaging.rabbitmq$RabbitMQSink.html">RabbitMQSink</a></li>
+
+<li class="sli"><a class="xref" href="op$com.ibm.streamsx.messaging.rabbitmq$RabbitMQSource.html">RabbitMQSource</a></li>
+
+</ul>
+
+        </dd>
+
+      </dl>
+</dd>
+
+         
       <dt class="dt dlterm splpart"><a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a></dt>
 
       <dd class="dd"/>
 
       <dd class="dd">
-<strong class="ph b">Conversions between XMS messages and tuples in IBM InfoSphere Streams</strong>When you send data to or receive messages from a WebSphere MQ queue or topic by using <tt class="ph tt">XMSSink</tt> or <tt class="ph tt">XMSSource</tt> operators, IBM InfoSphere Streams must convert the XMS message to a tuple, or vice versa.
+<strong class="ph b">Conversions between XMS messages and tuples in IBM InfoSphere Streams</strong> 
       </dd>
 
       <dd class="dd"><dl class="dl">
