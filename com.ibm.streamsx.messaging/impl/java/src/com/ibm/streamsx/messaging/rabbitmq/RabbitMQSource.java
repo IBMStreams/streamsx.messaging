@@ -6,6 +6,10 @@
 package com.ibm.streamsx.messaging.rabbitmq;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,10 +30,11 @@ import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Envelope;
+import com.rabbitmq.client.ShutdownSignalException;
+
 import java.util.logging.Logger;
 
 /**
@@ -46,6 +51,8 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 	
 	private Thread processThread;
 	private String queueName = "";
+
+	private String queueNameParameter = "";
 	
 	//consistent region checks
 	@ContextCheck(compile = true)
@@ -70,7 +77,13 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 		// produce tuples returns immediately, but we don't want ports to close
 		createAvoidCompletionThread();
 
-		processThread = getOperatorContext().getThreadFactory().newThread(
+		processThread = getNewConsumerThread();
+
+		processThread.setDaemon(false);
+	}
+
+	private Thread getNewConsumerThread() {
+		return getOperatorContext().getThreadFactory().newThread(
 				new Runnable() {
 
 					@Override
@@ -84,8 +97,6 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 					}
 
 				});
-
-		processThread.setDaemon(false);
 	}
 
 	
@@ -98,12 +109,9 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 	 */
 	@Override
 	public synchronized void allPortsReady() throws Exception {
-		// After all the ports are ready, but before we start 
-		// sending messages, setup our connection, channel, exchange and queue
-		super.initializeRabbitChannelAndConnection();		
-		bindAndSetupQueue();
-		
+				
 		processThread.start();
+		
 	}
 
 	private void bindAndSetupQueue() throws IOException {
@@ -138,9 +146,10 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 	private boolean initializeQueue(Connection connection) throws IOException {
 		boolean createdQueue = true;
 		
-		if (queueName.isEmpty()) {
+		if (queueNameParameter.isEmpty()) {
 			queueName = channel.queueDeclare().getQueue();
 		} else {
+			queueName = queueNameParameter;
 			try {
 				channel.queueDeclarePassive(queueName);
 				trace.log(TraceLevel.INFO, "Queue was found, therefore no queue will be declared and user queue configurations will be ignored.");
@@ -157,14 +166,53 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 	
 	/**
 	 * Submit new tuples to the output stream
+	 * @throws InterruptedException 
 	 * @throws IOException 
+	 * @throws MalformedURLException 
+	 * @throws Exception 
 	 */
-	private void produceTuples() throws IOException {
-		Consumer consumer = new DefaultConsumer(channel) {
+	private void produceTuples() throws MalformedURLException, IOException, InterruptedException, Exception{
+		
+		// After all the ports are ready, but before we start 
+		// sending messages, setup our connection, channel, exchange and queue
+		super.initializeRabbitChannelAndConnection();		
+		bindAndSetupQueue();
+		
+		DefaultConsumer consumer = getNewDefaultConsumer();
+		channel.basicConsume(queueName, true, consumer);
+		
+		while (!Thread.interrupted()){
+			isConnected.waitForMetricChange();
+			if (isConnected.getValue() != 1
+					&& newCredentialsExist()){
+				trace.log(TraceLevel.WARN,
+						"New properties have been found so the client is restarting.");
+				resetRabbitClient();
+				consumer = getNewDefaultConsumer();
+				channel.basicConsume(queueName, true, consumer);
+			}
+		}
+	}
+	
+	@Override
+	public void resetRabbitClient() throws KeyManagementException, MalformedURLException, NoSuchAlgorithmException,
+			URISyntaxException, IOException, TimeoutException, InterruptedException, Exception {
+		if (super.getAutoRecovery()) {
+			super.resetRabbitClient();
+			bindAndSetupQueue();
+		} 
+	}
+
+	private DefaultConsumer getNewDefaultConsumer() {
+		return new DefaultConsumer(channel) {
 			@Override
 			public void handleDelivery(String consumerTag, Envelope envelope,
 					AMQP.BasicProperties properties, byte[] body)
 					throws IOException {
+				if (isConnected.getValue() == 0){
+					// We know we are connected if we're sending messages
+					isConnected.setValue(1);
+				}
 				StreamingOutput<OutputTuple> out = getOutput(0);
 				OutputTuple tuple = out.newTuple();
 
@@ -201,8 +249,19 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 					e.printStackTrace();
 				}
 			}
+			
+			@Override
+			public void handleCancelOk(String consumerTag) {
+				trace.log(TraceLevel.INFO,"Recieved cancel signal at consumer");
+				super.handleCancelOk(consumerTag);
+			}
+			
+			@Override
+			public void handleShutdownSignal(String consumerTag, ShutdownSignalException sig) {
+				trace.log(TraceLevel.INFO,"Recieved shutdown signal at consumer");
+				super.handleShutdownSignal(consumerTag, sig);
+			}
 		};
-		channel.basicConsume(queueName, true, consumer);
 	}
 	
 	@Parameter(optional = true, description = "Routing key/keys to bind the queue to. If you are connecting to an existing queue, these bindings will be ignored.")
@@ -213,7 +272,7 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 	
 	@Parameter(optional = true, description = "Name of the queue. Main reason to specify is to facilitate parallel consuming. If this parameter is not specified, a queue will be created using a randomly generated name.")
 	public void setQueueName(String value) {
-		queueName = value;
+		queueNameParameter = value;
 	}
 	
 	@Parameter(optional = true, description = "Name of the RabbitMQ exchange to bind the queue to. If consuming from an already existing queue, this parameter is ignored. To use default RabbitMQ exchange, do not specify this parameter or use empty quotes: \\\"\\\".")
@@ -224,11 +283,9 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 	/**
 	 * Shutdown this operator, which will interrupt the thread executing the
 	 * <code>produceTuples()</code> method.
-	 * 
-	 * @throws TimeoutException
-	 * @throws IOException
+	 * @throws Exception 
 	 */
-	public synchronized void shutdown() throws IOException, TimeoutException {		
+	public synchronized void shutdown() throws Exception {	
 		if (processThread != null) {
 			processThread.interrupt();
 			processThread = null;
@@ -253,6 +310,7 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 			"All exchanges and queues created by this operator are non-durable and auto-delete." + 
 			"This operator supports direct, fanout, and topic exchanges. It does not support header exchanges. " + 
 			"\\n\\n**Behavior in a Consistent Region**" + 
-			"\\nThis operator cannot participate in a consistent region."
+			"\\nThis operator cannot participate in a consistent region." + 
+			BASE_DESC
 			;
 }

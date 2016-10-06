@@ -38,6 +38,7 @@ import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streams.operator.state.StateHandler;
 import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
 import com.ibm.streamsx.messaging.common.IGovernanceConstants;
+import com.ibm.streamsx.messaging.common.PropertyProvider;
 
 
 //The JMSSink operator publishes data from Streams to a JMS Provider queue or a topic.
@@ -179,6 +180,43 @@ public class JMSSink extends AbstractOperator implements StateHandler{
     
     // unique id to identify messages on CR queue
     private String operatorUniqueID;
+    
+    // application configuration name
+    private String appConfigName;
+    
+    // user property name stored in application configuration
+    private String userPropName;
+    
+    // password property name stored in application configuration
+    private String passwordPropName;
+    
+
+	public String getAppConfigName() {
+		return appConfigName;
+	}
+    
+	@Parameter(optional = true)
+	public void setAppConfigName(String appConfigName) {
+		this.appConfigName = appConfigName;
+	}
+
+	public String getUserPropName() {
+		return userPropName;
+	}
+    
+	@Parameter(optional = true)
+	public void setUserPropName(String userPropName) {
+		this.userPropName = userPropName;
+	}
+
+	public String getPasswordPropName() {
+		return passwordPropName;
+	}
+    
+	@Parameter(optional = true)
+	public void setPasswordPropName(String passwordPropName) {
+		this.passwordPropName = passwordPropName;
+	}
 
 	public String getConsistentRegionQueueName() {
 		return consistentRegionQueueName;
@@ -415,6 +453,34 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 						new String[] {});
 			}
 		}
+		
+		if((checker.getOperatorContext().getParameterNames().contains("appConfigName"))) {
+        	String appConfigName = checker.getOperatorContext().getParameterValues("appConfigName").get(0);
+			String userPropName = checker.getOperatorContext().getParameterValues("userPropName").get(0);
+			String passwordPropName = checker.getOperatorContext().getParameterValues("passwordPropName").get(0);
+			
+			
+			PropertyProvider provider = new PropertyProvider(checker.getOperatorContext().getPE(), appConfigName);
+			
+			String userName = provider.getProperty(userPropName);
+			String password = provider.getProperty(passwordPropName);
+			
+			if(userName == null || userName.trim().length() == 0) {
+				logger.log(LogLevel.ERROR, "Property " + userPropName + " is not found in application configuration " + appConfigName);
+				checker.setInvalidContext(
+						"Property {0} is not found in application configuration {1}.",
+						new Object[] {userPropName, appConfigName});
+				
+			}
+			
+			if(password == null || password.trim().length() == 0) {
+				logger.log(LogLevel.ERROR, "Property " + passwordPropName + " is not found in application configuration " + appConfigName);
+				checker.setInvalidContext(
+						"Property {0} is not found in application configuration {1}.",
+						new Object[] {passwordPropName, appConfigName});
+			
+			}
+        }
 	}
 
 	// add compile time check for either period or reconnectionBound to be
@@ -432,6 +498,11 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			checker.checkDependentParameters("maxMessageSendRetries", "messageSendRetryDelay");
 			checker.checkDependentParameters("messageSendRetryDelay", "maxMessageSendRetries");
 		}
+		
+		// Make sure if appConfigName is specified then both userPropName and passwordPropName are needed
+		checker.checkDependentParameters("appConfigName", "userPropName", "passwordPropName");
+		checker.checkDependentParameters("userPropName", "appConfigName", "passwordPropName");
+		checker.checkDependentParameters("passwordPropName", "appConfigName", "userPropName");
 	}
 
 	@Override
@@ -479,23 +550,21 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			throw new ParseConnectionDocumentException(
 					"codepage appears only when the message class is bytes");
 		}
+		
+		PropertyProvider propertyProvider = null;
+		
+		if(getAppConfigName() != null) {
+			propertyProvider = new PropertyProvider(context.getPE(), getAppConfigName());
+		}
 
 		// parsing connection document is successful, we can go ahead and create
 		// connection
 		// The jmsConnectionHelper will throw a runtime error and abort the
 		// application in case of errors.
-		jmsConnectionHelper = new JMSConnectionHelper(reconnectionPolicy,
+		jmsConnectionHelper = new JMSConnectionHelper(connectionDocumentParser, reconnectionPolicy,
 				reconnectionBound, period, true, maxMessageSendRetries, 
-				messageSendRetryDelay, connectionDocumentParser.getDeliveryMode(),
-				nReconnectionAttempts, nFailedInserts, logger, (consistentRegionContext != null), msgSelectorCR);
-		jmsConnectionHelper.createAdministeredObjects(
-				connectionDocumentParser.getInitialContextFactory(),
-				connectionDocumentParser.getProviderURL(),
-				connectionDocumentParser.getUserPrincipal(),
-				connectionDocumentParser.getUserCredential(),
-				connectionDocumentParser.getConnectionFactory(),
-				connectionDocumentParser.getDestination(),
-				getConsistentRegionQueueName());
+				messageSendRetryDelay, nReconnectionAttempts, nFailedInserts, logger, (consistentRegionContext != null), 
+				msgSelectorCR, propertyProvider, userPropName, passwordPropName, getConsistentRegionQueueName());
 		
 		// Initialize JMS connection if operator is in a consistent region.
 		// When this operator is in a consistent region, a transacted session is used,

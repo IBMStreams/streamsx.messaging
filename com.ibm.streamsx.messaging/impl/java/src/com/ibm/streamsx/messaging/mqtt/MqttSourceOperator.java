@@ -49,6 +49,7 @@ import com.ibm.streams.operator.types.RString;
 import com.ibm.streams.operator.types.ValueFactory;
 import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
 import com.ibm.streamsx.messaging.common.IGovernanceConstants;
+import com.ibm.streamsx.messaging.common.PropertyProvider;
 import com.ibm.streamsx.messaging.mqtt.MqttClientRequest.MqttClientRequestType;
 
 /**
@@ -310,6 +311,12 @@ public class MqttSourceOperator extends AbstractMqttOperator {
         mqttWrapper.setKeepAliveInterval(getKeepAliveInterval());
         mqttWrapper.setConnectionLostMetric(nConnectionLost);
         mqttWrapper.setIsConnectedMetric(isConnected);
+        
+        if(getAppConfigName() != null) {
+     	   mqttWrapper.setPropProvider(new PropertyProvider(context.getPE(), getAppConfigName()));
+     	   mqttWrapper.setUserPropName(getUserPropName());
+     	   mqttWrapper.setPasswordPropName(getPasswordPropName());
+        }
         
         // register for data governance
         registerForDataGovernance();

@@ -6,15 +6,24 @@
 package com.ibm.streamsx.messaging.kafka;
 
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
+
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.common.KafkaException;
+import org.apache.kafka.common.errors.WakeupException;
 
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
+import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamSchema;
+import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.logging.TraceLevel;
 import com.ibm.streams.operator.model.Icons;
@@ -38,10 +47,17 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	private int threadsPerTopic = 1;
 	private List<Integer> partitions = new ArrayList<Integer>();
 	private static Logger trace = Logger.getLogger(KafkaSource.class.getName());
+	private final AtomicBoolean shutdown = new AtomicBoolean(false);
+	private AtomicBoolean consumerIsShutdown = new AtomicBoolean(false);
 	
+	@SuppressWarnings("rawtypes")
 	KafkaConsumerClient streamsKafkaConsumer;
 	private int consumerPollTimeout = 100;
 	private int triggerCount = -1;
+	Thread processThread;
+	
+	private ConsistentRegionContext crContext;
+	private long triggerIteration = 0;
 	
 	//consistent region checks
 	@ContextCheck(compile = true)
@@ -55,21 +71,6 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 				checker.setInvalidContext("The partition parameter must be specified in consistent regions.", new String[] {});
 			}
 		}
-	}
-	
-	//simple consumer client checks
-	@ContextCheck(runtime = false, compile = true)
-	public static void checkCompileCompatability(OperatorContextChecker checker) {
-		OperatorContext operContext = checker.getOperatorContext();
-
-		if (!operContext.getParameterNames().contains("propertiesFile")
-				&& !operContext.getParameterNames().contains("kafkaProperty")) {
-			checker.setInvalidContext(
-					"Missing properties: Neither propertiesFile nor kafkaProperty parameters are set. At least one must be set.",
-					new String[] {});
-
-		}
-
 	}
 
 	@ContextCheck(runtime = true, compile = false)
@@ -98,14 +99,12 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		checkForMessageAttribute(operContext, operSchema);		
 	}
 	
-    
 	@Override
 	public void initialize(OperatorContext context)
 			throws Exception {
 		super.initialize(context);
 		super.initSchema(getOutput(0).getStreamSchema());
 
-		getOutput(0);
 		if (threadsPerTopic < 1)
 			throw new IllegalArgumentException(
 					"Number of threads per topic cannot be less than one: "
@@ -113,17 +112,29 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 
 		// initialize the client
 		trace.log(TraceLevel.INFO, "Initializing source client");
-		KafkaConsumerFactory clientFactory = new KafkaConsumerFactory();
-		streamsKafkaConsumer = clientFactory.getClient(topicAH, keyAH, messageAH,
-				partitions, consumerPollTimeout, finalProperties);
-		consistentRegionCheckAndSetup();
+		streamsKafkaConsumer = getNewConsumerClient(topicAH, keyAH, messageAH,
+				partitions, consumerPollTimeout, finalProperties, getOutput(0), topics);
 		
+		// Get consistent region context 
+		crContext = getOperatorContext()
+				.getOptionalContext(ConsistentRegionContext.class);
 		// register for data governance
 		registerForDataGovernance();
 
 	}
 
     
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static KafkaConsumerClient getNewConsumerClient(AttributeHelper topicAH, AttributeHelper keyAH,
+			AttributeHelper messageAH, List<Integer> partitions, int consumerPollTimeout, Properties finalProperties,
+			StreamingOutput<OutputTuple> streamingOutput, List<String> topics) throws UnsupportedStreamsKafkaConfigurationException {
+		KafkaConsumerFactory clientFactory = new KafkaConsumerFactory();
+		KafkaConsumerClient kafkaConsumer = clientFactory.getClient(topicAH, keyAH, messageAH,
+				partitions, consumerPollTimeout, finalProperties);
+		kafkaConsumer.init(streamingOutput, topics);
+		return kafkaConsumer;
+	}
+
 	private void registerForDataGovernance() {
 		trace.log(TraceLevel.INFO, "KafkaSource - Registering for data governance");
 		if (topics != null) {
@@ -139,22 +150,136 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 
     
 	@Override
-	public void allPortsReady() throws Exception {
-		streamsKafkaConsumer.init(getOutput(0), getOperatorContext()
-				.getThreadFactory(), topics);
-	}
+	public void allPortsReady() throws Exception {	
+		
+		processThread = getOperatorContext()
+				.getThreadFactory().newThread(new Runnable() {
 
+			@Override
+			public void run() {
+				try {
+					produceTuples();
+				} catch (FileNotFoundException e) {
+					trace.log(TraceLevel.ERROR, e.getMessage());
+					e.printStackTrace();
+				} catch (IOException e) {
+					trace.log(TraceLevel.ERROR, e.getMessage());
+					e.printStackTrace();
+				} catch (UnsupportedStreamsKafkaConfigurationException e) {
+					trace.log(TraceLevel.ERROR, e.getMessage());
+					e.printStackTrace();
+				}
+			}
+
+		});
+		
+		/*
+		 * Set the thread not to be a daemon to ensure that the SPL runtime will
+		 * wait for the thread to complete before determining the operator is
+		 * complete.
+		 */
+		processThread.setDaemon(false);
+		processThread.start();
+	}
 	
-	
-	private void consistentRegionCheckAndSetup() {
-		ConsistentRegionContext crContext = getOperatorContext()
-				.getOptionalContext(ConsistentRegionContext.class);
-		if (crContext != null){
-			streamsKafkaConsumer.setConsistentRegionContext(crContext, triggerCount);
+	@SuppressWarnings("unchecked")
+	public void produceTuples() throws FileNotFoundException, IOException, UnsupportedStreamsKafkaConfigurationException{	
+		while (!shutdown.get()) {
+			try {
+				if (crContext != null){
+					if(trace.isLoggable(TraceLevel.TRACE))
+						trace.log(TraceLevel.TRACE, "Acquiring consistent region permit.");
+					crContext.acquirePermit();
+				}
+				
+				ConsumerRecords<?,?> records = streamsKafkaConsumer.getRecords(consumerPollTimeout);
+				
+				if (records.isEmpty()){
+					streamsKafkaConsumer.checkConnectionCount();
+				} else {
+					streamsKafkaConsumer.processAndSubmit(records);
+					if (crContext != null
+							&& crContext.isTriggerOperator()) {
+						triggerIteration += records.count();
+						if (triggerIteration >= triggerCount) {
+							trace.log(TraceLevel.INFO, "Making consistent..." );
+							crContext.makeConsistent();
+							triggerIteration = 0;
+						}
+					}
+				}
+			} catch (WakeupException e){
+	            // Close if we are shutting down, else error
+				if (shutdown.get()) {
+					trace.log(TraceLevel.ALL, "Shutting down consumer.");
+					if (streamsKafkaConsumer != null) {
+						streamsKafkaConsumer.shutdown();
+						consumerIsShutdown.set(true);
+						synchronized(consumerIsShutdown){
+							consumerIsShutdown.notifyAll();
+						}
+					}
+				} else {
+					// Else let's see if we have new properties to reset the consumer
+					trace.log(TraceLevel.ERROR, "WakeupException: " + e.getMessage());
+					e.printStackTrace();
+					resetConsumerIfPropertiesHaveChanges();
+				}
+			} catch (NoKafkaBrokerConnectionsException 
+					| KafkaException e){
+				// Let's see if we have new properties to reset the consumer
+				trace.log(TraceLevel.ERROR, e.getMessage());
+				e.printStackTrace();
+				resetConsumerIfPropertiesHaveChanges();
+	        } catch (InterruptedException e) {
+	        	// Interrupted while acquiring permit
+	        	trace.log(TraceLevel.ERROR, "Error while acquiring permit: " + e.getMessage());
+				e.printStackTrace();
+			} catch (Exception e) {
+				trace.log(TraceLevel.ERROR, "Error while processing and submitting messages: " + e.getMessage());
+				e.printStackTrace();
+			} finally {
+				if (crContext != null){
+					crContext.releasePermit();
+					if(trace.isLoggable(TraceLevel.TRACE))
+						trace.log(TraceLevel.TRACE, "Released consistent region permit.");
+				}
+			}
+		}
+		
+		if (!consumerIsShutdown.get()){
+			streamsKafkaConsumer.shutdown();
+			consumerIsShutdown.set(true);
+			synchronized(consumerIsShutdown){
+				consumerIsShutdown.notifyAll();
+			}
 		}
 	}
 
-	@Parameter(name = "consumerPollTimeout", optional = true, description = "The time, in milliseconds, spent waiting in poll if data is not available. If 0, returns immediately with any records that are available now. Must not be negative. This parameter is only valid when using the KafkaConsumer(0.9) (specified bootstrap.servers instead of zookeeper.connect). Default is 100.")
+	private void resetConsumerIfPropertiesHaveChanges() throws FileNotFoundException, IOException, UnsupportedStreamsKafkaConfigurationException {
+		OperatorContext context = this.getOperatorContext();
+		if (newPropertiesExist(context)){
+			trace.log(TraceLevel.INFO,
+					"Properties have changed. Initializing consumer with new properties.");
+			resetConsumerClient(context);
+		} else {
+			trace.log(TraceLevel.INFO, "P:roperties have not changed, so we are keeping the same consumer client!");
+		}
+		
+	}
+
+	private void resetConsumerClient(OperatorContext context) throws FileNotFoundException, IOException, UnsupportedStreamsKafkaConfigurationException {
+		// Not catching exceptions because we want to fail
+		// if we can't initialize a new consumer
+		getKafkaProperties(context);		
+        streamsKafkaConsumer.shutdown();
+		trace.log(TraceLevel.INFO,
+				"Shut down consumer. Will attempt to create a new one.");
+		streamsKafkaConsumer = getNewConsumerClient(topicAH, keyAH, messageAH,
+				partitions, consumerPollTimeout, finalProperties, getOutput(0), topics);
+	}
+
+	@Parameter(name = "consumerPollTimeout", optional = true, description = "The time, in milliseconds, spent waiting in poll if data is not available. If 0, returns immediately with any records that are available now. Must not be negative. Default is 100.")
 	public void setConsumerPollTimeout(int value) {
 		this.consumerPollTimeout = value;
 	}
@@ -178,26 +303,43 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		}
 	}
 
-	public static final String DESC = 
-			"This operator acts as a Kafka consumer receiving messages for one or more topics. " +
-			"For parallel consumption, we strongly recommend specifying partitions on each Consumer operator, " +
-			"as we have found the automatic partition assignment strategies from Kafka to be unreliable." + 
-			"Ordering of messages is only guaranteed per Kafka topic partition." + 
-			"\\n\\n**Behavior in a Consistent Region**" + 
-			"\\nThis operator can be used inside a consistent region. Operator driven and periodical checkpointing " +
-			"are supported. Partitions to be read from must be specified. " +
-			"Resetting to initial state is not supported because the intial offset cannot be saved and may not be present in the Kafka log. " + 
-			"In the case of a reset to initial state after operator crash, messages will start being read from the time of reset."
-			;
+	public static final String DESC = "This operator acts as a Kafka consumer receiving messages for one or more topics. "
+			+ "Ordering of messages is only guaranteed per Kafka topic partition. " + BASE_DESC + // common
+																									// description
+																									// between
+																									// Source
+																									// and
+																									// Sink
+			"The threadsPerTopic parameter has been removed since the upgrade to Kafka 0.9. This is because the new KafkaConsumer is single-threaded. "
+			+ "Due to a bug in Kafka (eventually getting resolved by KAFKA-1894), when authentication failure occurs or "
+			+ "connection to Kafka brokers is lost, we will not be able to pick up new properties from the PropertyProvider. "
+			+ "The workaround is to manually restart the KafkaConsumer PE after properties have been updated. New properties will "
+			+ "then be picked up. " + "\\n\\n**Behavior in a Consistent Region**"
+			+ "\\nThis operator can be used inside a consistent region. Operator driven and periodical checkpointing "
+			+ "are supported. Partitions to be read from must be specified. "
+			+ "Resetting to initial state is not supported because the intial offset cannot be saved and may not be present in the Kafka log. "
+			+ "In the case of a reset to initial state after operator crash, messages will start being read from the time of reset.";
 	
 	@Override
-	public void shutdown() throws Exception{
+	public void shutdown() throws Exception {
+		shutdown.set(true);
 		if (streamsKafkaConsumer != null){
-			streamsKafkaConsumer.shutdown();
+			streamsKafkaConsumer.wakeupConsumer();
 		}
+		
+		// Wait to make sure we have caught the wakeup exception
+		// and submitted shutdown task. 
+		
+		synchronized (consumerIsShutdown) {
+			if (!consumerIsShutdown.get()) {
+				consumerIsShutdown.wait(); // Wait until shutdown task submitted
+			}
+		}
+		
 		super.shutdown();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void checkpoint(Checkpoint checkpoint) throws Exception {
 		Map<Integer, Long> offsetMap = streamsKafkaConsumer.getOffsetPositions();
@@ -210,9 +352,9 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		trace.log(TraceLevel.INFO,"Draining....");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void reset(Checkpoint checkpoint) throws Exception {
-		@SuppressWarnings("unchecked")
 		Map<Integer, Long> offsetMap = (Map<Integer, Long>) checkpoint.getInputStream().readObject();
 		trace.log(TraceLevel.INFO, "Resetting...");
 		streamsKafkaConsumer.seekToPositions(offsetMap);		
@@ -220,7 +362,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 
 	@Override
 	public void resetToInitialState() throws Exception {
-		trace.log(TraceLevel.INFO, "Resetting to initial state. Consumer will begin consuming from the latest offset.");
+		trace.log(TraceLevel.INFO, "Resetting to initial state. Consumer will begin consuming from the latest offset (initial state is not supported by this operator).");
 	}
 
 	@Override
