@@ -9,6 +9,10 @@
 * * **KafkaConsumer**: bootstrap.servers and group.id
 * * **KafkaProducer**: bootstrap.servers and acks
 * 
+* 
+* If you observe hanging while working with very large message sizes, we recommend increasing  
+* the receive.buffer.bytes property. 
+* 
 */
 
 namespace com.ibm.streamsx.messaging.kafka;

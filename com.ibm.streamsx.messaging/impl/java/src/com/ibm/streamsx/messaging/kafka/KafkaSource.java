@@ -310,7 +310,8 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 																									// Source
 																									// and
 																									// Sink
-			"Due to a bug in Kafka (eventually getting resolved by KAFKA-1894), when authentication failure occurs or "
+			"The threadsPerTopic parameter has been removed since the upgrade to Kafka 0.9. This is because the new KafkaConsumer is single-threaded. "
+			+ "Due to a bug in Kafka (eventually getting resolved by KAFKA-1894), when authentication failure occurs or "
 			+ "connection to Kafka brokers is lost, we will not be able to pick up new properties from the PropertyProvider. "
 			+ "The workaround is to manually restart the KafkaConsumer PE after properties have been updated. New properties will "
 			+ "then be picked up. " + "\\n\\n**Behavior in a Consistent Region**"

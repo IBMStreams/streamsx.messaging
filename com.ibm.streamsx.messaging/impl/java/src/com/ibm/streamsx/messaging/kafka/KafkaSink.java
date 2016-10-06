@@ -175,5 +175,6 @@ public class KafkaSink extends KafkaBaseOper {
 			BASE_DESC + // common description between Source and Sink
 			"\\n\\n**Behavior in a Consistent Region**" + 
 			"\\nThis operator can participate in a consistent region.  This operator cannot be placed at the start of a consistent region. "
+			+ "The KafkaProducer guarantees at-least-once delivery of messages to a Kafka topic."
 			;
 }

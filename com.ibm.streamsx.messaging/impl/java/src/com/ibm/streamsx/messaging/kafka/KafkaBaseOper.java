@@ -355,7 +355,8 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	
 	public static final String BASE_DESC = 	"Specify properties as described here: http://kafka.apache.org/documentation.html#configuration. "
 			+ "If you are using Java security modules for login/authentication, ensure that they are compatible with IBM Java, as IBM Streams only runs "
-			+ "with IBM Java." 
+			+ "with IBM Java. The SPL Attribute Types supported are rstring, ustring, and blob. The topic must be of type rstring/ustring, while the key and message must "
+			+ "be of the same type (rstring, ustring, or blob). " 
 			+ "\\n\\n**Kafka 0.9 Server Support**: "
 			+ "By default this toolkit builds with Kafka 0.10 client JARs. The Kafka 0.10 client is not compatible with Kafka 0.9 brokers. "
 			+ "To use this operator with Kafka 0.9 brokers, you must rebuild with the kafka-0.9 target after cleaning. From the toolkit root directory: "
