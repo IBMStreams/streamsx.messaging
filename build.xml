@@ -61,6 +61,7 @@
 	</target>
 	
 	<target name="toolkitIndexOnly" description="Index the toolkit.">
+		<property name="pom.file" value="pom.xml" />
 		<ant dir="${toolkit}" target="toolkit" />
 	</target>
 
