@@ -5,6 +5,8 @@
 package com.ibm.streamsx.messaging.jms;
 
 import com.ibm.streams.operator.metrics.Metric;
+import com.ibm.streamsx.messaging.common.PropertyProvider;
+
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -90,6 +92,17 @@ class JMSConnectionHelper {
 	
 	// message consumer of the CR queue
 	private MessageConsumer consumerCR = null;
+	
+	private PropertyProvider propertyProvider = null;
+	
+	private String userPropName;
+	
+	private String passwordPropName;
+	
+	// CR queue name
+	private String destinationCR;
+	
+	private ConnectionDocumentParser connectionDocumentParser = null;
 
 	private synchronized MessageConsumer getConsumerCR() {
 		return consumerCR;
@@ -172,31 +185,43 @@ class JMSConnectionHelper {
 
 	// This constructor sets the parameters required to create a connection for
 	// JMSSource
-	JMSConnectionHelper(ReconnectionPolicies reconnectionPolicy,
+	JMSConnectionHelper(ConnectionDocumentParser connectionDocumentParser,ReconnectionPolicies reconnectionPolicy,
 			int reconnectionBound, double period, boolean isProducer,
 			int maxMessageRetry, long messageRetryDelay,
-			String deliveryMode, Metric nReconnectionAttempts, Logger logger, boolean useClientAckMode, String messageSelector) {
+			Metric nReconnectionAttempts, Logger logger, boolean useClientAckMode, String messageSelector, 
+			PropertyProvider propertyProvider, String userPropName, String passwordPropName, String destinationCR) throws NamingException {
 		this.reconnectionPolicy = reconnectionPolicy;
 		this.reconnectionBound = reconnectionBound;
 		this.period = period;
 		this.isProducer = isProducer;
-		this.deliveryMode = deliveryMode;
+		this.deliveryMode = connectionDocumentParser.getDeliveryMode();
 		this.logger = logger;
 		this.nReconnectionAttempts = nReconnectionAttempts;
 		this.maxMessageRetries = maxMessageRetry;
 		this.messageRetryDelay = messageRetryDelay;
 		this.useClientAckMode = useClientAckMode;
 		this.messageSelector = messageSelector;
+		this.propertyProvider = propertyProvider;
+		this.userPropName = userPropName;
+		this.passwordPropName = passwordPropName;
+		this.connectionDocumentParser = connectionDocumentParser;
+		this.userPrincipal = connectionDocumentParser.getUserPrincipal();
+		this.userCredential = connectionDocumentParser.getUserCredential();
+		this.destinationCR = destinationCR;
+		
+		refreshUserCredential();
+		createAdministeredObjects();
 	}
 
 	// This constructor sets the parameters required to create a connection for
 	// JMSSink
-	JMSConnectionHelper(ReconnectionPolicies reconnectionPolicy,
+	JMSConnectionHelper(ConnectionDocumentParser connectionDocumentParser, ReconnectionPolicies reconnectionPolicy,
 			int reconnectionBound, double period, boolean isProducer,
-			int maxMessageRetry, long messageRetryDelay, String deliveryMode, 
-			Metric nReconnectionAttempts, Metric nFailedInserts, Logger logger, boolean useClientAckMode, String msgSelectorCR) {
-		this(reconnectionPolicy, reconnectionBound, period, isProducer,
-			 maxMessageRetry, messageRetryDelay, deliveryMode, nReconnectionAttempts, logger, useClientAckMode, msgSelectorCR);
+			int maxMessageRetry, long messageRetryDelay,  
+			Metric nReconnectionAttempts, Metric nFailedInserts, Logger logger, boolean useClientAckMode, String msgSelectorCR, 
+			PropertyProvider propertyProvider, String userPropName, String passwordPropName, String destinationCR) throws NamingException {
+		this(connectionDocumentParser, reconnectionPolicy, reconnectionBound, period, isProducer,
+			 maxMessageRetry, messageRetryDelay, nReconnectionAttempts, logger, useClientAckMode, msgSelectorCR, propertyProvider, userPropName, passwordPropName, destinationCR);
 		this.nFailedInserts = nFailedInserts;
 
 	}
@@ -217,22 +242,17 @@ class JMSConnectionHelper {
 	// this subroutine creates the initial jndi context by taking the mandatory
 	// and optional parameters
 
-	public void createAdministeredObjects(String initialContextFactory,
-			String providerURL, String userPrincipal, String userCredential,
-			String connectionFactory, String destination, String destinationCR)
+	private void createAdministeredObjects()
 			throws NamingException {
 
-		this.userPrincipal = userPrincipal;
-		this.userCredential = userCredential;
-		
 		// Create a JNDI API InitialContext object if none exists
 		// create a properties object and add all the mandatory and optional
 		// parameter
 		// required to create the jndi context as specified in connection
 		// document
 		Properties props = new Properties();
-		props.put(Context.INITIAL_CONTEXT_FACTORY, initialContextFactory);
-		props.put(Context.PROVIDER_URL, providerURL);
+		props.put(Context.INITIAL_CONTEXT_FACTORY, connectionDocumentParser.getInitialContextFactory());
+		props.put(Context.PROVIDER_URL, connectionDocumentParser.getProviderURL());
 
 		// Add the optional elements
 
@@ -248,8 +268,8 @@ class JMSConnectionHelper {
 		// Look up connection factory and destination. If either does not exist,
 		// exit, throws a NamingException if lookup fails
 
-		connFactory = (ConnectionFactory) jndiContext.lookup(connectionFactory);
-		dest = (Destination) jndiContext.lookup(destination);
+		connFactory = (ConnectionFactory) jndiContext.lookup(connectionDocumentParser.getConnectionFactory());
+		dest = (Destination) jndiContext.lookup(connectionDocumentParser.getDestination());
 		
 		// Look up CR queue only for producer and when producer is in a CR
 		if(this.isProducer && this.useClientAckMode) {
@@ -277,6 +297,10 @@ class JMSConnectionHelper {
 				// nConnectionAttempts
 				try {
 					nConnectionAttempts++;
+					
+					if(refreshUserCredential()) {
+						createAdministeredObjects();
+					}
 					if (connect(isProducer)) {
 						// got a successfull connection,
 						// come out of while loop.
@@ -286,7 +310,7 @@ class JMSConnectionHelper {
 				} catch (InvalidSelectorException e) {
 					throw new ConnectionException(
 							"Connection to JMS failed. Invalid message selector");
-				} catch (JMSException e) {
+				} catch (JMSException | NamingException e) {
 					logger.log(LogLevel.ERROR, "RECONNECTION_EXCEPTION",
 							new Object[] { e.toString() });
 					// Get the reconnectionPolicy
@@ -394,6 +418,31 @@ class JMSConnectionHelper {
 			getConnect().start();
 		}
 		// create connection is successful, return true
+		return true;
+	}
+	
+    private boolean refreshUserCredential() {
+		
+		if(propertyProvider == null) {
+			return false;
+		}
+		
+		String userName = propertyProvider.getProperty(userPropName);
+		String password = propertyProvider.getProperty(passwordPropName);
+		
+		if(this.userPrincipal == userName && this.userCredential == password) {
+			return false;
+		}
+		
+		if((this.userPrincipal != null && userName != null && this.userPrincipal.equals(userName))
+			&& (this.userCredential != null && password != null && this.userCredential.equals(password))) {
+			return false;
+		}
+		
+		logger.log(LogLevel.INFO, "User credentials has been updated");
+		this.userPrincipal = userName;
+		this.userCredential = password;
+		
 		return true;
 	}
 

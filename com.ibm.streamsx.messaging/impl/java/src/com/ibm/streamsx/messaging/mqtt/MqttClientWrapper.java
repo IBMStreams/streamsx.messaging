@@ -24,6 +24,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import com.ibm.streams.operator.log4j.LoggerNames;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.metrics.Metric;
+import com.ibm.streamsx.messaging.common.PropertyProvider;
 
 public class MqttClientWrapper implements MqttCallback {
 	private static final int COMMAND_TIMEOUT = 5000;
@@ -50,6 +51,10 @@ public class MqttClientWrapper implements MqttCallback {
 	private Metric nConnectionLost;
 	private Metric isConnected;
 	
+    private PropertyProvider propProvider;
+    private String userPropName;
+    private String passwordPropName;
+	
 	public MqttClientWrapper() {	
 
     	conOpt = new MqttConnectOptions();
@@ -58,6 +63,18 @@ public class MqttClientWrapper implements MqttCallback {
     	callBackListeners = new ArrayList<MqttCallback>();
 	}
 	
+	public void setPropProvider(PropertyProvider propProvider) {
+		this.propProvider = propProvider;
+	}
+
+	public void setUserPropName(String userPropName) {
+		this.userPropName = userPropName;
+	}
+
+	public void setPasswordPropName(String passwordPropName) {
+		this.passwordPropName = passwordPropName;
+	}
+
 	public void setConnectionLostMetric(Metric nConnectionLost) {
 		this.nConnectionLost = nConnectionLost;
 	}
@@ -204,6 +221,23 @@ public class MqttClientWrapper implements MqttCallback {
 		}
 
 	}
+	
+	private void updateUserCredential() {
+		
+		if(this.propProvider == null) {
+			return;
+		}
+		
+		String userName = propProvider.getProperty(userPropName);
+		String password = propProvider.getProperty(passwordPropName);
+		
+		conOpt.setUserName(userName);
+		conOpt.setPassword(password.toCharArray());
+		
+		TRACE.log(TraceLevel.INFO, "Using latest user credentials");
+	   
+	    
+	}
 
 	private String newClientId() {
 		return "streams" + System.nanoTime();		
@@ -221,6 +255,7 @@ public class MqttClientWrapper implements MqttCallback {
 
 		try {
 			TRACE.log(TraceLevel.DEBUG, "[Connect:] " + brokerUri + " Attempt: " + i); //$NON-NLS-1$ //$NON-NLS-2$
+			updateUserCredential();
 			mqttClient.connect(conOpt);		
 			isConnected.setValue(1L);
 		} catch (MqttSecurityException e) {

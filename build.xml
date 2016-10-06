@@ -56,6 +56,10 @@
 		<ant dir="${toolkit}" target="all" />
 	</target>
 	
+	<target name="kafka-0.9" description="Build toolkit using kafka-0.9 JARs.">
+			<ant dir="${toolkit}" target="kafka-0.9" />
+	</target>
+	
 	<target name="toolkitIndexOnly" description="Index the toolkit.">
 		<ant dir="${toolkit}" target="toolkit" />
 	</target>

@@ -52,6 +52,7 @@ import com.ibm.streams.operator.types.Blob;
 import com.ibm.streams.operator.types.RString;
 import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
 import com.ibm.streamsx.messaging.common.IGovernanceConstants;
+import com.ibm.streamsx.messaging.common.PropertyProvider;
 
 /**
  * Class for an operator that consumes tuples and does not produce an output stream. 
@@ -457,6 +458,13 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
        mqttWrapper.setIsConnectedMetric(isConnected);
        
        setupSslProperties(mqttWrapper);
+    
+       if(getAppConfigName() != null) {
+    	   mqttWrapper.setPropProvider(new PropertyProvider(context.getPE(), getAppConfigName()));
+    	   mqttWrapper.setUserPropName(getUserPropName());
+    	   mqttWrapper.setPasswordPropName(getPasswordPropName());
+       }
+       
        
        if(crContext != null) {
     	   initState = new InitialState();
