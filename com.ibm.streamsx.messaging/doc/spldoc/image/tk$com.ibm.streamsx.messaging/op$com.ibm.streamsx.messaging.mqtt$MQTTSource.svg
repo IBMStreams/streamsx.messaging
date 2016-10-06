@@ -97,19 +97,21 @@ UO1Q00tpNAXMVUDi3LyAVcb+V+p/lEn1O4AcAPYfpjeT1ZS+6JhiswIK5jIwrP2C
       ><set attributeName="visibility" from="hidden" end="sdt0.mouseout" to="visible" begin="sdt0.mouseover"
     /></g
     ><g visibility="hidden" style="stroke:none;font-style:italic;font-size:12px;font-family:&apos;Helvetica&apos;,&apos;SansSerif&apos;;"
-    ><rect x="47.65" y="13.0" width="446.13998" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="92.0"
-      /><text x="48.65" y="26.0"
-      >Required: topics / Optional: clientID, commandTimeout, </text
+    ><rect x="47.65" y="-2.0" width="381.47998" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="107.0"
+      /><text x="48.65" y="11.0"
+      >Required: topics / Optional: appConfigName, </text
+      ><text x="48.65" y="26.0"
+      >clientID, commandTimeout, connection, connectionDocument, </text
       ><text x="48.65" y="41.0"
-      >connection, connectionDocument, dataAttributeName, </text
+      >dataAttributeName, keepAliveInterval, keyStore, </text
       ><text x="48.65" y="56.0"
-      >keepAliveInterval, keyStore, keyStorePassword, </text
+      >keyStorePassword, messageQueueSize, qosStr, password, </text
       ><text x="48.65" y="71.0"
-      >messageQueueSize, qosStr, password, period, qos, reconnectionBound, </text
+      >passwordPropName, period, qos, reconnectionBound, </text
       ><text x="48.65" y="86.0"
-      >serverURI, topicOutAttrName, trustStore, trustStorePassword, </text
+      >serverURI, sslProtocol, topicOutAttrName, trustStore, </text
       ><text x="48.65" y="101.0"
-      >userID</text
+      >trustStorePassword, userID, userPropName</text
       ><set attributeName="visibility" from="hidden" end="sdt1.mouseout" to="visible" begin="sdt1.mouseover"
     /></g
     ><g visibility="hidden" style="stroke:none;font-style:italic;font-size:12px;font-family:&apos;Helvetica&apos;,&apos;SansSerif&apos;;"

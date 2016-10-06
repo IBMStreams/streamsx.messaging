@@ -22,14 +22,37 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 3.0.0</a> &gt; com.ibm.streamsx.messaging.kafka</p>
+<a class="xref" href="../toolkits/toolkits.html">Messaging Toolkit Doc</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.0</a> &gt; com.ibm.streamsx.messaging.kafka</p>
+
+</div>
+
+<div class="section">
+
+<p class="p"><strong class="ph b">Kafka Properties</strong>
+</p>
+
+<p class="p">Specify properties as described here: http://kafka.apache.org/documentation.html#configuration. Properties are typically specified using a consumer.properties and producer.properties file in the etc  directory of your application. See the samples for examples. 
+</p>
+
+<div class="p">Here are the required properties for each operator:
+<ul class="ul">
+<li class="li"> <strong class="ph b">KafkaConsumer</strong>: bootstrap.servers and group.id</li>
+
+<li class="li"> <strong class="ph b">KafkaProducer</strong>: bootstrap.servers and acks</li>
+
+</ul>
+
+</div>
+
+<p class="p">If you observe hanging while working with very large message sizes, we recommend increasing   the receive.buffer.bytes property. 
+</p>
 
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-1">Operators</h2>
   
 <ul class="sl simple">
-<li class="sli"><strong class="ph b"><a class="xref" href="op$com.ibm.streamsx.messaging.kafka$KafkaConsumer.html">KafkaConsumer</a></strong>: This operator acts as a Kafka consumer receiving messages for a single topic.
+<li class="sli"><strong class="ph b"><a class="xref" href="op$com.ibm.streamsx.messaging.kafka$KafkaConsumer.html">KafkaConsumer</a></strong>: This operator acts as a Kafka consumer receiving messages for one or more topics.
 </li>
 
 <li class="sli"><strong class="ph b"><a class="xref" href="op$com.ibm.streamsx.messaging.kafka$KafkaProducer.html">KafkaProducer</a></strong>: This operator acts as a Kafka producer sending tuples as messages to a Kafka broker.
