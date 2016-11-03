@@ -1,5 +1,7 @@
 ##README --  IBMStreams/streamsx.messaging
 
+# This 5.1.x_m branch is a maintenance branch supporting the 4.2 IBM Streams Release
+
 The IBMStreams/streamsx.messaging toolkit project is an open source Streams toolkit project focused on the development of operators and functions that extend IBM InfoSphere Streams ability to interact with messaging systems.
 
 Messaging Toolkit v5.1 is offically released to support InfoSphere Streams v4.2:
