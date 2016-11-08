@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.jms.JMSException;
@@ -188,6 +189,50 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
     
     // password property name stored in application configuration
     private String passwordPropName;
+    
+    private String keyStore;
+    
+    private String trustStore;
+    
+    private String keyStorePassword;
+    
+    private boolean sslConnection;
+
+    public boolean isSslConnection() {
+		return sslConnection;
+	}
+
+    @Parameter(optional = true)
+    public void setSslConnection(boolean sslConnection) {
+		this.sslConnection = sslConnection;
+	}
+    
+    public String getTrustStore() {
+		return trustStore;
+	}
+    
+    @Parameter(optional = true)
+    public void setTrustStore(String trustStore) {
+		this.trustStore = trustStore;
+	}
+    
+    public String getKeyStorePassword() {
+		return keyStorePassword;
+	}
+    
+    @Parameter(optional = true)
+    public void setKeyStorePassword(String keyStorePassword) {
+		this.keyStorePassword = keyStorePassword;
+	}
+    
+    public String getKeyStore() {
+		return keyStore;
+	}
+    
+    @Parameter(optional = true)
+    public void setKeyStore(String keyStore) {
+		this.keyStore = keyStore;
+	}    
     
 
 	public String getAppConfigName() {
@@ -535,6 +580,21 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		checker.checkDependentParameters("passwordPropName", "appConfigName", "userPropName");
 	}
 
+	@ContextCheck(compile = false)
+	public static void checkSSLParameters(OperatorContextChecker checker) {
+		List<String> paramValues = checker.getOperatorContext().getParameterValues("sslConnection");
+		if(paramValues.size() > 0 && Boolean.valueOf(paramValues.get(0)) == true) {
+			Set<String> params = checker.getOperatorContext().getParameterNames();
+				
+			if(!params.contains("keyStore") 
+					|| !params.contains("trustStore") 
+					|| !params.contains("keyStorePassword")) {
+				String msg = "The 'keyStore', 'trustStore' and 'keyStorePassword' parameters must be set when 'sslConnection' is set to true."; 
+				checker.setInvalidContext(msg, null);;
+			}
+		}
+	}
+	
 	@Override
 	public synchronized void initialize(OperatorContext context)
 			throws ParserConfigurationException, InterruptedException,
@@ -546,6 +606,13 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		consistentRegionContext = context.getOptionalContext(ConsistentRegionContext.class);
 		
 		JmsClasspathUtil.setupClassPaths(context);
+		
+		// set SSL system properties
+		if(isSslConnection()) {
+			System.setProperty("javax.net.ssl.keyStore", getKeyStore());
+			System.setProperty("javax.net.ssl.keyStorePassword", getKeyStorePassword());
+			System.setProperty("javax.net.ssl.trustStore",  getTrustStore());			
+		}
 		
 		if(consistentRegionContext != null) {
 			crState = new JMSSourceCRState();

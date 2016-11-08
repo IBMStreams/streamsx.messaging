@@ -348,6 +348,38 @@ If the **maxMessageSendRetries** is specified, you must also specify a value for
         <type>rstring</type>
         <cardinality>1</cardinality>
       </parameter>
+      <parameter>
+        <name>sslConnection</name>
+        <description>This parameter specifies whether the operator should attempt to connect using SSL. If this parameter is specified, then the *keyStore*, *keyStorePassword* and *trustStore* parameters must also be specified. </description>
+        <optional>true</optional>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>boolean</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>keyStore</name>
+        <description>This parameter specifies the path to the keyStore. The *sslConnection* parameter must be set to true for this parameter to have any effect. The *trustStore* and *keyStorePassword* parameters must also be set. </description>
+        <optional>true</optional>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>keyStorePassword</name>
+        <description>This parameter specifies the password for the keyStore given by the *keyStore* parameter. The *sslConnection* parameter must be set to `true` for this parameter to have any effect. The *trustStore* and *keyStore* parameters must also be set. </description>
+        <optional>true</optional>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+      <parameter>
+        <name>trustStore</name>
+        <description>This parameter specifies the path to the trustStore. The *sslConnection* parameter must be set to true for this parameter to have any effect. The *keyStore* and *keyStorePassword* parameters must also be set. </description>
+        <optional>true</optional>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
     </parameters>
     <inputPorts>
       <inputPortSet>
