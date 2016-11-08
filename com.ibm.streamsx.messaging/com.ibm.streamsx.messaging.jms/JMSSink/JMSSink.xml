@@ -19,6 +19,16 @@ For the `JMSSink` operator, the following message classes are supported:
 map, stream, bytes, xml, wbe, wbe22, and empty.
 The type of message is specified as the value of the message_class attribute in the connection specifications document.
 
+# SSL Support
+
+The `JMSSink` operator provides support for SSL via these parameters: *sslConnection*, *keyStore*, *keyStorePassword* and *trustStore*. 
+When *sslConnection* is set to `true`, the *keyStore*, *keyStorePassword* and *trustStore* parameters must be set. 
+
+**Note:** The `JMSSink` operator configures SSL by setting the JVM system properties via calls to `System.property()`. 
+Java operators that are fused into the same PE share the same JVM. This implies that any other Java operators fused into the 
+same PE as the `JMSSink` operator will have these SSL properties set. If this is undesirable, then the `JMSSink` operator
+should be placed into it's own PE. 
+
 # Behavior in a consistent region
 
 The `JMSSink` operator can be an operator within the reachability graph of a operator-driven consistent region.

@@ -19,6 +19,17 @@ or a topic and creates tuples from the read data.
 The `JMSSource` operator converts each WebSphere MQ or Apache Active MQ message to a separate tuple
 and sends it to the output stream. A single message is converted into a single tuple.
 
+# SSL Support
+
+The `JMSSource` operator provides support for SSL via these parameters: *sslConnection*, *keyStore*, *keyStorePassword* and *trustStore*. 
+When *sslConnection* is set to `true`, the *keyStore*, *keyStorePassword* and *trustStore* parameters must be set. 
+
+**Note:** The `JMSSource` operator configures SSL by setting the JVM system properties via calls to `System.property()`. 
+Java operators that are fused into the same PE share the same JVM. This implies that any other Java operators fused into the 
+same PE as the `JMSSource` operator will have these SSL properties set. If this is undesirable, then the `JMSSource` operator
+should be placed into it's own PE. 
+ 
+
 # Behavior in a consistent region
 
 The `JMSSource` operator can participate in a consistent region. The operator must be at the start of a consistent region.
