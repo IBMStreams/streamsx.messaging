@@ -360,7 +360,7 @@ If the **maxMessageSendRetries** is specified, you must also specify a value for
       </parameter>
       <parameter>
         <name>sslConnection</name>
-        <description>This parameter specifies whether the operator should attempt to connect using SSL. If this parameter is specified, then the *keyStore*, *keyStorePassword* and *trustStore* parameters must also be specified. </description>
+        <description>This parameter specifies whether the operator should attempt to connect using SSL. If this parameter is specified, then the *keyStore*, *keyStorePassword* and *trustStore* parameters must also be specified. The default value of `false`.</description>
         <optional>true</optional>
         <expressionMode>AttributeFree</expressionMode>
         <type>boolean</type>
@@ -368,7 +368,7 @@ If the **maxMessageSendRetries** is specified, you must also specify a value for
       </parameter>
       <parameter>
         <name>keyStore</name>
-        <description>This parameter specifies the path to the keyStore. The *sslConnection* parameter must be set to true for this parameter to have any effect. The *trustStore* and *keyStorePassword* parameters must also be set. </description>
+        <description>This parameter specifies the path to the keyStore. If a relative path is specified, the path is relative to the application directory. The *sslConnection* parameter must be set to true for this parameter to have any effect. The *trustStore* and *keyStorePassword* parameters must also be set. </description>
         <optional>true</optional>
         <expressionMode>AttributeFree</expressionMode>
         <type>rstring</type>
@@ -384,7 +384,7 @@ If the **maxMessageSendRetries** is specified, you must also specify a value for
       </parameter>
       <parameter>
         <name>trustStore</name>
-        <description>This parameter specifies the path to the trustStore. The *sslConnection* parameter must be set to true for this parameter to have any effect. The *keyStore* and *keyStorePassword* parameters must also be set. </description>
+        <description>This parameter specifies the path to the trustStore. If a relative path is specified, the path is relative to the application directory. The *sslConnection* parameter must be set to true for this parameter to have any effect. The *keyStore* and *keyStorePassword* parameters must also be set. </description>
         <optional>true</optional>
         <expressionMode>AttributeFree</expressionMode>
         <type>rstring</type>

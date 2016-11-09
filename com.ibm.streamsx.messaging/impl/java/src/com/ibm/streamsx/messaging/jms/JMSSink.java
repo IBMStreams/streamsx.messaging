@@ -8,6 +8,9 @@ package com.ibm.streamsx.messaging.jms;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -577,9 +580,9 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		
 		// set SSL system properties
 		if(isSslConnection()) {
-			System.setProperty("javax.net.ssl.keyStore", getKeyStore());
+			System.setProperty("javax.net.ssl.keyStore", getAbsolutePath(getKeyStore()));
 			System.setProperty("javax.net.ssl.keyStorePassword", getKeyStorePassword());
-			System.setProperty("javax.net.ssl.trustStore",  getTrustStore());			
+			System.setProperty("javax.net.ssl.trustStore",  getAbsolutePath(getTrustStore()));			
 		}
 		
 		consistentRegionContext = context.getOptionalContext(ConsistentRegionContext.class);
@@ -697,6 +700,20 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		registerForDataGovernance(connectionDocumentParser.getProviderURL(), connectionDocumentParser.getDestination());
 	}
 
+	protected String getAbsolutePath(String filePath) {
+		if(filePath == null) 
+			return null;
+		
+		
+		Path p = Paths.get(filePath);
+		if(p.isAbsolute()) {
+			return filePath;
+		} else {
+			File f = new File (getOperatorContext().getPE().getApplicationDirectory(), filePath);
+			return f.getAbsolutePath();
+		}
+	}
+	
 	private void registerForDataGovernance(String providerURL, String destination) {
 		logger.log(TraceLevel.INFO, "JMSSink - Registering for data governance with providerURL: " + providerURL
 				+ " destination: " + destination);
