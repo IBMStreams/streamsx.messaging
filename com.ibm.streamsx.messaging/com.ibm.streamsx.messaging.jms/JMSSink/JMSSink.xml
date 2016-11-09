@@ -360,7 +360,7 @@ If the **maxMessageSendRetries** is specified, you must also specify a value for
       </parameter>
       <parameter>
         <name>sslConnection</name>
-        <description>This parameter specifies whether the operator should attempt to connect using SSL. If this parameter is specified, then the *keyStore*, *keyStorePassword* and *trustStore* parameters must also be specified. The default value of `false`.</description>
+        <description>This parameter specifies whether the operator should attempt to connect using SSL. If this parameter is specified, then the *keyStore*, *keyStorePassword* and *trustStore* parameters must also be specified. The default value is `false`.</description>
         <optional>true</optional>
         <expressionMode>AttributeFree</expressionMode>
         <type>boolean</type>
