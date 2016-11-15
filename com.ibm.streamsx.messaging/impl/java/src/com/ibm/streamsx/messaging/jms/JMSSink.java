@@ -202,6 +202,8 @@ public class JMSSink extends AbstractOperator implements StateHandler{
     
     private String keyStorePassword;
     
+    private String trustStorePassword;
+    
     private boolean sslConnection;
 
     public boolean isSslConnection() {
@@ -211,6 +213,15 @@ public class JMSSink extends AbstractOperator implements StateHandler{
     @Parameter(optional = true)
     public void setSslConnection(boolean sslConnection) {
 		this.sslConnection = sslConnection;
+	}
+
+    @Parameter(optional = true)
+    public void setTrustStorePassword(String trustStorePassword) {
+		this.trustStorePassword = trustStorePassword;
+	}
+    
+    public String getTrustStorePassword() {
+		return trustStorePassword;
 	}
     
     public String getTrustStore() {
@@ -553,21 +564,6 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		checker.checkDependentParameters("userPropName", "appConfigName", "passwordPropName");
 		checker.checkDependentParameters("passwordPropName", "appConfigName", "userPropName");
 	}
-
-	@ContextCheck(compile = false)
-	public static void checkSSLParameters(OperatorContextChecker checker) {
-		List<String> paramValues = checker.getOperatorContext().getParameterValues("sslConnection");
-		if(paramValues.size() > 0 && Boolean.valueOf(paramValues.get(0)) == true) {
-			Set<String> params = checker.getOperatorContext().getParameterNames();
-				
-			if(!params.contains("keyStore") 
-					|| !params.contains("trustStore") 
-					|| !params.contains("keyStorePassword")) {
-				String msg = "The 'keyStore', 'trustStore' and 'keyStorePassword' parameters must be set when 'sslConnection' is set to true."; 
-				checker.setInvalidContext(msg, null);;
-			}
-		}
-	}
 	
 	@Override
 	public synchronized void initialize(OperatorContext context)
@@ -580,9 +576,14 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		
 		// set SSL system properties
 		if(isSslConnection()) {
-			System.setProperty("javax.net.ssl.keyStore", getAbsolutePath(getKeyStore()));
-			System.setProperty("javax.net.ssl.keyStorePassword", getKeyStorePassword());
-			System.setProperty("javax.net.ssl.trustStore",  getAbsolutePath(getTrustStore()));			
+			if(context.getParameterNames().contains("keyStore"))
+				System.setProperty("javax.net.ssl.keyStore", getAbsolutePath(getKeyStore()));				
+			if(context.getParameterNames().contains("keyStorePassword"))
+				System.setProperty("javax.net.ssl.keyStorePassword", getKeyStorePassword());				
+			if(context.getParameterNames().contains("trustStore"))
+				System.setProperty("javax.net.ssl.trustStore",  getAbsolutePath(getTrustStore()));			
+			if(context.getParameterNames().contains("trustStorePassword"))
+				System.setProperty("javax.net.ssl.trustStorePassword",  getAbsolutePath(getTrustStorePassword()));
 		}
 		
 		consistentRegionContext = context.getOptionalContext(ConsistentRegionContext.class);
