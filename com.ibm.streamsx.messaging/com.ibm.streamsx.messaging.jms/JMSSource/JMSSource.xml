@@ -356,7 +356,7 @@ This parameter must be greater than zero and must be set if the JMSSource operat
       </parameter>
       <parameter>
         <name>sslConnection</name>
-        <description>This parameter specifies whether the operator should attempt to connect using SSL. If this parameter is specified, then the *keyStore*, *keyStorePassword* and *trustStore* parameters must also be specified. The default value is `false`.S</description>
+        <description>This parameter specifies whether the operator should attempt to connect using SSL. If this parameter is specified, then the *keyStore*, *keyStorePassword* and *trustStore* parameters must also be specified. The default value is `false`.</description>
         <optional>true</optional>
         <expressionMode>AttributeFree</expressionMode>
         <type>boolean</type>
@@ -364,7 +364,7 @@ This parameter must be greater than zero and must be set if the JMSSource operat
       </parameter>
       <parameter>
         <name>keyStore</name>
-        <description>This parameter specifies the path to the keyStore. If a relative path is specified, the path is relative to the application directory. The *sslConnection* parameter must be set to true for this parameter to have any effect. The *trustStore* and *keyStorePassword* parameters must also be set. </description>
+        <description>This parameter specifies the path to the keyStore. If a relative path is specified, the path is relative to the application directory. The *sslConnection* parameter must be set to true for this parameter to have any effect.</description>
         <optional>true</optional>
         <expressionMode>AttributeFree</expressionMode>
         <type>rstring</type>
@@ -372,7 +372,7 @@ This parameter must be greater than zero and must be set if the JMSSource operat
       </parameter>
       <parameter>
         <name>keyStorePassword</name>
-        <description>This parameter specifies the password for the keyStore given by the *keyStore* parameter. The *sslConnection* parameter must be set to `true` for this parameter to have any effect. The *trustStore* and *keyStore* parameters must also be set. </description>
+        <description>This parameter specifies the password for the keyStore given by the *keyStore* parameter. The *sslConnection* parameter must be set to `true` for this parameter to have any effect.</description>
         <optional>true</optional>
         <expressionMode>AttributeFree</expressionMode>
         <type>rstring</type>
@@ -380,12 +380,20 @@ This parameter must be greater than zero and must be set if the JMSSource operat
       </parameter>
       <parameter>
         <name>trustStore</name>
-        <description>This parameter specifies the path to the trustStore. If a relative path is specified, the path is relative to the application directory. The *sslConnection* parameter must be set to true for this parameter to have any effect. The *keyStore* and *keyStorePassword* parameters must also be set. </description>
+        <description>This parameter specifies the path to the trustStore. If a relative path is specified, the path is relative to the application directory. The *sslConnection* parameter must be set to true for this parameter to have any effect.</description>
         <optional>true</optional>
         <expressionMode>AttributeFree</expressionMode>
         <type>rstring</type>
         <cardinality>1</cardinality>
-      </parameter>      
+      </parameter>  
+      <parameter>
+        <name>trustStorePassword</name>
+        <description>This parameter specifies the password for the trustStore given by the *trustStore* parameter. The *sslConnection* parameter must be set to `true` for this parameter to have any effect.</description>
+        <optional>true</optional>
+        <expressionMode>AttributeFree</expressionMode>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>          
     </parameters>
     <inputPorts>
     </inputPorts>
