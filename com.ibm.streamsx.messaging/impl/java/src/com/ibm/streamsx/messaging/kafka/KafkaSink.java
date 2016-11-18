@@ -5,6 +5,7 @@
 
 package com.ibm.streamsx.messaging.kafka;
 
+import static com.ibm.streams.operator.logging.TraceLevel.TRACE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.Collections;
@@ -214,18 +215,30 @@ public class KafkaSink extends KafkaBaseOper implements StateHandler, Callback {
      * to a Future so just clean out any completed messages.
      */
     private Object handleCompletedMessage(RecordMetadata rmd, Exception exception) throws Exception {
+        
+        if (trace.isLoggable(TRACE)) {
+            trace.log(TRACE, "handleCompletedMessage:" + rmd);
+            if (exception != null)
+                trace.log(TRACE, "handleCompletedMessage:exception:", exception);
+        }
 
         synchronized (sentMessages) {
             if (exception != null) {
                 if (sentMessageException == null)
                     sentMessageException = exception;
+                
+                if (trace.isLoggable(TRACE)) {
+                    if (sentMessageException != null)
+                        trace.log(TRACE, "handleCompletedMessage:sentMessageException:", sentMessageException);
+                }
             }
 
             final Iterator<Future<RecordMetadata>> it = sentMessages.iterator();
             while (it.hasNext()) {
                 Future<RecordMetadata> sentMessage = it.next();
+                RecordMetadata sentRmd;
                 try {
-                    sentMessage.get(0, MILLISECONDS);
+                    sentRmd = sentMessage.get(0, MILLISECONDS);
                 } catch (TimeoutException e) {
                     // reached a non-completed message
                     // with the assumption messages are
@@ -233,15 +246,20 @@ public class KafkaSink extends KafkaBaseOper implements StateHandler, Callback {
                     // looking for completed messages.
                     break;
                 } catch (ExecutionException ee) {
-                    trace.log(TraceLevel.ERROR, "Sending message failed", ee.getCause());
+                    trace.log(TRACE, "Sending message failed", ee.getCause());
 
                     if (sentMessageException == null)
                         exception = ee;
                     // remove from list
+                    sentRmd = null;
                 }
+                if (trace.isLoggable(TRACE))
+                    trace.log(TRACE, "handleCompletedMessage:Removing:" + sentRmd);
+
                 it.remove();
             }
         }
+        
         if (exception != null)
             throw exception;
 
@@ -255,6 +273,12 @@ public class KafkaSink extends KafkaBaseOper implements StateHandler, Callback {
      */
     @Override
     public void drain() throws Exception {
+        
+        if (trace.isLoggable(TRACE)) {
+            trace.log(TRACE, "drain:outstanding messages:" + sentMessages.size());
+            if (sentMessageException != null)
+                trace.log(TRACE, "drain:sentMessageException:", sentMessageException);
+        }
 
         outer: while (!sentMessages.isEmpty()) {
 
@@ -270,7 +294,10 @@ public class KafkaSink extends KafkaBaseOper implements StateHandler, Callback {
                 while (it.hasNext()) {
                     Future<RecordMetadata> sentMessage = it.next();
                     try {
-                        sentMessage.get(1, MILLISECONDS);
+                        RecordMetadata rmd = sentMessage.get(1, MILLISECONDS);
+                        if (trace.isLoggable(TRACE))
+                            trace.log(TRACE, "drain:message_completed:" + rmd);
+
                     } catch (TimeoutException e) {
                         // Continue from the start of the
                         // list as it is expected messages
@@ -281,6 +308,11 @@ public class KafkaSink extends KafkaBaseOper implements StateHandler, Callback {
                         // N is the number of sent but
                         // not completed messages.
                         continue outer;
+                    } catch (ExecutionException e) {
+                        if (trace.isLoggable(TRACE))
+                            trace.log(TRACE, "drain:message_exception:" + e);
+                        throw e;
+                        
                     }
                     it.remove();
                 }
@@ -288,6 +320,12 @@ public class KafkaSink extends KafkaBaseOper implements StateHandler, Callback {
         }
     
         synchronized (sentMessages) {
+            if (trace.isLoggable(TRACE)) {
+                trace.log(TRACE, "drain:completed:outstanding messages:" + sentMessages.size());
+                if (sentMessageException != null)
+                    trace.log(TRACE, "drain:completed:sentMessageException:", sentMessageException);
+            }
+            
             if (sentMessageException != null)
                 throw sentMessageException;
         }
