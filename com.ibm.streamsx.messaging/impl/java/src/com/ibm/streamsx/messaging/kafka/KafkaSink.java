@@ -336,17 +336,28 @@ public class KafkaSink extends KafkaBaseOper implements StateHandler, Callback {
     }
     @Override
     public void reset(Checkpoint checkpoint) {
-        // Forget about any messages already sent.
         resetToInitialState();
     }
     @Override
     public void resetToInitialState() {
-        // Forget about any messages already sent.
+        // Forget about any messages already sent
+        // trying to cancel if they are not yet sent.
         synchronized (sentMessages) {
+            
+            if (trace.isLoggable(TRACE)) {
+                trace.log(TRACE, "reset:outstanding messages:" + sentMessages.size());
+            }
+
+            for (Future<RecordMetadata> sentMessage : sentMessages) {
+                sentMessage.cancel(false);             
+            }
+            
+            if (trace.isLoggable(TRACE)) {
+                trace.log(TRACE, "reset:cancelled outstanding messages");
+            }
             sentMessageException = null;
             sentMessages.clear();
         }
-        
     }
     @Override
     public void retireCheckpoint(long id) {
