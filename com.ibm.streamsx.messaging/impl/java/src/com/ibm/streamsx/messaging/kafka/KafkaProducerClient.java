@@ -54,7 +54,7 @@ class ProducerStringHelper extends KafkaProducerClient{
 	}
 
 	@Override
-	void send(Tuple tuple) throws Exception {
+	void send(Tuple tuple) {
 		String topic = topicAH.getString(tuple);
 		String message = messageAH.getString(tuple);
 		String key = keyAH.getString(tuple);
@@ -64,7 +64,7 @@ class ProducerStringHelper extends KafkaProducerClient{
 	}
 
 	@Override
-	void send(Tuple tuple, List<String> topics) throws Exception {
+	void send(Tuple tuple, List<String> topics) {
 		String message = messageAH.getString(tuple);
 		String key = keyAH.getString(tuple);
 

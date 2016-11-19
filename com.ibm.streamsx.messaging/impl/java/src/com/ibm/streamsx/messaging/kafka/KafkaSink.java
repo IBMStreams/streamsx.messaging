@@ -145,19 +145,14 @@ public class KafkaSink extends KafkaBaseOper implements StateHandler, Callback {
 	
 	@Override
 	public void process(StreamingInput<Tuple> stream, Tuple tuple) throws Exception {
-		try {	
-			if(trace.isLoggable(TraceLevel.DEBUG))
-				trace.log(TraceLevel.DEBUG, "Sending message: " + tuple);
-			
-			if(!topics.isEmpty()) 
-				producerClient.send(tuple, topics);
-			else 
-				producerClient.send(tuple);
-		} catch(Exception e) {
-			trace.log(TraceLevel.ERROR, "Could not send message: " + tuple, e);
-			e.printStackTrace();
-			resetProducerIfPropertiesHaveChanged();
-		}
+	
+        if (trace.isLoggable(TraceLevel.DEBUG))
+            trace.log(TraceLevel.DEBUG, "Sending message: " + tuple);
+
+        if (!topics.isEmpty())
+            producerClient.send(tuple, topics);
+        else
+            producerClient.send(tuple);
 		
 		if (clientSeenException.get()){
 			trace.log(TraceLevel.WARN, "Found message exception");

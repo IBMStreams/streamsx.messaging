@@ -96,21 +96,21 @@ class AttributeHelper {
 		}
 	}
 	
-	String getString(Tuple tuple) throws IOException {
+	String getString(Tuple tuple) {
 		if(!isAvailable) return null;
 		if(isString)
 			return tuple.getString(name);
         return new String(getBytesFromBlob(tuple, name));
 	}
 	
-	byte[] getBytes(Tuple tuple) throws IOException {
+	byte[] getBytes(Tuple tuple) {
 		if(!isAvailable) return null;
 		if(isString)
 			return tuple.getString(name).getBytes(CS);
 		return getBytesFromBlob(tuple, name);
 	}
 	
-	private static byte[] getBytesFromBlob(Tuple tuple, String name) throws IOException {
+	private static byte[] getBytesFromBlob(Tuple tuple, String name) {
 		Blob blockMsg = tuple.getBlob(name);
 		ByteBuffer msgBuffer = blockMsg.getByteBuffer();
 		byte[] msgBytes = new byte[(int) blockMsg.getLength()];
