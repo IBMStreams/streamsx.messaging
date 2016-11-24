@@ -59,8 +59,8 @@ class ConnectionDocumentHelper {
 			parseConnectionSpecifications(docEle);
 		} catch (Exception e) {
 			
-			TRACE.log(TraceLevel.ERROR, Messages.getString("Error_ConnectionDocumentHelper.1"), e); //$NON-NLS-1$
-			LOG.log(LogLevel.ERROR, Messages.getString("Error_ConnectionDocumentHelper.1"), e); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR, Messages.getString("INVALID_CONNECTION_DOC"), e); //$NON-NLS-1$
+			LOG.log(LogLevel.ERROR, Messages.getString("INVALID_CONNECTION_DOC"), e); //$NON-NLS-1$
 			throw e;
 		}
 

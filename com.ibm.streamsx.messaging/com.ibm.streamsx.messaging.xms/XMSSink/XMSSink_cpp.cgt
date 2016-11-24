@@ -344,7 +344,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 		
 	
 	if (fatalError == true){
-		SPLAPPLOG(L_ERROR, PREVIOUS_ERROR, "XMSSink");
+		SPLAPPLOG(L_ERROR, MSGTK_PREVIOUS_ERROR, "XMSSink");
 		<% if (defined $operatorErrorPort ) { %>
 			SPLAPPLOG(L_INFO, SEND_TUPLE_ERROR_PORT, "XMSSink");
 		    	sendOutputErrorMsg(ErrMsg,tuple);
@@ -371,7 +371,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 			<%	if (defined $operatorErrorPort ) { %>
 		    		sendOutputErrorMsg(ErrMsg,tuple);
 			<% }%>
-			SPLAPPLOG(L_ERROR, MESSAGE_DROPPED, "XMSSink");
+			SPLAPPLOG(L_ERROR, MSGTK_MESSAGE_DROPPED, "XMSSink");
 			nFailedInserts++;
 			updatePerformanceCounters();
 			SPLAPPTRC(L_TRACE, "Exit: process0(const <%=$inStream->getSPLTupleType()%>)", "XMSSink");
@@ -762,14 +762,14 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 			
 			//Now send the message
 			producer.send(msg);
-			logmsg = SENT_MESSAGE(msg.getJMSMessageID().c_str());
+			logmsg = MSGTK_SENT_MESSAGE(msg.getJMSMessageID().c_str());
 			SPLAPPLOG(L_INFO, logmsg, "XMSSink");
 			
 		} catch (xms::Exception & ex) {
 			// Unable to send
 			nFailedInserts++;
 			ErrMsg<<"Exception sending the message, exception = "<<ex.getErrorString().c_str()<<" Error Code = "<<ex.getErrorCode();
-			logmsg = EXCEPTION(ex.getErrorString().c_str(),ex.getErrorCode());
+			logmsg = MSGTK_EXCEPTION(ex.getErrorString().c_str(),ex.getErrorCode());
 			SPLAPPLOG(L_ERROR, logmsg, "XMSSink");
 			processException(ex);
 
@@ -792,7 +792,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 			<%	if (defined $operatorErrorPort ) { %>
 				sendOutputErrorMsg(ErrMsg,tuple);
 			<% }%>
-			logmsg = STREAMS_EXCEPTION(ex.what(),ex.getExplanation());
+			logmsg = MSGTK_STREAMS_EXCEPTION(ex.what(),ex.getExplanation());
 			SPLAPPLOG(L_ERROR, logmsg, "XMSSink");
 		
 		} catch (std::exception & ex) {
@@ -802,7 +802,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 			<%	if (defined $operatorErrorPort ) { %>
 				sendOutputErrorMsg(ErrMsg,tuple);
 			<% }%>
-			logmsg = OTHER_EXCEPTION(ex.what());
+			logmsg = MSGTK_OTHER_EXCEPTION(ex.what());
 			SPLAPPLOG(L_ERROR, logmsg, "XMSSink");
 		
 		} catch (...) {
@@ -812,7 +812,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 			<%	if (defined $operatorErrorPort ) { %>
 				sendOutputErrorMsg(ErrMsg,tuple);
 			<% }%>
-			SPLAPPLOG(L_ERROR, UNKNOWN_EXCEPTION, "XMSSink");
+			SPLAPPLOG(L_ERROR, MSGTK_UNKNOWN_EXCEPTION, "XMSSink");
 		}
 	}	
     
