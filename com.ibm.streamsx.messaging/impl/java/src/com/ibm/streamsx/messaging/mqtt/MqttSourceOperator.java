@@ -50,6 +50,7 @@ import com.ibm.streams.operator.types.ValueFactory;
 import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
 import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 import com.ibm.streamsx.messaging.common.PropertyProvider;
+import com.ibm.streamsx.messaging.i18n.Messages;
 import com.ibm.streamsx.messaging.mqtt.MqttClientRequest.MqttClientRequestType;
 
 /**

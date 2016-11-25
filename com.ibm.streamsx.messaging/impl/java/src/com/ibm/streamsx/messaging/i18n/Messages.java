@@ -2,7 +2,7 @@
  * Copyright (C) 2014, International Business Machines Corporation
  * All Rights Reserved
  *******************************************************************************/
-package com.ibm.streamsx.messaging.mqtt;
+package com.ibm.streamsx.messaging.i18n;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
