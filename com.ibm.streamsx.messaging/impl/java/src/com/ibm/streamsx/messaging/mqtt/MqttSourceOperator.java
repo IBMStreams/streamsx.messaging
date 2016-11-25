@@ -137,8 +137,8 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 
     @ContextCheck(compile=true)
     public static void checkQosQosStrExclusive(OperatorContextChecker checker) {
-    	checker.checkExcludedParameters("qos", "qosStr");
-    	checker.checkExcludedParameters("qosStr", "qos");
+    	checker.checkExcludedParameters("qos", "qosStr"); //$NON-NLS-1$ //$NON-NLS-2$
+    	checker.checkExcludedParameters("qosStr", "qos"); //$NON-NLS-1$ //$NON-NLS-2$
     }
     
     @ContextCheck(compile=true)
@@ -149,7 +149,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 		ConsistentRegionContext cContext = oContext.getOptionalContext(ConsistentRegionContext.class);
 		
 		if(cContext != null) {
-			checker.setInvalidContext("The following operator cannot be in a consistent region: MQTTSource", new String[] {});
+			checker.setInvalidContext(Messages.getString("OP_CANNOT_PARTICIPATE_IN_CONSISTENT_REGION"), new String[] {"MQTTSource"}); //$NON-NLS-1$
 		}
 	}
     
@@ -160,10 +160,10 @@ public class MqttSourceOperator extends AbstractMqttOperator {
     	validateNumber(checker, "qos", 0, 2); //$NON-NLS-1$
     	validateNumber(checker, "reconnectionBound", -1, Long.MAX_VALUE); //$NON-NLS-1$
     	validateNumber(checker, "messageQueueSize", 1, Integer.MAX_VALUE); //$NON-NLS-1$
-    	validateCommaSeparatedNumber(checker, "qosStr", 0, 2);
+    	validateCommaSeparatedNumber(checker, "qosStr", 0, 2); //$NON-NLS-1$
     	
     	int topicsCount = getCommaSeparatedParamNumber(checker, "topics"); //$NON-NLS-1$
-    	int qosTotalCount = getCommaSeparatedParamNumber(checker, "qos") + getCommaSeparatedParamNumber(checker, "qosStr"); //$NON-NLS-1$
+    	int qosTotalCount = getCommaSeparatedParamNumber(checker, "qos") + getCommaSeparatedParamNumber(checker, "qosStr"); //$NON-NLS-1$ //$NON-NLS-2$
     	
     	//List<String> topicValues = checker.getOperatorContext().getParameterValues("topics"); //$NON-NLS-1$
     	//List<String> qosValues = checker.getOperatorContext().getParameterValues("qos"); //$NON-NLS-1$
@@ -266,7 +266,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 					dataAttribute = streamSchema.getAttribute(0);
 				}
 				else {
-					dataAttribute = streamSchema.getAttribute("data");
+					dataAttribute = streamSchema.getAttribute("data"); //$NON-NLS-1$
 				}
 				
 				// the default data attribute must be present and must be either BLOB or RSTRING
@@ -373,15 +373,15 @@ public class MqttSourceOperator extends AbstractMqttOperator {
     private void registerForDataGovernance() {
 		String uri = getServerUri();
 		List<String> topics = getTopics();
-		TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance with server uri: " + uri + " and topics: " + topics.toArray().toString());
+		TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance with server uri: " + uri + " and topics: " + topics.toArray().toString()); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		if(topics != null && uri != null && !uri.isEmpty()) {		
 			for (String topic : topics) {			
-				TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance with server uri: " + uri + " and topic: " + topic);
-				DataGovernanceUtil.registerForDataGovernance(this, topic, IGovernanceConstants.ASSET_MQTT_TOPIC_TYPE, uri, IGovernanceConstants.ASSET_MQTT_SERVER_TYPE, true, "MQTTSource");
+				TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance with server uri: " + uri + " and topic: " + topic); //$NON-NLS-1$ //$NON-NLS-2$
+				DataGovernanceUtil.registerForDataGovernance(this, topic, IGovernanceConstants.ASSET_MQTT_TOPIC_TYPE, uri, IGovernanceConstants.ASSET_MQTT_SERVER_TYPE, true, "MQTTSource"); //$NON-NLS-1$
 			}
 		} else {
-			TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance -- aborted. topic and/or uri is null");
+			TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance -- aborted. topic and/or uri is null"); //$NON-NLS-1$
 		}
 	}
     

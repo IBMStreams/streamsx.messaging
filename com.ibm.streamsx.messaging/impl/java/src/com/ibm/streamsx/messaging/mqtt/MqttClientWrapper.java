@@ -234,13 +234,13 @@ public class MqttClientWrapper implements MqttCallback {
 		conOpt.setUserName(userName);
 		conOpt.setPassword(password.toCharArray());
 		
-		TRACE.log(TraceLevel.INFO, "Using latest user credentials");
+		TRACE.log(TraceLevel.INFO, "Using latest user credentials"); //$NON-NLS-1$
 	   
 	    
 	}
 
 	private String newClientId() {
-		return "streams" + System.nanoTime();		
+		return "streams" + System.nanoTime();		 //$NON-NLS-1$
 	}
 
 	/**
@@ -259,11 +259,11 @@ public class MqttClientWrapper implements MqttCallback {
 			mqttClient.connect(conOpt);		
 			isConnected.setValue(1L);
 		} catch (MqttSecurityException e) {
-			TRACE.log(TraceLevel.ERROR, Messages.getString("UNABLE_TO_CONNECT_TO_SERVER"), e); //$NON-NLS-1$
-			LOG.log(TraceLevel.ERROR, Messages.getString("UNABLE_TO_CONNECT_TO_SERVER"), e); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR, Messages.getString("UNABLE_TO_CONNECT_TO_SERVER_CLIENT_WRAPPER"), e); //$NON-NLS-1$
+			LOG.log(TraceLevel.ERROR, Messages.getString("UNABLE_TO_CONNECT_TO_SERVER_CLIENT_WRAPPER"), e); //$NON-NLS-1$
 		} catch (MqttException e) {
-			TRACE.log(TraceLevel.ERROR,Messages.getString("UNABLE_TO_CONNECT_TO_SERVER"), e); //$NON-NLS-1$
-			LOG.log(TraceLevel.ERROR, Messages.getString("UNABLE_TO_CONNECT_TO_SERVER"), e); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR,Messages.getString("UNABLE_TO_CONNECT_TO_SERVER_CLIENT_WRAPPER"), e); //$NON-NLS-1$
+			LOG.log(TraceLevel.ERROR, Messages.getString("UNABLE_TO_CONNECT_TO_SERVER_CLIENT_WRAPPER"), e); //$NON-NLS-1$
 		}
 
 		return mqttClient.isConnected(); 

@@ -125,19 +125,19 @@ class ConnectionDocumentHelper {
 							String keyStorePassword = getAttributeValue(
 									attributes, "keyStorePassword"); //$NON-NLS-1$
 							String trustStorePassword = getAttributeValue(attributes, "trustStorePassword"); //$NON-NLS-1$
-							String userID = getAttributeValue(attributes, "userID");
-							String password = getAttributeValue(attributes, "password");
+							String userID = getAttributeValue(attributes, "userID"); //$NON-NLS-1$
+							String password = getAttributeValue(attributes, "password"); //$NON-NLS-1$
 							
 							int keepAliveInterval;
 							try {
-								keepAliveInterval = Integer.parseInt(getAttributeValue(attributes, "keepAliveInterval"));
+								keepAliveInterval = Integer.parseInt(getAttributeValue(attributes, "keepAliveInterval")); //$NON-NLS-1$
 							} catch (NumberFormatException e) {
 								keepAliveInterval = IMqttConstants.UNINITIALIZED_KEEP_ALIVE_INTERVAL;
 							}
 							
 							long commandTimeout;
 							try {
-								commandTimeout = Long.parseLong(getAttributeValue(attributes, "commandTimeout"));
+								commandTimeout = Long.parseLong(getAttributeValue(attributes, "commandTimeout")); //$NON-NLS-1$
 							} catch (NumberFormatException e) {
 								commandTimeout = IMqttConstants.UNINITIALIZED_COMMAND_TIMEOUT;
 							}

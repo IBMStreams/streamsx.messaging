@@ -29,7 +29,7 @@ public class MqttAsyncClientWrapper  implements MqttCallback{
 	private static final int COMMAND_TIMEOUT = 5000;
 
 	private static final Logger TRACE = Logger.getLogger(MqttAsyncClientWrapper.class);
-	private static final Logger LOG = Logger.getLogger(LoggerNames.LOG_FACILITY + "." + MqttAsyncClientWrapper.class.getName());
+	private static final Logger LOG = Logger.getLogger(LoggerNames.LOG_FACILITY + "." + MqttAsyncClientWrapper.class.getName()); //$NON-NLS-1$
 	
 	private String brokerUri;
 	private MqttAsyncClient mqttClient;
@@ -155,11 +155,11 @@ public class MqttAsyncClientWrapper  implements MqttCallback{
 			mqttToken.waitForCompletion(COMMAND_TIMEOUT);
 
 		} catch (MqttSecurityException e) {
-			TRACE.log(TraceLevel.ERROR, Messages.getString("MqttAsyncClientWrapper.9"), e); //$NON-NLS-1$
-			LOG.log(TraceLevel.ERROR, Messages.getString("MqttAsyncClientWrapper.9"), e); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR, Messages.getString("UNABLE_TO_CONNECT_TO_SERVER_CLIENT_WRAPPER"), e); //$NON-NLS-1$
+			LOG.log(TraceLevel.ERROR, Messages.getString("UNABLE_TO_CONNECT_TO_SERVER_CLIENT_WRAPPER"), e); //$NON-NLS-1$
 		} catch (MqttException e) {
-			TRACE.log(TraceLevel.ERROR,Messages.getString("MqttAsyncClientWrapper.10"), e); //$NON-NLS-1$
-			LOG.log(TraceLevel.ERROR, Messages.getString("MqttAsyncClientWrapper.9"), e); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR,Messages.getString("UNABLE_TO_CONNECT_TO_SERVER_CLIENT_WRAPPER"), e); //$NON-NLS-1$
+			LOG.log(TraceLevel.ERROR, Messages.getString("UNABLE_TO_CONNECT_TO_SERVER_CLIENT_WRAPPER"), e); //$NON-NLS-1$
 		}
 
 		if (mqttToken.isComplete() && mqttToken.getException() == null
@@ -224,13 +224,13 @@ public class MqttAsyncClientWrapper  implements MqttCallback{
     	
     	if (topics.length != qos.length)
     	{
-    		throw new RuntimeException("Number of topics must equal to number of qos entries."); //$NON-NLS-1$
+    		throw new RuntimeException(Messages.getString("NUMBER_OF_TOPICS_MUST_EQUAL_QOS_ENTRIES")); //$NON-NLS-1$
     	}
     	
     	if (TRACE.getLevel() == TraceLevel.INFO)
     	{
 	    	for (int i : qos) {
-	    		String msg = Messages.getString("MqttAsyncClientWrapper.1", topics[i], qos[i]); //$NON-NLS-1$	    
+	    		String msg = "Topic: " + topics[i] + " / qos: " + qos[i];	//$NON-NLS-1$	//$NON-NLS-2$	    
 	    		TRACE.log(TraceLevel.INFO, msg); 
 			}
     	}
@@ -273,7 +273,7 @@ public class MqttAsyncClientWrapper  implements MqttCallback{
 	@Override
 	public void connectionLost(Throwable cause) {
 		
-		TRACE.log(TraceLevel.WARN, Messages.getString("MqttAsyncClientWrapper.0") + brokerUri); //$NON-NLS-1$
+		TRACE.log(TraceLevel.WARN, "Connection lost: " + brokerUri); //$NON-NLS-1$
 		
 		for (Iterator iterator = callBackListeners.iterator(); iterator.hasNext();) {
 			MqttCallback callbackListener = (MqttCallback) iterator.next();

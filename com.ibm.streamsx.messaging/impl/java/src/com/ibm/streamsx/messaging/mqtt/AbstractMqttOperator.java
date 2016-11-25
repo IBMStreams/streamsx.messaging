@@ -163,11 +163,11 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 			String password = provider.getProperty(passwordPropName);
 			
 			if(userName == null || userName.trim().length() == 0) {
-				checker.setInvalidContext(Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG"), new Object[] {userPropName, appConfigName});
+				checker.setInvalidContext(Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG"), new Object[] {userPropName, appConfigName});	//$NON-NLS-1$
 			}
 			
 			if(password == null || password.trim().length() == 0) {
-				checker.setInvalidContext(Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG"), new Object[] {passwordPropName, appConfigName});
+				checker.setInvalidContext(Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG"), new Object[] {passwordPropName, appConfigName});	//$NON-NLS-1$
 			}
 		}
 		
@@ -453,7 +453,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 			String value = checker.getOperatorContext().getParameterValues(parameterName).get(0);
 			
 			if(value == null || value.trim().length() == 0) {
-				checker.setInvalidContext(Messages.getString("PARAM_MUST_BE_NON_EMPTY_STRING"), new Object[] {parameterName});
+				checker.setInvalidContext(Messages.getString("PARAM_MUST_BE_NON_EMPTY_STRING"), new Object[] {parameterName});	//$NON-NLS-1$
 			}
 		}
 	}
