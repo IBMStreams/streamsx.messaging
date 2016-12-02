@@ -56,11 +56,13 @@
       <group>
       
       
-         <!-- MessageID Range for Messaging Toolkit:                        CDIST1400 - CDIST1599 -->
-         <!-- Range for XLF:                                                CDIST1400 - CDIST1499 -->
-         <!-- Range for Properties:                                         CDIST1500 - CDIST1599 -->
-         <!--    com.ibm.streamsx.messaging.jms.JMSMessages.properties      CDIST1500 - CDIST1549 -->
-         <!--    com.ibm.streamsx.messaging.mqtt.MQTTMessages.properties    CDIST1550 - CDIST1599 -->
+         <!-- MessageID Range for Messaging Toolkit:                                 CDIST1400 - CDIST1599 -->
+         <!-- Range for XLF:                                                         CDIST1400 - CDIST1499 -->
+         <!-- Range for Properties:                                                  CDIST1500 - CDIST1599 -->
+         <!--    com.ibm.streamsx.messaging.jms.JMSMessages.properties               CDIST1500 - CDIST1549 -->
+         <!--    com.ibm.streamsx.messaging.kafka.KafkaMessages.properties                                 -->
+         <!--    com.ibm.streamsx.messaging.mqtt.MQTTMessages.properties             CDIST1550 - CDIST1599 -->
+         <!--    com.ibm.streamsx.messaging.rabbitmq.RabbitMQMessages.properties                           -->
          
          
        <trans-unit id="StreamsMessagingToolkitMessages_CDIST1400" extraData="MSGTK_INITIALCONTEXT_NON_EXISTENT" resname="CDIST1400E">
