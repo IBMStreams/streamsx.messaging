@@ -385,7 +385,7 @@
 	</trans-unit>
 
 	<trans-unit id="StreamsMessagingToolkitMessages_CDIST1533" extraData="MSGTK_CONN_NOT_SUCCESS" resname="CDIST1533I">
-          <source>Connection is unsuccessfull. </source>
+          <source>Connection is unsuccessful. </source>
 	</trans-unit>
 
 	<trans-unit id="StreamsMessagingToolkitMessages_CDIST1534" extraData="MSGTK_CONN_SUCCESS" resname="CDIST1534I">

@@ -73,11 +73,10 @@ class XMLTextMessageHandler extends BaseXMLMessageHandler {
 		// create elements for constructing the xml document
 		// with spl xml data type format
 		Element attr;
-		Element rootElement = document.createElement("tuple"); // creates a
-																// element for
-		// root tuple
-		rootElement.setAttribute("xmlns",
-				"http://www.ibm.com/xmlns/prod/streams/spl/tuple");
+		// creates an element for root tuple
+		Element rootElement = document.createElement("tuple"); //$NON-NLS-1$
+		rootElement.setAttribute("xmlns", //$NON-NLS-1$
+				"http://www.ibm.com/xmlns/prod/streams/spl/tuple"); //$NON-NLS-1$
 		// variable to specify if any of the attributes in the message is
 		// truncated
 		boolean isTruncated = false;
@@ -89,10 +88,10 @@ class XMLTextMessageHandler extends BaseXMLMessageHandler {
 			final String name = currentObject.getName();
 			final int length = currentObject.getLength();
 
-			attr = document.createElement("attr"); // create another
+			attr = document.createElement("attr"); // create another //$NON-NLS-1$
 			// element
-			attr.setAttribute("name", name);
-			attr.setAttribute("type", tuple.getStreamSchema()
+			attr.setAttribute("name", name); //$NON-NLS-1$
+			attr.setAttribute("type", tuple.getStreamSchema() //$NON-NLS-1$
 					.getAttribute(name).getType().getLanguageType());
 
 			// handle based on data type
@@ -152,7 +151,7 @@ class XMLTextMessageHandler extends BaseXMLMessageHandler {
 				// set the bytes into the messaage
 				StringBuilder sb = new StringBuilder();
 				for (byte b : blobdata)
-					sb.append(String.format("%02x", b & 0xff));
+					sb.append(String.format("%02x", b & 0xff)); //$NON-NLS-1$
 
 				stringdata = sb.toString();
 

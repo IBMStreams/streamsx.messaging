@@ -45,7 +45,7 @@ import com.ibm.streamsx.messaging.common.PropertyProvider;
 
 public class JMSSink extends AbstractOperator implements StateHandler{
 
-	private static final String CLASS_NAME = "com.ibm.streamsx.messaging.jms.JMSSink";
+	private static final String CLASS_NAME = "com.ibm.streamsx.messaging.jms.JMSSink"; //$NON-NLS-1$
 
 	/**
 	 * Create a {@code Logger} specific to this class that will write to the SPL
@@ -53,12 +53,12 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	 * {@code Logger}. The {@code Logger} uses a
 	 */
 	private static Logger logger = Logger.getLogger(LoggerNames.LOG_FACILITY
-			+ "." + CLASS_NAME, "com.ibm.streamsx.messaging.jms.JMSMessages");
+			+ "." + CLASS_NAME, "com.ibm.streamsx.messaging.jms.JMSMessages"); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	// property names used in message header
-	public static final String OP_CKP_NAME_PROPERTITY = "StreamsOperatorCkpName";
+	public static final String OP_CKP_NAME_PROPERTITY = "StreamsOperatorCkpName"; //$NON-NLS-1$
 	
-	public static final String CKP_ID_PROPERTITY = "checkpointId";
+	public static final String CKP_ID_PROPERTITY = "checkpointId"; //$NON-NLS-1$
 
 	// Variables required by the optional error output port
 
@@ -117,7 +117,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	// If present, it must have exactly one value that is a String constant. If
 	// the parameter is absent, the operator will use the default value of to
 	// UTF-8
-	private String codepage = "UTF-8";
+	private String codepage = "UTF-8"; //$NON-NLS-1$
 	// This mandatory parameter access specifies access specification name.
 	private String access;
 	// This mandatory parameter connection specifies name of the connection
@@ -145,7 +145,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	// If not specified, it is set to BoundedRetry with a reconnectionBound of 5
 	// and a period of 60 seconds.
 	private ReconnectionPolicies reconnectionPolicy = ReconnectionPolicies
-			.valueOf("BoundedRetry");
+			.valueOf("BoundedRetry"); //$NON-NLS-1$
 	// This optional parameter period specifies the time period in seconds which
 	// the
 	// operator will wait before trying to reconnect.
@@ -286,10 +286,10 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		
 		if (connectionDocument == null)
 		{
-			connectionDocument = getOperatorContext().getPE().getApplicationDirectory() + "/etc/connections.xml";
+			connectionDocument = getOperatorContext().getPE().getApplicationDirectory() + "/etc/connections.xml"; //$NON-NLS-1$
 		}
 		
-		if (!connectionDocument.startsWith("/"))
+		if (!connectionDocument.startsWith("/")) //$NON-NLS-1$
 		{
 			connectionDocument = getOperatorContext().getPE().getApplicationDirectory() + File.separator + connectionDocument;
 		}
@@ -314,12 +314,12 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			// The optional error output port can have no more than two
 			// attributes.
 			if (streamingOutputPort.getStreamSchema().getAttributeCount() > 2) {
-				logger.log(LogLevel.ERROR, "ATMOST_TWO_ATTR");
+				logger.log(LogLevel.ERROR, "ATMOST_TWO_ATTR"); //$NON-NLS-1$
 
 			}
 			// The optional error output port must have at least one attribute.
 			if (streamingOutputPort.getStreamSchema().getAttributeCount() < 1) {
-				logger.log(LogLevel.ERROR, "ATLEAST_ONE_ATTR");
+				logger.log(LogLevel.ERROR, "ATLEAST_ONE_ATTR"); //$NON-NLS-1$
 
 			}
 			// If only one attribute is specified, that attribute in the
@@ -327,7 +327,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			if (streamingOutputPort.getStreamSchema().getAttributeCount() == 1) {
 				if (streamingOutputPort.getStreamSchema().getAttribute(0)
 						.getType().getMetaType() != Type.MetaType.RSTRING) {
-					logger.log(LogLevel.ERROR, "ERROR_PORT_FIRST_ATTR_RSTRING");
+					logger.log(LogLevel.ERROR, "ERROR_PORT_FIRST_ATTR_RSTRING"); //$NON-NLS-1$
 				}
 			}
 			// If two attributes are specified, the first attribute in the
@@ -336,12 +336,12 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			if (streamingOutputPort.getStreamSchema().getAttributeCount() == 2) {
 				if (streamingOutputPort.getStreamSchema().getAttribute(0)
 						.getType().getMetaType() != Type.MetaType.TUPLE) {
-					logger.log(LogLevel.ERROR, "ERROR_PORT_FIRST_ATTR_TUPLE");
+					logger.log(LogLevel.ERROR, "ERROR_PORT_FIRST_ATTR_TUPLE"); //$NON-NLS-1$
 
 				}
 				if (streamingOutputPort.getStreamSchema().getAttribute(1)
 						.getType().getMetaType() != Type.MetaType.RSTRING) {
-					logger.log(LogLevel.ERROR, "ERROR_PORT_SECOND_ATTR_RSTRING");
+					logger.log(LogLevel.ERROR, "ERROR_PORT_SECOND_ATTR_RSTRING"); //$NON-NLS-1$
 
 				}
 			}
@@ -356,26 +356,26 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		if(consistentRegionContext != null) {
 			
 			if(consistentRegionContext.isStartOfRegion()) {
-				checker.setInvalidContext("The following operator cannot be the start of a consistent region: JMSSink", new String[] {});
+				checker.setInvalidContext(Messages.getString("OP_CANNOT_BE_START_OF_CONSISTENT_REGION"), new String[] {"JMSSink"}); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			
-			if(!context.getParameterNames().contains("consistentRegionQueueName")) {
-				checker.setInvalidContext("consistentRegionQueueName parameter must be set when JMSSink is participating in a consistent region", new String[] {});
+			if(!context.getParameterNames().contains("consistentRegionQueueName")) { //$NON-NLS-1$
+				checker.setInvalidContext(Messages.getString("CONSISTENTREGIONQUEUENAME_MUST_BE_SET_WHEN_PARTICIPATING_IN_CONSISTENT_REGION"), new String[] {}); //$NON-NLS-1$
 			}
 			
-			if(context.getParameterNames().contains("reconnectionPolicy") ||
-			   context.getParameterNames().contains("reconnectionBound") || 
-			   context.getParameterNames().contains("period") || 
-			   context.getParameterNames().contains("maxMessageSendRetries") || 
-			   context.getParameterNames().contains("messageSendRetryDelay")) {
+			if(context.getParameterNames().contains("reconnectionPolicy") || //$NON-NLS-1$
+			   context.getParameterNames().contains("reconnectionBound") ||  //$NON-NLS-1$
+			   context.getParameterNames().contains("period") ||  //$NON-NLS-1$
+			   context.getParameterNames().contains("maxMessageSendRetries") ||  //$NON-NLS-1$
+			   context.getParameterNames().contains("messageSendRetryDelay")) { //$NON-NLS-1$
 				
-				checker.setInvalidContext("Parameters 'reconnectionPolicy', 'reconnectionBound', 'period', 'maxMessageSendRetries' and 'messageSendRetryDelay' can not be specified when JMSSink is participating in a consistent region", new String[] {});
+				checker.setInvalidContext(Messages.getString("PARAMS_NOT_ALLOWED_WHEN_PARTICIPATING_IN_CONSISTENT_REGION"), new String[] {}); //$NON-NLS-1$
 			}
 		}
 		else {
 			
-			if(context.getParameterNames().contains("consistentRegionQueueName")) {
-				checker.setInvalidContext("consistentRegionQueueName parameter can not be specified when JMSSink is not participating in a consistent region", new String[] {});
+			if(context.getParameterNames().contains("consistentRegionQueueName")) { //$NON-NLS-1$
+				checker.setInvalidContext(Messages.getString("CONSISTENTREGIONQUEUENAME_CANNOT_BE_SPECIFIED_WHEN_NOT_PARTICIPATING_IN_CONSISTENT_REGION"), new String[] {}); //$NON-NLS-1$
 			}
 		}
 		
@@ -389,32 +389,31 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	public static void checkParametersRuntime(OperatorContextChecker checker) {
 		OperatorContext context = checker.getOperatorContext();
 
-		if ((context.getParameterNames().contains("reconnectionBound"))) {
+		if ((context.getParameterNames().contains("reconnectionBound"))) { //$NON-NLS-1$
 			// reconnectionBound value should be non negative.
 			if (Integer.parseInt(context
-					.getParameterValues("reconnectionBound").get(0)) < 0) {
+					.getParameterValues("reconnectionBound").get(0)) < 0) { //$NON-NLS-1$
 
-				logger.log(LogLevel.ERROR, "REC_BOUND_NEG");
+				logger.log(LogLevel.ERROR, "REC_BOUND_NEG"); //$NON-NLS-1$
 				checker.setInvalidContext(
-						"reconnectionBound value {0} should be zero or greater than zero  ",
-						new String[] { context.getParameterValues(
-								"reconnectionBound").get(0) });
+						Messages.getString("PARAM_VALUE_SHOULD_BE_GREATER_OR_EQUAL_TO_ZERO"), //$NON-NLS-1$
+						new String[] { "reconnectionBound", context.getParameterValues("reconnectionBound").get(0) }); //$NON-NLS-1$
 			}
-			if (context.getParameterNames().contains("reconnectionPolicy")) {
+			if (context.getParameterNames().contains("reconnectionPolicy")) { //$NON-NLS-1$
 				// reconnectionPolicy can be either InfiniteRetry, NoRetry,
 				// BoundedRetry
 				ReconnectionPolicies reconPolicy = ReconnectionPolicies
 						.valueOf(context
-								.getParameterValues("reconnectionPolicy")
+								.getParameterValues("reconnectionPolicy") //$NON-NLS-1$
 								.get(0).trim());
 				// reconnectionBound can appear only when the reconnectionPolicy
 				// parameter is set to BoundedRetry and cannot appear otherwise
 				if (reconPolicy != ReconnectionPolicies.BoundedRetry) {
-					logger.log(LogLevel.ERROR, "REC_BOUND_NOT_ALLOWED");
+					logger.log(LogLevel.ERROR, "REC_BOUND_NOT_ALLOWED"); //$NON-NLS-1$
 					checker.setInvalidContext(
-							"reconnectionBound {0} can appear only when the reconnectionPolicy parameter is set to BoundedRetry and cannot appear otherwise ",
+							Messages.getString("RECONNECTIONBOUND_CAN_APPEAR_ONLY_WHEN_RECONNECTIONPOLICY_PARAM_IS_SET_TO_BOUNDENTRY"), //$NON-NLS-1$
 							new String[] { context.getParameterValues(
-									"reconnectionBound").get(0) });
+									"reconnectionBound").get(0) }); //$NON-NLS-1$
 
 				}
 			}
@@ -422,42 +421,42 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		}
 		
 		// maxMessageSendRetries can not be negative number if present
-		if(context.getParameterNames().contains("maxMessageSendRetries")) {
-			if(Integer.parseInt(context.getParameterValues("maxMessageSendRetries").get(0)) < 0) {
-				logger.log(LogLevel.ERROR, "MESSAGE_RESEND_NEG", new Object[] {"maxMessageSendRetries"});
+		if(context.getParameterNames().contains("maxMessageSendRetries")) { //$NON-NLS-1$
+			if(Integer.parseInt(context.getParameterValues("maxMessageSendRetries").get(0)) < 0) { //$NON-NLS-1$
+				logger.log(LogLevel.ERROR, "MESSAGE_RESEND_NEG", new Object[] {"maxMessageSendRetries"}); //$NON-NLS-1$ //$NON-NLS-2$
 				checker.setInvalidContext(
-						"maxMessageSendRetries value {0} should be zero or greater than zero", 
-						new String[] {context.getParameterValues("maxMessageSendRetries").get(0)});
+						Messages.getString("PARAM_VALUE_SHOULD_BE_GREATER_OR_EQUAL_TO_ZERO"),  //$NON-NLS-1$
+						new String[] {"maxMessageSendRetries", context.getParameterValues("maxMessageSendRetries").get(0)}); //$NON-NLS-1$
 			}
 			
 		}
 		
 		// messageSendRetryDelay can not be negative number if present
-		if(context.getParameterNames().contains("messageSendRetryDelay")) {
-			if(Long.parseLong(context.getParameterValues("messageSendRetryDelay").get(0)) < 0) {
-				logger.log(LogLevel.ERROR, "MESSAGE_RESEND_NEG", new Object[] {"messageSendRetryDelay"});
+		if(context.getParameterNames().contains("messageSendRetryDelay")) { //$NON-NLS-1$
+			if(Long.parseLong(context.getParameterValues("messageSendRetryDelay").get(0)) < 0) { //$NON-NLS-1$
+				logger.log(LogLevel.ERROR, "MESSAGE_RESEND_NEG", new Object[] {"messageSendRetryDelay"}); //$NON-NLS-1$ //$NON-NLS-2$
 				checker.setInvalidContext(
-						"messageSendRetryDelay value {0} should be zero or greater than zero", 
-						new String[] {context.getParameterValues("messageSendRetryDelay").get(0)});
+						Messages.getString("PARAM_VALUE_SHOULD_BE_GREATER_OR_EQUAL_TO_ZERO"),  //$NON-NLS-1$
+						new String[] {"messageSendRetryDelay", context.getParameterValues("messageSendRetryDelay").get(0)}); //$NON-NLS-1$
 			}
 		}
 		
 		// consistentRegionQueueName must not be null if present
-		if(context.getParameterNames().contains("consistentRegionQueueName")) {
+		if(context.getParameterNames().contains("consistentRegionQueueName")) { //$NON-NLS-1$
 			
-			String consistentRegionQueueName = context.getParameterValues("consistentRegionQueueName").get(0);
+			String consistentRegionQueueName = context.getParameterValues("consistentRegionQueueName").get(0); //$NON-NLS-1$
 			if(consistentRegionQueueName == null || consistentRegionQueueName.trim().length() == 0) {
-				logger.log(LogLevel.ERROR, "consistentRegionQueueName value must be a non-empty value");
+				logger.log(LogLevel.ERROR, "CONSISTENTREGIONQUEUENAME_VALUE_MUST_BE_NON_EMPTY"); //$NON-NLS-1$
 				checker.setInvalidContext(
-						"consistentRegionQueueName value must be a non-empty value", 
+						Messages.getString("CONSISTENTREGIONQUEUENAME_VALUE_MUST_BE_NON_EMPTY"),  //$NON-NLS-1$
 						new String[] {});
 			}
 		}
 		
-		if((checker.getOperatorContext().getParameterNames().contains("appConfigName"))) {
-        	String appConfigName = checker.getOperatorContext().getParameterValues("appConfigName").get(0);
-			String userPropName = checker.getOperatorContext().getParameterValues("userPropName").get(0);
-			String passwordPropName = checker.getOperatorContext().getParameterValues("passwordPropName").get(0);
+		if((checker.getOperatorContext().getParameterNames().contains("appConfigName"))) { //$NON-NLS-1$
+        	String appConfigName = checker.getOperatorContext().getParameterValues("appConfigName").get(0); //$NON-NLS-1$
+			String userPropName = checker.getOperatorContext().getParameterValues("userPropName").get(0); //$NON-NLS-1$
+			String passwordPropName = checker.getOperatorContext().getParameterValues("passwordPropName").get(0); //$NON-NLS-1$
 			
 			
 			PropertyProvider provider = new PropertyProvider(checker.getOperatorContext().getPE(), appConfigName);
@@ -466,17 +465,17 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			String password = provider.getProperty(passwordPropName);
 			
 			if(userName == null || userName.trim().length() == 0) {
-				logger.log(LogLevel.ERROR, "Property " + userPropName + " is not found in application configuration " + appConfigName);
+				logger.log(LogLevel.ERROR, "PROPERTY_NOT_FOUND_IN_APP_CONFIG", new String[] {userPropName, appConfigName}); //$NON-NLS-1$
 				checker.setInvalidContext(
-						"Property {0} is not found in application configuration {1}.",
+						Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG"), //$NON-NLS-1$
 						new Object[] {userPropName, appConfigName});
 				
 			}
 			
 			if(password == null || password.trim().length() == 0) {
-				logger.log(LogLevel.ERROR, "Property " + passwordPropName + " is not found in application configuration " + appConfigName);
+				logger.log(LogLevel.ERROR, "PROPERTY_NOT_FOUND_IN_APP_CONFIG", new String[] {passwordPropName, appConfigName} ); //$NON-NLS-1$
 				checker.setInvalidContext(
-						"Property {0} is not found in application configuration {1}.",
+						Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG"), //$NON-NLS-1$
 						new Object[] {passwordPropName, appConfigName});
 			
 			}
@@ -491,18 +490,18 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
 		
 		if(consistentRegionContext == null) {
-			checker.checkDependentParameters("period", "reconnectionPolicy");
-			checker.checkDependentParameters("reconnectionBound",
-					"reconnectionPolicy");
+			checker.checkDependentParameters("period", "reconnectionPolicy"); //$NON-NLS-1$ //$NON-NLS-2$
+			checker.checkDependentParameters("reconnectionBound", //$NON-NLS-1$
+					"reconnectionPolicy"); //$NON-NLS-1$
 			
-			checker.checkDependentParameters("maxMessageSendRetries", "messageSendRetryDelay");
-			checker.checkDependentParameters("messageSendRetryDelay", "maxMessageSendRetries");
+			checker.checkDependentParameters("maxMessageSendRetries", "messageSendRetryDelay"); //$NON-NLS-1$ //$NON-NLS-2$
+			checker.checkDependentParameters("messageSendRetryDelay", "maxMessageSendRetries"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		// Make sure if appConfigName is specified then both userPropName and passwordPropName are needed
-		checker.checkDependentParameters("appConfigName", "userPropName", "passwordPropName");
-		checker.checkDependentParameters("userPropName", "appConfigName", "passwordPropName");
-		checker.checkDependentParameters("passwordPropName", "appConfigName", "userPropName");
+		checker.checkDependentParameters("appConfigName", "userPropName", "passwordPropName"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		checker.checkDependentParameters("userPropName", "appConfigName", "passwordPropName"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		checker.checkDependentParameters("passwordPropName", "appConfigName", "userPropName"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	@Override
@@ -516,8 +515,8 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		
 		consistentRegionContext = context.getOptionalContext(ConsistentRegionContext.class);
 		
-		operatorUniqueID = context.getPE().getDomainId() + "_" + context.getPE().getInstanceId() + "_" + context.getPE().getJobId() + "_" + context.getName();
-		String msgSelectorCR = (consistentRegionContext == null) ? null : JMSSink.OP_CKP_NAME_PROPERTITY + "=" + "'" + operatorUniqueID + "'";
+		operatorUniqueID = context.getPE().getDomainId() + "_" + context.getPE().getInstanceId() + "_" + context.getPE().getJobId() + "_" + context.getName(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String msgSelectorCR = (consistentRegionContext == null) ? null : JMSSink.OP_CKP_NAME_PROPERTITY + "=" + "'" + operatorUniqueID + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		/*
 		 * Set appropriate variables if the optional error output port is
@@ -546,9 +545,9 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		// connections document in initialize function , we need to keep this
 		// check here
 		if (connectionDocumentParser.getMessageType() != MessageClass.bytes
-				&& context.getParameterNames().contains("codepage")) {
+				&& context.getParameterNames().contains("codepage")) { //$NON-NLS-1$
 			throw new ParseConnectionDocumentException(
-					"codepage appears only when the message class is bytes");
+					Messages.getString("CODEPAGE_APPEARS_ONLY_WHEN_MSG_CLASS_IS_BYTES")); //$NON-NLS-1$
 		}
 		
 		PropertyProvider propertyProvider = null;
@@ -622,7 +621,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			mhandler = new TextMessageHandler(connectionDocumentParser.getNativeSchemaObjects());
 			break;
 		default:
-			throw new RuntimeException("No valid message class is specified.");
+			throw new RuntimeException(Messages.getString("NO_VALID_MSG_CLASS_SPECIFIED")); //$NON-NLS-1$
 		}
 
 		// register for data governance
@@ -631,10 +630,10 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	}
 
 	private void registerForDataGovernance(String providerURL, String destination) {
-		logger.log(TraceLevel.INFO, "JMSSink - Registering for data governance with providerURL: " + providerURL
-				+ " destination: " + destination);
+		logger.log(TraceLevel.INFO, "JMSSink - Registering for data governance with providerURL: " + providerURL //$NON-NLS-1$
+				+ " destination: " + destination); //$NON-NLS-1$
 		DataGovernanceUtil.registerForDataGovernance(this, destination, IGovernanceConstants.ASSET_JMS_MESSAGE_TYPE,
-				providerURL, IGovernanceConstants.ASSET_JMS_SERVER_TYPE, false, "JMSSink");
+				providerURL, IGovernanceConstants.ASSET_JMS_SERVER_TYPE, false, "JMSSink"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -671,10 +670,10 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		
 		if (!msgSent) {
 									
-			logger.log(LogLevel.ERROR, "EXCEPTION_SINK");
+			logger.log(LogLevel.ERROR, "EXCEPTION_SINK"); //$NON-NLS-1$
 			if (hasErrorPort) {
 				sendOutputErrorMsg(tuple,
-						"Dropping this tuple since an exception occurred while sending.");
+						Messages.getString("EXCEPTION_SINK")); //$NON-NLS-1$
 			}
 			
 		}
@@ -712,12 +711,12 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 
 	@Override
 	public void close() throws IOException {
-		logger.log(LogLevel.INFO, "StateHandler Close");
+		logger.log(LogLevel.INFO, "STATEHANDLER_CLOSE"); //$NON-NLS-1$
 	}
 
 	@Override
 	public void checkpoint(Checkpoint checkpoint) throws Exception {
-		logger.log(LogLevel.INFO, "checkpoint " + checkpoint.getSequenceId());
+		logger.log(LogLevel.INFO, "CHECKPOINT", checkpoint.getSequenceId()); //$NON-NLS-1$
 		
 		long currentCheckpointId = checkpoint.getSequenceId();
 		long committedCheckpointId = 0;
@@ -740,15 +739,15 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			
 		// Something is wrong here as committedCheckpointId should be greater than 1 when a successful checkpoint has been made
 		if(committedCheckpointId == 0 && lastSuccessfulCheckpointId > 0) {
-			logger.log(LogLevel.ERROR, "Checkpoint can not proceed, expecting a checkpoint message, but not found.");
-		    throw new Exception("Checkpoint can not proceed, expecting a checkpoint message, but not found.");
+			logger.log(LogLevel.ERROR, "CHECKPOINT_CANNOT_PROCEED_MISSING_CHECKPOINT_MSG"); //$NON-NLS-1$
+		    throw new Exception(Messages.getString("CHECKPOINT_CANNOT_PROCEED_MISSING_CHECKPOINT_MSG")); //$NON-NLS-1$
 		}
 			
 		if((currentCheckpointId - lastSuccessfulCheckpointId > 1) &&
 		   (lastSuccessfulCheckpointId < committedCheckpointId)) {
 			// this transaction has been processed before, and this is a duplicate
 			// discard this transaction. 
-			logger.log(LogLevel.INFO, "discard this transaction as it has been processed last time.");
+			logger.log(LogLevel.INFO, "DISCARD_TRANSACTION_AS_IT_HAS_BEEN_PROCESSED_LAST_TIME"); //$NON-NLS-1$
 		    commit = false;
 				
 		}
@@ -777,12 +776,12 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 
 	@Override
 	public void drain() throws Exception {
-		logger.log(LogLevel.INFO, "Drain... ");
+		logger.log(LogLevel.INFO, "DRAIN"); //$NON-NLS-1$
 	}
 
 	@Override
 	public void reset(Checkpoint checkpoint) throws Exception {
-		logger.log(LogLevel.INFO, "Reset to checkpoint " + checkpoint.getSequenceId());
+		logger.log(LogLevel.INFO, "RESET_CHECKPOINT", checkpoint.getSequenceId()); //$NON-NLS-1$
 	
 		lastSuccessfulCheckpointId = checkpoint.getSequenceId();
 		jmsConnectionHelper.roolbackSession();
@@ -791,7 +790,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 
 	@Override
 	public void resetToInitialState() throws Exception {
-		logger.log(LogLevel.INFO, "Reset to initial state");
+		logger.log(LogLevel.INFO, "RESET_TO_INITIAL_STATE"); //$NON-NLS-1$
 		
 		lastSuccessfulCheckpointId = 0;
 		jmsConnectionHelper.roolbackSession();
@@ -799,6 +798,6 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 
 	@Override
 	public void retireCheckpoint(long id) throws Exception {
-		logger.log(LogLevel.INFO, "Retire checkpoint");		
+		logger.log(LogLevel.INFO, "RETIRE_CHECKPOINT", id);		 //$NON-NLS-1$
 	}
 }

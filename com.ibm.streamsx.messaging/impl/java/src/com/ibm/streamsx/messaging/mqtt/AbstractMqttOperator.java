@@ -28,7 +28,7 @@ import com.ibm.streams.operator.model.CustomMetric;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streamsx.messaging.common.PropertyProvider;
-import com.ibm.streamsx.messaging.i18n.Messages;
+import com.ibm.streamsx.messaging.mqtt.Messages;
 
 public abstract class AbstractMqttOperator extends AbstractOperator {
 

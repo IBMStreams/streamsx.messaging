@@ -309,9 +309,9 @@ class JMSConnectionHelper {
 
 				} catch (InvalidSelectorException e) {
 					throw new ConnectionException(
-							"Connection to JMS failed. Invalid message selector");
+							Messages.getString("CONNECTION_TO_JMS_FAILED_INVALID_MSG_SELECTOR")); //$NON-NLS-1$
 				} catch (JMSException | NamingException e) {
-					logger.log(LogLevel.ERROR, "RECONNECTION_EXCEPTION",
+					logger.log(LogLevel.ERROR, "RECONNECTION_EXCEPTION", //$NON-NLS-1$
 							new Object[] { e.toString() });
 					// Get the reconnectionPolicy
 					// Apply reconnection policies if the connection was
@@ -320,7 +320,7 @@ class JMSConnectionHelper {
 					if (reconnectionPolicy == ReconnectionPolicies.NoRetry) {
 						// Check if ReconnectionPolicy is noRetry, then abort
 						throw new ConnectionException(
-								"Connection to JMS failed. Did not try to reconnect as the policy is noReconnect");
+								Messages.getString("CONNECTION_TO_JMS_FAILED_DID_NOT_TRY_RECONNECT")); //$NON-NLS-1$
 					}
 
 					// Check if ReconnectionPolicy is BoundedRetry, then try
@@ -333,7 +333,7 @@ class JMSConnectionHelper {
 							&& nConnectionAttempts == reconnectionBound) {
 						// Bounded number of retries has exceeded.
 						throw new ConnectionException(
-								"Connection to JMS failed. Bounded number of tries has exceeded");
+								Messages.getString("CONNECTION_TO_JMS_FAILED_NUMBER_OF_TRIES_EXCEDED")); //$NON-NLS-1$
 					}
 					// sleep for delay interval
 					Thread.sleep(delay);
@@ -352,9 +352,9 @@ class JMSConnectionHelper {
 			try {
 				connect(isProducer);
 			} catch (JMSException e) {
-				logger.log(LogLevel.ERROR, "Connection to JMS failed", new Object[] { e.toString() });
+				logger.log(LogLevel.ERROR, "CONNECTION_TO_JMS_FAILED", new Object[] { e.toString() }); //$NON-NLS-1$
 				throw new ConnectionException(
-						"Connection to JMS failed. Did not try to reconnect as the policy is reconnection policy does not apply here.");
+						Messages.getString("CONNECTION_TO_JMS_FAILED_NO_RECONNECT_AS_RECONNECT_POLICY_DOES_NOT_APPLY")); //$NON-NLS-1$
 			}
 		}
 	}
@@ -402,11 +402,11 @@ class JMSConnectionHelper {
 			if (deliveryMode == null) {
 				getProducer().setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 			} else {
-				if (deliveryMode.trim().toLowerCase().equals("non_persistent")) {
+				if (deliveryMode.trim().toLowerCase().equals("non_persistent")) { //$NON-NLS-1$
 					getProducer().setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 				}
 
-				if (deliveryMode.trim().toLowerCase().equals("persistent")) {
+				if (deliveryMode.trim().toLowerCase().equals("persistent")) { //$NON-NLS-1$
 					getProducer().setDeliveryMode(DeliveryMode.PERSISTENT);
 				}
 			}
@@ -439,7 +439,7 @@ class JMSConnectionHelper {
 			return false;
 		}
 		
-		logger.log(LogLevel.INFO, "User credentials has been updated");
+		logger.log(LogLevel.INFO, "USER_CREDENTIALS_UPDATED"); //$NON-NLS-1$
 		this.userPrincipal = userName;
 		this.userCredential = password;
 		
@@ -462,7 +462,7 @@ class JMSConnectionHelper {
 				
 				// This is retry, wait before retry
 				if(count > 0) {
-					logger.log(LogLevel.INFO, "ATTEMPT_TO_RESEND_MESSAGE", new Object[] { count });
+					logger.log(LogLevel.INFO, "ATTEMPT_TO_RESEND_MESSAGE", new Object[] { count }); //$NON-NLS-1$
 					// Wait for a while before next delivery attempt
 					Thread.sleep(messageRetryDelay);
 				}
@@ -475,8 +475,8 @@ class JMSConnectionHelper {
 			}
 			catch (JMSException e) {
 				// error has occurred, log error and try sending message again
-				logger.log(LogLevel.WARN, "ERROR_DURING_SEND", new Object[] { e.toString() });
-				logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
+				logger.log(LogLevel.WARN, "ERROR_DURING_SEND", new Object[] { e.toString() }); //$NON-NLS-1$
+				logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT"); //$NON-NLS-1$
 				
 				// Recreate the connection objects if we don't have any (this
 				// could happen after a connection failure)
@@ -507,15 +507,15 @@ class JMSConnectionHelper {
 		}
 		catch (JMSException e) {
 			// If the JMSSource operator was interrupted in middle
-			if (e.toString().contains("java.lang.InterruptedException")) {
+			if (e.toString().contains("java.lang.InterruptedException")) { //$NON-NLS-1$
 				throw new java.lang.InterruptedException();
 			}
 			// Recreate the connection objects if we don't have any (this
 			// could happen after a connection failure)
 			setConnect(null);
-			logger.log(LogLevel.WARN, "ERROR_DURING_RECEIVE",
+			logger.log(LogLevel.WARN, "ERROR_DURING_RECEIVE", //$NON-NLS-1$
 					new Object[] { e.toString() });
-			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
+			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT"); //$NON-NLS-1$
 			createConnection();
 			// retry to receive again
 			
@@ -545,7 +545,7 @@ class JMSConnectionHelper {
 		}
 		catch (JMSException e) {
 			// error has occurred, log error and try sending message again
-			logger.log(LogLevel.WARN, "ERROR_DURING_SEND", new Object[] { e.toString() });
+			logger.log(LogLevel.WARN, "ERROR_DURING_SEND", new Object[] { e.toString() }); //$NON-NLS-1$
 			
 			// If the exception is caused by message format, then we can return peacefully as connection is still good.
 			if(!(e instanceof MessageFormatException)) {
@@ -587,7 +587,7 @@ class JMSConnectionHelper {
 			}
 		} catch (JMSException e) {
 			
-			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
+			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT"); //$NON-NLS-1$
 			setConnect(null);
 			createConnection();
 			

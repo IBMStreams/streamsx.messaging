@@ -2,14 +2,14 @@
  * Copyright (C) 2014, International Business Machines Corporation
  * All Rights Reserved
  *******************************************************************************/
-package com.ibm.streamsx.messaging.i18n;
+package com.ibm.streamsx.messaging.jms;
 
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 public class Messages {
-	private static final String BUNDLE_NAME = "com.ibm.streamsx.messaging.i18n.CommonMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "com.ibm.streamsx.messaging.jms.JMSMessages"; //$NON-NLS-1$
 
 	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle
 			.getBundle(BUNDLE_NAME);

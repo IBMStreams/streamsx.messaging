@@ -12,10 +12,10 @@ public class JmsClasspathUtil {
 
 
 	public static void setupClassPaths(OperatorContext context) {
-		String AMQ_HOME = System.getenv("STREAMS_MESSAGING_AMQ_HOME");
+		String AMQ_HOME = System.getenv("STREAMS_MESSAGING_AMQ_HOME"); //$NON-NLS-1$
 		if (AMQ_HOME != null) {
-			String lib = AMQ_HOME + "/lib/*";
-			String libOptional = AMQ_HOME + "/lib/optional/*";
+			String lib = AMQ_HOME + "/lib/*"; //$NON-NLS-1$
+			String libOptional = AMQ_HOME + "/lib/optional/*"; //$NON-NLS-1$
 	
 			try {
 				context.addClassLibraries(new String[] { lib, libOptional });
@@ -24,9 +24,9 @@ public class JmsClasspathUtil {
 			}
 		}
 	
-		String WMQ_HOME = System.getenv("STREAMS_MESSAGING_WMQ_HOME");
+		String WMQ_HOME = System.getenv("STREAMS_MESSAGING_WMQ_HOME"); //$NON-NLS-1$
 		if (WMQ_HOME != null) {
-			String javaLib = WMQ_HOME + "/java/lib/*";
+			String javaLib = WMQ_HOME + "/java/lib/*"; //$NON-NLS-1$
 			try {
 				context.addClassLibraries(new String[] { javaLib });
 			} catch (MalformedURLException e) {

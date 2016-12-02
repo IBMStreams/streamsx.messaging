@@ -22,7 +22,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import com.ibm.streams.operator.log4j.LoggerNames;
 import com.ibm.streams.operator.log4j.TraceLevel;
-import com.ibm.streamsx.messaging.i18n.Messages;
+import com.ibm.streamsx.messaging.mqtt.Messages;
 
 
 public class MqttAsyncClientWrapper  implements MqttCallback{

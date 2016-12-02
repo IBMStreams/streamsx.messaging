@@ -33,7 +33,7 @@ import org.xml.sax.SAXException;
 import com.ibm.streams.operator.log4j.LogLevel;
 import com.ibm.streams.operator.log4j.LoggerNames;
 import com.ibm.streams.operator.log4j.TraceLevel;
-import com.ibm.streamsx.messaging.i18n.Messages;
+import com.ibm.streamsx.messaging.mqtt.Messages;
 
 //This class parses and validates the connections document 
 class ConnectionDocumentHelper {

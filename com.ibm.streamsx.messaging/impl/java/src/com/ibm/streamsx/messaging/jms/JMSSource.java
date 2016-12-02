@@ -46,7 +46,7 @@ import com.ibm.streamsx.messaging.common.PropertyProvider;
 //The JMSSource operator converts a message JMS queue or topic to stream
 public class JMSSource extends ProcessTupleProducer implements StateHandler{	
 
-	private static final String CLASS_NAME = "com.ibm.streamsx.messaging.jms.JMSSource";
+	private static final String CLASS_NAME = "com.ibm.streamsx.messaging.jms.JMSSource"; //$NON-NLS-1$
 
 	/**
 	 * Create a {@code Logger} specific to this class that will write to the SPL
@@ -54,7 +54,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	 * {@code Logger}. The {@code Logger} uses a
 	 */
 	private static Logger logger = Logger.getLogger(LoggerNames.LOG_FACILITY
-			+ "." + CLASS_NAME, "com.ibm.streamsx.messaging.jms.JMSMessages");
+			+ "." + CLASS_NAME, "com.ibm.streamsx.messaging.jms.JMSMessages"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	// variable to hold the output port
 	private StreamingOutput<OutputTuple> dataOutputPort;
@@ -126,7 +126,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	// If present, it must have exactly one value that is a String constant. If
 	// the parameter is absent, the operator will use the default value of to
 	// UTF-8
-	private String codepage = "UTF-8";
+	private String codepage = "UTF-8"; //$NON-NLS-1$
 	// This mandatory parameter access specifies access specification name.
 	private String access;
 	// This mandatory parameter connection specifies name of the connection
@@ -154,7 +154,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	// If not specified, it is set to BoundedRetry with a reconnectionBound of 5
 	// and a period of 60 seconds.
 	private ReconnectionPolicies reconnectionPolicy = ReconnectionPolicies
-			.valueOf("BoundedRetry");
+			.valueOf("BoundedRetry"); //$NON-NLS-1$
 	// This optional parameter period specifies the time period in seconds which
 	// the
 	// operator will wait before trying to reconnect.
@@ -366,11 +366,11 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		
 		if (connectionDocument == null)
 		{
-			connectionDocument = getOperatorContext().getPE().getApplicationDirectory() + "/etc/connections.xml";
+			connectionDocument = getOperatorContext().getPE().getApplicationDirectory() + "/etc/connections.xml"; //$NON-NLS-1$
 		}
 		
 		// if relative path, convert to absolute path
-		if (!connectionDocument.startsWith("/"))
+		if (!connectionDocument.startsWith("/")) //$NON-NLS-1$
 		{
 			connectionDocument = getOperatorContext().getPE().getApplicationDirectory() + File.separator + connectionDocument;
 		}
@@ -385,8 +385,8 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
 		OperatorContext context = checker.getOperatorContext();
 		
-		if(consistentRegionContext != null && consistentRegionContext.isTriggerOperator() && !context.getParameterNames().contains("triggerCount")) {
-			checker.setInvalidContext("triggerCount parameter must be set when consistent region is configured to operator driven", new String[] {});
+		if(consistentRegionContext != null && consistentRegionContext.isTriggerOperator() && !context.getParameterNames().contains("triggerCount")) { //$NON-NLS-1$
+			checker.setInvalidContext(Messages.getString("TRIGGERCOUNT_PARAM_MUST_BE_SET_WHEN_CONSISTENT_REGION_IS_OPERATOR_DRIVEN"), new String[] {}); //$NON-NLS-1$
 		}
 	}
 	
@@ -405,11 +405,11 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 			// The optional error output port can have only one attribute of
 			// type rstring
 			if (streamingOutputErrorPort.getStreamSchema().getAttributeCount() != 1) {
-				logger.log(LogLevel.ERROR, "ERROR_PORT_ATTR_COUNT_MAX");
+				logger.log(LogLevel.ERROR, "ERROR_PORT_ATTR_COUNT_MAX"); //$NON-NLS-1$
 			}
 			if (streamingOutputErrorPort.getStreamSchema().getAttribute(0)
 					.getType().getMetaType() != Type.MetaType.RSTRING) {
-				logger.log(LogLevel.ERROR, "ERROR_PORT_ATTR_TYPE");
+				logger.log(LogLevel.ERROR, "ERROR_PORT_ATTR_TYPE"); //$NON-NLS-1$
 			}
 
 		}
@@ -424,55 +424,51 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 
 		OperatorContext context = checker.getOperatorContext();
 
-		if ((context.getParameterNames().contains("reconnectionBound"))) { // reconnectionBound
+		if ((context.getParameterNames().contains("reconnectionBound"))) { // reconnectionBound //$NON-NLS-1$
 			// reconnectionBound value should be non negative.
 			if (Integer.parseInt(context
-					.getParameterValues("reconnectionBound").get(0)) < 0) {
+					.getParameterValues("reconnectionBound").get(0)) < 0) { //$NON-NLS-1$
 
-				logger.log(LogLevel.ERROR, "REC_BOUND_NEG");
+				logger.log(LogLevel.ERROR, "REC_BOUND_NEG"); //$NON-NLS-1$
 				checker.setInvalidContext(
-						"reconnectionBound value {0} should be zero or greater than zero  ",
-						new String[] { context.getParameterValues(
-								"reconnectionBound").get(0) });
+						Messages.getString("PARAM_VALUE_SHOULD_BE_GREATER_OR_EQUAL_TO_ZERO"),	//$NON-NLS-1$
+						new String[] { "reconnectionBound", context.getParameterValues("reconnectionBound").get(0) }); //$NON-NLS-1$
 			}
-			if (context.getParameterNames().contains("reconnectionPolicy")) {
+			if (context.getParameterNames().contains("reconnectionPolicy")) { //$NON-NLS-1$
 				// reconnectionPolicy can be either InfiniteRetry, NoRetry,
 				// BoundedRetry
 				ReconnectionPolicies reconPolicy = ReconnectionPolicies
 						.valueOf(context
-								.getParameterValues("reconnectionPolicy")
+								.getParameterValues("reconnectionPolicy") //$NON-NLS-1$
 								.get(0).trim());
 				// reconnectionBound can appear only when the reconnectionPolicy
 				// parameter is set to BoundedRetry and cannot appear otherwise
 				if (reconPolicy != ReconnectionPolicies.BoundedRetry) {
-					logger.log(LogLevel.ERROR, "REC_BOUND_NOT_ALLOWED");
+					logger.log(LogLevel.ERROR, "REC_BOUND_NOT_ALLOWED");	//$NON-NLS-1$
 					checker.setInvalidContext(
-							"reconnectionBound {0} can appear only when the reconnectionPolicy parameter is set to BoundedRetry and cannot appear otherwise ",
-							new String[] { context.getParameterValues(
-									"reconnectionBound").get(0) });
+							Messages.getString("RECONNECTIONBOUND_CAN_APPEAR_ONLY_WHEN_RECONNECTIONPOLICY_IS_BOUNDEDRETRY"), //$NON-NLS-1$
+							new String[] { context.getParameterValues("reconnectionBound").get(0) }); //$NON-NLS-1$
 
 				}
 			}
 		}
 		// If initDelay parameter os specified then its value should be non
 		// negative.
-		if (context.getParameterNames().contains("initDelay")) {
-			if (Integer.valueOf(context.getParameterValues("initDelay").get(0)) < 0) {
-				logger.log(LogLevel.ERROR, "INIT_DELAY_NEG");
+		if (context.getParameterNames().contains("initDelay")) { //$NON-NLS-1$
+			if (Integer.valueOf(context.getParameterValues("initDelay").get(0)) < 0) { //$NON-NLS-1$
+				logger.log(LogLevel.ERROR, "INIT_DELAY_NEG"); //$NON-NLS-1$
 				checker.setInvalidContext(
-						"initDelay value {0} should be zero or greater than zero  ",
-						new String[] { context.getParameterValues("initDelay")
-								.get(0).trim() });
+						Messages.getString("PARAM_VALUE_SHOULD_BE_GREATER_OR_EQUAL_TO_ZERO"), //$NON-NLS-1$
+						new String[] { "initDelay", context.getParameterValues("initDelay").get(0).trim() }); //$NON-NLS-1$
 			}
 		}
 		
-		if(context.getParameterNames().contains("triggerCount")) {
-			if(Integer.valueOf(context.getParameterValues("triggerCount").get(0)) < 1) {
-				logger.log(LogLevel.ERROR, "triggerCount should be greater than zero");
+		if(context.getParameterNames().contains("triggerCount")) { //$NON-NLS-1$
+			if(Integer.valueOf(context.getParameterValues("triggerCount").get(0)) < 1) { //$NON-NLS-1$
+				logger.log(LogLevel.ERROR, "TRIGGERCOUNT_SHOULD_BE_GREATER_THAN_ZERO"); //$NON-NLS-1$
 				checker.setInvalidContext(
-						"triggerCount value {0} should be greater than zero  ",
-						new String[] { context.getParameterValues("triggerCount")
-								.get(0).trim() });
+						Messages.getString("TRIGGERCOUNT_VALUE_SHOULD_BE_GREATER_THAN_ZERO"), //$NON-NLS-1$
+						new String[] { context.getParameterValues("triggerCount").get(0).trim() }); //$NON-NLS-1$
 			}
 		}
 		
@@ -491,10 +487,10 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	    	}
     	}
         
-        if((checker.getOperatorContext().getParameterNames().contains("appConfigName"))) {
-        	String appConfigName = checker.getOperatorContext().getParameterValues("appConfigName").get(0);
-			String userPropName = checker.getOperatorContext().getParameterValues("userPropName").get(0);
-			String passwordPropName = checker.getOperatorContext().getParameterValues("passwordPropName").get(0);
+        if((checker.getOperatorContext().getParameterNames().contains("appConfigName"))) { //$NON-NLS-1$
+        	String appConfigName = checker.getOperatorContext().getParameterValues("appConfigName").get(0); //$NON-NLS-1$
+			String userPropName = checker.getOperatorContext().getParameterValues("userPropName").get(0); //$NON-NLS-1$
+			String passwordPropName = checker.getOperatorContext().getParameterValues("passwordPropName").get(0); //$NON-NLS-1$
 			
 			
 			PropertyProvider provider = new PropertyProvider(checker.getOperatorContext().getPE(), appConfigName);
@@ -503,19 +499,17 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 			String password = provider.getProperty(passwordPropName);
 			
 			if(userName == null || userName.trim().length() == 0) {
-				logger.log(LogLevel.ERROR, "Property " + userPropName + " is not found in application configuration " + appConfigName);
+				logger.log(LogLevel.ERROR, "PROPERTY_NOT_FOUND_IN_APP_CONFIG", new String[] {userPropName, appConfigName}); //$NON-NLS-1$
 				checker.setInvalidContext(
-						"Property {0} is not found in application configuration {1}.",
+						Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG"), //$NON-NLS-1$
 						new Object[] {userPropName, appConfigName});
-				
 			}
 			
 			if(password == null || password.trim().length() == 0) {
-				logger.log(LogLevel.ERROR, "Property " + passwordPropName + " is not found in application configuration " + appConfigName);
+				logger.log(LogLevel.ERROR, "PROPERTY_NOT_FOUND_IN_APP_CONFIG", new String[] {passwordPropName, appConfigName}); //$NON-NLS-1$
 				checker.setInvalidContext(
-						"Property {0} is not found in application configuration {1}.",
+						Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG"), //$NON-NLS-1$
 						new Object[] {passwordPropName, appConfigName});
-			
 			}
         }
 		
@@ -525,14 +519,14 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	// reconnectionBound is specified
 	@ContextCheck(compile = true)
 	public static void checkParameters(OperatorContextChecker checker) {
-		checker.checkDependentParameters("period", "reconnectionPolicy");
-		checker.checkDependentParameters("reconnectionBound",
-				"reconnectionPolicy");
+		checker.checkDependentParameters("period", "reconnectionPolicy"); //$NON-NLS-1$ //$NON-NLS-2$
+		checker.checkDependentParameters("reconnectionBound", //$NON-NLS-1$
+				"reconnectionPolicy"); //$NON-NLS-1$
 		
 		// Make sure if appConfigName is specified then both userPropName and passwordPropName are needed
-		checker.checkDependentParameters("appConfigName", "userPropName", "passwordPropName");
-		checker.checkDependentParameters("userPropName", "appConfigName", "passwordPropName");
-		checker.checkDependentParameters("passwordPropName", "appConfigName", "userPropName");
+		checker.checkDependentParameters("appConfigName", "userPropName", "passwordPropName"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		checker.checkDependentParameters("userPropName", "appConfigName", "passwordPropName"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		checker.checkDependentParameters("passwordPropName", "appConfigName", "userPropName"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	@Override
@@ -575,9 +569,9 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		// codepage parameter can come only if message class is bytes
 
 		if (connectionDocumentParser.getMessageType() != MessageClass.bytes
-				&& context.getParameterNames().contains("codepage")) {
+				&& context.getParameterNames().contains("codepage")) { //$NON-NLS-1$
 			throw new ParseConnectionDocumentException(
-					"codepage appears only when the message class is bytes");
+					Messages.getString("CODEPAGE_APPEARS_ONLY_WHEN_MSG_CLASS_IS_BYTES")); //$NON-NLS-1$
 		}
 		// populate the message type and isAMQ
 
@@ -621,7 +615,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 				messageHandlerImpl = new TextMessageHandler(connectionDocumentParser.getNativeSchemaObjects());
 				break;
 			default:
-				throw new RuntimeException("No valid message class is specified.");
+				throw new RuntimeException(Messages.getString("NO_VALID_MESSAGE_CLASS_IS_SPECIFIED")); //$NON-NLS-1$
 		}
 		
 		// register for data governance
@@ -630,10 +624,10 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	}
 
 	private void registerForDataGovernance(String providerURL, String destination) {
-		logger.log(TraceLevel.INFO, "JMSSource - Registering for data governance with providerURL: " + providerURL
-				+ " destination: " + destination);
+		logger.log(TraceLevel.INFO, "JMSSource - Registering for data governance with providerURL: " + providerURL //$NON-NLS-1$
+				+ " destination: " + destination); //$NON-NLS-1$
 		DataGovernanceUtil.registerForDataGovernance(this, destination, IGovernanceConstants.ASSET_JMS_MESSAGE_TYPE,
-				providerURL, IGovernanceConstants.ASSET_JMS_SERVER_TYPE, true, "JMSSource");
+				providerURL, IGovernanceConstants.ASSET_JMS_SERVER_TYPE, true, "JMSSource"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -709,7 +703,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 						// if session has been re-created and message is duplicate,ignore
 						if(jmsConnectionHelper.getSessionCreationTime() > sessionCreationTime && 
 						   isDuplicateMsg(m, crState.getLastMsgSent().getJMSTimestamp(), crState.getMsgIDWIthSameTS())) {
-						    logger.log(LogLevel.INFO, "Ignored duplicated message: " + m.getJMSMessageID());
+						    logger.log(LogLevel.INFO, "IGNORED_DUPLICATED_MSG", m.getJMSMessageID()); //$NON-NLS-1$
 							continue;
 						}
 					}
@@ -731,44 +725,43 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 				case DISCARD_MESSAGE_WRONG_TYPE:
 					nMessagesDropped.incrementValue(1);
 
-					logger.log(LogLevel.WARN, "DISCARD_WRONG_MESSAGE_TYPE",
+					logger.log(LogLevel.WARN, "DISCARD_WRONG_MESSAGE_TYPE", //$NON-NLS-1$
 							new Object[] { messageType });
 
 					// If the error output port is defined, redirect the error
 					// to error output port
 					if (hasErrorPort) {
-						sendOutputErrorMsg("Discarding message as it has the wrong type , Expected: "
-								+ messageType);
+						sendOutputErrorMsg(Messages.getString("DISCARD_WRONG_MESSAGE_TYPE", new Object[] { messageType })); //$NON-NLS-1$
 					}
 					break;
 				// if unexpected end of message has been reached
 				case DISCARD_MESSAGE_EOF_REACHED:
 					nMessagesDropped.incrementValue(1);
-					logger.log(LogLevel.WARN, "DISCARD_MSG_TOO_SHORT");
+					logger.log(LogLevel.WARN, "DISCARD_MSG_TOO_SHORT"); //$NON-NLS-1$
 					// If the error output port is defined, redirect the error
 					// to error output port
 					if (hasErrorPort) {
-						sendOutputErrorMsg("The message is too short, and was discarded.");
+						sendOutputErrorMsg(Messages.getString("DISCARD_MSG_TOO_SHORT")); //$NON-NLS-1$
 					}
 					break;
 				// Mesage is read-only
 				case DISCARD_MESSAGE_UNREADABLE:
 					nMessagesDropped.incrementValue(1);
-					logger.log(LogLevel.WARN, "DISCARD_MSG_UNREADABLE");
+					logger.log(LogLevel.WARN, "DISCARD_MSG_UNREADABLE"); //$NON-NLS-1$
 					// If the error output port is defined, redirect the error
 					// to error output port
 					if (hasErrorPort) {
-						sendOutputErrorMsg("An attempt was made to read a write-only message, and the message was discarded.");
+						sendOutputErrorMsg(Messages.getString("DISCARD_MSG_UNREADABLE")); //$NON-NLS-1$
 					}
 					break;
 				case DISCARD_MESSAGE_MESSAGE_FORMAT_ERROR:
 					nMessagesDropped.incrementValue(1);
 					logger.log(LogLevel.WARN,
-							"DISCARD_MESSAGE_MESSAGE_FORMAT_ERROR");
+							"DISCARD_MESSAGE_MESSAGE_FORMAT_ERROR"); //$NON-NLS-1$
 					// If the error output port is defined, redirect the error
 					// to error output port
 					if (hasErrorPort) {
-						sendOutputErrorMsg("The type conversion was invalid. Hence the message was discarded.");
+						sendOutputErrorMsg(Messages.getString("DISCARD_MESSAGE_MESSAGE_FORMAT_ERROR")); //$NON-NLS-1$
 					}
 					break;
 				// the message was read successfully
@@ -858,7 +851,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 
 	@Override
 	public void checkpoint(Checkpoint checkpoint) throws Exception {
-		logger.log(LogLevel.INFO, "Checkpoint... ");
+		logger.log(LogLevel.INFO, "CHECKPOINT", checkpoint.getSequenceId()); //$NON-NLS-1$
 	 
 		crState.setCheckpointPerformed(true);
 		
@@ -875,17 +868,16 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 
 	@Override
 	public void drain() throws Exception {
-		logger.log(LogLevel.INFO, "Drain... ");
-		
+		logger.log(LogLevel.INFO, "DRAIN"); //$NON-NLS-1$		
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void reset(Checkpoint checkpoint) throws Exception {
-		logger.log(LogLevel.INFO, "Reset to checkpoint " + checkpoint.getSequenceId());
+		logger.log(LogLevel.INFO, "RESET_CHECKPOINT", checkpoint.getSequenceId()); //$NON-NLS-1$
 		
 		if(!isInitialConnectionEstablished()) {
-			throw new ConnectionException("Connection to JMS failed.");
+			throw new ConnectionException(Messages.getString("CONNECTION_TO_JMS_FAILED", new Object[]{})); //$NON-NLS-1$
 		}
 		
 		// Reset consistent region variables and recover JMS session to make re-delivery of
@@ -925,7 +917,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	}
 	
 	private void deduplicateMsg(long lastSentMsgTs, List<String> lastSentMsgIDs) throws JMSException, ConnectionException, InterruptedException {
-		logger.log(LogLevel.INFO, "Deduplicate messages...");
+		logger.log(LogLevel.INFO, "DEDUPLICATE_MESSAGES"); //$NON-NLS-1$
 		
 		boolean stop = false;
 		
@@ -939,7 +931,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 			
 			if(isDuplicateMsg(msg, lastSentMsgTs, lastSentMsgIDs)) {
 				msg.acknowledge();
-				logger.log(LogLevel.INFO, "Ignored duplicated message: " + msg.getJMSMessageID());
+				logger.log(LogLevel.INFO, "IGNORED_DUPLICATED_MSG", msg.getJMSMessageID()); //$NON-NLS-1$
 			}
 			else {
 				jmsConnectionHelper.recoverSession();
@@ -952,10 +944,10 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 
 	@Override
 	public void resetToInitialState() throws Exception {
-		logger.log(LogLevel.INFO, "Resetting to Initial...");
+		logger.log(LogLevel.INFO, "RESET_TO_INITIAL_STATE"); //$NON-NLS-1$
 		
 		if(!isInitialConnectionEstablished()) {
-			throw new ConnectionException("Connection to JMS failed.");
+			throw new ConnectionException(Messages.getString("CONNECTION_TO_JMS_FAILED", new Object[]{})); //$NON-NLS-1$
 		}
 		
 		jmsConnectionHelper.recoverSession();
@@ -965,7 +957,6 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 
 	@Override
 	public void retireCheckpoint(long id) throws Exception {
-		logger.log(LogLevel.INFO, "Retire checkpoint " + id);
-        
+		logger.log(LogLevel.INFO, "RETIRE_CHECKPOINT", id);		 //$NON-NLS-1$
 	}
 }

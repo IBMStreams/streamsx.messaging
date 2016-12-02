@@ -57,11 +57,11 @@ class EmptyMessageHandler extends JMSMessageHandlerImpl {
 				// format is "messagetype, msgid, deliveryMode, expiration"
 				StringBuilder builder = new StringBuilder();
 				builder.append(type);
-				builder.append(",");
+				builder.append(","); //$NON-NLS-1$
 				builder.append(msgId);
-				builder.append(",");
+				builder.append(","); //$NON-NLS-1$
 				builder.append(deliveryModeStr);
-				builder.append(",");
+				builder.append(","); //$NON-NLS-1$
 				builder.append(expiration);
 
 				tuple.setString(0, builder.toString());
@@ -74,22 +74,22 @@ class EmptyMessageHandler extends JMSMessageHandlerImpl {
 
 	private String getMessageType(Message message) {
 		if (message instanceof BytesMessage)
-			return "bytes";
+			return "bytes"; //$NON-NLS-1$
 		else if (message instanceof StreamMessage)
-			return "streams";
+			return "streams"; //$NON-NLS-1$
 		else if (message instanceof MapMessage)
-			return "map";
+			return "map"; //$NON-NLS-1$
 		else if (message instanceof TextMessage)
-			return "text";
+			return "text"; //$NON-NLS-1$
 		else if (message instanceof ObjectMessage)
-			return "object";
+			return "object"; //$NON-NLS-1$
 		else if (message instanceof Message)
-			return "empty";
-		return "unknown";
+			return "empty"; //$NON-NLS-1$
+		return "unknown"; //$NON-NLS-1$
 	}
 
 	private String getDeliveryMode(Message message) {
-		String deliveryModeStr = "unknown";
+		String deliveryModeStr = "unknown"; //$NON-NLS-1$
 		int deliveryMode = -1;
 		try {
 			deliveryMode = message.getJMSDeliveryMode();
@@ -97,9 +97,9 @@ class EmptyMessageHandler extends JMSMessageHandlerImpl {
 		}
 
 		if (deliveryMode == DeliveryMode.NON_PERSISTENT) {
-			deliveryModeStr = "non_persistent";
+			deliveryModeStr = "non_persistent"; //$NON-NLS-1$
 		} else if (deliveryMode == DeliveryMode.PERSISTENT) {
-			deliveryModeStr = "persistent";
+			deliveryModeStr = "persistent"; //$NON-NLS-1$
 		}
 		return deliveryModeStr;
 	}

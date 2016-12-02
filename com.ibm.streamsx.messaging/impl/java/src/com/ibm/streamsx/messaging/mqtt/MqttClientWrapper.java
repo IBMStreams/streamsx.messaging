@@ -25,7 +25,7 @@ import com.ibm.streams.operator.log4j.LoggerNames;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.metrics.Metric;
 import com.ibm.streamsx.messaging.common.PropertyProvider;
-import com.ibm.streamsx.messaging.i18n.Messages;
+import com.ibm.streamsx.messaging.mqtt.Messages;
 
 public class MqttClientWrapper implements MqttCallback {
 	private static final int COMMAND_TIMEOUT = 5000;
