@@ -54,7 +54,7 @@ public abstract class KafkaConsumerClient<K,V> extends KafkaBaseClient {
 		
 		if (partitions == null || partitions.isEmpty()){
 			//subscribe to the topics
-			trace.log(TraceLevel.INFO, "Subscribing to topics: " + topics.toString());
+			trace.log(TraceLevel.INFO, "Subscribing to topics: " + topics.toString()); //$NON-NLS-1$
 			consumer.subscribe(topics); 
 		} else {
 			//subscribe to specific partitions
@@ -63,7 +63,7 @@ public abstract class KafkaConsumerClient<K,V> extends KafkaBaseClient {
 				TopicPartition tPartition = new TopicPartition(topics.get(0), partition);
 				partitionList.add(tPartition);
 			}
-			trace.log(TraceLevel.INFO, "Subscribing to partitions: " + partitionList.toString() + " in topic: " + topics.get(0));
+			trace.log(TraceLevel.INFO, "Subscribing to partitions: " + partitionList.toString() + " in topic: " + topics.get(0)); //$NON-NLS-1$ //$NON-NLS-2$
 			consumer.assign(partitionList);
 		}	
 		
@@ -104,7 +104,7 @@ public abstract class KafkaConsumerClient<K,V> extends KafkaBaseClient {
 			Long offset = consumer.position(partition);
 			offsetMap.put(partition.partition(), offset);
 			if(trace.isLoggable(TraceLevel.INFO))
-				trace.log(TraceLevel.INFO, "Retrieving offset: " + offset + " for topic: " + partition.topic());
+				trace.log(TraceLevel.INFO, "Retrieving offset: " + offset + " for topic: " + partition.topic()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		return offsetMap;
@@ -119,7 +119,7 @@ public abstract class KafkaConsumerClient<K,V> extends KafkaBaseClient {
 			Entry<Integer, Long> entry = partitionOffsetIterator.next();
 			TopicPartition partition = new TopicPartition(topic, entry.getKey());
 			Long offset = entry.getValue();
-			trace.log(TraceLevel.INFO, "Seeking to offset: " + offset + " for topic: " + partition.topic() + " from postion: " + consumer.position(partition));
+			trace.log(TraceLevel.INFO, "Seeking to offset: " + offset + " for topic: " + partition.topic() + " from postion: " + consumer.position(partition)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			consumer.seek(partition, offset);
 		}
 	}
@@ -129,7 +129,7 @@ public abstract class KafkaConsumerClient<K,V> extends KafkaBaseClient {
 		Map<MetricName,KafkaMetric> metricsMap = (Map<MetricName, KafkaMetric>) consumer.metrics();
 		
 		for (Map.Entry<MetricName,KafkaMetric> metric : metricsMap.entrySet()){
-			if (metric.getKey().name().equals("connection-count")){
+			if (metric.getKey().name().equals("connection-count")){ //$NON-NLS-1$
 				if (metric.getValue().value() == 0){
 					throw new NoKafkaBrokerConnectionsException();
 				}
@@ -143,7 +143,7 @@ public abstract class KafkaConsumerClient<K,V> extends KafkaBaseClient {
 			topic = record.topic();
 			if(shutdown.get()) return;
 			if(trace.isLoggable(TraceLevel.DEBUG))
-				trace.log(TraceLevel.DEBUG, "Topic: " + topic + ", Message: " + record.value() );
+				trace.log(TraceLevel.DEBUG, "Topic: " + topic + ", Message: " + record.value() ); //$NON-NLS-1$ //$NON-NLS-2$
 			OutputTuple otup = streamingOutput.newTuple();
 			if(topicAH.isAvailable())
 				topicAH.setValue(otup, topic);
@@ -162,7 +162,7 @@ public abstract class KafkaConsumerClient<K,V> extends KafkaBaseClient {
 			K key);
 	
 	public void shutdown() {
-		trace.log(TraceLevel.ALL, "Shutting down Kafka Consumer Client...");
+		trace.log(TraceLevel.ALL, "Shutting down Kafka Consumer Client..."); //$NON-NLS-1$
 		shutdown.set(true);
 		consumer.close();	
 	}

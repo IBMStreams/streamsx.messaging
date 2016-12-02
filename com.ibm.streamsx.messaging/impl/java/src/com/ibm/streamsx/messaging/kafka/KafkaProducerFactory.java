@@ -17,13 +17,13 @@ public class KafkaProducerFactory {
 	public KafkaProducerClient getClient(AttributeHelper topicAH,
 			AttributeHelper keyAH, AttributeHelper messageAH, Properties props) {
 		if (messageAH.isString() && (!keyAH.isAvailable() || keyAH.isString())){
-			trace.log(TraceLevel.WARNING, "Using KafkaProducer<String,String> client.");
+			trace.log(TraceLevel.WARNING, "Using KafkaProducer<String,String> client."); //$NON-NLS-1$
 			client = new ProducerStringHelper(topicAH, keyAH, messageAH, props);
 		} else if ( !messageAH.isString() && (!keyAH.isAvailable() || !keyAH.isString())){
-			trace.log(TraceLevel.WARNING, "Using KafkaProducer<byte,byte> client.");
+			trace.log(TraceLevel.WARNING, "Using KafkaProducer<byte,byte> client."); //$NON-NLS-1$
 			client = new ProducerByteHelper(topicAH, keyAH, messageAH, props);
 		} else {
-			trace.log(TraceLevel.ERROR, "Key and Message type must match and be of type String or Byte.");
+			trace.log(TraceLevel.ERROR, Messages.getString("KEY_AND_MESSAGE_TYPE_MUST_MATCH_AND_BE_STRING_OR_BYTE")); //$NON-NLS-1$
 		}
 
 		return client;
