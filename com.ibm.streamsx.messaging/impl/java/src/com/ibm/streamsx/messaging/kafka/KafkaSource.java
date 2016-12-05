@@ -44,7 +44,6 @@ import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 public class KafkaSource extends KafkaBaseOper implements StateHandler{
 
 	static final String OPER_NAME = "KafkaConsumer";
-	private int threadsPerTopic = 1;
 	private List<Integer> partitions = new ArrayList<Integer>();
 	private static Logger trace = Logger.getLogger(KafkaSource.class.getName());
 	private final AtomicBoolean shutdown = new AtomicBoolean(false);
@@ -104,11 +103,6 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 			throws Exception {
 		super.initialize(context);
 		super.initSchema(getOutput(0).getStreamSchema());
-
-		if (threadsPerTopic < 1)
-			throw new IllegalArgumentException(
-					"Number of threads per topic cannot be less than one: "
-							+ threadsPerTopic);
 
 		// initialize the client
 		trace.log(TraceLevel.INFO, "Initializing source client");
