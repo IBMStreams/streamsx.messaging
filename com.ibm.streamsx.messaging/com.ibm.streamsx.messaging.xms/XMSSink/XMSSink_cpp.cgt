@@ -6,8 +6,7 @@
 %>
 
 <%
-   my $isInConsistentRegion = 
-   $model->getContext()->getOptionalContext("ConsistentRegion");
+   my $isInConsistentRegion = $model->getContext()->getOptionalContext("ConsistentRegion");
 %>
  
 <%
@@ -138,7 +137,7 @@ using namespace streams_boost;
     ### Consistent region ERROR message ###
     my $crContext = $model->getContext()->getOptionalContext("ConsistentRegion");
     if($crContext && $crContext->isStartOfRegion()) {
-        SPL::CodeGen::exitln("The following operator cannot be the start of a consistent region: XMSSink");
+        SPL::CodeGen::exitln(MSGTK_OP_CANNOT_BE_IN_CONSISTENT_REGION("XMSSink"));
     }
 %>
 
@@ -173,13 +172,13 @@ MY_OPERATOR::MY_OPERATOR() : nTruncatedInserts(0),nTruncatedInsertsPC( getContex
     
     # support relative binding file path.
     if(!defined ($ic) || $ic eq '') {
-        SPL::CodeGen::exitln("A value must be specified for initial_context attribute in connection document.");
+        SPL::CodeGen::exitln(MSGTK_VALUE_MUST_BE_SPECIFIED_FOR_INITIAL_CONTEXT_ATTRIB_IN_CONNECTION_DOC());
     }
 
     my $url = new URI($ic);
     
     if($url->scheme eq '') {
-        SPL::CodeGen::exitln("Invalid initial_context format detected.");
+        SPL::CodeGen::exitln(MSGTK_INVALID_INITIAL_CONTEXT_FORMAT_DETECTED());
     }
 
     if($url->scheme eq 'file') {
@@ -346,7 +345,7 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 	if (fatalError == true){
 		SPLAPPLOG(L_ERROR, MSGTK_PREVIOUS_ERROR, "XMSSink");
 		<% if (defined $operatorErrorPort ) { %>
-			SPLAPPLOG(L_INFO, SEND_TUPLE_ERROR_PORT, "XMSSink");
+			SPLAPPLOG(L_INFO, MSGTK_SEND_TUPLE_ERROR_PORT, "XMSSink");
 		    	sendOutputErrorMsg(ErrMsg,tuple);
 		<% }%>
 	}
@@ -367,9 +366,9 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 		 
 		// Carry on only if we have managed to get a connection 
 		if (connected == false){
-			ErrMsg<<"Dropping message as we do not have an XMS connection";
 			<%	if (defined $operatorErrorPort ) { %>
-		    		sendOutputErrorMsg(ErrMsg,tuple);
+				ErrMsg << MSGTK_MESSAGE_DROPPED;
+	    		sendOutputErrorMsg(ErrMsg,tuple);
 			<% }%>
 			SPLAPPLOG(L_ERROR, MSGTK_MESSAGE_DROPPED, "XMSSink");
 			nFailedInserts++;
@@ -768,12 +767,12 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 		} catch (xms::Exception & ex) {
 			// Unable to send
 			nFailedInserts++;
-			ErrMsg<<"Exception sending the message, exception = "<<ex.getErrorString().c_str()<<" Error Code = "<<ex.getErrorCode();
 			logmsg = MSGTK_EXCEPTION(ex.getErrorString().c_str(),ex.getErrorCode());
 			SPLAPPLOG(L_ERROR, logmsg, "XMSSink");
 			processException(ex);
 
 			<%	if (defined $operatorErrorPort ) { %>
+				ErrMsg << logmsg;
 				sendOutputErrorMsg(ErrMsg,tuple);
 			<% }%>
 	   
@@ -788,28 +787,29 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 		} catch (DistilleryException & ex) {
 			nFailedInserts++;
 			// Streams runtime exception
-	   		ErrMsg<<"Streams Exception occurred when sending the message. Explanation "<<ex.getExplanation().c_str();
+			logmsg = MSGTK_STREAMS_EXCEPTION(ex.what(),ex.getExplanation());
 			<%	if (defined $operatorErrorPort ) { %>
+				ErrMsg << logmsg;
 				sendOutputErrorMsg(ErrMsg,tuple);
 			<% }%>
-			logmsg = MSGTK_STREAMS_EXCEPTION(ex.what(),ex.getExplanation());
+			
 			SPLAPPLOG(L_ERROR, logmsg, "XMSSink");
 		
 		} catch (std::exception & ex) {
 			nFailedInserts++;
 			// Some other exception
-			ErrMsg<<"Other Exception occurred when sending the message"<<ex.what();
+			logmsg = MSGTK_OTHER_EXCEPTION(ex.what());
 			<%	if (defined $operatorErrorPort ) { %>
+				ErrMsg << logmsg;
 				sendOutputErrorMsg(ErrMsg,tuple);
 			<% }%>
-			logmsg = MSGTK_OTHER_EXCEPTION(ex.what());
 			SPLAPPLOG(L_ERROR, logmsg, "XMSSink");
 		
 		} catch (...) {
 			nFailedInserts++;
 			// Some unknown exception
-			ErrMsg<<"Unknown Exception occurred when sending the message";
 			<%	if (defined $operatorErrorPort ) { %>
+				ErrMsg << MSGTK_UNKNOWN_EXCEPTION;
 				sendOutputErrorMsg(ErrMsg,tuple);
 			<% }%>
 			SPLAPPLOG(L_ERROR, MSGTK_UNKNOWN_EXCEPTION, "XMSSink");

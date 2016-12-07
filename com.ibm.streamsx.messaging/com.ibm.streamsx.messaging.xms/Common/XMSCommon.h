@@ -101,7 +101,7 @@ xmsINT createAdminObjects() {
 			if (isErrorPortSpecified==true)
 			{
 				//Append to the InitializationErrMsg
-				InitializationErrMsg<<"Serious Error - InitialContext was not specified";
+				InitializationErrMsg<<MSGTK_INITIALCONTEXT_NON_EXISTENT;
 			}
 			nRC = XMS_E_BAD_PARAMETER;
 		}
@@ -117,7 +117,7 @@ xmsINT createAdminObjects() {
 					if (isErrorPortSpecified==true)
 					{
 						//Append to the InitializationErrMsg
-						InitializationErrMsg<<"Unable to lookup connection factory";
+						InitializationErrMsg<<MSGTK_CONFAC_LOOKUP_FAILURE;
 					}
 					nRC = XMS_E_BAD_PARAMETER;
 				}
@@ -135,7 +135,7 @@ xmsINT createAdminObjects() {
 						if (isErrorPortSpecified==true)
 						{
 							//Append to the InitializationErrMsg
-							InitializationErrMsg<<"Unable to lookup Destination";
+							InitializationErrMsg<<MSGTK_DEST_LOOKUP_FAILURE;
 						}
 						nRC = XMS_E_BAD_PARAMETER;
 					}
@@ -149,7 +149,7 @@ xmsINT createAdminObjects() {
 				if (isErrorPortSpecified==true)
 				{
 					//Append to the InitializationErrMsg
-					InitializationErrMsg<<"Unable to lookup connection factory or destination";
+					InitializationErrMsg<<MSGTK_CONFAC_DEST_LOOKUP_FAILURE;
 				}
 				processException(ex);
 				nRC = ex.getErrorCode();
@@ -158,11 +158,11 @@ xmsINT createAdminObjects() {
 	} catch (xms::Exception & ex) {
 		// Unable to create initial context.
 		SPL::rstring logmsg = MSGTK_INITIALCONTEXT_CREATION_ERROR(ex.getErrorString().c_str());
-		SPLAPPLOG(L_ERROR, MSGTK_logmsg, "XMSCommon");
+		SPLAPPLOG(L_ERROR, logmsg, "XMSCommon");
 		if (isErrorPortSpecified==true)
 		{
 			//Append to the InitializationErrMsg
-			InitializationErrMsg<<"Unable to create initial context, exception = "<<ex.getErrorString().c_str();
+			InitializationErrMsg<<logmsg;
 		}
 		processException(ex);
 		nRC = ex.getErrorCode();
@@ -172,7 +172,7 @@ xmsINT createAdminObjects() {
 		if (isErrorPortSpecified==true)
 		{
 			//Append to the InitializationErrMsg
-			InitializationErrMsg<<"Exception occurred when creating administered objects";
+			InitializationErrMsg<<MSGTK_ADMINISTERED_OBJECT_ERROR;
 		}
 		nRC = -1;
 	}
@@ -196,7 +196,7 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 	xmsINT nRC = XMS_OK;
 
 	try {
-			SPLAPPLOG(L_INFO, XMS_CONNECT, "XMSCommon");
+			SPLAPPLOG(L_INFO, MSGTK_XMS_CONNECT, "XMSCommon");
 
 			//set the reconnectionAttemptDelay to period
 			float reconnectionAttemptDelay = period;
@@ -214,7 +214,7 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 					SPLAPPLOG(L_ERROR, MSGTK_CONNECTION_FAILURE_NORETRY,"XMSCommon");
 					if (isErrorPortSpecified==true)
 					{					
-						InitializationErrMsg<<"XMSDBG Connection to XMS failed...Did not try to reconnect as the policy is noReconnect";
+						InitializationErrMsg<<MSGTK_CONNECTION_FAILURE_NORETRY;
 					}
 					throw new xms::Exception();
 				}
@@ -313,7 +313,7 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 													if (isErrorPortSpecified==true)
 													{
 														//Added  to append to the InitializationErrMsg
-														InitializationErrMsg<<"Unable to set Delivery Mode, exception = "<<ex.getErrorString().c_str();
+														InitializationErrMsg<<logmsg;
 													}
                 									processException(ex);
                 									nRC = ex.getErrorCode();
@@ -326,7 +326,7 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 										if (isErrorPortSpecified==true)
 										{		
 											//Added  to append to the InitializationErrMsg
-											InitializationErrMsg<<"Unable to create Producer, exception = "<<ex.getErrorString().c_str();
+											InitializationErrMsg<<logmsg;
 										}
                 						processException(ex);
                 						nRC = ex.getErrorCode();
@@ -347,7 +347,7 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 										if (isErrorPortSpecified==true)
 										{
 											//Added  to append to the InitializationErrMsg
-											InitializationErrMsg<<"Unable to create Consumer, exception = "<<ex.getErrorString().c_str();
+											InitializationErrMsg<<logmsg;
 										}
                 						processException(ex);
                 						nRC = ex.getErrorCode();
@@ -360,7 +360,7 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 							if (isErrorPortSpecified==true)
 							{
 								//Added  to append to the InitializationErrMsg
-								InitializationErrMsg<<"Unable to create Destination, exception = "<<ex.getErrorString().c_str();
+								InitializationErrMsg<<logmsg;
 							}
                 			processException(ex);
                 			nRC = ex.getErrorCode();
@@ -372,7 +372,7 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 					if (isErrorPortSpecified==true)
 					{
 						//Added  to append to the InitializationErrMsg
-						InitializationErrMsg<<"Unable to create Session, exception = "<<ex.getErrorString().c_str();
+						InitializationErrMsg<<logmsg;
 					}
                 	processException(ex);
                 	nRC = ex.getErrorCode();
@@ -385,7 +385,7 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 				if (isErrorPortSpecified==true)
 				{
 					//Append to the InitializationErrMsg
-					InitializationErrMsg<<"Exception occurred when creating XMS api objects";
+					InitializationErrMsg<<logmsg;
 				}
 				nRC = -1;
 		} catch (...) {
@@ -394,7 +394,7 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 			if (isErrorPortSpecified==true)
 			{
 				//Append to the InitializationErrMsg
-				InitializationErrMsg<<"Unknown Exception occurred when creating XMS api objects";
+				InitializationErrMsg<<MSGTK_XMS_API_UNKNOWN_EXCEPTION;
 			}
 			nRC = -1;
 	}
@@ -425,7 +425,7 @@ xmsINT connect() {
 		if (isErrorPortSpecified==true)
 		{
 			//Append to the InitializationErrMsg
-			InitializationErrMsg<<"Unable to create Connection, exception = "<<ex.getErrorString().c_str();
+			InitializationErrMsg<<logmsg;
 		}
 		processException(ex);
 		nRC = ex.getErrorCode();

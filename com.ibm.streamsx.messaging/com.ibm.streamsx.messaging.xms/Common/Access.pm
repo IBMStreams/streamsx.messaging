@@ -13,9 +13,11 @@ use File::Basename;
 use Cwd qw(realpath abs_path getcwd);
 use Encode;
 
+require MessagingResource;
+
 sub new {
   unless(@_ == 3 || @_ == 4) {
-    die "Incorrect number of arguments passed to Connection->new().  Required are type and name values.  Optional is document.***";
+    die MessagingResource::MSGTK_INCORRECT_NUMBER_OF_ARGS_FOR_CONNECTION();
     return 0;
   }
   my $class = shift @_;
@@ -31,19 +33,19 @@ sub new {
 
   # Check document file
   if (!(-e $document)) {
-    die "Connection XML document '$document' does not exist***";
+    die MessagingResource::MSGTK_CONNECTION_XML_DOC_DOES_NOT_EXIST($document);
   }
   if (!(-s $document)) {
-    die "Connection XML document '$document' is empty***";
+    die MessagingResource::MSGTK_CONNECTION_XML_DOC_EMPTY($document);
   }
   if (!(-r $document)) {
-    die "Connection XML document '$document' is not readable. Please check permissions***";
+    die MessagingResource::MSGTK_CONNECTION_XML_DOC_NOT_READABLE_CHECK_PERMISSIONS($document);
   }
   if (-d $document) {
-    die "'$document' is a directory, not a connection XML document***";
+    die MessagingResource::MSGTK_DOC_IS_DIR_NOT_XML_DOC($document);
   }
   if (!(-T $document)) {
-    die "Connection XML document '$document' is not a text file***";
+  	die MessagingResource::MSGTK_CONNECTION_XML_DOC_IS_NOT_TEXT_FILE($document);
   }
 
   # Validate the XML
@@ -55,7 +57,7 @@ sub new {
   system(Encode::encode($charmap, $xmllint));
   my $res = $? >> 8;
   if ($res != 0) {
-    die "Connection XML document '$document' does not validate with schema '$xsd' using the system command '$xmllint'***";
+  	die MessagingResource::MSGTK_CONNECTION_XML_DOC_DOES_NOT_VALIDATE($document, $xsd, $xmllint);
   }
 
   # Parse the access XML and grab the accesses element
@@ -78,11 +80,11 @@ sub new {
     # Fix "Is a directoryIs a directory"
     # Because of the -d check done earlier, it is hoped we never get this, but just in case (e.g., race condition
     # with a file being moved); also, this check should not cause any harm
-    if ($msg eq "Is a directoryIs a directory") {
-      die "$document is a directory, not a connection xml document***";
+    if ($msg eq "Is a directoryIs a directory") {	# TODO: Is the duplicated string correct???
+      die MessagingResource::MSGTK_DOC_IS_DIR_NOT_XML_DOC($document);
     }
-
-    die "Connection XML file problem. $msg***";
+    
+	die MessagingResource::MSGTK_CONNECTION_XML_FILE_PROBLEM($msg);
   }
 
 # Process the access specifications
@@ -91,12 +93,12 @@ sub new {
 
   $refType = ref($accspec);
   unless (defined($refType) && $refType ne '') {
-    die "Missing access_specification named '$name' in file '$document'***";
+  	die MessagingResource::MSGTK_MISSING_ACCESS_SPEC_IN_FILE($name, $document);
   }
 
   $refType = ref($accspec->{$type});
   unless (defined($refType) && $refType ne '') {
-    die "Missing '$type' tag from access_specification '$name' in file '$document'***";
+  	die MessagingResource::MSGTK_MISSING_TAG_FROM_ACCESS_SPEC_IN_FILE($type, $name, $document);
   }
 
   my $self = {
@@ -279,7 +281,7 @@ sub usesConnection {
 # value violating the check should have an error message printed.
 sub checkStaticParameterAt {
   unless(@_ == 3 || @_ == 4) {
-    die "Incorrect number of arguments passed to Access->checkStaticParameterAt().  Required are index and check values.  Optional is quiet mode.***";
+  	die MessagingResource::MSGTK_INCORRECT_NUMBER_OF_ARGS_PASSED_TO_ACCESS_CHECKSTATICPARAMAT();
     return 0;
   }
   my $self = shift @_;
@@ -289,7 +291,7 @@ sub checkStaticParameterAt {
   $quietmode = shift if @_;
 
   if (not (exists $self->{_parameters}->{parameter}->[$index])) {
-    die "Invalid parameter check.  '$index' is greater than the number of parameters for the access named '$self->{_name}'***";
+  	die MessagingResource::MSGTK_INVALID_PARAM_CHECK($index, $self->{_name});
   }
   if (not (exists $self->{_parameters}->{parameter}->[$index]->{check})) { return 1; }
   my $check = $self->{_parameters}->{parameter}->[$index]->{check};
@@ -301,26 +303,26 @@ sub checkStaticParameterAt {
     } else {
       if (!$quietmode) {
         my @values = keys %{$check->{allowed}};
-        die "Invalid constant value '$checkval' for parameter '$self->{_parameters}->{parameter}->[$index]->{name}' of access named '$self->{_name}'.  Valid values are: @values***";
+        die MessagingResource::MSGTK_INVALID_CONST_VALUE_FOR_PARAM_OF_ACCESS($checkval, $self->{_parameters}->{parameter}->[$index]->{name}, $self->{_name}, @values);
       }
       return 0;
     }
   } elsif ($checktype eq 'range') {
     if ($checkval > $check->{max}) {
       if (!$quietmode) {
-        die "Value of '$checkval' for parameter '$self->{_parameters}->{parameter}->[$index]->{name}' of access named '$self->{_name}' is over the maximum allowed of '$check->{max}'***";
+        die MessagingResource::MSGTK_VALUE_FOR_PARAM_OF_ACCESS_IS_OVER_MAX($checkval, $self->{_parameters}->{parameter}->[$index]->{name}, $self->{_name}, $check->{max});
       }
       return 0;
     }
     if ($checkval < $check->{min}) {
       if (!$quietmode) {
-        die "Value of '$checkval' for parameter '$self->{_parameters}->{parameter}->[$index]->{name}' of access named '$self->{_name}' is under the minimum allowed of '$check->{min}'***";
+        die MessagingResource::MSGTK_VALUE_FOR_PARAM_OF_ACCESS_IS_UNDER_MIN($checkval, $self->{_parameters}->{parameter}->[$index]->{name}, $self->{_name}, $check->{min});
       }
       return 0;
     }
     return 1;  # we're within the range if we reach here
   } else {
-    die "Unsupported check type specified for parameter '$self->{_parameters}->{parameter}->[$index]->{name}' of access named '$self->{_name}'***";
+    die MessagingResource::MSGTK_UNSUPPORTED_CHECK_TYPE_FOR_PARAM_OF_ACCESS($self->{_parameters}->{parameter}->[$index]->{name}, $self->{_name});
   }
   return 0; # Should not have reached this line
 }
@@ -332,7 +334,7 @@ sub checkRuntimeParameterAt {
   my ($self, $index, $checkval) = @_;
 
   if (not (exists $self->{_parameters}->{parameter}->[$index])) {
-    die "Invalid parameter check.  '$index' is greater than the number of parameters for the access named '$self->{_name}'***";
+  	die MessagingResource::MSGTK_INVALID_PARAM_CHECK_GREATER_THAN_NUMBER_OF_PARAMS_FOR_ACCESS($index, $self->{_name});
   }
 
   if (not (exists $self->{_parameters}->{parameter}->[$index]->{check})) { return "1"; }
@@ -377,7 +379,7 @@ sub checkRuntimeParameterAt {
       }
     }
   } else {
-    die "Unsupported check type specified for parameter '$self->{_parameters}->{parameter}->[$index]->{name}' of access named '$self->{_name}'***";
+  	die MessagingResource::MSGTK_UNSUPPORTED_CHECK_TYPE_FOR_PARAM_OF_ACCESS($self->{_parameters}->{parameter}->[$index]->{name}, $self->{_name});
   }
 
   return $code . ')';

@@ -411,9 +411,8 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 				if (reconPolicy != ReconnectionPolicies.BoundedRetry) {
 					logger.log(LogLevel.ERROR, "REC_BOUND_NOT_ALLOWED"); //$NON-NLS-1$
 					checker.setInvalidContext(
-							Messages.getString("RECONNECTIONBOUND_CAN_APPEAR_ONLY_WHEN_RECONNECTIONPOLICY_PARAM_IS_SET_TO_BOUNDENTRY"), //$NON-NLS-1$
-							new String[] { context.getParameterValues(
-									"reconnectionBound").get(0) }); //$NON-NLS-1$
+							Messages.getString("RECONNECTIONBOUND_CAN_APPEAR_ONLY_WHEN_RECONNECTIONPOLICY_IS_BOUNDEDRETRY"), //$NON-NLS-1$
+							new String[] { context.getParameterValues("reconnectionBound").get(0) }); //$NON-NLS-1$
 
 				}
 			}

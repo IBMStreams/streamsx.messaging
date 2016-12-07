@@ -28,6 +28,9 @@ require Connection;
 require Access;
 require Edge;
 
+unshift @INC, dirname($modelroot) . "../impl/nl/include";
+require MessagingResource;
+
 
 # Set up the objects that interface with this operator's connection specification and access specification.
 my ($conn, $access) = Edge::connectionSetup($model, $connTag, $accessTag);
@@ -149,7 +152,7 @@ using namespace streams_boost;
     ### Consistent region ERROR message ###
     my $crContext = $model->getContext()->getOptionalContext("ConsistentRegion");
     if($crContext) {
-        SPL::CodeGen::exitln("The following operator cannot be in a consistent region: XMSSource");
+        SPL::CodeGen::exitln(MSGTK_OP_CANNOT_BE_IN_CONSISTENT_REGION("XMSSource"));
     }
 %>
 
@@ -184,13 +187,13 @@ MY_OPERATOR::MY_OPERATOR(): nMessagesReadPC( getContext().getMetrics().getCustom
     
     # support relative binding file path.
     if(!defined ($ic) || $ic eq '') {
-        SPL::CodeGen::exitln("A value must be specified for initial_context attribute in connection document.");
+    	SPL::CodeGen::exitln(MSGTK_VALUE_MUST_BE_SPECIFIED_FOR_INITIAL_CONTEXT_ATTRIB_IN_CONNECTION_DOC());
     }
 
     my $url = new URI($ic);
     
     if($url->scheme eq '') {
-        SPL::CodeGen::exitln("Invalid initial_context format detected.");
+    	SPL::CodeGen::exitln(MSGTK_INVALID_INITIAL_CONTEXT_FORMAT_DETECTED());
     }
 
     if($url->scheme eq 'file') {
@@ -411,7 +414,7 @@ void MY_OPERATOR::initialize()
 
 }
 
-// Processing for source and threaded operators   
+// Processing for source and threaded operators  
 void MY_OPERATOR::process(uint32_t idx)
 {
 	SPL::rstring logmsg;
@@ -423,8 +426,8 @@ void MY_OPERATOR::process(uint32_t idx)
 		
 		SPLAPPLOG(L_ERROR, MSGTK_PREVIOUS_ERROR, "XMSSource");
 		<% if (defined $operatorErrorPort ) { %>
-				ErrMsg<<PREVIOUS_ERROR;
-		    	sendOutputErrorMsg(ErrMsg);
+			ErrMsg<<MSGTK_PREVIOUS_ERROR;
+		    sendOutputErrorMsg(ErrMsg);
 		<% }%>
 	}
 
@@ -439,8 +442,8 @@ void MY_OPERATOR::process(uint32_t idx)
 		catch (xms::Exception & ex) {
 			logmsg = MSGTK_MESSAGE_LISTENER_ERROR(ex.getErrorString().c_str());
 			SPLAPPLOG(L_ERROR, logmsg, "XMSSource");
-			ErrMsg<<"Unable to start the message listener WITH ID, exception = "<<ex.getErrorString();
 			<%	if (defined $operatorErrorPort ) { %>
+				ErrMsg<<logmsg;
 				sendOutputErrorMsg(ErrMsg);
 			<% }%>
 			processException(ex);
@@ -508,10 +511,10 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 			<% if ($msgType ne 'bytes')
 # $msgType is the type we expected to receive
 			{   %>
-				logmsg=DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","bytes");
+				logmsg=MSGTK_DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","bytes");
 				SPLAPPLOG(L_WARN, logmsg, "XMSSource");
-				ErrMsg<<logmsg;
 				<%	if (defined $operatorErrorPort ) { %>
+					ErrMsg<<logmsg;
 					sendOutputErrorMsg(ErrMsg);
 				<% }%>
 
@@ -599,9 +602,9 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 						if (len < length) 
 						{
 							
-							SPLAPPLOG(L_WARN, DISCARD_MSG_TOO_SHORT , "XMSSource");
+							SPLAPPLOG(L_WARN, MSGTK_DISCARD_MSG_TOO_SHORT , "XMSSource");
 							<%	if (defined $operatorErrorPort ) { %>
-									ErrMsg<<DISCARD_MSG_TOO_SHORT;
+									ErrMsg<<MSGTK_DISCARD_MSG_TOO_SHORT;
 									sendOutputErrorMsg(ErrMsg);
 								<% }%>
 							break;
@@ -634,11 +637,11 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 								xmsINT len = pBytes->readBytes(NULL, length, NULL);
 								if (len < length)
 								{
-									SPLAPPLOG(L_WARN, DISCARD_MSG_TOO_SHORT , "XMSSource");
+									SPLAPPLOG(L_WARN, MSGTK_DISCARD_MSG_TOO_SHORT , "XMSSource");
 									<%	if (defined $operatorErrorPort ) { %>
-										ErrMsg<<DISCARD_MSG_TOO_SHORT;
+										ErrMsg<<MSGTK_DISCARD_MSG_TOO_SHORT;
 										sendOutputErrorMsg(ErrMsg);
-								<% }%>
+									<% }%>
 									break;
 								}
 							<%}
@@ -659,10 +662,10 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 							xmsINT len = pBytes->readBytes(buffer, length, NULL);
 							if (len < length)
 							{
-								SPLAPPLOG(L_WARN, DISCARD_MSG_TOO_SHORT , "XMSSource");
+								SPLAPPLOG(L_WARN, MSGTK_DISCARD_MSG_TOO_SHORT , "XMSSource");
 								
 								<% if (defined $operatorErrorPort ) { %>
-									ErrMsg<<DISCARD_MSG_TOO_SHORT;
+									ErrMsg<<MSGTK_DISCARD_MSG_TOO_SHORT;
 									sendOutputErrorMsg(ErrMsg);
 								<% }%>
 								break;
@@ -712,10 +715,10 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 			{%>
 				//$msgType is the type we expected to receive
 				
-				logmsg=DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","map");
+				logmsg=MSGTK_DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","map");
 				SPLAPPLOG(L_WARN, logmsg, "XMSSource");
-				ErrMsg<<logmsg;
 				<%	if (defined $operatorErrorPort ) { %>
+					ErrMsg<<logmsg;
 					sendOutputErrorMsg(ErrMsg);
 				<% }%>
 
@@ -797,10 +800,10 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 			<%if ($msgType ne 'stream')
 			# $msgType is the type we expected to receive
 			{%>
-				logmsg=DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","stream");
+				logmsg=MSGTK_DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","stream");
 				SPLAPPLOG(L_WARN, logmsg, "XMSSource");
-				ErrMsg<<logmsg;
 				<%	if (defined $operatorErrorPort ) { %>
+					ErrMsg<<logmsg;
 					sendOutputErrorMsg(ErrMsg);
 				<% }%>
 
@@ -924,10 +927,10 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 			<% if ($msgType ne 'text')
 			# $msgType is the type we expected to receive
 			{%>
-				logmsg=DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","text");
+				logmsg=MSGTK_DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","text");
 				SPLAPPLOG(L_WARN, logmsg, "XMSSource");
-				ErrMsg<<logmsg;
 				<%	if (defined $operatorErrorPort ) { %>
+					ErrMsg<<logmsg;
 					sendOutputErrorMsg(ErrMsg);
 				<% }%>
 
@@ -936,8 +939,8 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 			{%>
 				logmsg = MSGTK_OBJ_UNSUPPORTED("<%=$access->getName()%>");
 				SPLAPPLOG(L_ERROR, logmsg, "XMSSource");
-				ErrMsg<<logmsg;
 				<%	if (defined $operatorErrorPort ) { %>
+					ErrMsg<<logmsg;
 					sendOutputErrorMsg(ErrMsg);
 				<% }%>
 
@@ -948,10 +951,10 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 			<% if ($msgType ne 'object')
 			# $msgType is the type we expected to receive
 			{%>
-				logmsg=DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","object");
+				logmsg=MSGTK_DISCARD_MSG_WRONG_TYPE("<%=$msgType%>","object");
 				SPLAPPLOG(L_WARN, logmsg, "XMSSource");
-				ErrMsg<<logmsg;
 				<%	if (defined $operatorErrorPort ) { %>
+					ErrMsg<<logmsg;
 					sendOutputErrorMsg(ErrMsg);
 				<% }%>
 
@@ -960,8 +963,8 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 			{%>
 				logmsg = MSGTK_TXT_UNSUPPORTED("<%=$access->getName()%>");
 				SPLAPPLOG(L_ERROR, logmsg, "XMSSource");
-				ErrMsg<<logmsg;
 				<%	if (defined $operatorErrorPort ) { %>
+					ErrMsg<<logmsg;
 					sendOutputErrorMsg(ErrMsg);
 				<% }%>
 
@@ -974,8 +977,8 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 				logmsg = MSGTK_DISCARD_MSG_MISSING_BODY("<%=$msgType%>");
 				SPLAPPLOG(L_WARN, logmsg, "XMSSource");
 				<%	if (defined $operatorErrorPort ) { %>
-						ErrMsg<<logmsg;
-						sendOutputErrorMsg(ErrMsg);
+					ErrMsg<<logmsg;
+					sendOutputErrorMsg(ErrMsg);
 				<% }%>
 			<%}
 			else {			
@@ -1005,9 +1008,9 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 			break;
 
 		default:
-			SPLAPPLOG(L_WARN, DISCARD_MSG_UNRECOG_TYPE, "XMSSource");
-			ErrMsg<<"Discarding the message as it has an unrecognised type";
+			SPLAPPLOG(L_WARN, MSGTK_DISCARD_MSG_UNRECOG_TYPE, "XMSSource");
 			<%	if (defined $operatorErrorPort ) { %>
+				ErrMsg<<MSGTK_DISCARD_MSG_UNRECOG_TYPE;
 				sendOutputErrorMsg(ErrMsg);
 			<% }%>
 
@@ -1016,12 +1019,15 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 	}
 	catch (xms::Exception & ex) {
 		if (ex.getErrorCode() == XMS_E_NOT_SET){
-			ErrMsg<<"Discarding the message as it has at least one missing attribute"<<ex.getErrorString();
+			logmsg=MSGTK_DISCARD_MSG_MISSING_ATTR(ex.getErrorString().c_str());
+			SPLAPPLOG(L_WARN, logmsg, "XMSSource");
+			
 			<%	if (defined $operatorErrorPort ) { %>
+				ErrMsg << logmsg;
 				sendOutputErrorMsg(ErrMsg);
 			<% }%>
 
-			SPLAPPLOG(L_WARN, DISCARD_MSG_MISSING_ATTR, "XMSSource");
+			
 			
 
 		}
@@ -1030,9 +1036,9 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 			logmsg = MSGTK_UNABLE_PROCESS_MESSAGE(ex.getErrorString().c_str());
 			SPLAPPLOG(L_ERROR, logmsg, "XMSSource");
 
-			ErrMsg<<"Unable to process the incoming message, exception = "<<ex.getErrorString().c_str();
 			<%	if (defined $operatorErrorPort ) { %>
-			sendOutputErrorMsg(ErrMsg);
+				ErrMsg << logmsg;
+				sendOutputErrorMsg(ErrMsg);
 			<% }%>
 
 			processException(ex);
@@ -1043,8 +1049,8 @@ xmsVOID MY_OPERATOR::onMessage(xms::Message * pMsg)
 		logmsg = MSGTK_STREAMS_EXCEPTION(ex.what(),ex.getExplanation().c_str());
 		SPLAPPLOG(L_ERROR, logmsg, "XMSSource");
 
-		ErrMsg<<logmsg;
 		<%	if (defined $operatorErrorPort ) { %>
+			ErrMsg<<logmsg;
 			sendOutputErrorMsg(ErrMsg);
 		<% }%>
 	}

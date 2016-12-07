@@ -465,7 +465,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		
 		if(context.getParameterNames().contains("triggerCount")) { //$NON-NLS-1$
 			if(Integer.valueOf(context.getParameterValues("triggerCount").get(0)) < 1) { //$NON-NLS-1$
-				logger.log(LogLevel.ERROR, "TRIGGERCOUNT_SHOULD_BE_GREATER_THAN_ZERO"); //$NON-NLS-1$
+				logger.log(LogLevel.ERROR, "TRIGGERCOUNT_VALUE_SHOULD_BE_GREATER_THAN_ZERO", new String[] { context.getParameterValues("triggerCount").get(0).trim() } ); //$NON-NLS-1$ //$NON-NLS-2$
 				checker.setInvalidContext(
 						Messages.getString("TRIGGERCOUNT_VALUE_SHOULD_BE_GREATER_THAN_ZERO"), //$NON-NLS-1$
 						new String[] { context.getParameterValues("triggerCount").get(0).trim() }); //$NON-NLS-1$
@@ -615,7 +615,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 				messageHandlerImpl = new TextMessageHandler(connectionDocumentParser.getNativeSchemaObjects());
 				break;
 			default:
-				throw new RuntimeException(Messages.getString("NO_VALID_MESSAGE_CLASS_IS_SPECIFIED")); //$NON-NLS-1$
+				throw new RuntimeException(Messages.getString("NO_VALID_MSG_CLASS_SPECIFIED")); //$NON-NLS-1$
 		}
 		
 		// register for data governance

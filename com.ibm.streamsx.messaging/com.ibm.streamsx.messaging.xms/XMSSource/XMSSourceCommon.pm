@@ -6,10 +6,15 @@ package XMSSourceCommon;
 
 use File::Basename;
 
+
+
 sub verify($) 
 {
-	
 	my ($model) = @_;
+
+	my $modelroot = $model->getContext()->getOperatorDirectory();
+	unshift @INC, dirname($modelroot) . "/../impl/nl/include";
+	require MessagingResource;
 
 
 	#Need to know about the reconnection policy
@@ -21,18 +26,18 @@ sub verify($)
 	#reconnectionBound parameter can only appear if reconnectionPolicy is  BoundedRetry
 	if (defined $reconnectionBound) {
 		if (!defined $reconnectionPolicy || $reconnectionPolicy->getValueAt(0)->getSPLExpression() ne "BoundedRetry") {
-			SPL::CodeGen::exitln("Operator \'XMSSource\': reconnectionBound parameter can only appear if reconnectionPolicy is  \'BoundedRetry\' ");
+			SPL::CodeGen::exitln(MessagingResource::MSGTK_RECONNECTIONBOUND_ONLY_IF_RECONNECTIONPOLICY_IS_BOUNDEDRETRY("XMSSource"));
 		}
 		#reconnectionBound cannot be negative
 		if ($reconnectionBound->getValueAt(0)->getSPLExpression() <0)
 		{
-			SPL::CodeGen::exitln("Operator \'XMSSource\': reconnectionBound cannot be negative ");    
+			SPL::CodeGen::exitln(MessagingResource::MSGTK_RECONNECTIONBOUND_CANNOT_BE_NEGATIVE("XMSSource"));    
 		}
 	}
 
 	#period parameter can only appear if reconnectionPolicy is defined
-	if (defined $period && !defined $reconnectionPolicy ) {        
-		SPL::CodeGen::exitln("Operator \'XMSSource\': period parameter can only appear if reconnectionPolicy is specified ");    
+	if (defined $period && !defined $reconnectionPolicy ) {
+		SPL::CodeGen::exitln(MessagingResource::MSGTK_PERIOD_PARAM_ONLY_IF_RECONNECTIONPOLICY_IS_SPECIFIED("XMSSource"));            
 	}
 	
 	
@@ -45,9 +50,7 @@ sub verify($)
 
 	#native_schema should not be specified when message class is empty.
  	if (($msgType eq 'empty') && ($nparm > 0)){
-	      SPL::CodeGen::exitln("Operator \'XMSSource\': unable to use message class \'" . $msgType .
-		"\' in access specification " . $access->getName() .
-		" if native schema attributes have been supplied\n");
+		SPL::CodeGen::exitln(MessagingResource::MSGTK_UNABLE_TO_USE_MSG_CLASS_IN_ACCESS_SPEC_IF_NATIVE_SCHEMA_ATTRIBS_SUPPLIED("XMSSource", $msgType, $access->getName()));
 	}
 
 	
@@ -64,7 +67,7 @@ sub verify($)
 			my $errorAttribute =($operatorErrorPort)->getAttributeAt(0);
 			my $errorAttributeType = $errorAttribute->getSPLType();		
 			if ($errorAttributeType ne 'rstring') {
-				SPL::CodeGen::exitln("Operator \'XMSSource\': The error ourput port can only contain an rstring.\n");
+				SPL::CodeGen::exitln(MessagingResource::MSGTK_ERROR_OUTPUT_PORT_CAN_ONLY_CONTAIN_RSTRING("XMSSource"));
 			}
 	}
 
@@ -95,10 +98,8 @@ sub verify($)
 		# Check that the user hasn't specified a length value for types other than String or ByteLists
 		if (($$parm{_type} ne "String") && ($$parm{_type} ne "Bytes") && ($$parm{_length} ne -1 ))
 		{
-			SPL::CodeGen::exitln("Operator \'XMSSource\': native schema attribute \'$$parm{_name}\' defined in access specification " . $access->getName() . 
-			" must not have a length specification\n");
+			SPL::CodeGen::exitln(MessagingResource::MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_MUST_NOT_LENGTH_SPEC("XMSSource", $$parm{_name}, $access->getName()));
 		} 
-
 
 		# If the schema attribute exists in the output stream we need to check that the schema type matches the output type
 		my $outAttr =  $outStream->getAttributeByName ( $$parm{_name} );
@@ -106,22 +107,18 @@ sub verify($)
 		{
 			#Verify if the attribute in native schema has a matching attribute in the input stream and if they have the same type     
 			if (($outAttr->getSPLType() ne "int8") && ($outAttr->getSPLType() ne "uint8") && ($outAttr->getSPLType() ne "int16") && ($outAttr->getSPLType() ne "uint16") && ($outAttr->getSPLType() ne "int32") && ($outAttr->getSPLType() ne "uint32") && ($outAttr->getSPLType() ne "int64") && ($outAttr->getSPLType() ne "float32") && ($outAttr->getSPLType() ne "float64") && ($outAttr->getSPLType() ne "boolean") && ($outAttr->getSPLType() ne "blob") && ($outAttr->getSPLType() ne "rstring")){
-				SPL::CodeGen::exitln("Operator \'XMSSource\': Stream schema attribute \'" .$$parm{_name} . "\'is not a supported data type\n");
+				SPL::CodeGen::exitln(MessagingResource::MSGTK_STREAM_SCHEMA_ATTRIB_IS_NOT_SUPPORTED_DATA_TYPE("XMSSource", $$parm{_name}));
 			}     
 
 			#check its type
 			if ($XMStypeTable{$outAttr->getSPLType()} ne $$parm{_type})
 			{
-				SPL::CodeGen::exitln("Operator \'XMSSource\': native schema attribute \'" . $$parm{_name} .
-				"\' in access specification " . $access->getName() .
-				" has type \'" . $$parm{_type} .
-				"\' which does not match the attribute in the output stream schema\n");
+				SPL::CodeGen::exitln(MessagingResource::MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_HAS_TYPE_WHICH_DOSNT_MATCH_ATTRIB_IN_OUTPUT_STREAM_SCHEMA("XMSSource", $$parm{_name}, $access->getName(), $$parm{_type}));
 			}  
 			
 			if (defined $schemaAttrs{$$parm{_name} })
 			{
-				SPL::CodeGen::exitln("Operator \'XMSSource\': native schema attribute \'" . $$parm{_name} .
-				"\' defined twice in access specification " . $access->getName() . "\n");
+				SPL::CodeGen::exitln(MessagingResource::MSGTK_NATIVE_SCHEMA_ATTRIB_DEFINED_TWICE_IN_ACCESS_SPEC("XMSSource", $$parm{_name}, $access->getName()));
 			}  
 			$schemaAttrs { $$parm{_name} } = $$parm{_type};  
 		}
@@ -134,9 +131,7 @@ sub verify($)
        	my $outputAttr = $outStream->getAttributeAt($i);
 		if (($outputAttr->hasAssignment() == 0) && (!defined $schemaAttrs {$outputAttr->getName()}) )
 		{
-			SPL::CodeGen::exitln("Operator \'XMSSource\': output stream attribute \'" . $$parm{_name} .
-			" has no matching attribute in the native schema " .
-			"\' in access specification " . $access->getName() ."\n");
+			SPL::CodeGen::exitln(MessagingResource::MSGTK_OUTPUT_STREAM_ATTRIB_HAS_NO_MATCHING_ATTRIB_IN_NATIVE_SCHEMA_OF_ACCESS_SPEC("XMSSource", $$parm{_name}, $access->getName()));
 		} 
 	}
 
@@ -156,9 +151,7 @@ sub verify($)
 				{
 					next; # do not throw an error if the last attribute has no length (i.e. length == -1)
 				} else {
-					SPL::CodeGen::exitln("Operator \'XMSSource\': native schema attribute \'" . $$parm{_name} .  
-					"\' defined in access specification \'" . $access->getName() . 
-					"\' must have a valid length specification\n");	
+					SPL::CodeGen::exitln(MessagingResource::MSGTK_NATIVE_SCHEMA_ATTRIB_DEFINED_IN_ACCESS_SPEC_MUST_HAVE_VALID_LENGTH_SPEC("XMSSource", $$parm{_name}, $access->getName()));
 				}
 			}
 		}
@@ -171,10 +164,8 @@ sub verify($)
 		{
 			my $parm = @$parmlist[$i];
 			my $length = $$parm{_length};
-			if ($length<-1){	
-				SPL::CodeGen::exitln("Operator \'XMSSource\': native schema attribute \'" . $$parm{_name} .  
-				"\' defined in access specification \'" . $access->getName() . 
-				"\' must have a valid length specification\n");
+			if ($length<-1){
+				SPL::CodeGen::exitln(MessagingResource::MSGTK_NATIVE_SCHEMA_ATTRIB_DEFINED_IN_ACCESS_SPEC_MUST_HAVE_VALID_LENGTH_SPEC("XMSSource", $$parm{_name}, $access->getName()));
 			}
 		}
 	}
