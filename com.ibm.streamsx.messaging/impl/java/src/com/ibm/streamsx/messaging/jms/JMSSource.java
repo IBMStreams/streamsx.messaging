@@ -710,7 +710,6 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 			return filePath;
 		} else {
 			File f = new File (getOperatorContext().getPE().getApplicationDirectory(), filePath);
-			System.out.println(f);
 			return f.getAbsolutePath();
 		}
 	}
