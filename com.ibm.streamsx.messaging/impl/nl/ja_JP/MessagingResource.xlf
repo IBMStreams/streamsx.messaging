@@ -1,0 +1,739 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- begin_generated_IBM_copyright_prolog                             -->
+<!--                                                                  -->
+<!-- This is an automatically generated copyright prolog.             -->
+<!-- After initializing,  DO NOT MODIFY OR MOVE                       -->
+<!-- **************************************************************** -->
+<!-- Licensed Materials - Property of IBM                             -->
+<!-- 5724-Y95                                                         -->
+<!-- (C) Copyright IBM Corp.  2012, 2016    All Rights Reserved.      -->
+<!-- US Government Users Restricted Rights - Use, duplication or      -->
+<!-- disclosure restricted by GSA ADP Schedule Contract with          -->
+<!-- IBM Corp.                                                        -->
+<!--                                                                  -->
+<!-- end_generated_IBM_copyright_prolog                               -->
+<xliff version="1.1" xmlns="urn:oasis:names:tc:xliff:document:1.1" 
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.1 _path_/xliff-core-1.1.xsd">
+   <file datatype="plaintext" original="root.txt" source-language="en" target-language="ja" xml:space="preserve">
+      <body>
+      <!-- =============================================================== -->
+      <!-- TRNOTE Please refer to the "XML Localization Interchange File   -->
+      <!-- Format (.xlf) files" section in the translation instructions    -->
+      <!-- file for more information on this file.                         -->
+      <!--                                                                 -->
+      <!-- NLS_ENCODING=UTF-8                                              -->
+      <!-- TRNOTE Return this file using the UTF-8 encoding.               -->
+      <!--                                                                 -->
+      <!-- NLS_MESSAGEFORMAT_ALL                                           -->
+      <!-- TRNOTE Because of a behavior with the Java MessageFormat class, -->
+      <!-- any message in the Java Resource Bundle that has a {0} string   -->
+      <!-- in it, must escape all single quotes in that message. To escape -->
+      <!-- the single quote, just insert another single quote before it.   -->
+      <!-- For example, the following message                              -->
+      <!--    "Can't find card with name [{0}]"                            -->
+      <!-- would be changed to                                             -->
+      <!--    "Can''t find card with name [{0}]"                           -->
+      <!--                                                                 -->
+      <!-- TRNOTE Do not translate the text between the curly braces. This -->
+      <!-- text is reserved and should not be translated. For example,     -->
+      <!-- the text in the following curly braces should not be translated:-->
+      <!--    {0,number} {0,number,percent} {0,date} {0,time}              -->
+      <!--                                                                 -->
+      <!-- TRNOTE For the target language setting, please use the          -->
+      <!-- appropriate value for your locale as indicated in parenthesis:  -->
+      <!--   Danish (da), Dutch (nl), Finnish (fi), French (fr),           -->
+      <!--   German (de), Italian (it), Norwegian - Bokmal (no),           -->
+      <!--   Brazilian Portuguese (pt-BR), Portuguese (pt-PT),             -->
+      <!--   Spanish (es), Swedish (sv), Czech (cs), Hungarian (hu),       -->
+      <!--   Polish (pl), Russian (ru), Simplified Chinese (zh),           -->
+      <!--   Traditional Chinese (zh-TW), Japanese (ja), Korean (ko),      -->
+      <!--   Arabic (ar), Hebrew (he), Slovakian (sk), Slovenian (sl),     -->
+      <!--   Thai (th), Turkish (tr)                                       -->
+      <!--                                                                 -->
+      <!-- TRNOTE Please start translating the following entries.          -->
+      <!-- =============================================================== -->
+      <group>
+      
+
+         <!-- MessageID Range for Messaging Toolkit:                                 CDIST1300 - CDIST1599 -->
+         <!--                                                                                              -->
+         <!-- Ranges for XLF:                                                        CDIST1300 - CDIST1349,-->
+         <!--                                                                        CDIST1400 - CDIST1427,-->
+         <!--                                                                        CDIST1460 - CDIST1465,-->
+         <!--                                                                        CDIST1520 - CDIST1526,-->
+         <!--                                                                        CDIST1584 - CDIST1599 -->
+         <!--                                                                                              -->
+         <!-- Ranges for Properties:                                                                       -->
+         <!--    com.ibm.streamsx.messaging.i18n.CommonMessages.properties           CDIST1350 - CDIST1359 -->
+         <!--    com.ibm.streamsx.messaging.jms.JMSMessages.properties               CDIST1428 - CDIST1443,-->
+         <!--                                                                        CDIST1470 - CDIST1499,-->
+         <!--                                                                        CDIST1510 - CDIST1519,-->
+         <!--                                                                        CDIST1527,            -->
+         <!--                                                                        CDIST1540 - CDIST1549 -->
+         <!--    com.ibm.streamsx.messaging.kafka.KafkaMessages.properties           CDIST1360 - CDIST1384 -->
+         <!--    com.ibm.streamsx.messaging.mqtt.MQTTMessages.properties             CDIST155O - CDIST1583 -->
+         <!--    com.ibm.streamsx.messaging.rabbitmq.RabbitMQMessages.properties     CDIST1385 - CDIST1399 -->
+         <!--                                                                                              -->
+         <!--                                                                                              -->
+         <!-- See file messageIdsOverview.txt for detailed list of used ranges of MessageIDs!              -->
+         
+         
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1400" extraData="MSGTK_INITIALCONTEXT_NON_EXISTENT" resname="CDIST1400E">
+            <source>A value for the InitialContext was not specified.</source>
+            <target>InitialContext の値が指定されませんでした。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1401" extraData="MSGTK_CONFAC_LOOKUP_FAILURE" resname="CDIST1401E">
+            <source>The system cannot look up the Connection Factory.</source>
+            <target>システムは接続ファクトリーを検索できません。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1402" extraData="MSGTK_DEST_LOOKUP_FAILURE" resname="CDIST1402E">
+            <source>The system cannot look up the Destination.</source>
+            <target>システムは宛先を検索できません。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1403" extraData="MSGTK_CONFAC_DEST_LOOKUP_FAILURE" resname="CDIST1403E">
+            <source>The system cannot look up the Connection Factory or the Destination.</source>
+            <target>システムは接続ファクトリーも宛先も検索できません。</target>
+         </trans-unit><!--used-->
+       
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1404" extraData="MSGTK_INITIALCONTEXT_CREATION_ERROR" resname="CDIST1404E">
+            <source>The InitialContext cannot be created. The exception is: {0}. </source>
+            <target>InitialContext を作成できません。例外: {0}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1405" extraData="MSGTK_ADMINISTERED_OBJECT_ERROR" resname="CDIST1405E">
+            <source>Exception occurred during the creation of the administered objects.</source>
+            <target>管理対象オブジェクトの作成中に例外が発生しました。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1406" extraData="MSGTK_CONNECTION_FAILURE_NORETRY" resname="CDIST1406E">
+            <source>The connection to the IBM Message Service Client failed. The NoRetry value of the reConnection Policy mandates that a reconnection is not allowed.</source>
+            <target>IBM Message Service Client への接続に失敗しました。reConnection ポリシーの NoRetry 値は、再接続が許可されないよう指示します。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1407" extraData="MSGTK_SET_DELIVERY_MODE_FAILURE" resname="CDIST1407E">
+            <source>The delivery mode cannot be set. The exception is: {0}.</source>
+            <target>送達モードを設定できません。例外: {0}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1408" extraData="MSGTK_CREATE_PRODUCER_EXCEPTION" resname="CDIST1408E">
+            <source>The Producer cannot be created. The exception is: {0}.</source>
+            <target>プロデューサーを作成できません。例外: {0}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1409" extraData="MSGTK_CREATE_CONSUMER_EXCEPTION" resname="CDIST1409E">
+            <source>The Consumer cannot be created. The exception is: {0}.</source>
+            <target>コンシューマーを作成できません。例外: {0}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1410" extraData="MSGTK_CREATE_DESTINATION_EXCEPTION" resname="CDIST1410E">
+            <source>The Destination cannot be created. The exception is: {0}.</source>
+            <target>宛先を作成できません。例外: {0}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1411" extraData="MSGTK_CREATE_SESSION_EXCEPTION" resname="CDIST1411E">
+            <source>The Session cannot be created. The exception is: {0}.</source>
+            <target>セッションを作成できません。例外: {0}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1412" extraData="MSGTK_XMS_API_OBJECT_ERROR" resname="CDIST1412E">
+            <source>An exception occurred during the creation of the IBM Message Service Client Application Programming Interface Objects. The exception is: {0}.</source>
+            <target>IBM Message Service Client アプリケーション・プログラミング・インターフェース・オブジェクトの作成中に例外が発生しました。例外: {0}。</target>
+         </trans-unit><!--used-->
+       
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1413" extraData="MSGTK_XMS_API_UNKNOWN_EXCEPTION" resname="CDIST1413E">
+            <source>An unknown exception occurred during the creation of the IBM Message Service Client Application Programming Interface Objects.</source>
+            <target>IBM Message Service Client アプリケーション・プログラミング・インターフェース・オブジェクトの作成中に不明な例外が発生しました。</target>
+         </trans-unit><!--used-->
+       
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1414" extraData="MSGTK_CREATE_CONNECTION_EXCEPTION" resname="CDIST1414E">
+            <source>The Connection cannot be created. The exception is: {0}.</source>
+            <target>接続を作成できません。例外: {0}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1415" extraData="MSGTK_XMS_JMS_EXCEPTION" resname="CDIST1415E">
+            <source>{0}.</source>
+            <target>{0}.</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1416" extraData="MSGTK_PREVIOUS_ERROR" resname="CDIST1416E">
+            <source>The system cannot proceed because of the previous errors.</source>
+            <target>以前のエラーが理由でシステムは続行できません。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1417" extraData="MSGTK_MESSAGE_DROPPED" resname="CDIST1417E">
+            <source>The message was dropped because the system was not connected to the IBM Message Service Client.</source>
+            <target>システムが IBM Message Service Client に接続されていなかったため、メッセージは除去されました。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1418" extraData="MSGTK_EXCEPTION" resname="CDIST1418E">
+            <source>An exception occurred while the system was sending the message. The exception is: {0}. The error code is: {1}.</source>
+            <target>システムがメッセージを送信中に例外が発生しました。例外: {0}。エラー・コード: {1}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1419" extraData="MSGTK_STREAMS_EXCEPTION" resname="CDIST1419E">
+            <source>An InfoSphere Streams exception occurred while the system was sending the message. The exception is: {0}. The explanation is: {1}.</source>
+            <target>システムがメッセージを送信中に InfoSphere Streams 例外が発生しました。例外: {0}。説明: {1}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1420" extraData="MSGTK_OTHER_EXCEPTION" resname="CDIST1420E">
+            <source>Other exception occurred while the system was sending the message. The exception is: {0}.</source>
+            <target>システムがメッセージを送信中にその他の例外が発生しました。例外: {0}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1421" extraData="MSGTK_UNKNOWN_EXCEPTION" resname="CDIST1421E">
+            <source>An unknown exception occurred while the system was sending the message.</source>
+            <target>システムがメッセージを送信中に不明な例外が発生しました。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1422" extraData="MSGTK_MESSAGE_LISTENER_ERROR" resname="CDIST1422E">
+            <source>The message listener with ID cannot be started. The exception is: {0}.</source>
+            <target>ID を持つメッセージ・リスナーを開始できません。例外: {0}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1423" extraData="MSGTK_UNABLE_PROCESS_MESSAGE" resname="CDIST1423E">
+            <source>The incoming message cannot be processed. The exception is: {0}. </source>
+            <target>着信メッセージを処理できません。例外: {0}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1424" extraData="MSGTK_TXT_UNSUPPORTED" resname="CDIST1424E">
+            <source>Text messages are not supported. The access specification cannot be used: {0}.</source>
+            <target>テキスト・メッセージはサポートされていません。アクセス仕様を使用できません: {0}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1425" extraData="MSGTK_OBJ_UNSUPPORTED" resname="CDIST1425E">
+            <source>Object messages are not supported. The access specification cannot be used: {0}.</source>
+            <target>オブジェクト・メッセージはサポートされていません。アクセス仕様を使用できません: {0}。</target>
+         </trans-unit><!--used-->
+<!--
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1444" extraData="MSGTK_PROTOCOLTYPE_NON_SSL1" resname="CDIST1444E">
+            <source>Please set the protocol type to ssl when trustStore is provided.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1445" extraData="MSGTK_TRUSTSTORE_NON_EXISTENT" resname="CDIST1445E">
+            <source>Trust Store does not exist.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1446" extraData="MSGTK_PROTOCOLTYPE_NON_SSL2" resname="CDIST1446E">
+            <source>Please set the protocol type to ssl when keyStore is provided.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1447" extraData="MSGTK_KEYSTORE_NON_EXISTENT" resname="CDIST1447E">
+            <source>Key Store does not exist.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1448" extraData="MSGTK_KS_TS_ABSENT_SSL" resname="CDIST1448E">
+            <source>KeyStore or trustStore should be provided when ssl protocol is used.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1449" extraData="MSGTK_BAD_RETURN_CODE" resname="CDIST1449E">
+            <source>Bad return code from MQTTClient_publishMessage returncode={0} handlecode={1}.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1450" extraData="MSGTK_RETRY_PUBLISH" resname="CDIST1450E">
+            <source>Error occurred while trying to publish message - the return code is {0} and handle code is {1}, retrying to publish.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1451" extraData="MSGTK_CLNT_CREATE_FAILED_NO_RECONNECT" resname="CDIST1451E">
+            <source>Creation of MQTT client failed. Did not try to reconnect as the policy is noRetry.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1452" extraData="MSGTK_CLNT_CREATE_FAILED_BOUNDED_RETRY" resname="CDIST1452E">
+            <source>Creation of MQTT client failed after trying for {0} times. Did not try to reconnect as the policy is BoundedRetry.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1453" extraData="MSGTK_CONN_FAILURE_NO_RECONNECT" resname="CDIST1453E">
+            <source>Connection to MQTT failed. Did not try to reconnect as the policy is NoRetry. </source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1454" extraData="MSGTK_CONN_FAILURE_BOUNDED_RETRY" resname="CDIST1454E">
+            <source>Connection to MQTT failed after retrying for {0} times. Did not try to reconnect as the policy is BoundedRetry.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1455" extraData="MSGTK_CONTEXT_NULL" resname="CDIST1455E">
+            <source>Context information is null.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1456" extraData="MSGTK_CONN_ESTABLISH_FAILURE" resname="CDIST1456E">
+            <source>Failed to establish connection, exiting.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1457" extraData="MSGTK_SUBSCRIBE_FAILURE" resname="CDIST1457E">
+            <source>Failed to subscribe, exiting.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1458" extraData="MSGTK_DISCONNECT_START_FAILED" resname="CDIST1458E">
+            <source>Failed to start disconnect, return code: {0}</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1459" extraData="MSGTK_SUBSCRIBE_FAILED" resname="CDIST1459E">
+            <source>Subscribe failed, will abort the application.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1500" extraData="MSGTK_INVALID_QOS" resname="CDIST1500E">
+            <source>Invalid QoS value provided, supported values are 0,1,2.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1501" extraData="MSGTK_TOPIC_QOS_SIZE" resname="CDIST1501E">
+            <source>QoS value should be provided for every topic. </source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1502" extraData="MSGTK_TRUST_SSL" resname="CDIST1502E">
+            <source>Set the protocol type to ssl when trustStore is provided.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1503" extraData="MSGTK_TRUST_STORE_MISSING" resname="CDIST1503E">
+            <source>TrustStore file could not be loaded.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1504" extraData="MSGTK_KEY_SSL" resname="CDIST1504E">
+            <source>Set the protocol type to ssl when keyStore is provided.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1505" extraData="MSGTK_KEY_STORE_MISSING" resname="CDIST1505E">
+            <source>KeyStore file could not be loaded.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1506" extraData="MSGTK_STORE_SSL" resname="CDIST1506E">
+            <source>KeyStore or TrustStore should be provided when ssl protocol is being used.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1507" extraData="MSGTK_CONNECT_MQTT_FAIL_ABORT" resname="CDIST1507E">
+            <source>Connection to MQTT failed, Aborting.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1508" extraData="MSGTK_BAD_RETRY_PUBLISH" resname="CDIST1508E">
+            <source>An error occurred that can not be handled while trying to publish message, with return code {0}, handle code is {1}, exiting.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1509" extraData="MSGTK_PERIOD_NON_NEGATIVE" resname="CDIST1509E">
+            <source>Period value cannot be negative.</source>
+         </trans-unit>
+-->
+	
+<!-- Level: L_WARN Range: 1460 to 1499 -->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1460" extraData="MSGTK_DISCARD_MSG_WRONG_TYPE" resname="CDIST1460W">
+            <source>The message has the wrong type and is being discarded. The expected message type was {0}, but the a {1} message was received.</source>
+            <target>メッセージは、誤ったタイプのため破棄されます。予期されたメッセージ・タイプは {0} でしたが、{1} メッセージを受け取りました。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1461" extraData="MSGTK_DISCARD_MSG_INVALID_LENGTH" resname="CDIST1461W">
+            <source>The message was discarded because the message length of {0} is not valid.</source>
+            <target>メッセージ長 {0} は無効のため、メッセージは破棄されました。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1462" extraData="MSGTK_DISCARD_MSG_TOO_SHORT" resname="CDIST1462W">
+            <source>The message was discarded because the message is too short.</source>
+            <target>メッセージは、短すぎるため破棄されました。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1463" extraData="MSGTK_DISCARD_MSG_MISSING_BODY" resname="CDIST1463W">
+            <source>The message was discarded because the message does not contain a body. A {0} message was expected.</source>
+            <target>メッセージは、本文を含まないため破棄されました。{0} メッセージが予期されました。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1464" extraData="MSGTK_DISCARD_MSG_UNRECOG_TYPE" resname="CDIST1464W">
+            <source>The message was discarded because the type is not recognized.</source>
+            <target>タイプが認識されないため、メッセージは破棄されました。</target>
+         </trans-unit><!--used-->
+ 
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1465" extraData="MSGTK_DISCARD_MSG_MISSING_ATTR" resname="CDIST1465W">
+            <source>The message was discarded, because at least one attribute is missing: {0}</source>
+            <target>少なくとも 1 つの属性が欠落しているため、メッセージは破棄されました: {0}</target>
+         </trans-unit><!--used-->
+
+<!--
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1466" extraData="MSGTK_INVALID_QOS_WARN" resname="CDIST1466W">
+            <source>Invalid QoS value provided, supported value is 0,1 or 2. Hence,default value of zero will be used.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1467" extraData="MSGTK_TOPIC_QOS_SIZE_WARN" resname="CDIST1467W">
+            <source>QoS value should be provided for every topic. Hence, control signal will be ignored.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1468" extraData="MSGTK_STORE_SSL_WARN" resname="CDIST1468W">
+            <source>KeyStore or TrustStore should be provided when ssl protocol is being used. Hence, supplied configuration cannot be applied.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1469" extraData="MSGTK_KEY_SSL_WARN" resname="CDIST1469W">
+            <source>Set the protocol type to ssl when keyStore is provided. Hence, supplied configuration is invalid.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1470" extraData="MSGTK_TRUST_SSL_WARN" resname="CDIST1470W">
+            <source>Set the protocol type to ssl when trustStore is provided.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1471" extraData="MSGTK_SERVER_URI_WARN" resname="CDIST1471W">
+            <source>MQTTConfig control tuple does not contain new serverURI. Hence, the configuration will be ignored.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1472" extraData="MSGTK_REMOVE_INVALID" resname="CDIST1472W">
+            <source>At least one topic should be provided, cannot remove all. Hence, the configuration will be ignored.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1473" extraData="MSGTK_INVALID_MQTT_CONFIG_VALUE" resname="CDIST1473W">
+            <source>Invalid configuration key provided for mqttConfig attribute. Supported values are connection.serverURI, connection.keyStore, connection.keyStorePassword , connection.trustStore. Hence control signal will be ignored.</source>
+         </trans-unit>
+-->
+
+
+<!-- Level: L_INFO Range: 1520 to 1579-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1520" extraData="MSGTK_XMS_CONNECT" resname="CDIST1520I">
+            <source>The system is about to connect to the IBM Message Service Client.</source>
+            <target>システムは、IBM Message Service Client に接続しようとしています。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1521" extraData="MSGTK_CONNECTION_FAILURE_BOUNDEDRETRY" resname="CDIST1521I">
+            <source>The connection to the IBM Message Service Client failed. The system is waiting for {0} seconds before it reconnects. The number of connection attempts is: {1}.</source>
+            <target>IBM Message Service Client への接続に失敗しました。システムは {0} 秒間待った後、再接続します。接続試行回数: {1}。</target>
+         </trans-unit><!--used-->	  
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1522" extraData="MSGTK_CONNECTION_FAILURE_INFINITERETRY" resname="CDIST1522I">
+            <source>The connection to the IBM Message Service Client failed. The system is waiting for {0} seconds before it reconnects.</source>
+            <target>IBM Message Service Client への接続に失敗しました。システムは {0} 秒間待った後、再接続します。</target>
+         </trans-unit><!--used-->	  
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1523" extraData="MSGTK_CONNECTION_SUCCESSFUL" resname="CDIST1523I">
+            <source>The connection to the IBM Message Service Client succeeded.</source>
+            <target>IBM Message Service Client への接続に成功しました。</target>
+         </trans-unit><!--used-->  
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1524" extraData="MSGTK_SEND_TUPLE_ERROR_PORT" resname="CDIST1524I">
+            <source>The tuple is being sent to the error output port.</source>
+            <target>タプルはエラー出力ポートに送信されます。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1525" extraData="MSGTK_SENT_MESSAGE" resname="CDIST1525I">
+            <source>The message was sent. The ID is: {0}.</source>
+            <target>メッセージが送信されました。ID: {0}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1526" extraData="MSGTK_INIT_WAIT" resname="CDIST1526I">
+            <source>The wait time before starting is {0} seconds.</source>
+            <target>開始前の待機時間は {0} 秒です。</target>
+         </trans-unit><!--used-->
+<!--
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1528" extraData="MSGTK_MQTT_CLIENT_DISCONNECTED" resname="CDIST1528I">
+            <source>MQTT Client Disconnected.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1529" extraData="MSGTK_PUBLISH_SUCCESS" resname="CDIST1529I">
+            <source>Successfully published message for client {0}.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1530" extraData="MSGTK_RECONNECT_ATTEMPT" resname="CDIST1530I">
+            <source>Attempting to connect with clientId {0}.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1531" extraData="MSGTK_MQTT_CLNT_CREATION_FAILED" resname="CDIST1531I">
+            <source>Failed to create MQTT Client instance, with return code {0} , retrying.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1532" extraData="MSGTK_RETRY_CONNECT" resname="CDIST1532I">
+            <source>Connection to MQTT failed, Trying to reconnect.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1533" extraData="MSGTK_CONN_NOT_SUCCESS" resname="CDIST1533I">
+            <source>Connection is unsuccessful. </source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1534" extraData="MSGTK_CONN_SUCCESS" resname="CDIST1534I">
+            <source>Connection is successful.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1535" extraData="MSGTK_CONN_ESTABLISH_FAIL" resname="CDIST1535I">
+            <source>Failed to establish connection.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1536" extraData="MSGTK_MSG_RECEIVED" resname="CDIST1536I">
+            <source>Message received on topic {0} .</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1537" extraData="MSGTK_SUBSCRIBE_SUCCESS" resname="CDIST1537I">
+            <source>Subscribe succeeded, waiting to receive messages.</source>
+         </trans-unit>
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1538" extraData="MSGTK_INTERMITTENT_FAIL" resname="CDIST1538I">
+            <source>Connection failed in between, will try to re-connect.</source>
+         </trans-unit>
+	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1539" extraData="MSGTK_INVALID_QOS_INFO_TUPLE" resname="CDIST1539I">
+            <source>Invalid QoS value provided in the incoming tuple, supported value is 0,1 or 2. Hence, default value of Qos=0 is used.</source>
+         </trans-unit>	
+-->
+
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1426" extraData="MSGTK_INCORRECT_NUMBER_OF_ARGS_FOR_CONNECTION" resname="CDIST1426E">
+            <source>Incorrect number of arguments passed to Connection->new(). Required are type and name values. Optional is document.</source>
+            <target>誤った数の引数が Connection->new() に渡されました。必須は、タイプと名前の値です。オプションは、文書です。</target>
+         </trans-unit><!--used-->
+         
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1427" extraData="MSGTK_CONNECTION_XML_DOC_DOES_NOT_EXIST" resname="CDIST1427E">
+            <source>Connection XML document ''{0}'' does not exist.</source>
+            <target>接続 XML 文書 ''{0}'' は存在しません。</target>
+         </trans-unit><!--used-->
+         
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1584" extraData="MSGTK_CONNECTION_XML_DOC_EMPTY" resname="CDIST1584E">
+            <source>Connection XML document ''{0}'' is empty.</source>
+            <target>接続 XML 文書 ''{0}'' は空です。</target>
+         </trans-unit><!--used-->
+         
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1585" extraData="MSGTK_CONNECTION_XML_DOC_NOT_READABLE_CHECK_PERMISSIONS" resname="CDIST1585E">
+            <source>Connection XML document ''{0}'' is not readable. Please, check permissions.</source>
+            <target>接続 XML 文書 ''{0}'' は読み取り可能ではありません。権限を確認してください。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1586" extraData="MSGTK_DOC_IS_DIR_NOT_XML_DOC" resname="CDIST1586E">
+            <source>''{0}'' is a directory, not a connection XML document.</source>
+            <target>''{0}'' はディレクトリーであり、接続 XML 文書ではありません。</target>
+         </trans-unit><!--used-->
+    
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1587" extraData="MSGTK_CONNECTION_XML_DOC_IS_NOT_TEXT_FILE" resname="CDIST1587E">
+            <source>Connection XML document ''{0}'' is not a text file.</source>
+            <target>接続 XML 文書 ''{0}'' はテキスト・ファイルではありません。</target>
+         </trans-unit><!--used-->
+    
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1588" extraData="MSGTK_CONNECTION_XML_DOC_DOES_NOT_VALIDATE" resname="CDIST1588E">
+            <source>Connection XML document ''{0}'' does not validate with schema ''{1}'' using the system command ''{2}''.</source>
+            <target>接続 XML 文書 ''{0}'' は、システム・コマンド ''{2}'' を使用してスキーマ ''{1}'' で妥当性検査しません。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1589" extraData="MSGTK_CONNECTION_XML_FILE_PROBLEM" resname="CDIST1589E">
+            <source>Connection XML file problem. {0}</source>
+            <target>接続 XML ファイルの問題。{0}</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1590" extraData="MSGTK_MISSING_ACCESS_SPEC_IN_FILE" resname="CDIST1590E">
+            <source>Missing access_specification named ''{0}'' in file ''{1}''.</source>
+            <target>ファイル ''{1}'' には、access_specification 名 ''{0}'' が欠落しています。</target>
+         </trans-unit><!--used-->
+         
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1591" extraData="MSGTK_MISSING_TAG_FROM_ACCESS_SPEC_IN_FILE" resname="CDIST1591E">
+            <source>Missing ''{0}'' tag from access_specification ''{1}'' in file ''{2}''.</source>
+            <target>ファイル ''{2}'' の access_specification ''{1}'' から ''{0}'' タグが欠落しています。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1592" extraData="MSGTK_INCORRECT_NUMBER_OF_ARGS_PASSED_TO_ACCESS_CHECKSTATICPARAMAT" resname="CDIST1592E">
+            <source>Incorrect number of arguments passed to Access->checkStaticParameterAt().  Required are index and check values.  Optional is quiet mode.</source>
+            <target>誤った数の引数が Access->checkStaticParameterAt() に渡されました。必須は、索引とチェックの値です。オプションは、抑止モードです。</target>
+         </trans-unit><!--used-->
+  	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1593" extraData="MSGTK_INVALID_PARAM_CHECK" resname="CDIST1593E">
+            <source>Invalid parameter check. ''{0}'' is greater than the number of parameters for the access named ''{1}''</source>
+            <target>無効なパラメーター・チェック。''{0}'' は、アクセス指定 ''{1}'' のパラメーターの数より大きくなっています</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1594" extraData="MSGTK_INVALID_CONST_VALUE_FOR_PARAM_OF_ACCESS" resname="CDIST1594E">
+            <source>Invalid constant value ''{0}'' for parameter ''{1}'' of access named ''{2}''.  Valid values are: ''{3}''.</source>
+            <target>アクセス指定 ''{2}'' のパラメーター ''{1}'' の定数値 ''{0}'' が無効です。有効な値: ''{3}''。</target>
+         </trans-unit><!--used-->
+  	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1595" extraData="MSGTK_VALUE_FOR_PARAM_OF_ACCESS_IS_OVER_MAX" resname="CDIST1595E">
+            <source>Value of ''{0}'' for parameter ''{1}'' of access named ''{2}'' is over the maximum allowed of ''{3}''.</source>
+            <target>アクセス指定 ''{2}'' のパラメーター ''{1}'' の値 ''{0}'' が、最大許容値の ''{3}'' を超えています。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1596" extraData="MSGTK_VALUE_FOR_PARAM_OF_ACCESS_IS_UNDER_MIN" resname="CDIST1596E">
+            <source>Value of ''{0}'' for parameter ''{1}'' of access named ''{2}'' is under the minimum allowed of ''{3}''.</source>
+            <target>アクセス指定 ''{2}'' のパラメーター ''{1}'' の値 ''{0}'' が、最小許容値の ''{3}'' を下回っています。</target>
+         </trans-unit><!--used-->
+        
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1597" extraData="MSGTK_UNSUPPORTED_CHECK_TYPE_FOR_PARAM_OF_ACCESS" resname="CDIST1597E">
+            <source>Unsupported check type specified for parameter ''{0}'' of access named ''{1}''.</source>
+            <target>アクセス指定 ''{1}'' のパラメーター ''{0}'' に、サポートされないチェック・タイプが指定されました。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1598" extraData="MSGTK_INVALID_PARAM_CHECK_GREATER_THAN_NUMBER_OF_PARAMS_FOR_ACCESS" resname="CDIST1598E">
+            <source>Invalid parameter check. ''{0}'' is greater than the number of parameters for the access named ''{1}''.</source>
+            <target>無効なパラメーター・チェック。''{0}'' は、アクセス指定 ''{1}'' のパラメーターの数より大きくなっています。</target>
+         </trans-unit><!--used-->
+    
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1599" extraData="MSGTK_INCORRECT_NUMBER_OF_ARGS_PASSED_TO_CONNECTION_NEW" resname="CDIST1599E">
+            <source>Incorrect number of arguments passed to Connection->new(). Required are type and name values. Optional is document.</source>
+            <target>誤った数の引数が Connection->new() に渡されました。必須は、タイプと名前の値です。オプションは、文書です。</target>
+         </trans-unit><!--used-->
+         
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1300" extraData="MSGTK_MISSING_CONNECTION_SPEC_IN_FILE" resname="CDIST1300E">
+            <source>Missing connection_specification named ''{0}'' in file ''{1}''.</source>
+            <target>ファイル ''{1}'' には、connection_specification 名 ''{0}'' が欠落しています。</target>
+         </trans-unit><!--used-->
+         
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1301" extraData="MSGTK_MISSING_ELEMENT_FROM_CONNECTION_SPEC_IN_FILE" resname="CDIST1301E">
+            <source>Missing ''{0}'' element from connection_specification ''{1}'' in file ''{2}''.</source>
+            <target>ファイル ''{2}'' の connection_specification ''{1}'' から ''{0}'' エレメントが欠落しています。</target>
+         </trans-unit><!--used-->
+         
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1302" extraData="MSGTK_PARAM_HAS_UNEXPECTED_FORMAT" resname="CDIST1302E">
+            <source>Value of parameter ''{0}'' has unexpected format: {1}.</source>
+            <target>パラメーター ''{0}'' の値が予期しないフォーマットです: {1}。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1303" extraData="MSGTK_ERROR_WITH_MESSAGE" resname="CDIST1303E">
+            <source>ERROR: {0}</source>
+            <target>エラー: {0}</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1304" extraData="MSGTK_CONNECTION_SPEC_NOT_NAME_OF_USESCONNECTION_IN_ACCESS_SPEC" resname="CDIST1304E">
+            <source>ERROR: Connection specification {0} is not the name of a uses_connection element of access specification {1}.</source>
+            <target>エラー: 接続指定 {0} は、アクセス仕様 {1} の uses_connection エレメントの名前ではありません。</target>
+         </trans-unit><!--used-->
+    	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1305" extraData="MSGTK_INVALID_PARAM_SPECIFIED_FOR_OP_ACCESS_SPEC" resname="CDIST1305E">
+            <source>''{0}'': Invalid parameter specified for ''{1}'' operator, access specification ''{2}''.</source>
+            <target>''{0}'': アクセス仕様 ''{2}'' で ''{1}'' オペレーターに指定されたパラメーターが無効です。</target>
+         </trans-unit><!--used-->
+    	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1306" extraData="MSGTK_PARAM_FOR_ACCESS_SPEC_PREVIOUSLY_DEFINED" resname="CDIST1306E">
+            <source>''{0}'': Parameter for access specification ''{1}'' previously defined (at index {2}).</source>
+            <target>''{0}'': アクセス仕様 ''{1}'' のパラメーターは、前に定義されました (索引 {2} で)。</target>
+         </trans-unit><!--used-->
+        	        	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1307" extraData="MSGTK_PARAM_FOR_ACCESS_SPEC_SUPPLIED_TO_OP_EXPECTS_MIN_ONE_VALUE" resname="CDIST1307E">
+            <source>''{0}'': Parameter for access specification ''{1}'' supplied to ''{2}'' operator expects at least one value.</source>
+            <target>''{0}'': ''{2}'' オペレーターに提供されたアクセス仕様 ''{1}'' のパラメーターは、少なくとも 1 つの値を想定しています。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1308" extraData="MSGTK_PARAM_FOR_ACCESS_SPEC_SUPPLIED_TO_OP_EXPECTS_CARDINALITY_VALUES" resname="CDIST1308E">
+            <source>''{0}'': Parameter for access specification ''{1}'' supplied to ''{2}'' operator expects {3} value(s).</source>
+            <target>''{0}'': ''{2}'' オペレーターに提供されたアクセス仕様 ''{1}'' のパラメーターは、''{3}'' 個の値を想定しています。</target>
+         </trans-unit><!--used-->
+            
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1309" extraData="MSGTK_OP_EXPECTS_TYPE_BASE_FOR_PARAM_VALUE_FROM_ACCESS_SPEC" resname="CDIST1309E">
+            <source>''{0}'' operator expects type base ''{1}'' (not ''{2}'') for value of parameter ''{3}'' from access specification ''{4}''.</source>
+            <target>''{0}'' オペレーターは、アクセス仕様 ''{4}'' からのパラメーター ''{3}'' の値に、タイプ・ベース ''{1}'' (''{2}'' ではなく) を想定しています。</target>
+         </trans-unit><!--used-->
+             	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1310" extraData="MSGTK_OP_EXPECTS_MANDATORY_PARAM_FOR_ACCESS_SPEC" resname="CDIST1310E">
+            <source>''{0}'' operator expects mandatory parameter ''{1}'' for access specification ''{2}''.</source>
+            <target>''{0}'' オペレーターは、アクセス仕様 ''{2}'' に必須パラメーター ''{1}'' を想定しています。</target>
+         </trans-unit><!--used-->
+        	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1311" extraData="MSGTK_OP_HAS_ATTRIB_IN_INPUT_STREAM_AND_NATIVE_SCHEMA_FOR_ACCESS_SPEC" resname="CDIST1311E">
+            <source>''{0}'' operator has an attribute named ''{1}'' in both its input stream and in the native schema for access specification ''{2}''.</source>
+            <target>''{0}'' オペレーターは、入力ストリーム内とアクセス仕様 ''{2}'' のネイティブ・スキーマ内の両方に、属性 ''{1}'' を持っています。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1312" extraData="MSGTK_OP_HAS_TYPE_MISMATCH_BETWEEN_OUTPUT_STREAM_ATTRIB_AND_SAME_NAME_NATIVE_SCHEMA_ATTRIB" resname="CDIST1312E">
+            <source>''{0}'' operator: type mismatch between output stream attribute ''{1}'' and the native schema attribute of the same name in access specification ''{2}''.</source>
+            <target>''{0}'' オペレーター: 出力ストリーム属性 ''{1}'' とアクセス仕様 ''{2}'' 内の同じ名前のネイティブ・スキーマ属性の間での、タイプの不一致。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1313" extraData="MSGTK_OP_HAS_NO_MATCHING_ATTRIB_IN_INPUT_STREAM_OR_NATIVE_SCHEMA_OF_ACCESS_SPEC" resname="CDIST1313E">
+            <source>''{0}'' operator: no matching attribute name found in the input stream or in the native schema of access specification ''{1}'' for the output attribute ''{2}''.</source>
+            <target>''{0}'' オペレーター: 入力ストリーム内、または出力属性 ''{2}'' のアクセス仕様 ''{1}'' のネイティブ・スキーマ内で、一致する属性名が見つかりません。</target>
+         </trans-unit><!--used-->
+        	
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1314" extraData="MSGTK_OP_HAS_NO_MATCHING_ATTRIB_IN_NATIVE_SCHEMA_OF_ACCESS_SPEC" resname="CDIST1314E">
+            <source>''{0}'' operator: no matching attribute name found in the native schema of access specification ''{1}'' for the output attribute ''{2}''</source>
+            <target>''{0}'' オペレーター: 出力属性 ''{2}'' のアクセス仕様 ''{1}'' のネイティブ・スキーマ内で、一致する属性名が見つかりません。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1315" extraData="MSGTK_RECONNECTIONBOUND_ONLY_IF_RECONNECTIONPOLICY_IS_BOUNDEDRETRY" resname="CDIST1315E">
+            <source>Operator ''{0}'': reconnectionBound parameter can only appear if reconnectionPolicy is  ''BoundedRetry''.</source>
+            <target>オペレーター ''{0}'': reconnectionBound パラメーターは、reconnectionPolicy が ''BoundedRetry'' の場合にのみ指定できます。</target>
+         </trans-unit><!--used-->
+                
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1316" extraData="MSGTK_RECONNECTIONBOUND_CANNOT_BE_NEGATIVE" resname="CDIST1316E">
+            <source>Operator ''{0}'': reconnectionBound cannot be negative.</source>
+            <target>オペレーター ''{0}'': reconnectionBound を負数にすることはできません。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1317" extraData="MSGTK_PERIOD_PARAM_ONLY_IF_RECONNECTIONPOLICY_IS_SPECIFIED" resname="CDIST1317E">
+            <source>Operator ''{0}'': period parameter can only appear if reconnectionPolicy is specified.</source>
+            <target>オペレーター ''{0}'': period パラメーターは、reconnectionPolicy が指定された場合にのみ指定できます。</target>
+         </trans-unit><!--used-->
+			
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1318" extraData="MSGTK_UNABLE_TO_USE_MSG_CLASS_IN_ACCESS_SPEC_IF_NATIVE_SCHEMA_ATTRIBS_SUPPLIED" resname="CDIST1318E">
+            <source>Operator ''{0}'': unable to use message class ''{1}'' in access specification {2} if native schema attributes have been supplied.</source>
+            <target>オペレーター ''{0}'': ネイティブ・スキーマ属性が指定されている場合、アクセス仕様 {2} にメッセージ・クラス ''{1}'' を使用できません。</target>
+         </trans-unit><!--used-->
+			
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1319" extraData="MSGTK_TUPLE_ATTRIBS_IN_ERROR_STREAM_DONT_MATCH_RECEIVED_TUPLE" resname="CDIST1319E">
+            <source>Operator ''{0}'': The tuple attributes defined in the error stream do not match the tuple which is received.</source>
+            <target>オペレーター ''{0}'': エラー・ストリームに定義されたタプル属性が、受け取ったタプルに一致しません。</target>
+         </trans-unit><!--used-->
+ 			
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1320" extraData="MSGTK_ERROR_OUTPUT_PORT_CAN_ONLY_CONTAIN_RSTRING" resname="CDIST1320E">
+            <source>Operator ''{0}'': The error output port can only contain an rstring.</source>
+            <target>オペレーター ''{0}'': エラー出力ポートは、rstring のみを含むことができます。</target>
+         </trans-unit><!--used-->
+					
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1321" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_MUST_NOT_LENGTH_SPEC" resname="CDIST1321E">
+            <source>Operator ''{0}'': native schema attribute ''{1}'' in access specification {2} must not have a length specification.</source>
+            <target>オペレーター ''{0}'': アクセス仕様 {2} のネイティブ・スキーマ属性 ''{1}'' に、長さ指定があってはなりません。</target>
+         </trans-unit><!--used-->
+				
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1322" extraData="MSGTK_STREAM_SCHEMA_ATTRIB_IS_NOT_SUPPORTED_DATA_TYPE" resname="CDIST1322E">
+            <source>Operator ''{0}'': Stream schema attribute ''{1}'' is not a supported data type.</source>
+            <target>オペレーター ''{0}'': ストリーム・スキーマ属性 ''{1}'' は、サポートされるデータ・タイプではありません。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1323" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_HAS_TYPE_WHICH_DOSNT_MATCH_ATTRIB_IN_INPUT_STREAM_SCHEMA" resname="CDIST1323E">
+            <source>Operator ''{0}'': native schema attribute ''{1}'' in access specification {2} has type ''{3}'' which does not match the attribute in the input stream schema.</source>
+            <target>オペレーター ''{0}'': アクセス仕様 {2} のネイティブ・スキーマ属性 ''{1}'' のタイプは ''{3}'' で、入力ストリーム・スキーマの属性に一致しません。</target>
+         </trans-unit><!--used-->
+				
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1324" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_HAS_TYPE_WHICH_DOSNT_MATCH_ATTRIB_IN_OUTPUT_STREAM_SCHEMA" resname="CDIST1324E">
+            <source>Operator ''{0}'': native schema attribute ''{1}'' in access specification {2} has type ''{3}'' which does not match the attribute in the input stream schema.</source>
+            <target>オペレーター ''{0}'': アクセス仕様 {2} のネイティブ・スキーマ属性 ''{1}'' のタイプは ''{3}'' で、入力ストリーム・スキーマの属性に一致しません。</target>
+         </trans-unit><!--used-->
+				
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1325" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_HAS_NO_MATCHING_ATTRIB_IN_INPUT_STREAM_SCHEMA" resname="CDIST1325E">
+            <source>Operator ''{0}'': native schema attribute ''{1}'' in access specification {2} has no matching attribute in the input stream schema.</source>
+            <target>オペレーター ''{0}'': アクセス仕様 {2} のネイティブ・スキーマ属性 ''{1}'' には、入力ストリーム・スキーマに一致する属性がありません。</target>
+         </trans-unit><!--used-->
+      		
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1326" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_DEFINED_TWICE_IN_ACCESS_SPEC" resname="CDIST1326E">
+            <source>Operator ''{0}'': native schema attribute ''{1}'' defined twice in access specification {2}.</source>
+            <target>オペレーター ''{0}'': ネイティブ・スキーマ属性 ''{1}'' は、アクセス仕様 {2} で 2 回定義されています。</target>
+         </trans-unit><!--used-->
+				
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1327" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_SHOULD_NOT_HAVE_NEGATIVE_LENGTH" resname="CDIST1327E">
+            <source>Operator ''{0}'': native schema attribute {1} in access specification {2} should not have a negative length.</source>
+            <target>オペレーター ''{0}'': アクセス仕様 {2} のネイティブ・スキーマ属性 {1} は、負の長さにしないでください。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1328" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_CANNOT_HAVE_OTHER_NEGATIVE_VALUES_THAN" resname="CDIST1328E">
+            <source>Operator ''{0}'': native schema attribute {1} in access specification {2} cannot have any other negative values than -2,-4 and -8.</source>
+            <target>オペレーター ''{0}'': アクセス仕様 {2} のネイティブ・スキーマ属性 {1} は、-2、-4、および -8 以外の負の値にすることはできません.</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1329" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_CANNOT_HAVE_BYTES_DATA_FOR_THIS_MSG_CLASS" resname="CDIST1329E">
+            <source>Operator ''{0}'': native schema attribute {1} in access specification {2} cannot have Bytes data for this message class.</source>
+            <target>オペレーター ''{0}'': アクセス仕様 {2} のネイティブ・スキーマ属性 {1} は、このメッセージ・クラスの Bytes データを含むことはできません。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1330" extraData="MSGTK_OUTPUT_STREAM_ATTRIB_HAS_NO_MATCHING_ATTRIB_IN_NATIVE_SCHEMA_OF_ACCESS_SPEC" resname="CDIST1330E">
+            <source>Operator ''{0}'': output stream attribute ''{1}'' has no matching attribute in the native schema in access specification {2}.</source>
+            <target>オペレーター ''{0}'': 出力ストリーム属性 ''{1}'' には、アクセス仕様 {2} のネイティブ・スキーマに一致する属性がありません。</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1331" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_DEFINED_IN_ACCESS_SPEC_MUST_HAVE_VALID_LENGTH_SPEC" resname="CDIST1331E">
+            <source>Operator ''{0}'': native schema attribute ''{1}'' defined in access specification ''{2}'' must have a valid length specification.</source>
+            <target>オペレーター ''{0}'': アクセス仕様 ''{2}'' に定義されたネイティブ・スキーマ属性 ''{1}'' に有効な長さ指定が必要です。</target>
+         </trans-unit><!--used-->
+				
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1332" extraData="MSGTK_OP_CANNOT_BE_IN_CONSISTENT_REGION" resname="CDIST1332E">
+            <source>The following operator cannot be in a consistent region: {0}</source>
+            <target>次のオペレーターは整合領域に置くことはできません: {0}</target>
+         </trans-unit><!--used-->
+
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1333" extraData="MSGTK_VALUE_MUST_BE_SPECIFIED_FOR_INITIAL_CONTEXT_ATTRIB_IN_CONNECTION_DOC" resname="CDIST1333E">
+            <source>A value must be specified for initial_context attribute in connection document.</source>
+            <target>接続文書に initial_context 属性の値を指定する必要があります。</target>
+         </trans-unit><!--used-->
+				
+         <trans-unit id="StreamsMessagingToolkitMessages_CDIST1334" extraData="MSGTK_INVALID_INITIAL_CONTEXT_FORMAT_DETECTED" resname="CDIST1334E">
+            <source>Invalid initial_context format detected.</source>
+            <target>無効な initial_context 形式が検出されました。</target>
+         </trans-unit><!--used-->
+				
+      </group>
+   </body>
+  </file>
+</xliff>
