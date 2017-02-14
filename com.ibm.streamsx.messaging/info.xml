@@ -687,8 +687,8 @@ The &lt;attribute> element has three possible attributes:
   <info:resources>
     <info:messageSet name="MessagingResource">
       <info:lang default="true">en_US/MessagingResource.xlf</info:lang>
-<!--
       <info:lang>de_DE/JSONResource.xlf</info:lang>
+<!--
       <info:lang>es_ES/JSONResource.xlf</info:lang>
 -->
       <info:lang>fr_FR/MessagingResource.xlf</info:lang>
