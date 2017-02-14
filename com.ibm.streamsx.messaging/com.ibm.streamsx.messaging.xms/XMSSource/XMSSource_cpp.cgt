@@ -27,6 +27,7 @@ unshift @INC, dirname($modelroot) . "/Common";
 require Connection;
 require Access;
 require Edge;
+require MessagingResource;
 
 unshift @INC, dirname($modelroot) . "../impl/nl/include";
 require MessagingResource;
@@ -152,7 +153,7 @@ using namespace streams_boost;
     ### Consistent region ERROR message ###
     my $crContext = $model->getContext()->getOptionalContext("ConsistentRegion");
     if($crContext) {
-        SPL::CodeGen::exitln(MSGTK_OP_CANNOT_BE_IN_CONSISTENT_REGION("XMSSource"));
+        SPL::CodeGen::exitln(MessagingResource::MSGTK_OP_CANNOT_BE_IN_CONSISTENT_REGION("XMSSource"));
     }
 %>
 
@@ -187,13 +188,13 @@ MY_OPERATOR::MY_OPERATOR(): nMessagesReadPC( getContext().getMetrics().getCustom
     
     # support relative binding file path.
     if(!defined ($ic) || $ic eq '') {
-    	SPL::CodeGen::exitln(MSGTK_VALUE_MUST_BE_SPECIFIED_FOR_INITIAL_CONTEXT_ATTRIB_IN_CONNECTION_DOC());
+    	SPL::CodeGen::exitln(MessagingResource::MSGTK_VALUE_MUST_BE_SPECIFIED_FOR_INITIAL_CONTEXT_ATTRIB_IN_CONNECTION_DOC());
     }
 
     my $url = new URI($ic);
     
     if($url->scheme eq '') {
-    	SPL::CodeGen::exitln(MSGTK_INVALID_INITIAL_CONTEXT_FORMAT_DETECTED());
+    	SPL::CodeGen::exitln(MessagingResource::MSGTK_INVALID_INITIAL_CONTEXT_FORMAT_DETECTED());
     }
 
     if($url->scheme eq 'file') {
