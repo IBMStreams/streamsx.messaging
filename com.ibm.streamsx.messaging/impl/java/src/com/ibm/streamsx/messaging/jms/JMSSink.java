@@ -8,6 +8,12 @@ package com.ibm.streamsx.messaging.jms;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.jms.Message;
@@ -190,7 +196,61 @@ public class JMSSink extends AbstractOperator implements StateHandler{
     // password property name stored in application configuration
     private String passwordPropName;
     
+    private String keyStore;
+    
+    private String trustStore;
+    
+    private String keyStorePassword;
+    
+    private String trustStorePassword;
+    
+    private boolean sslConnection;
 
+    public boolean isSslConnection() {
+		return sslConnection;
+	}
+
+    @Parameter(optional = true)
+    public void setSslConnection(boolean sslConnection) {
+		this.sslConnection = sslConnection;
+	}
+
+    @Parameter(optional = true)
+    public void setTrustStorePassword(String trustStorePassword) {
+		this.trustStorePassword = trustStorePassword;
+	}
+    
+    public String getTrustStorePassword() {
+		return trustStorePassword;
+	}
+    
+    public String getTrustStore() {
+		return trustStore;
+	}
+    
+    @Parameter(optional = true)
+    public void setTrustStore(String trustStore) {
+		this.trustStore = trustStore;
+	}
+    
+    public String getKeyStorePassword() {
+		return keyStorePassword;
+	}
+    
+    @Parameter(optional = true)
+    public void setKeyStorePassword(String keyStorePassword) {
+		this.keyStorePassword = keyStorePassword;
+	}
+    
+    public String getKeyStore() {
+		return keyStore;
+	}
+    
+    @Parameter(optional = true)
+    public void setKeyStore(String keyStore) {
+		this.keyStore = keyStore;
+	}
+    
 	public String getAppConfigName() {
 		return appConfigName;
 	}
@@ -504,7 +564,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		checker.checkDependentParameters("userPropName", "appConfigName", "passwordPropName");
 		checker.checkDependentParameters("passwordPropName", "appConfigName", "userPropName");
 	}
-
+	
 	@Override
 	public synchronized void initialize(OperatorContext context)
 			throws ParserConfigurationException, InterruptedException,
@@ -513,6 +573,18 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		super.initialize(context);
 		
 		JmsClasspathUtil.setupClassPaths(context);
+		
+		// set SSL system properties
+		if(isSslConnection()) {
+			if(context.getParameterNames().contains("keyStore"))
+				System.setProperty("javax.net.ssl.keyStore", getAbsolutePath(getKeyStore()));				
+			if(context.getParameterNames().contains("keyStorePassword"))
+				System.setProperty("javax.net.ssl.keyStorePassword", getKeyStorePassword());				
+			if(context.getParameterNames().contains("trustStore"))
+				System.setProperty("javax.net.ssl.trustStore",  getAbsolutePath(getTrustStore()));			
+			if(context.getParameterNames().contains("trustStorePassword"))
+				System.setProperty("javax.net.ssl.trustStorePassword",  getTrustStorePassword());
+		}
 		
 		consistentRegionContext = context.getOptionalContext(ConsistentRegionContext.class);
 		
@@ -627,9 +699,22 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 
 		// register for data governance
 		registerForDataGovernance(connectionDocumentParser.getProviderURL(), connectionDocumentParser.getDestination());
-
 	}
 
+	protected String getAbsolutePath(String filePath) {
+		if(filePath == null) 
+			return null;
+		
+		
+		Path p = Paths.get(filePath);
+		if(p.isAbsolute()) {
+			return filePath;
+		} else {
+			File f = new File (getOperatorContext().getPE().getApplicationDirectory(), filePath);
+			return f.getAbsolutePath();
+		}
+	}
+	
 	private void registerForDataGovernance(String providerURL, String destination) {
 		logger.log(TraceLevel.INFO, "JMSSink - Registering for data governance with providerURL: " + providerURL
 				+ " destination: " + destination);
