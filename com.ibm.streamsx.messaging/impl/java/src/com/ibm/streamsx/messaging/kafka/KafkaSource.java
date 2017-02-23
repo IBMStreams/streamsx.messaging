@@ -6,12 +6,19 @@
 package com.ibm.streamsx.messaging.kafka;
 
 
+import static java.lang.String.format;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
@@ -26,6 +33,9 @@ import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.logging.TraceLevel;
+import com.ibm.streams.operator.metrics.Metric;
+import com.ibm.streams.operator.metrics.Metric.Kind;
+import com.ibm.streams.operator.metrics.OperatorMetrics;
 import com.ibm.streams.operator.model.Icons;
 import com.ibm.streams.operator.model.OutputPortSet;
 import com.ibm.streams.operator.model.OutputPorts;
@@ -44,7 +54,6 @@ import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 public class KafkaSource extends KafkaBaseOper implements StateHandler{
 
 	static final String OPER_NAME = "KafkaConsumer";
-	private int threadsPerTopic = 1;
 	private List<Integer> partitions = new ArrayList<Integer>();
 	private static Logger trace = Logger.getLogger(KafkaSource.class.getName());
 	private final AtomicBoolean shutdown = new AtomicBoolean(false);
@@ -58,6 +67,27 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	
 	private ConsistentRegionContext crContext;
 	private long triggerIteration = 0;
+	
+	/*
+	 * Consistent region specific state.
+	 */
+	/**
+	 * Offset maps at the end of a checkpoint for this operator,
+	 * keyed by sequence identifier.
+	 */
+	private Map<Long,Map<Integer,Long>> ckptOffsetMaps;
+	
+	/**
+	 * Metrics for consistent region maintaining the offsets for the partitions.
+	 * topicStartingOffsetsMetrics - Offset the consumer started at or was last reset to.
+	 * topicCkptOffsetsMetrics - Offset at the last checkpoint of this operator.
+	 * topicRegionCkptOffsetsMetrics - Offset at the last region completed checkpoint.
+	 */
+    private Map<Integer,Metric> startingOffsetsMetrics;
+    private Map<Integer,Metric> ckptOffsetsMetrics;
+    private Map<Integer,Metric> regionCkptOffsetsMetrics;
+
+
 	
 	//consistent region checks
 	@ContextCheck(compile = true)
@@ -105,11 +135,6 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		super.initialize(context);
 		super.initSchema(getOutput(0).getStreamSchema());
 
-		if (threadsPerTopic < 1)
-			throw new IllegalArgumentException(
-					"Number of threads per topic cannot be less than one: "
-							+ threadsPerTopic);
-
 		// initialize the client
 		trace.log(TraceLevel.INFO, "Initializing source client");
 		streamsKafkaConsumer = getNewConsumerClient(topicAH, keyAH, messageAH,
@@ -121,7 +146,60 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		// register for data governance
 		registerForDataGovernance();
 
+		// Maintain metrics for the offsets in a consistent region.
+		if (crContext != null) {
+		    createConsistentRegionMetrics();
+		    updateMetricsFromOffsetMap(startingOffsetsMetrics,
+		            streamsKafkaConsumer.getOffsetPositions());
+		}
 	}
+	
+	/**
+	 * Create a collection of metrics for consistent region.
+	 * Metrics representing offset map at:
+	 *  * starting offset (including last reset)
+	 *  * last checkpoint of this operator
+	 *  * last checkpoint when the region was checkpointed completely.
+	 */
+	private void createConsistentRegionMetrics() {
+	    
+        ckptOffsetMaps = Collections.synchronizedMap(new HashMap<>());
+        startingOffsetsMetrics = new HashMap<>();
+        ckptOffsetsMetrics = new HashMap<>();
+        regionCkptOffsetsMetrics = new HashMap<>();
+
+        OperatorMetrics opMetrics = getOperatorContext().getMetrics();
+        
+        assert topics.size() == 1;
+        final String topic = topics.get(0);
+                
+        for (Integer partition : partitions) {
+            Metric metric = opMetrics.createCustomMetric(
+                    format("topicStartingOffset:%s[%d]", topic, partition),                   
+                    "Starting offsets for consistent region.", Kind.GAUGE);
+            startingOffsetsMetrics.put(partition, metric);
+            
+            metric = opMetrics.createCustomMetric(
+                    format("topicLastCheckpointOffset:%s[%d]", topic, partition),                   
+                    "Last checkpoint offsets for consistent region.", Kind.GAUGE);
+            ckptOffsetsMetrics.put(partition, metric);
+
+            metric = opMetrics.createCustomMetric(
+                    format("topicRegionCheckpointOffset:%s[%d]", topic, partition),                   
+                    "Region checkpoint offsets for consistent region.", Kind.GAUGE);
+            regionCkptOffsetsMetrics.put(partition, metric);
+        }
+	}
+	
+	/**
+	 * Update a set of metrics from an offsetMap, both are keyed by the partition.
+	 * @param metrics Set of metrics to update
+	 * @param offsetMap Offset map to update the metrics.
+	 */
+    private static void updateMetricsFromOffsetMap(Map<Integer, Metric> metrics, Map<Integer, Long> offsetMap) {
+        for (Integer partition : offsetMap.keySet())
+            metrics.get(partition).setValue(offsetMap.get(partition));
+    }
 
     
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -345,6 +423,12 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		Map<Integer, Long> offsetMap = streamsKafkaConsumer.getOffsetPositions();
 		trace.log(TraceLevel.INFO, "Checkpointing offsetMap.");
 		checkpoint.getOutputStream().writeObject(offsetMap);
+		
+		// Save the offset map for this checkpoint.
+		if (ckptOffsetMaps != null) {
+		    ckptOffsetMaps.put(checkpoint.getSequenceId(), offsetMap);
+		    updateMetricsFromOffsetMap(ckptOffsetsMetrics, offsetMap);
+		}
 	}
 
 	@Override
@@ -358,6 +442,7 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		Map<Integer, Long> offsetMap = (Map<Integer, Long>) checkpoint.getInputStream().readObject();
 		trace.log(TraceLevel.INFO, "Resetting...");
 		streamsKafkaConsumer.seekToPositions(offsetMap);		
+		updateMetricsFromOffsetMap(startingOffsetsMetrics, offsetMap);
 	}
 
 	@Override
@@ -368,6 +453,28 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	@Override
 	public void retireCheckpoint(long id) throws Exception {
 		trace.log(TraceLevel.INFO, "Retiring Checkpoint.");
+		
+		// Age out any saved maps.
+		if (ckptOffsetMaps != null) {
+		    synchronized (ckptOffsetMaps) {
+		        for (Iterator<Long> it = ckptOffsetMaps.keySet().iterator(); it.hasNext(); ) {
+		            Long svid = it.next();
+		            if (svid <= id)
+		                it.remove();
+		        }
+		    }
+		}
+	}
+	@Override
+	public void regionCheckpointed(long id) throws Exception {
+	    if (ckptOffsetMaps != null) {
+	        // This is the only time we use the saved offset
+	        // so remove it.
+	        final Map<Integer,Long> offsetMap = ckptOffsetMaps.remove(id);
+	        if (offsetMap != null) {
+	            updateMetricsFromOffsetMap(regionCkptOffsetsMetrics, offsetMap);
+	        }
+	    }
 	}
 
 	@Override
