@@ -616,7 +616,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 			if(context.getParameterNames().contains("trustStore"))
 				System.setProperty("javax.net.ssl.trustStore",  getAbsolutePath(getTrustStore()));			
 			if(context.getParameterNames().contains("trustStorePassword"))
-				System.setProperty("javax.net.ssl.trustStorePassword",  getAbsolutePath(getTrustStorePassword()));
+				System.setProperty("javax.net.ssl.trustStorePassword",  getTrustStorePassword());
 		}
 		
 		if(consistentRegionContext != null) {
