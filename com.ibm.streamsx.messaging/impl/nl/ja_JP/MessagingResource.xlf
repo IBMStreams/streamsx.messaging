@@ -171,7 +171,7 @@
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1418" extraData="MSGTK_EXCEPTION" resname="CDIST1418E">
             <source>An exception occurred while the system was sending the message. The exception is: {0}. The error code is: {1}.</source>
-            <target>システムがメッセージを送信中に例外が発生しました。例外: {0}。エラー・コード: {1}。</target>
+            <target>システムがメッセージを送信中に例外が発生しました。例外: {0}。エラー・コードは {1} です。</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1419" extraData="MSGTK_STREAMS_EXCEPTION" resname="CDIST1419E">
