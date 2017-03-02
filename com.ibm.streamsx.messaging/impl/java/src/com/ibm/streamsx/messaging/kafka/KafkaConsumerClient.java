@@ -94,7 +94,11 @@ public abstract class KafkaConsumerClient<K,V> extends KafkaBaseClient {
 		ConsumerRecords<K,V> records = consumer.poll(consumerPollTimeout);
 		return records;
 	}
-		
+    /**
+     * 
+     *
+     * @return A new map containing the offsets for the partitions.
+	 */
 	protected synchronized Map<Integer, Long> getOffsetPositions() throws InterruptedException{
 		Set<TopicPartition> partitionSet = consumer.assignment();
 		Iterator<TopicPartition> partitionIterator = partitionSet.iterator();
