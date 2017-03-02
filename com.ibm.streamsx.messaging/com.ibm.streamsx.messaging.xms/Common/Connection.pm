@@ -11,11 +11,14 @@ use File::Basename;
 use Cwd qw(realpath abs_path getcwd);
 use Encode;
 
+require MessagingResource;
+
+
 my $path_separator = "/";
 
 sub new {
   unless(@_ == 3 || @_ == 4) {
-    die "Incorrect number of arguments passed to Connection->new().  Required are type and name values.  Optional is document.***";
+  	die MessagingResource::MSGTK_INCORRECT_NUMBER_OF_ARGS_PASSED_TO_CONNECTION_NEW();
     return 0;
   }
   my $class = shift @_;
@@ -35,19 +38,19 @@ sub new {
   if (!(-e $document)) {
 	my $dir1 = getcwd;
 
-    die "Connection XML document '$document' does not exist *** ";
+    die MessagingResource::MSGTK_CONNECTION_XML_DOC_DOES_NOT_EXIST($document);
   }
   if (!(-s $document)) {
-    die "Connection XML document '$document' is empty*** ";
+    die MessagingResource::MSGTK_CONNECTION_XML_DOC_EMPTY($document);
   }
   if (!(-r $document)) {
-    die "Connection XML document '$document' is not readable. Please check permissions***";
+    die MessagingResource::MSGTK_CONNECTION_XML_DOC_NOT_READABLE_CHECK_PERMISSIONS($document);
   }
   if (-d $document) {
-    die "'$document' is a directory, not a connection XML document***";
+    die MessagingResource::MSGTK_DOC_IS_DIR_NOT_XML_DOC($document);
   }
   if (!(-T $document)) {
-    die "Connection XML document '$document' is not a text file***";
+    die MessagingResource::MSGTK_CONNECTION_XML_DOC_IS_NOT_TEXT_FILE($document);
   }
 
   # Validate the XML
@@ -59,7 +62,7 @@ sub new {
   system(Encode::encode($charmap, $xmllint));
   my $res = $? >> 8;
   if ($res != 0) {
-    die "Connection XML document '$document' does not validate with schema '$xsd' using the system command '$xmllint'***";
+    die MessagingResource::MSGTK_CONNECTION_XML_DOC_DOES_NOT_VALIDATE($document, $xsd, $xmllint);
   }
 
   # Parse the connection XML and grab the connections element
@@ -81,11 +84,11 @@ sub new {
     # Fix "Is a directoryIs a directory"
     # Because of the -d check done earlier, it is hoped we never get this, but just in case (e.g., race condition
     # with a file being moved); also, this check should not cause any harm
-    if ($msg eq "Is a directoryIs a directory") {
-      die "$document is a directory, not a connection xml document***";
+    if ($msg eq "Is a directoryIs a directory") {	# TODO: Is the duplicated string correct???
+      die MessagingResource::MSGTK_DOC_IS_DIR_NOT_XML_DOC($document);
     }
 
-    die "Connection XML file problem. $msg***";
+    die MessagingResource::MSGTK_CONNECTION_XML_FILE_PROBLEM($msg);
   }
 
   # Process the connection specifications
@@ -94,22 +97,22 @@ sub new {
 
   $refType = ref($connspec);
   unless (defined($refType) && $refType ne '') {
-    die "Missing connection_specification named '$name' in file '$document'***";
+  	die MessagingResource::MSGTK_MISSING_CONNECTION_SPEC_IN_FILE($name, $document);
   }
 
   $refType = ref($connspec->{$type});
   unless (defined($refType) && $refType ne '') {
-    die "Missing '$type' element from connection_specification '$name' in file '$document'***";
+  	die MessagingResource::MSGTK_MISSING_ELEMENT_FROM_CONNECTION_SPEC_IN_FILE($type, $name, $document);
   }
 
 #  my $installname = $connspec->{"installation"};
 #  unless (defined($refType) && $refType ne '') {
-#    die "Missing installation attribute for connection_specification '$name' in file '$document'***";
+#    die "Missing installation attribute for connection_specification '$name' in file '$document'";
 #  }
 #
 #  my $install = $connections->{installations}->{installation}->{$installname};
 #  unless (defined($refType) && $refType ne '') {
-#    die "Missing installation element with name '$installname' used by connection_specification '$name' in file '$document'***";
+#    die "Missing installation element with name '$installname' used by connection_specification '$name' in file '$document'";
 #  }
 
   my $self = {

@@ -61,7 +61,7 @@ public class TextMessageHandler extends JMSMessageHandlerImpl {
 
 		MetaType attrType = tuple.getStreamSchema().getAttribute(0).getType().getMetaType();
 
-		String msgText = "";
+		String msgText = ""; //$NON-NLS-1$
 
 		if (attrType == MetaType.RSTRING || attrType == MetaType.USTRING) {
 			// use getObject to avoid copying of the tuple

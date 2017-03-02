@@ -8,6 +8,7 @@ package com.ibm.streamsx.messaging.common;
 import java.util.Map;
 
 import com.ibm.streams.operator.ProcessingElement;
+import com.ibm.streamsx.messaging.i18n.Messages;
 
 // This class provides configuration data stored in PE
 public class PropertyProvider {
@@ -22,7 +23,7 @@ public class PropertyProvider {
 		this.loadConfiguration();
 		
 		if(configuration.isEmpty()) {
-			throw new IllegalArgumentException("Application Configuration " + configurationName + " is not found or empty" );
+			throw new IllegalArgumentException(Messages.getString("APP_CFG_NOT_FOUND_OR_EMPTY", configurationName )); //$NON-NLS-1$
 		}
 	}
 	

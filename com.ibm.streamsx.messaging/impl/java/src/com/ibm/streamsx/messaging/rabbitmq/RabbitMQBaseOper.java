@@ -43,9 +43,9 @@ public class RabbitMQBaseOper extends AbstractOperator {
 
 	protected Channel channel;
 	protected Connection connection;
-	protected String username = "",
-			password = "", 
-			exchangeName = "", exchangeType = "direct";
+	protected String username = "", //$NON-NLS-1$
+			password = "",  //$NON-NLS-1$
+			exchangeName = "", exchangeType = "direct"; //$NON-NLS-1$ //$NON-NLS-2$
 			
 	protected List<String> hostAndPortList = new ArrayList<String>();
 	protected Address[] addressArr; 
@@ -54,19 +54,19 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	private AtomicBoolean shuttingDown = new AtomicBoolean(false);
 	protected boolean readyForShutdown = true;
 
-	protected AttributeHelper messageHeaderAH = new AttributeHelper("message_header"),
-			routingKeyAH = new AttributeHelper("routing_key"),
-			messageAH = new AttributeHelper("message");
+	protected AttributeHelper messageHeaderAH = new AttributeHelper("message_header"), //$NON-NLS-1$
+			routingKeyAH = new AttributeHelper("routing_key"), //$NON-NLS-1$
+			messageAH = new AttributeHelper("message"); //$NON-NLS-1$
 
 	private final static Logger trace = Logger.getLogger(RabbitMQBaseOper.class
 			.getCanonicalName());
 	protected Boolean usingDefaultExchange = false;
-	private String URI = "";
+	private String URI = ""; //$NON-NLS-1$
 	private long networkRecoveryInterval = 5000;
 	
 	protected SynchronizedConnectionMetric isConnected;
 	private Metric reconnectionAttempts;
-	private String appConfigName = "";
+	private String appConfigName = ""; //$NON-NLS-1$
 	private String userPropName;
 	private String passwordPropName;
 	
@@ -77,10 +77,10 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	 */
 	@ContextCheck(compile = false)
 	public static void checkParametersRuntime(OperatorContextChecker checker) {		
-		if((checker.getOperatorContext().getParameterNames().contains("appConfigName"))) {
-        	String appConfigName = checker.getOperatorContext().getParameterValues("appConfigName").get(0);
-			String userPropName = checker.getOperatorContext().getParameterValues("userPropName").get(0);
-			String passwordPropName = checker.getOperatorContext().getParameterValues("passwordPropName").get(0);
+		if((checker.getOperatorContext().getParameterNames().contains("appConfigName"))) { //$NON-NLS-1$
+        	String appConfigName = checker.getOperatorContext().getParameterValues("appConfigName").get(0); //$NON-NLS-1$
+			String userPropName = checker.getOperatorContext().getParameterValues("userPropName").get(0); //$NON-NLS-1$
+			String passwordPropName = checker.getOperatorContext().getParameterValues("passwordPropName").get(0); //$NON-NLS-1$
 			
 			
 			PropertyProvider provider = new PropertyProvider(checker.getOperatorContext().getPE(), appConfigName);
@@ -89,17 +89,17 @@ public class RabbitMQBaseOper extends AbstractOperator {
 			String password = provider.getProperty(passwordPropName);
 			
 			if(userName == null || userName.trim().length() == 0) {
-				trace.log(LogLevel.ERROR, "Property " + userPropName + " is not found in application configuration " + appConfigName);
+				trace.log(LogLevel.ERROR, Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG", userPropName, appConfigName)); //$NON-NLS-1$
 				checker.setInvalidContext(
-						"Property {0} is not found in application configuration {1}.",
+						Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG"), //$NON-NLS-1$
 						new Object[] {userPropName, appConfigName});
 				
 			}
 			
 			if(password == null || password.trim().length() == 0) {
-				trace.log(LogLevel.ERROR, "Property " + passwordPropName + " is not found in application configuration " + appConfigName);
+				trace.log(LogLevel.ERROR, Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG", passwordPropName, appConfigName)); //$NON-NLS-1$
 				checker.setInvalidContext(
-						"Property {0} is not found in application configuration {1}.",
+						Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG"), //$NON-NLS-1$
 						new Object[] {passwordPropName, appConfigName});
 			
 			}
@@ -110,9 +110,9 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	@ContextCheck(compile = true)
 	public static void checkParameters(OperatorContextChecker checker) {	
 		// Make sure if appConfigName is specified then both userPropName and passwordPropName are needed
-		checker.checkDependentParameters("appConfigName", "userPropName", "passwordPropName");
-		checker.checkDependentParameters("userPropName", "appConfigName", "passwordPropName");
-		checker.checkDependentParameters("passwordPropName", "appConfigName", "userPropName");
+		checker.checkDependentParameters("appConfigName", "userPropName", "passwordPropName"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		checker.checkDependentParameters("userPropName", "appConfigName", "passwordPropName"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		checker.checkDependentParameters("passwordPropName", "appConfigName", "userPropName"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
 	public synchronized void initialize(OperatorContext context)
@@ -140,7 +140,7 @@ public class RabbitMQBaseOper extends AbstractOperator {
 		}
 		
 		trace.log(TraceLevel.INFO,
-				"newPropertiesExist() is returning a value of: " + newProperties);
+				"newPropertiesExist() is returning a value of: " + newProperties); //$NON-NLS-1$
 		
 		
 		return newProperties;
@@ -148,12 +148,12 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	
 	public void resetRabbitClient() throws KeyManagementException, MalformedURLException, NoSuchAlgorithmException, URISyntaxException, IOException, TimeoutException, InterruptedException, Exception {
 		if (autoRecovery){
-			trace.log(TraceLevel.WARN, "Resetting Rabbit Client.");
+			trace.log(TraceLevel.WARN, "Resetting Rabbit Client."); //$NON-NLS-1$
 			closeRabbitConnections();
 			initializeRabbitChannelAndConnection();
 			
 		} else {
-			trace.log(TraceLevel.INFO, "AutoRecovery was not enabled, so we are not resetting client.");
+			trace.log(TraceLevel.INFO, "AutoRecovery was not enabled, so we are not resetting client."); //$NON-NLS-1$
 		}
 	}
 	
@@ -178,13 +178,13 @@ public class RabbitMQBaseOper extends AbstractOperator {
 				isConnected.setValue(1);
 				
 				trace.log(TraceLevel.INFO,
-						"Initializing channel connection to exchange: " + exchangeName
-								+ " of type: " + exchangeType + " as user: " + connectionFactory.getUsername());
+						"Initializing channel connection to exchange: " + exchangeName //$NON-NLS-1$
+								+ " of type: " + exchangeType + " as user: " + connectionFactory.getUsername()); //$NON-NLS-1$ //$NON-NLS-2$
 				trace.log(TraceLevel.INFO,
-						"Connection to host: " + connection.getAddress());
+						"Connection to host: " + connection.getAddress()); //$NON-NLS-1$
 			} catch (IOException | TimeoutException e) {
 				e.printStackTrace();
-				trace.log(TraceLevel.ERROR, "Failed to setup connection: " + e.getMessage());
+				trace.log(LogLevel.ERROR, Messages.getString("FAILED_TO_SETUP_CONNECTION", e.getMessage())); //$NON-NLS-1$
 				if (autoRecovery == true){
 					Thread.sleep(networkRecoveryInterval);
 				}
@@ -194,7 +194,7 @@ public class RabbitMQBaseOper extends AbstractOperator {
 				&& !shuttingDown.get());
 		
 		if (connection == null || channel == null){
-			throw new FailedToConnectToRabbitMQException("Failed to initialize connection or channel to RabbitMQ Server.");
+			throw new FailedToConnectToRabbitMQException(Messages.getString("FAILED_TO_INIT_CONNECTION_OR_CHANNEL_TO_SERVER")); //$NON-NLS-1$
 		}
 	}
 
@@ -217,8 +217,8 @@ public class RabbitMQBaseOper extends AbstractOperator {
 		} else{
 			//use specified URI rather than username, password, vHost, hostname, etc
 			if (!username.isEmpty() | !password.isEmpty() | vHost != null | !hostAndPortList.isEmpty()){
-				trace.log(TraceLevel.WARNING, "You specified a URI, therefore username, password"
-						+ ", vHost, and hostname parameters will be ignored.");
+				trace.log(TraceLevel.WARNING, "You specified a URI, therefore username, password" //$NON-NLS-1$
+						+ ", vHost, and hostname parameters will be ignored."); //$NON-NLS-1$
 			}
 			connectionFactory.setUri(URI);
 		}
@@ -243,10 +243,10 @@ public class RabbitMQBaseOper extends AbstractOperator {
 		Connection connection;
 		if (URI.isEmpty()){
 			connection = connectionFactory.newConnection(addressArr);
-			trace.log(TraceLevel.INFO, "Creating a new connection based on an address list.");
+			trace.log(TraceLevel.INFO, "Creating a new connection based on an address list."); //$NON-NLS-1$
 		} else {
 			connection = connectionFactory.newConnection();
-			trace.log(TraceLevel.INFO, "Creating a new connection based on a provided URI.");
+			trace.log(TraceLevel.INFO, "Creating a new connection based on a provided URI."); //$NON-NLS-1$
 		}
 		return connection;
 	}
@@ -274,18 +274,18 @@ public class RabbitMQBaseOper extends AbstractOperator {
 
 		if (!username.isEmpty()) {
 			connectionFactory.setUsername(username);
-			trace.log(TraceLevel.INFO, "Set username.");
+			trace.log(TraceLevel.INFO, "Set username."); //$NON-NLS-1$
 		} else {
 			trace.log(TraceLevel.INFO,
-					"Default username: " + connectionFactory.getUsername() );
+					"Default username: " + connectionFactory.getUsername() ); //$NON-NLS-1$
 		}
 		
 		if (!password.isEmpty()) {
 			connectionFactory.setPassword(password);
-			trace.log(TraceLevel.INFO, "Set password.");
+			trace.log(TraceLevel.INFO, "Set password."); //$NON-NLS-1$
 		} else {
 			trace.log(TraceLevel.INFO,
-					"Default password: " + connectionFactory.getPassword());
+					"Default password: " + connectionFactory.getPassword()); //$NON-NLS-1$
 		}
 	}
 
@@ -295,10 +295,10 @@ public class RabbitMQBaseOper extends AbstractOperator {
 			//check to see if the exchange exists if not then it is the default exchange
 			if ( !exchangeName.isEmpty()){
 				channel.exchangeDeclarePassive(exchangeName);
-				trace.log(TraceLevel.INFO, "Exchange was found, therefore no exchange will be declared.");
+				trace.log(TraceLevel.INFO, "Exchange was found, therefore no exchange will be declared."); //$NON-NLS-1$
 			} else {
 				usingDefaultExchange = true;
-				trace.log(TraceLevel.INFO, "Using the default exchange. Name \"\"");
+				trace.log(TraceLevel.INFO, "Using the default exchange. Name \"\""); //$NON-NLS-1$
 			}
 		} catch (IOException e){
 			// if exchange doesn't exist, we will create it
@@ -306,7 +306,7 @@ public class RabbitMQBaseOper extends AbstractOperator {
 			channel = connection.createChannel();
 			// declare non-durable, auto-delete exchange
 			channel.exchangeDeclare(exchangeName, exchangeType, false, true, null);
-			trace.log(TraceLevel.INFO, "Exchange was not found, therefore non-durable exchange will be declared.");
+			trace.log(TraceLevel.INFO, "Exchange was not found, therefore non-durable exchange will be declared."); //$NON-NLS-1$
 		}
 		return channel;
 	}
@@ -315,11 +315,11 @@ public class RabbitMQBaseOper extends AbstractOperator {
 		Address[] addrArr = new Address[hostsAndPorts.size()];
 		int i = 0;
 		for (String hostAndPort : hostsAndPorts){
-			URL tmpURL = new URL("http://" + hostAndPort);
+			URL tmpURL = new URL("http://" + hostAndPort); //$NON-NLS-1$
 			addrArr[i++] = new Address(tmpURL.getHost(), tmpURL.getPort());
-			trace.log(TraceLevel.INFO, "Adding: " + tmpURL.getHost() + ":"+ tmpURL.getPort());
+			trace.log(TraceLevel.INFO, "Adding: " + tmpURL.getHost() + ":"+ tmpURL.getPort()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		trace.log(TraceLevel.INFO, "Built address array: \n" + addrArr.toString());
+		trace.log(TraceLevel.INFO, "Built address array: \n" + addrArr.toString()); //$NON-NLS-1$
 		
 		return addrArr;
 	}
@@ -342,7 +342,7 @@ public class RabbitMQBaseOper extends AbstractOperator {
 				channel.close();
 			} catch (Exception e){
 				e.printStackTrace();
-				trace.log(TraceLevel.ALL, "Exception at channel close: " + e.toString());
+				trace.log(LogLevel.ALL, Messages.getString("EXCEPTION_AT_CHANNEL_CLOSE", e.toString())); //$NON-NLS-1$
 			} finally {
 				channel = null;
 			}
@@ -353,7 +353,7 @@ public class RabbitMQBaseOper extends AbstractOperator {
 				connection.close();
 			} catch (Exception e) {
 				e.printStackTrace();
-				trace.log(TraceLevel.ALL, "Exception at connection close: " + e.toString());
+				trace.log(LogLevel.ALL, Messages.getString("EXCEPTION_AT_CONNECTION_CLOSE", e.toString())); //$NON-NLS-1$
 			} finally {
 				connection = null;
 			}
@@ -480,12 +480,12 @@ public class RabbitMQBaseOper extends AbstractOperator {
 	
 	
 	public static final String BASE_DESC = 
- "\\n\\n**AppConfig**: "
-			+ "The hierarchy of credentials goes: credentials from the appConfig beat out parameters (username and password). "
-			+ "The valid key-value pairs in the appConfig are <userPropName>=<username> and <passwordPropName>=<password>, where "
-			+ "<userPropName> and <passwordPropName> are specified by the corresponding parameters. "
-			+ "This operator will only automatically recover with new credentials from the appConfig if automaticRecovery "
-			+ "is set to true. ";
+ "\\n\\n**AppConfig**: " //$NON-NLS-1$
+			+ "The hierarchy of credentials goes: credentials from the appConfig beat out parameters (username and password). " //$NON-NLS-1$
+			+ "The valid key-value pairs in the appConfig are <userPropName>=<username> and <passwordPropName>=<password>, where " //$NON-NLS-1$
+			+ "<userPropName> and <passwordPropName> are specified by the corresponding parameters. " //$NON-NLS-1$
+			+ "This operator will only automatically recover with new credentials from the appConfig if automaticRecovery " //$NON-NLS-1$
+			+ "is set to true. "; //$NON-NLS-1$
 
 
 }

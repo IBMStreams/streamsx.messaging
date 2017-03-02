@@ -35,7 +35,7 @@ import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 public class KafkaSink extends KafkaBaseOper {
 	
 	
-	static final String OPER_NAME =  "KafkaProducer";
+	static final String OPER_NAME =  "KafkaProducer"; //$NON-NLS-1$
 	
 	private static final Logger trace = Logger.getLogger(KafkaSink.class.getName());
 	private KafkaProducerClient producerClient;
@@ -53,8 +53,8 @@ public class KafkaSink extends KafkaBaseOper {
 	
 	@ContextCheck(compile=true)
 	public static boolean topicChecker(OperatorContextChecker checker) {
-		return checker.checkExcludedParameters("topic", "topicAttribute") &&
-			   checker.checkExcludedParameters("topicAttribute", "topic");
+		return checker.checkExcludedParameters("topic", "topicAttribute") && //$NON-NLS-1$ //$NON-NLS-2$
+			   checker.checkExcludedParameters("topicAttribute", "topic"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	//consistent region checks
@@ -64,8 +64,8 @@ public class KafkaSink extends KafkaBaseOper {
 				checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
 		
 		if(consistentRegionContext != null && consistentRegionContext.isStartOfRegion()) {
-			checker.setInvalidContext( OPER_NAME + " operator cannot be placed at the start of consistent region.", 
-					new String[] {});
+			checker.setInvalidContext( Messages.getString("CANNOT_BE_START_OF_CONSISTENT_REGION"),  //$NON-NLS-1$
+					new String[] {OPER_NAME});
 		}
 	}
 	
@@ -84,16 +84,16 @@ public class KafkaSink extends KafkaBaseOper {
 		super.initSchema(getInput(0).getStreamSchema());
 		
 		if(topics.size() == 0 && !topicAH.isAvailable())
-			throw new IllegalArgumentException("Topic has not been specified. Specify either the \"topicAttribute\" or \"topic\" parameters.");
+			throw new IllegalArgumentException(Messages.getString("TOPIC_NOT_SPECIFIED")); //$NON-NLS-1$
 		
 		if(keyAH.isAvailable() && ( keyAH.isString() != messageAH.isString())) {
-			throw new IllegalArgumentException("Key and Message attributes must have compatible types.");
+			throw new IllegalArgumentException(Messages.getString("KEY_AND_MESSAGE_MUST_HAVE_COMPATIBLE_TYPES")); //$NON-NLS-1$
 		}
 		
 		if(!topics.isEmpty())
-			trace.log(TraceLevel.INFO, "Topics: " + topics.toString());
+			trace.log(TraceLevel.INFO, "Topics: " + topics.toString()); //$NON-NLS-1$
 
-		trace.log(TraceLevel.INFO, "Initializing producer");
+		trace.log(TraceLevel.INFO, "Initializing producer"); //$NON-NLS-1$
 		producerClient = getNewProducerClient(topicAH, keyAH, messageAH, finalProperties);
 		
 		// register for data governance
@@ -108,16 +108,16 @@ public class KafkaSink extends KafkaBaseOper {
 	}
 
 	private void registerForDataGovernance() {
-		trace.log(TraceLevel.INFO, "KafkaSink -- Registering for data governance");
+		trace.log(TraceLevel.INFO, "KafkaSink -- Registering for data governance"); //$NON-NLS-1$
 
 		if (!topics.isEmpty()) {
 			for (String topic : topics) {
-				trace.log(TraceLevel.INFO, OPER_NAME + " -- data governance - topic to register: " + topic);
+				trace.log(TraceLevel.INFO, OPER_NAME + " -- data governance - topic to register: " + topic); //$NON-NLS-1$
 				DataGovernanceUtil.registerForDataGovernance(this, topic, IGovernanceConstants.ASSET_KAFKA_TOPIC_TYPE,
-						null, null, false, "KafkaSink");
+						null, null, false, "KafkaSink"); //$NON-NLS-1$
 			}
 		} else {
-			trace.log(TraceLevel.INFO, "KafkaSink -- Registering for data governance -- topics is empty");
+			trace.log(TraceLevel.INFO, "KafkaSink -- Registering for data governance -- topics is empty"); //$NON-NLS-1$
 		}
 
 	}
@@ -126,20 +126,20 @@ public class KafkaSink extends KafkaBaseOper {
 	public void process(StreamingInput<Tuple> stream, Tuple tuple) throws FileNotFoundException, IOException, UnsupportedStreamsKafkaConfigurationException{
 		try {	
 			if(trace.isLoggable(TraceLevel.DEBUG))
-				trace.log(TraceLevel.DEBUG, "Sending message: " + tuple);
+				trace.log(TraceLevel.DEBUG, "Sending message: " + tuple); //$NON-NLS-1$
 			
 			if(!topics.isEmpty()) 
 				producerClient.send(tuple, topics);
 			else 
 				producerClient.send(tuple);
 		} catch(Exception e) {
-			trace.log(TraceLevel.ERROR, "Could not send message: " + tuple, e);
+			trace.log(TraceLevel.ERROR, "Could not send message: " + tuple, e); //$NON-NLS-1$
 			e.printStackTrace();
 			resetProducerIfPropertiesHaveChanged();
 		}
 		
 		if(producerClient.hasMessageException() == true){
-			trace.log(TraceLevel.WARN, "Found message exception");
+			trace.log(TraceLevel.WARN, "Found message exception"); //$NON-NLS-1$
 			resetProducerIfPropertiesHaveChanged();
 		}
 
@@ -149,10 +149,10 @@ public class KafkaSink extends KafkaBaseOper {
 		OperatorContext context = this.getOperatorContext();
 		if (newPropertiesExist(context)){
 			trace.log(TraceLevel.INFO,
-					"Properties have changed. Initializing producer with new properties.");
+					"Properties have changed. Initializing producer with new properties."); //$NON-NLS-1$
 			resetProducerClient(context);
 		} else {
-			trace.log(TraceLevel.INFO, "Properties have not changed, so we are keeping the same producer client and resetting the message exception.");
+			trace.log(TraceLevel.INFO, "Properties have not changed, so we are keeping the same producer client and resetting the message exception."); //$NON-NLS-1$
 			producerClient.resetMessageException();
 		}
 	}
@@ -167,14 +167,14 @@ public class KafkaSink extends KafkaBaseOper {
 	}
 
 	public static final String DESC = 
-			"This operator acts as a Kafka producer sending tuples as messages to a Kafka broker. " + 
-			"The broker is assumed to be already configured and running. " +
-			"The incoming stream can have three attributes: topic, key and message. " +
-			"The message is a required attribute. " +
-			"A topic can be specified as either an input stream attribute or as a parameter. " +
+			"This operator acts as a Kafka producer sending tuples as messages to a Kafka broker. " +  //$NON-NLS-1$
+			"The broker is assumed to be already configured and running. " + //$NON-NLS-1$
+			"The incoming stream can have three attributes: topic, key and message. " + //$NON-NLS-1$
+			"The message is a required attribute. " + //$NON-NLS-1$
+			"A topic can be specified as either an input stream attribute or as a parameter. " + //$NON-NLS-1$
 			BASE_DESC + // common description between Source and Sink
-			"\\n\\n**Behavior in a Consistent Region**" + 
-			"\\nThis operator can participate in a consistent region.  This operator cannot be placed at the start of a consistent region. "
-			+ "The KafkaProducer guarantees at-least-once delivery of messages to a Kafka topic."
+			"\\n\\n**Behavior in a Consistent Region**" +  //$NON-NLS-1$
+			"\\nThis operator can participate in a consistent region.  This operator cannot be placed at the start of a consistent region. " //$NON-NLS-1$
+			+ "The KafkaProducer guarantees at-least-once delivery of messages to a Kafka topic." //$NON-NLS-1$
 			;
 }

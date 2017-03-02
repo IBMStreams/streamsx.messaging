@@ -72,17 +72,15 @@ class WBETextMessageHandler extends BaseXMLMessageHandler {
 		boolean isTruncated = false;
 		// create elements for constructing the xml document
 		// with wbe mesage format
-
-		Element rootElement = document.createElement("connector"); // creates a
-																	// element
-		// for root tuple
-		rootElement.setAttribute("xmlns", "http://wbe.ibm.com/6.2/Event/"
+		// creates an element for root tuple
+		Element rootElement = document.createElement("connector");	//$NON-NLS-1$ 
+		rootElement.setAttribute("xmlns", "http://wbe.ibm.com/6.2/Event/" //$NON-NLS-1$ //$NON-NLS-2$
 				+ eventName);
-		rootElement.setAttribute("name", "System S");
-		rootElement.setAttribute("version", "6.2");
-		Element rootEle2 = document.createElement("connector-bundle");
-		rootEle2.setAttribute("name", eventName);
-		rootEle2.setAttribute("type", "Event");
+		rootElement.setAttribute("name", "System S"); //$NON-NLS-1$ //$NON-NLS-2$
+		rootElement.setAttribute("version", "6.2"); //$NON-NLS-1$ //$NON-NLS-2$
+		Element rootEle2 = document.createElement("connector-bundle"); //$NON-NLS-1$
+		rootEle2.setAttribute("name", eventName); //$NON-NLS-1$
+		rootEle2.setAttribute("type", "Event"); //$NON-NLS-1$ //$NON-NLS-2$
 		rootElement.appendChild(rootEle2);
 		Element rootEle3 = document.createElement(eventName);
 		rootEle2.appendChild(rootEle3);
@@ -118,7 +116,7 @@ class WBETextMessageHandler extends BaseXMLMessageHandler {
 					stringdata = rdata.substring(0, length);
 				}
 
-				ele.setAttribute("data-type", "string");
+				ele.setAttribute("data-type", "string"); //$NON-NLS-1$ //$NON-NLS-2$
 				break;
 			// spl types decimal32, decimal64,decimal128, timestamp are mapped
 			// to String.
@@ -126,12 +124,12 @@ class WBETextMessageHandler extends BaseXMLMessageHandler {
 			case DECIMAL64:
 			case DECIMAL128:
 				stringdata = tuple.getBigDecimal(name).toString();
-				ele.setAttribute("data-type", "string");
+				ele.setAttribute("data-type", "string"); //$NON-NLS-1$ //$NON-NLS-2$
 				break;
 			case TIMESTAMP:
 				stringdata = tuple.getTimestamp(name).getTimeAsSeconds()
 						.toString();
-				ele.setAttribute("data-type", "string");
+				ele.setAttribute("data-type", "string"); //$NON-NLS-1$ //$NON-NLS-2$
 				break;
 			case INT8:
 			case UINT8:
@@ -142,23 +140,23 @@ class WBETextMessageHandler extends BaseXMLMessageHandler {
 			case INT64:
 			case UINT64:
 				stringdata = tuple.getString(name);
-				ele.setAttribute("data-type", "integer");
+				ele.setAttribute("data-type", "integer"); //$NON-NLS-1$ //$NON-NLS-2$
 				break;
 			case FLOAT32:
 			case FLOAT64:
 				stringdata = tuple.getString(name);
-				ele.setAttribute("data-type", "real");
+				ele.setAttribute("data-type", "real"); //$NON-NLS-1$ //$NON-NLS-2$
 
 				break;
 			case BOOLEAN:
 				if (tuple.getBoolean(name)) {
-					stringdata = "true";
+					stringdata = "true"; //$NON-NLS-1$
 
 				} else {
-					stringdata = "false";
+					stringdata = "false"; //$NON-NLS-1$
 
 				}
-				ele.setAttribute("data-type", "boolean");
+				ele.setAttribute("data-type", "boolean"); //$NON-NLS-1$ //$NON-NLS-2$
 
 				break;
 			}

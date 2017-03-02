@@ -50,6 +50,7 @@ import com.ibm.streams.operator.types.ValueFactory;
 import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
 import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 import com.ibm.streamsx.messaging.common.PropertyProvider;
+import com.ibm.streamsx.messaging.mqtt.Messages;
 import com.ibm.streamsx.messaging.mqtt.MqttClientRequest.MqttClientRequestType;
 
 /**
@@ -137,8 +138,8 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 
     @ContextCheck(compile=true)
     public static void checkQosQosStrExclusive(OperatorContextChecker checker) {
-    	checker.checkExcludedParameters("qos", "qosStr");
-    	checker.checkExcludedParameters("qosStr", "qos");
+    	checker.checkExcludedParameters("qos", "qosStr"); //$NON-NLS-1$ //$NON-NLS-2$
+    	checker.checkExcludedParameters("qosStr", "qos"); //$NON-NLS-1$ //$NON-NLS-2$
     }
     
     @ContextCheck(compile=true)
@@ -149,7 +150,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 		ConsistentRegionContext cContext = oContext.getOptionalContext(ConsistentRegionContext.class);
 		
 		if(cContext != null) {
-			checker.setInvalidContext("The following operator cannot be in a consistent region: MQTTSource", new String[] {});
+			checker.setInvalidContext(Messages.getString("OP_CANNOT_PARTICIPATE_IN_CONSISTENT_REGION"), new String[] {"MQTTSource"}); //$NON-NLS-1$
 		}
 	}
     
@@ -160,17 +161,17 @@ public class MqttSourceOperator extends AbstractMqttOperator {
     	validateNumber(checker, "qos", 0, 2); //$NON-NLS-1$
     	validateNumber(checker, "reconnectionBound", -1, Long.MAX_VALUE); //$NON-NLS-1$
     	validateNumber(checker, "messageQueueSize", 1, Integer.MAX_VALUE); //$NON-NLS-1$
-    	validateCommaSeparatedNumber(checker, "qosStr", 0, 2);
+    	validateCommaSeparatedNumber(checker, "qosStr", 0, 2); //$NON-NLS-1$
     	
     	int topicsCount = getCommaSeparatedParamNumber(checker, "topics"); //$NON-NLS-1$
-    	int qosTotalCount = getCommaSeparatedParamNumber(checker, "qos") + getCommaSeparatedParamNumber(checker, "qosStr"); //$NON-NLS-1$
+    	int qosTotalCount = getCommaSeparatedParamNumber(checker, "qos") + getCommaSeparatedParamNumber(checker, "qosStr"); //$NON-NLS-1$ //$NON-NLS-2$
     	
     	//List<String> topicValues = checker.getOperatorContext().getParameterValues("topics"); //$NON-NLS-1$
     	//List<String> qosValues = checker.getOperatorContext().getParameterValues("qos"); //$NON-NLS-1$
     	
     	if (qosTotalCount > 0 && topicsCount != qosTotalCount)
     	{
-    		checker.setInvalidContext(Messages.getString("Error_MqttSourceOperator.5"), new Object[] {}); //$NON-NLS-1$
+    		checker.setInvalidContext(Messages.getString("NUMBER_OF_TOPICS_MUST_EQUAL_QOS_VALUES"), new Object[] {}); //$NON-NLS-1$
     	}
     	
     	if (checker.getOperatorContext().getParameterNames().contains("topicOutAttrName")) { //$NON-NLS-1$
@@ -220,7 +221,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 
 					if (longVal.longValue() > max || longVal.longValue() < min) {
 						checker.setInvalidContext(
-								Messages.getString("Error_AbstractMqttOperator.0"), //$NON-NLS-1$
+								Messages.getString("NOT_IN_RANGE"), //$NON-NLS-1$
 								new Object[] { paramName, min, max });
 					}
 				}
@@ -228,7 +229,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 			}
 		} catch (NumberFormatException e) {
 			checker.setInvalidContext(
-					Messages.getString("Error_AbstractMqttOperator.1"), //$NON-NLS-1$
+					Messages.getString("NOT_A_NUMBER"), //$NON-NLS-1$
 					new Object[] { paramName });
 		}
     }
@@ -266,7 +267,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 					dataAttribute = streamSchema.getAttribute(0);
 				}
 				else {
-					dataAttribute = streamSchema.getAttribute("data");
+					dataAttribute = streamSchema.getAttribute("data"); //$NON-NLS-1$
 				}
 				
 				// the default data attribute must be present and must be either BLOB or RSTRING
@@ -274,7 +275,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 					checker.checkAttributeType(dataAttribute, MetaType.RSTRING, MetaType.BLOB );
 				}
 				else {
-					checker.setInvalidContext(Messages.getString("Error_MqttSourceOperator.0"), new Object[]{}); //$NON-NLS-1$
+					checker.setInvalidContext(Messages.getString("DATA_ATTRIB_NOT_FOUND_FROM_OUTPUT_PORT"), new Object[]{}); //$NON-NLS-1$
 				}
 			}
 		}
@@ -373,15 +374,15 @@ public class MqttSourceOperator extends AbstractMqttOperator {
     private void registerForDataGovernance() {
 		String uri = getServerUri();
 		List<String> topics = getTopics();
-		TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance with server uri: " + uri + " and topics: " + topics.toArray().toString());
+		TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance with server uri: " + uri + " and topics: " + topics.toArray().toString()); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		if(topics != null && uri != null && !uri.isEmpty()) {		
 			for (String topic : topics) {			
-				TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance with server uri: " + uri + " and topic: " + topic);
-				DataGovernanceUtil.registerForDataGovernance(this, topic, IGovernanceConstants.ASSET_MQTT_TOPIC_TYPE, uri, IGovernanceConstants.ASSET_MQTT_SERVER_TYPE, true, "MQTTSource");
+				TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance with server uri: " + uri + " and topic: " + topic); //$NON-NLS-1$ //$NON-NLS-2$
+				DataGovernanceUtil.registerForDataGovernance(this, topic, IGovernanceConstants.ASSET_MQTT_TOPIC_TYPE, uri, IGovernanceConstants.ASSET_MQTT_SERVER_TYPE, true, "MQTTSource"); //$NON-NLS-1$
 			}
 		} else {
-			TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance -- aborted. topic and/or uri is null");
+			TRACE.log(TraceLevel.INFO, "MQTTSource - Registering for data governance -- aborted. topic and/or uri is null"); //$NON-NLS-1$
 		}
 	}
     
@@ -465,15 +466,15 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 			} catch (InterruptedException e) {			
 				TRACE.log(TraceLevel.DEBUG, "[Request Queue:] Thread interrupted as expected: " + e.getLocalizedMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (URISyntaxException e1) {
-				String errorMsg = Messages.getString("Error_MqttSourceOperator.27", e1.getLocalizedMessage()); //$NON-NLS-1$
+				String errorMsg = Messages.getString("URI_SYNTAX_EXCEPTION", e1.getLocalizedMessage()); //$NON-NLS-1$
 				TRACE.log(TraceLevel.ERROR, errorMsg,e1);
 				submitToErrorPort(errorMsg, null);
 			} catch (MqttException e) {				
-				String errorMsg = Messages.getString("Error_MqttSourceOperator.25", e.getLocalizedMessage()); //$NON-NLS-1$
+				String errorMsg = Messages.getString("MGTT_CLIENT_ERROR_WHILE_HANDLING_MQTT_CLIENT_REQ", e.getLocalizedMessage()); //$NON-NLS-1$
 				TRACE.log(TraceLevel.ERROR, errorMsg,e);
 				submitToErrorPort(errorMsg, null);
 			} catch (RuntimeException e) {
-				String errorMsg = Messages.getString("Error_MqttSourceOperator.26", e.getLocalizedMessage()); //$NON-NLS-1$
+				String errorMsg = Messages.getString("RUNTIME_EXCEPTION_WHILE_HANDLING_MQTT_CLIENT_REQ", e.getLocalizedMessage()); //$NON-NLS-1$
 				TRACE.log(TraceLevel.ERROR, errorMsg,e);
 				submitToErrorPort(errorMsg, null);
 				
@@ -681,14 +682,14 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 							}
 							else if (serverUriStr.isEmpty())
 							{
-								String errorMsg = Messages.getString("Error_MqttSourceOperator.3"); //$NON-NLS-1$
+								String errorMsg = Messages.getString("IGNORED_EMPTY_ERVER_URI_FROM_CTRL_SIGNAL"); //$NON-NLS-1$
 								
 								TRACE.log(TraceLevel.ERROR,errorMsg);
 								submitToErrorPort(errorMsg, null);								
 							}
 							else if (serverUriStr.toLowerCase().equals(getServerUri().toLowerCase())){
 
-								String errorMsg = Messages.getString("Warning_MqttSourceOperator.4"); //$NON-NLS-1$
+								String errorMsg = Messages.getString("SERVER_URI_FROM_SIGNAL_IGNORED_AS_ALREADY_CONNECTED"); //$NON-NLS-1$
 								
 								TRACE.log(TraceLevel.WARN,errorMsg);
 							}
@@ -714,7 +715,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 							}
 							else
 							{
-								String errorMsg = Messages.getString("Warning_MqttSourceOperator.0"); //$NON-NLS-1$								
+								String errorMsg = Messages.getString("CTRL_SIGNAL_CONTAINS_EMPTY_TOPIC"); //$NON-NLS-1$								
 								TRACE.log(TraceLevel.WARN,errorMsg);
 							}
 						}
@@ -735,7 +736,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 						}
 						else if (reqTopics.size() > 0)
 						{
-							String errorMsg = Messages.getString("Error_MqttSourceOperator.24", reqTopics.toString(), signalQos); //$NON-NLS-1$
+							String errorMsg = Messages.getString("SIGNAL_CONTAINS_INVALID_QOS", reqTopics.toString(), signalQos); //$NON-NLS-1$
 							
 							TRACE.log(TraceLevel.ERROR,errorMsg);
 							submitToErrorPort(errorMsg, null);	
@@ -748,7 +749,7 @@ public class MqttSourceOperator extends AbstractMqttOperator {
 		} catch (Exception e) {
 			
 			String tupleAsString = tuple.toString();
-			String errorMsg = Messages.getString("Error_MqttSinkOperator.21", tupleAsString); //$NON-NLS-1$
+			String errorMsg = Messages.getString("CANNOT_PROCESS_CTRL_SIGNAL", tupleAsString); //$NON-NLS-1$
 
 			TRACE.log(TraceLevel.ERROR,errorMsg); //$NON-NLS-1$
 						

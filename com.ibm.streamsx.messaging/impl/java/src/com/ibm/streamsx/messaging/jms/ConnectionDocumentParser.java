@@ -37,14 +37,15 @@ import com.ibm.streams.operator.Attribute;
 import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.Type;
 import com.ibm.streams.operator.Type.MetaType;
+import com.ibm.streamsx.messaging.jms.Messages;
 
 //This class parses and validates the connections document 
 class ConnectionDocumentParser {
 
 	// Variable to hold the supported SPL data types for the adapter
-	private static final Set<String> supportedSPLTypes = new HashSet<String>(Arrays.asList("int8", "uint8", "int16",
-			"uint16", "int32", "uint32", "int64", "float32", "float64", "boolean", "blob", "rstring", "uint64",
-			"decimal32", "decimal64", "decimal128", "ustring", "timestamp", "xml"));
+	private static final Set<String> supportedSPLTypes = new HashSet<String>(Arrays.asList("int8", "uint8", "int16", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			"uint16", "int32", "uint32", "int64", "float32", "float64", "boolean", "blob", "rstring", "uint64", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$
+			"decimal32", "decimal64", "decimal128", "ustring", "timestamp", "xml")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 
 	// If the length is absent in native schema, we use -999
 	static final int LENGTH_ABSENT_IN_NATIVE_SCHEMA = -999;
@@ -88,65 +89,65 @@ class ConnectionDocumentParser {
 		mapSPLToNativeSchemaDataTypesForText = new HashMap<String, String>();
 		// method to populate mapSPLToNativeSchemaDataTypesForOtherMsgClass
 
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("int8", "Byte");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("uint8", "Byte");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("int16", "Short");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("uint16", "Short");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("int32", "Int");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("uint32", "Int");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("int64", "Long");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("uint64", "Long");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("float32", "Float");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("float64", "Double");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("boolean", "Boolean");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("blob", "Bytes");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("rstring", "String");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("ustring", "String");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("decimal32", "String");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("decimal64", "String");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("decimal128", "String");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("timestamp", "String");
-		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("xml", "String");
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("int8", "Byte"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("uint8", "Byte"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("int16", "Short"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("uint16", "Short"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("int32", "Int"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("uint32", "Int"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("int64", "Long"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("uint64", "Long"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("float32", "Float"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("float64", "Double"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("boolean", "Boolean"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("blob", "Bytes"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("rstring", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("ustring", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("decimal32", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("decimal64", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("decimal128", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("timestamp", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForOtherMsgClass.put("xml", "String"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		mapSPLToNativeSchemaDataTypesForBytes.put("int8", "Byte");
-		mapSPLToNativeSchemaDataTypesForBytes.put("uint8", "Byte");
-		mapSPLToNativeSchemaDataTypesForBytes.put("int16", "Short");
-		mapSPLToNativeSchemaDataTypesForBytes.put("uint16", "Short");
-		mapSPLToNativeSchemaDataTypesForBytes.put("int32", "Int");
-		mapSPLToNativeSchemaDataTypesForBytes.put("uint32", "Int");
-		mapSPLToNativeSchemaDataTypesForBytes.put("int64", "Long");
-		mapSPLToNativeSchemaDataTypesForBytes.put("uint64", "Long");
-		mapSPLToNativeSchemaDataTypesForBytes.put("float32", "Float");
-		mapSPLToNativeSchemaDataTypesForBytes.put("float64", "Double");
-		mapSPLToNativeSchemaDataTypesForBytes.put("boolean", "Boolean");
-		mapSPLToNativeSchemaDataTypesForBytes.put("blob", "Bytes");
-		mapSPLToNativeSchemaDataTypesForBytes.put("rstring", "Bytes");
-		mapSPLToNativeSchemaDataTypesForBytes.put("ustring", "Bytes");
-		mapSPLToNativeSchemaDataTypesForBytes.put("decimal32", "Bytes");
-		mapSPLToNativeSchemaDataTypesForBytes.put("decimal64", "Bytes");
-		mapSPLToNativeSchemaDataTypesForBytes.put("decimal128", "Bytes");
-		mapSPLToNativeSchemaDataTypesForBytes.put("timestamp", "Bytes");
-		mapSPLToNativeSchemaDataTypesForBytes.put("xml", "Bytes");
+		mapSPLToNativeSchemaDataTypesForBytes.put("int8", "Byte"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("uint8", "Byte"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("int16", "Short"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("uint16", "Short"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("int32", "Int"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("uint32", "Int"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("int64", "Long"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("uint64", "Long"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("float32", "Float"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("float64", "Double"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("boolean", "Boolean"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("blob", "Bytes"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("rstring", "Bytes"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("ustring", "Bytes"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("decimal32", "Bytes"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("decimal64", "Bytes"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("decimal128", "Bytes"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("timestamp", "Bytes"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForBytes.put("xml", "Bytes"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		mapSPLToNativeSchemaDataTypesForText.put("int8", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("uint8", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("int16", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("uint16", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("int32", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("uint32", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("int64", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("uint64", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("float32", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("float64", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("boolean", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("blob", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("rstring", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("ustring", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("decimal32", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("decimal64", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("decimal128", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("timestamp", "String");
-		mapSPLToNativeSchemaDataTypesForText.put("xml", "String");
+		mapSPLToNativeSchemaDataTypesForText.put("int8", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("uint8", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("int16", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("uint16", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("int32", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("uint32", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("int64", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("uint64", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("float32", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("float64", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("boolean", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("blob", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("rstring", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("ustring", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("decimal32", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("decimal64", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("decimal128", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("timestamp", "String"); //$NON-NLS-1$ //$NON-NLS-2$
+		mapSPLToNativeSchemaDataTypesForText.put("xml", "String"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	}
 
@@ -205,7 +206,7 @@ class ConnectionDocumentParser {
 		   
 		   // provider_url can not be empty
 		   if(this.providerURL == null || this.providerURL.trim().length() == 0) { 
-			   throw new ParseConnectionDocumentException("A value must be specified for provider_url attribute in connection document");
+			   throw new ParseConnectionDocumentException(Messages.getString("PROVIDER_URL_MUST_BE_SPECIFIED_IN_CONN_DOC")); //$NON-NLS-1$
 		   }
 		   
 		   // provider_url has a value specified
@@ -213,18 +214,18 @@ class ConnectionDocumentParser {
 		       URL url = new URL(providerURL);
 		       
 		       // We only care about url with file scheme.
-		       if("file".equalsIgnoreCase(url.getProtocol())) {
+		       if("file".equalsIgnoreCase(url.getProtocol())) { //$NON-NLS-1$
 		    	   String path = url.getPath();
 		    	   
 		    	   // relative path is considered being relative to the application directory
-		    	   if(!path.startsWith("/")) {
+		    	   if(!path.startsWith("/")) { //$NON-NLS-1$
 				          URL absProviderURL = new URL(url.getProtocol(), url.getHost(), applicationDir.getAbsolutePath() + File.separator + path);
 				    	  this.providerURL = absProviderURL.toExternalForm();
 				      }
 		       }
 		       
 		   } catch (MalformedURLException e) {
-			   throw new ParseConnectionDocumentException("Invalid provider_url value detected: " + e.getMessage());
+			   throw new ParseConnectionDocumentException(Messages.getString("INVALID_PROVIDER_URL", e.getMessage())); //$NON-NLS-1$
 		   }
 		   
 	   }
@@ -291,18 +292,18 @@ class ConnectionDocumentParser {
 		// set to true if its found, false otherwise
 		boolean connectionFound = false;
 		// extract the connection_specification elements
-		NodeList connection_specification = docEle.getElementsByTagName("connection_specification");
+		NodeList connection_specification = docEle.getElementsByTagName("connection_specification"); //$NON-NLS-1$
 		// iterate through the list to verify if the connection_specification
 		// with value as connection exists
 		for (int i = 0; i < connection_specification.getLength(); i++) {
-			if (connection.equals(connection_specification.item(i).getAttributes().getNamedItem("name").getNodeValue())) {
+			if (connection.equals(connection_specification.item(i).getAttributes().getNamedItem("name").getNodeValue())) { //$NON-NLS-1$
 				// found connection_specification
 				int jmsIndex = -1;
 				// Extract the child nodes
 				NodeList connSpecChildNodes = connection_specification.item(i).getChildNodes();
 				// verify if it has a JMS tag
 				for (int j = 0; j < connSpecChildNodes.getLength(); j++) {
-					if (connSpecChildNodes.item(j).getNodeName().equals("JMS")) {
+					if (connSpecChildNodes.item(j).getNodeName().equals("JMS")) { //$NON-NLS-1$
 						jmsIndex = j;
 						break;
 					}
@@ -310,25 +311,25 @@ class ConnectionDocumentParser {
 				// extract the jms element
 				Node destination = connSpecChildNodes.item(jmsIndex);
 				// extract the provider URL from the JMS element
-				providerURL = destination.getAttributes().getNamedItem("provider_url").getNodeValue();
+				providerURL = destination.getAttributes().getNamedItem("provider_url").getNodeValue(); //$NON-NLS-1$
 				// extract the initialContext from the JMS element
-				initialContextFactory = destination.getAttributes().getNamedItem("initial_context").getNodeValue();
+				initialContextFactory = destination.getAttributes().getNamedItem("initial_context").getNodeValue(); //$NON-NLS-1$
 				// extract the connectionFactory from the JMS element
-				connectionFactory = destination.getAttributes().getNamedItem("connection_factory").getNodeValue();
+				connectionFactory = destination.getAttributes().getNamedItem("connection_factory").getNodeValue(); //$NON-NLS-1$
 
 				// check if optional elements user and password are specified
 				// if speciifed extract those
-				if (destination.getAttributes().getNamedItem("user") != null) {
-					userPrincipal = destination.getAttributes().getNamedItem("user").getNodeValue();
+				if (destination.getAttributes().getNamedItem("user") != null) { //$NON-NLS-1$
+					userPrincipal = destination.getAttributes().getNamedItem("user").getNodeValue(); //$NON-NLS-1$
 				}
-				if (destination.getAttributes().getNamedItem("password") != null) {
-					userCredential = destination.getAttributes().getNamedItem("password").getNodeValue();
+				if (destination.getAttributes().getNamedItem("password") != null) { //$NON-NLS-1$
+					userCredential = destination.getAttributes().getNamedItem("password").getNodeValue(); //$NON-NLS-1$
 				}
 				// Verify if either both user and password are present or none
 				// is present
 				// throw a ParseConnectionDocumentException otherwise
 				if (userPrincipal == null && userCredential != null || userPrincipal != null && userCredential == null) {
-					throw new ParseConnectionDocumentException("Only one of userPrinicpal, userCredential is set.");
+					throw new ParseConnectionDocumentException(Messages.getString("USERPRINCIPAL_AND_USERCREDENTIAL_MUST_BE_SET")); //$NON-NLS-1$
 				}
 				// set the connectionFound to true
 				connectionFound = true;
@@ -339,9 +340,7 @@ class ConnectionDocumentParser {
 		// throw ParseConnectionDocumentException if the connection value
 		// specified in the parameter is not found in the connection document
 		if (!connectionFound) {
-			throw new ParseConnectionDocumentException("The value of the connection parameter " + connection
-					+ " is not found in the connections document");
-
+			throw new ParseConnectionDocumentException(Messages.getString("VALUE_OF_CONNECTION_PARAM_NOT_FOUND_IN_CONN_DOC", connection)); //$NON-NLS-1$
 		}
 		return;
 	}
@@ -357,11 +356,11 @@ class ConnectionDocumentParser {
 		// native schema attribute list
 		Node nativeSchema = null;
 		// extract the access_specification node list
-		NodeList access_specification = docEle.getElementsByTagName("access_specification");
+		NodeList access_specification = docEle.getElementsByTagName("access_specification"); //$NON-NLS-1$
 		// iterate through the node list to find the access_specification
 		// element with value as access paramter
 		for (int i = 0; i < access_specification.getLength(); i++) {
-			if (access.equals(access_specification.item(i).getAttributes().getNamedItem("name").getNodeValue())) {
+			if (access.equals(access_specification.item(i).getAttributes().getNamedItem("name").getNodeValue())) { //$NON-NLS-1$
 				// access_specification element found
 				accessFound = true;
 
@@ -372,21 +371,19 @@ class ConnectionDocumentParser {
 				// iterate througgh the child nodes to find all the required
 				// elements
 				for (int j = 0; j < accessSpecChildNodes.getLength(); j++) {
-					if (accessSpecChildNodes.item(j).getNodeName().equals("destination")) {
+					if (accessSpecChildNodes.item(j).getNodeName().equals("destination")) { //$NON-NLS-1$
 						// extract destination
 						destIndex = j;
-					} else if (accessSpecChildNodes.item(j).getNodeName().equals("uses_connection")) {
+					} else if (accessSpecChildNodes.item(j).getNodeName().equals("uses_connection")) { //$NON-NLS-1$
 						// check if the uses_connection uses the same
 						// connections as specified
 						// in the SPL under connection parameter. Else throw
 						// ParseConnectionDocumentException
-						if (!connection.equals(accessSpecChildNodes.item(j).getAttributes().getNamedItem("connection")
+						if (!connection.equals(accessSpecChildNodes.item(j).getAttributes().getNamedItem("connection") //$NON-NLS-1$
 								.getNodeValue())) {
-							throw new ParseConnectionDocumentException("The value of the connection parameter "
-									+ connection + " is not the same as the connection used by access element "
-									+ access + " as mentioned in the uses_connection element in connections document");
+							throw new ParseConnectionDocumentException(Messages.getString("VALUE_OF_CONNECTION_PARAM_NOT_THE_SAME_AS_CONN_USED_BY_ACCESS_ELEMENT", connection, access )); //$NON-NLS-1$
 						}
-					} else if (accessSpecChildNodes.item(j).getNodeName().equals("native_schema")) {
+					} else if (accessSpecChildNodes.item(j).getNodeName().equals("native_schema")) { //$NON-NLS-1$
 						nativeSchemaIndex = j;
 					}
 				}
@@ -394,12 +391,12 @@ class ConnectionDocumentParser {
 				// get the destination node
 				Node dest = accessSpecChildNodes.item(destIndex);
 				// get the destination value
-				destination = dest.getAttributes().getNamedItem("identifier").getNodeValue();
+				destination = dest.getAttributes().getNamedItem("identifier").getNodeValue(); //$NON-NLS-1$
 				// get the message class
-				messageClass = dest.getAttributes().getNamedItem("message_class").getNodeValue();
+				messageClass = dest.getAttributes().getNamedItem("message_class").getNodeValue(); //$NON-NLS-1$
 				// get the delivery mode if its present
-				if (dest.getAttributes().getNamedItem("delivery_mode") != null) {
-					deliveryMode = dest.getAttributes().getNamedItem("delivery_mode").getNodeValue();
+				if (dest.getAttributes().getNamedItem("delivery_mode") != null) { //$NON-NLS-1$
+					deliveryMode = dest.getAttributes().getNamedItem("delivery_mode").getNodeValue(); //$NON-NLS-1$
 				}
 				// Extract the message class
 				msgClass = MessageClass.valueOf(messageClass.trim());
@@ -413,8 +410,7 @@ class ConnectionDocumentParser {
 		}
 		// if accessFound is false , throw ParseConnectionDocumentException
 		if (!accessFound) {
-			throw new ParseConnectionDocumentException("The value of the access parameter " + access
-					+ " is not found in the connections document");
+			throw new ParseConnectionDocumentException(Messages.getString("VALUE_OF_ACCESS_PARAM_NOT_FOUND_IN_CONN_DOC", access )); //$NON-NLS-1$
 		}
 
 		return nativeSchema;
@@ -426,13 +422,12 @@ class ConnectionDocumentParser {
 		// Native schema should be present for all message classes except empty
 		// throw ParseConnectionDocumentException otherwise
 		if (nativeSchema == null && msgClass != MessageClass.empty) {
-			throw new ParseConnectionDocumentException("Native schema needs to be specified for message class "
-					+ msgClass);
+			throw new ParseConnectionDocumentException(Messages.getString("NATIVE_SCHEMA_MUST_BE_SPECIFIED_FOR_MESSAGE_CLASS", msgClass)); //$NON-NLS-1$
 		}
 		// Native schema should not be present for message class empty
 		// if present throw ParseConnectionDocumentException
 		if (nativeSchema != null && msgClass == MessageClass.empty) {
-			throw new ParseConnectionDocumentException("Native schema cannot be specified with message class Empty ");
+			throw new ParseConnectionDocumentException(Messages.getString("NATIVE_SCHEMA_CANNOT_BE_SPECIFIED_WITH_MSG_CLASS_EMPTY")); //$NON-NLS-1$
 
 		}
 		// check if attributes in streamschema are of supported type
@@ -441,9 +436,7 @@ class ConnectionDocumentParser {
 			String streamAttrName = attr.getName();
 			MetaType streamAttrMetaType = attr.getType().getMetaType();
 			if (!supportedSPLTypes.contains(streamAttrMetaType.getLanguageType())) {
-				throw new ParseConnectionDocumentException("Attribute Type: " + streamAttrMetaType.getLanguageType()
-						+ " For stream attribute: " + streamAttrName + " is not a supported SPL type ");
-
+				throw new ParseConnectionDocumentException(Messages.getString("ATTRIB_TYPE_FOR_STREAM_ATTRIB_NOT_SUPPORTED_SPL_TYPE", streamAttrMetaType.getLanguageType(), streamAttrName ));	//$NON-NLS-1$
 			}
 		}
 		return;
@@ -455,7 +448,7 @@ class ConnectionDocumentParser {
 		// throw ParseConnectionDocumentException if specified
 		if (msgClass == MessageClass.xml || msgClass == MessageClass.wbe || msgClass == MessageClass.wbe22) {
 			throw new ParseConnectionDocumentException(
-					"Message classes xml, wbe and wbe22 are not supported for JMSSource");
+					Messages.getString("UNSUPPORTED_MSG_CLASSES_FOR_JMSSOURCE")); //$NON-NLS-1$
 		}
 
 		for (Attribute attr : streamSchema) {
@@ -464,7 +457,7 @@ class ConnectionDocumentParser {
 			// type
 
 			if (streamAttrMetaType == Type.MetaType.BLOB) {
-				throw new ParseConnectionDocumentException("BLOB is not a supported SPL type for JMSSource adapter");
+				throw new ParseConnectionDocumentException(Messages.getString("BLOB_NOT_SUPPORTED_FOR_JMSSOURCE")); //$NON-NLS-1$
 			}
 		}
 		return;
@@ -480,16 +473,16 @@ class ConnectionDocumentParser {
 		for (int i = 0; i < attrList.getLength(); i++) {
 			if (attrList.item(i).hasAttributes()) {
 				// extract the native schema attribute name, type and length
-				String nativeAttrName = (attrList.item(i).getAttributes().getNamedItem("name").getNodeValue());
-				String nativeAttrType = (attrList.item(i).getAttributes().getNamedItem("type").getNodeValue());
+				String nativeAttrName = (attrList.item(i).getAttributes().getNamedItem("name").getNodeValue()); //$NON-NLS-1$
+				String nativeAttrType = (attrList.item(i).getAttributes().getNamedItem("type").getNodeValue()); //$NON-NLS-1$
 				int nativeAttrLength;
 
 				// if length is not specified for that parameter
-				if (attrList.item(i).getAttributes().getNamedItem("length") == null) {
+				if (attrList.item(i).getAttributes().getNamedItem("length") == null) { //$NON-NLS-1$
 					nativeAttrLength = LENGTH_ABSENT_IN_NATIVE_SCHEMA;
 
 				} else {
-					nativeAttrLength = Integer.parseInt((attrList.item(i).getAttributes().getNamedItem("length")
+					nativeAttrLength = Integer.parseInt((attrList.item(i).getAttributes().getNamedItem("length") //$NON-NLS-1$
 							.getNodeValue()));
 
 				}
@@ -497,8 +490,7 @@ class ConnectionDocumentParser {
 				if ((msgClass == MessageClass.wbe || msgClass == MessageClass.wbe22)
 						&& ((streamSchema.getAttribute(nativeAttrName) != null) && (streamSchema
 								.getAttribute(nativeAttrName).getType().getMetaType() == Type.MetaType.BLOB))) {
-					throw new ParseConnectionDocumentException(" Blob data type is not supported for message class "
-							+ msgClass);
+					throw new ParseConnectionDocumentException(Messages.getString("BLOB_NOT_SUPPORTED_FOR_MSG_CLASS", msgClass)); //$NON-NLS-1$
 				}
 
 				// validate that the attribute name is not already
@@ -507,31 +499,29 @@ class ConnectionDocumentParser {
 				while (it.hasNext()) {
 					if (it.next().getName().equals(nativeAttrName)) {
 
-						throw new ParseConnectionDocumentException("Parameter name: " + nativeAttrName
-								+ " is appearing more than once In native schema file");
+						throw new ParseConnectionDocumentException(Messages.getString("PARAMETER_NOT_UNIQUE_IN_NATIVE_SCHEMA", nativeAttrName )); //$NON-NLS-1$
 					}
 				}
 
 				// set to hold the data types which can have length specified in
 				// native schema
-				Set<String> typesWithLength = new HashSet<String>(Arrays.asList("String", "Bytes"));
+				Set<String> typesWithLength = new HashSet<String>(Arrays.asList("String", "Bytes")); //$NON-NLS-1$ //$NON-NLS-2$
 
 				// if message class is text, length on String attribute type is
 				// optional
 				if (msgClass == MessageClass.text) {
-					typesWithLength = new HashSet<String>(Arrays.asList("Bytes"));
+					typesWithLength = new HashSet<String>(Arrays.asList("Bytes")); //$NON-NLS-1$
 				}
 
 				// set to hold the data types which can not have length
 				// specified in native schema
-				Set<String> typesWithoutLength = new HashSet<String>(Arrays.asList("Byte", "Short", "Int", "Long",
-						"Float", "Double", "Boolean"));
+				Set<String> typesWithoutLength = new HashSet<String>(Arrays.asList("Byte", "Short", "Int", "Long", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+						"Float", "Double", "Boolean")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				// Length value should not be present if the data type belongs
 				// to typesWithoutLength
 				if (typesWithoutLength.contains(nativeAttrType) && nativeAttrLength != LENGTH_ABSENT_IN_NATIVE_SCHEMA) {
 
-					throw new ParseConnectionDocumentException("Length attribute should not be present for parameter: "
-							+ nativeAttrName + " In native schema file");
+					throw new ParseConnectionDocumentException(Messages.getString("LENGTH_ATTRIB_SHOULD_NOT_BE_PRESENT_FOR_PARAM_IN_NATIVE_SCHEMA", nativeAttrName )); //$NON-NLS-1$
 				}
 
 				// Since for xml, wbe and wbe22 all the String, a new check is
@@ -544,8 +534,7 @@ class ConnectionDocumentParser {
 						&& (streamSchema.getAttribute(nativeAttrName).getType().getMetaType() != Type.MetaType.USTRING)
 						&& (streamSchema.getAttribute(nativeAttrName).getType().getMetaType() != Type.MetaType.BLOB)) {
 
-					throw new ParseConnectionDocumentException("Length attribute should not be present for parameter: "
-							+ nativeAttrName + " In native schema file");
+					throw new ParseConnectionDocumentException(Messages.getString("LENGTH_ATTRIB_SHOULD_NOT_BE_PRESENT_FOR_PARAM_IN_NATIVE_SCHEMA", nativeAttrName )); //$NON-NLS-1$
 				}
 				// Since decimal32, decimal64, decimal128 and timestamp are
 				// mapped to bytes for message class bytes
@@ -559,8 +548,7 @@ class ConnectionDocumentParser {
 							|| metaType == Type.MetaType.DECIMAL128 || metaType == Type.MetaType.TIMESTAMP) {
 						if (nativeAttrLength != LENGTH_ABSENT_IN_NATIVE_SCHEMA) {
 							throw new ParseConnectionDocumentException(
-									"Length attribute should not be present for parameter: " + nativeAttrName
-											+ " with type " + metaType + " in native schema file.");
+									Messages.getString("LENGTH_ATTRIB_SHOULD_NOT_BE_PRESENT_FOR_PARAM_WITH_TYPE_IN_NATIVE_SCHEMA", nativeAttrName, metaType )); //$NON-NLS-1$
 						}
 
 						if (msgClass == MessageClass.bytes) {
@@ -572,8 +560,7 @@ class ConnectionDocumentParser {
 				// typesWithLength and message class is bytes
 				if (typesWithLength.contains(nativeAttrType)) {
 					if (nativeAttrLength == LENGTH_ABSENT_IN_NATIVE_SCHEMA && msgClass == MessageClass.bytes) {
-						throw new ParseConnectionDocumentException("Length attribute should be present for parameter: "
-								+ nativeAttrName + " In native schema file for message class bytes");
+						throw new ParseConnectionDocumentException(Messages.getString("LENGTH_ATTRIB_SHOULD_NOT_BE_PRESENT_FOR_PARAM_IN_NATIVE_SCHEMA_FOR_MSG_CLASS_BYTES", nativeAttrName )); //$NON-NLS-1$
 					}
 					// Length attribute can be non negative -2,-4 only for
 					// message class bytes
@@ -581,8 +568,7 @@ class ConnectionDocumentParser {
 						if (msgClass != MessageClass.bytes) {
 
 							throw new ParseConnectionDocumentException(
-									"Length attribute can be non negative -2,-4 only for message class bytes for parameter: "
-											+ nativeAttrName + " In native schema file");
+									Messages.getString("LENGTH_ATTRIB_CAN_BE_NONNEG-2-4_ONLY_FOR_MSG_CLASS_BYTES_FOR_PARAM_IN_NATIVE_SCHEMA", nativeAttrName )); //$NON-NLS-1$
 
 						}
 						// If the Length attribute is non negative, it can only
@@ -590,8 +576,7 @@ class ConnectionDocumentParser {
 						if (nativeAttrLength != -2 && nativeAttrLength != -4) {
 
 							throw new ParseConnectionDocumentException(
-									"Length attribute should be non negative or -2,-4 for parameter: " + nativeAttrName
-											+ " In native schema file");
+									Messages.getString("LENGTH_ATTRIB_SHOULD_BE_NONNEG-2-4_FOR_PARAM_IN_NATIVE_SCHEMA", nativeAttrName )); //$NON-NLS-1$
 
 						}
 					}
@@ -606,8 +591,7 @@ class ConnectionDocumentParser {
 					// native schema
 					// should be present in input stream
 
-					throw new ParseConnectionDocumentException("Attribute Name: " + nativeAttrName + " with type:"
-							+ nativeAttrType + " in the native schema cannot be found in stream schema ");
+					throw new ParseConnectionDocumentException(Messages.getString("ATTRIB_WITH_TYPE_IN_NATIVE_SCHEMA_NOT_FOUND_IN_STREAM_SCHEMA", nativeAttrName, nativeAttrType )); //$NON-NLS-1$
 				}
 				// Here we are comparing the data type of the native schema
 				// attribute with the stream schema attribute of the same name
@@ -622,40 +606,30 @@ class ConnectionDocumentParser {
 					if ((msgClass == MessageClass.stream || msgClass == MessageClass.map)
 							&& !mapSPLToNativeSchemaDataTypesForOtherMsgClass.get(streamAttrMetaType.getLanguageType())
 									.equals(nativeAttrType)) {
-
-						throw new ParseConnectionDocumentException("Attribute Name: " + nativeAttrName + " with type:"
-								+ nativeAttrType + " in the native schema cannot be mapped with attribute: "
-								+ streamAttrName + " with type : " + streamAttrMetaType.getLanguageType());
+						throw new ParseConnectionDocumentException(Messages.getString("ATTRIB_WITH_TYPE_IN_NATIVE_SCHEMA_CANNOT_BE_MAPPED_TO_ATTRIB_WITH_TYPE", nativeAttrName, nativeAttrType, streamAttrName, streamAttrMetaType.getLanguageType())); //$NON-NLS-1$
 					}
 					// for message class bytes
 					else if (msgClass == MessageClass.bytes
 							&& !mapSPLToNativeSchemaDataTypesForBytes.get(streamAttrMetaType.getLanguageType()).equals(
 									nativeAttrType)) {
 
-						throw new ParseConnectionDocumentException("Attribute Name: " + nativeAttrName + " with type:"
-								+ nativeAttrType + " in the native schema cannot be mapped with attribute: "
-								+ streamAttrName + " with type : " + streamAttrMetaType.getLanguageType());
+						throw new ParseConnectionDocumentException(Messages.getString("ATTRIB_WITH_TYPE_IN_NATIVE_SCHEMA_CANNOT_BE_MAPPED_TO_ATTRIB_WITH_TYPE", nativeAttrName, nativeAttrType, streamAttrName, streamAttrMetaType.getLanguageType())); //$NON-NLS-1$
 					}
 					// for message classes xml,wbe,wbe22
 					else if ((msgClass == MessageClass.wbe || msgClass == MessageClass.wbe22 || msgClass == MessageClass.xml)
 							&& !mapSPLToNativeSchemaDataTypesForText.get(streamAttrMetaType.getLanguageType()).equals(
 									nativeAttrType)) {
-
-						throw new ParseConnectionDocumentException("Attribute Name: " + nativeAttrName + " with type:"
-								+ nativeAttrType + " in the native schema cannot be mapped with attribute: "
-								+ streamAttrName + " with type : " + streamAttrMetaType.getLanguageType());
+						throw new ParseConnectionDocumentException(Messages.getString("ATTRIB_WITH_TYPE_IN_NATIVE_SCHEMA_CANNOT_BE_MAPPED_TO_ATTRIB_WITH_TYPE", nativeAttrName, nativeAttrType, streamAttrName, streamAttrMetaType.getLanguageType())); //$NON-NLS-1$
 					} else if (msgClass == MessageClass.text) {
 						if (streamAttrMetaType != MetaType.RSTRING && streamAttrMetaType != MetaType.USTRING
 								&& streamAttrMetaType != MetaType.XML) {
 
-							throw new ParseConnectionDocumentException(streamAttrName
-									+ " in spl schema must be of type rstring, ustring or xml");
+							throw new ParseConnectionDocumentException(Messages.getString("ATTRIB_IN_SPL_SCHEMA_MUST_BE_RSTRING_USTRING_OR_XML", streamAttrName)); //$NON-NLS-1$
 						}
 						
-						if (!nativeAttrType.equals("String"))
+						if (!nativeAttrType.equals("String")) //$NON-NLS-1$
 						{
-							throw new ParseConnectionDocumentException("Attribute Name: " + nativeAttrName + " with type:"
-									+ nativeAttrType + " is invalid.  Attribute must be of type String.");
+							throw new ParseConnectionDocumentException(Messages.getString("ATTRIB_WITH_TYPE_IS_INVALID_MUST_BE_STRING", nativeAttrName, nativeAttrType )); //$NON-NLS-1$
 						}
 					}
 				}
@@ -682,7 +656,7 @@ class ConnectionDocumentParser {
 			// for message class text, only allow one attribute on native schema
 			if (nativeSchemaObjects.size() != 1) {
 				throw new ParseConnectionDocumentException(
-						"Native schema cannot contain more than one attribute with message class text.");
+						Messages.getString("NATIVE_SCHEMA_CANNOT_CONTAIN_MORE_THAN_ONE_ATTRIB_WITH_MSG_CLASS_TXT")); //$NON-NLS-1$
 			}
 		}
 
@@ -691,7 +665,7 @@ class ConnectionDocumentParser {
 
 	// subroutine to verify if the JMSProvider is Active MQ
 	public boolean isAMQ() {
-		if (initialContextFactory.contains("activemq")) {
+		if (initialContextFactory.contains("activemq")) { //$NON-NLS-1$
 			return true;
 		}
 

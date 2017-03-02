@@ -19,7 +19,7 @@ import com.ibm.streams.operator.types.ValueFactory;
 
 //Helper to check if attributes have been specified explicitly
 class AttributeHelper {
-	static final Charset CS = Charset.forName("UTF-8"); 
+	static final Charset CS = Charset.forName("UTF-8");  //$NON-NLS-1$
 	private boolean wasSet = false, isAvailable = false;
 	private MetaType mType = null;
 	private String name = null;
@@ -50,16 +50,16 @@ class AttributeHelper {
 		Attribute a = ss.getAttribute(name);
 		if(a == null) {
 			if(wasSet)
-				throw new IllegalArgumentException("Attribute \"" + name + "\" not available.");
+				throw new IllegalArgumentException(Messages.getString("ATTRIBUTE_NOT_AVAILABLE", name )); //$NON-NLS-1$
 			if(required)
-				throw new IllegalArgumentException("Attribute not found for \"" + name + "\".");
+				throw new IllegalArgumentException(Messages.getString("ATTRIBUTE_NOT_FOUND", name )); //$NON-NLS-1$
 			return;
 		}
 		this.mType = a.getType().getMetaType();
 		isString = mType == MetaType.RSTRING || mType == MetaType.USTRING;
 		
 		if(!supportedTypes.contains(mType)){
-			throw new Exception("Attribute \"" + name + "\" must be one of:  " + supportedTypes);
+			throw new Exception(Messages.getString("ATTRIBUTE_MUST_BE_ONE_OF", name, supportedTypes)); //$NON-NLS-1$
 		}
 		isAvailable = true;
 	}
@@ -71,7 +71,7 @@ class AttributeHelper {
 		if(!isAvailable) return;
 		if(isString) {
 			if (value == null)
-				value = "";
+				value = ""; //$NON-NLS-1$
 			otup.setString(name, value);
 		} else 
 			otup.setBlob(name, ValueFactory.newBlob(value.getBytes(CS)));
@@ -80,7 +80,7 @@ class AttributeHelper {
 		if(!isAvailable) return;
 		if(isString) {
 			if (value == null)
-				otup.setString(name,"");
+				otup.setString(name,""); //$NON-NLS-1$
 			else 
 				otup.setString(name, new String(value, CS));
 		}

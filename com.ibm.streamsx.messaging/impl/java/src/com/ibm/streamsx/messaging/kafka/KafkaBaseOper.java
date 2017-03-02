@@ -43,13 +43,13 @@ public abstract class KafkaBaseOper extends AbstractOperator {
     // application configuration name
 	protected String appConfigName;
 	protected String propertiesFile = null;
-	protected AttributeHelper topicAH = new AttributeHelper("topic"),
-			keyAH = new AttributeHelper("key"),
-			messageAH = new AttributeHelper("message");
+	protected AttributeHelper	topicAH		= new AttributeHelper("topic"), //$NON-NLS-1$
+								keyAH		= new AttributeHelper("key"), //$NON-NLS-1$
+								messageAH	= new AttributeHelper("message"); //$NON-NLS-1$
 	protected List<String> topics = new ArrayList<String>();
 	private List<String> appConfigPropName = new ArrayList<String>();
 	private String jaasFile = null;
-	private String jaasFilePropName = "jaasFile";
+	private String jaasFilePropName = "jaasFile"; //$NON-NLS-1$
 	private static final Logger trace = Logger.getLogger(KafkaBaseOper.class
 			.getCanonicalName());
 
@@ -60,16 +60,16 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	public static void checkCompileCompatability(OperatorContextChecker checker) {
 		OperatorContext operContext = checker.getOperatorContext();
 
-		if (!operContext.getParameterNames().contains("propertiesFile")
-				&& !operContext.getParameterNames().contains("kafkaProperty")
-				&& !operContext.getParameterNames().contains("appConfigName")) {
+		if (!operContext.getParameterNames().contains("propertiesFile") //$NON-NLS-1$
+				&& !operContext.getParameterNames().contains("kafkaProperty") //$NON-NLS-1$
+				&& !operContext.getParameterNames().contains("appConfigName")) { //$NON-NLS-1$
 			checker.setInvalidContext(
-					"Missing properties: Check that appConfig, propertiesFile, or kafkaProperty parameter specified. At least one must be set.",
+					Messages.getString("MISSING_PRPERTIES"), //$NON-NLS-1$
 					new String[] {});
 
 		}
 		
-		checker.checkDependentParameters("jaasFilePropName", "appConfigName");
+		checker.checkDependentParameters("jaasFilePropName", "appConfigName"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	}
 	
@@ -79,21 +79,21 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	 */
 	@ContextCheck(compile = false)
 	public static void checkParametersRuntime(OperatorContextChecker checker) {
-		if((checker.getOperatorContext().getParameterNames().contains("appConfigName"))) {
-        	String appConfigName = checker.getOperatorContext().getParameterValues("appConfigName").get(0);
-			List<String> appConfigPropName = checker.getOperatorContext().getParameterValues("appConfigPropertyName");
+		if((checker.getOperatorContext().getParameterNames().contains("appConfigName"))) { //$NON-NLS-1$
+        	String appConfigName = checker.getOperatorContext().getParameterValues("appConfigName").get(0); //$NON-NLS-1$
+			List<String> appConfigPropName = checker.getOperatorContext().getParameterValues("appConfigPropertyName"); //$NON-NLS-1$
 			
 			PropertyProvider provider = new PropertyProvider(checker.getOperatorContext().getPE(), appConfigName);
 			for (String propName : appConfigPropName){
 				String prop = provider.getProperty(propName);
 				if(prop == null || prop.trim().length() == 0) {
-					trace.log(TraceLevel.ERROR, "Property " + propName + " is not found in application configuration " + appConfigName);
+					trace.log(TraceLevel.ERROR, Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG", propName, appConfigName )); //$NON-NLS-1$
 					checker.setInvalidContext(
-							"Property {0} is not found in application configuration {1}.",
+							Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG"), //$NON-NLS-1$
 							new Object[] {propName, appConfigName});
 					
 				} else {
-					trace.log(TraceLevel.TRACE, "Property " + propName + " was found in the appConfig: " + appConfigName);
+					trace.log(TraceLevel.TRACE, "Property " + propName + " was found in the appConfig: " + appConfigName); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
         }
@@ -101,14 +101,14 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 
 	
 	protected static void checkForMessageAttribute(OperatorContext operContext, StreamSchema operSchema) throws Exception {
-		List<String> messageAttrParameter = operContext.getParameterValues("messageAttribute");
-		String messageAttrString = "message";
+		List<String> messageAttrParameter = operContext.getParameterValues("messageAttribute"); //$NON-NLS-1$
+		String messageAttrString = "message"; //$NON-NLS-1$
 		if (!messageAttrParameter.isEmpty()){
 			messageAttrString = messageAttrParameter.get(0);
 		}
 		if ( !operSchema.getAttributeNames().contains(messageAttrString)
 				|| !operSchema.getAttributeNames().contains(messageAttrString)){
-			throw new UnsupportedStreamsKafkaAttributeException("Attribute called message or described by the \"messageAttribute\" parameter is REQUIRED.");
+			throw new UnsupportedStreamsKafkaAttributeException(Messages.getString("ATTRIBUTE_MESSAGE_OR_MESSAGEATTRIBUTE_REQUIRED")); //$NON-NLS-1$
 		}		
 	}
 
@@ -152,7 +152,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		
 		String jaasFile = getJaasFile();
 		if(jaasFile != null) {
-			System.setProperty("java.security.auth.login.config", jaasFile);
+			System.setProperty("java.security.auth.login.config", jaasFile); //$NON-NLS-1$
 			// If we are not setting the java.security.auth.login.config
 			// we must refresh the Configuration to load the security change
 			Configuration config = Configuration.getConfiguration();
@@ -162,7 +162,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		
 		if (finalProperties == null || finalProperties.isEmpty())
 			throw new UnsupportedStreamsKafkaConfigurationException(
-					"Kafka connection properties must be specified.");
+					Messages.getString("KAFKA_CONNECTION_PROPERTIES_MUST_BE_SPECIFIED")); //$NON-NLS-1$
 	}
 
 	/*
@@ -173,7 +173,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		Properties localAppConfigProps = new Properties();
 		if (appConfigPropName.isEmpty()){
 			// Then we want to add all properties from appConfig
-			trace.log(TraceLevel.INFO, "Adding all properties from appConfig (appConfigPropertyName not specified): " + getAppConfigName());
+			trace.log(TraceLevel.INFO, "Adding all properties from appConfig (appConfigPropertyName not specified): " + getAppConfigName()); //$NON-NLS-1$
 			localAppConfigProps.putAll(propertyProvider.getAllProperties());
 		} else {
 			for (String propName : appConfigPropName){
@@ -201,31 +201,31 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	}
 
 	private Properties transformTrustStoreProperty(Properties props) {
-		final String trustorePropertyName = "ssl.truststore.location";
-		final String trustorePasswordPropertyName = "ssl.truststore.password";
-		final String securityProtocolPropertyName = "security.protocol";
+		final String trustorePropertyName = "ssl.truststore.location"; //$NON-NLS-1$
+		final String trustorePasswordPropertyName = "ssl.truststore.password"; //$NON-NLS-1$
+		final String securityProtocolPropertyName = "security.protocol"; //$NON-NLS-1$
 		String trustStoreFile = props.getProperty(trustorePropertyName);
 		String securityProtocol = props.getProperty(securityProtocolPropertyName);
 		String trustStorePassword = props.getProperty(trustorePasswordPropertyName);
 		if (trustStoreFile != null){
 			trustStoreFile = getAbsoluteFilePath(trustStoreFile);
 			props.setProperty(trustorePropertyName, trustStoreFile);
-			trace.log(TraceLevel.INFO, "TrustStore location set to " + trustStoreFile);
-		} else if (securityProtocol != null && (securityProtocol.equalsIgnoreCase("SSL")
-												|| securityProtocol.equalsIgnoreCase("SASL_SSL"))){
+			trace.log(TraceLevel.INFO, "TrustStore location set to " + trustStoreFile); //$NON-NLS-1$
+		} else if (securityProtocol != null && (securityProtocol.equalsIgnoreCase("SSL") //$NON-NLS-1$
+												|| securityProtocol.equalsIgnoreCase("SASL_SSL"))){ //$NON-NLS-1$
 			Map<String, String> env = System.getenv();
 			//get java default truststore
-			trustStoreFile = env.get("STREAMS_INSTALL") + "/java/jre/lib/security/cacerts";
+			trustStoreFile = env.get("STREAMS_INSTALL") + "/java/jre/lib/security/cacerts"; //$NON-NLS-1$ //$NON-NLS-2$
 			props.setProperty(trustorePropertyName, trustStoreFile);
 			if (trustStorePassword == null)
-				props.setProperty(trustorePasswordPropertyName, "changeit");
-			trace.log(TraceLevel.WARN, "Automatically setting to default Java trust store.");
+				props.setProperty(trustorePasswordPropertyName, "changeit"); //$NON-NLS-1$
+			trace.log(TraceLevel.WARN, "Automatically setting to default Java trust store."); //$NON-NLS-1$
 		}
 		return props;
 	}
 
 	public void initSchema(StreamSchema ss) throws Exception {
-		trace.log(TraceLevel.INFO, "Connection properties: " + finalProperties);
+		trace.log(TraceLevel.INFO, "Connection properties: " + finalProperties); //$NON-NLS-1$
 
 		Set<MetaType> supportedTypes = new HashSet<MetaType>();
 		supportedTypes.add(MetaType.RSTRING);
@@ -246,10 +246,9 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 			+ "The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. ")
 	public void setKafkaProperty(List<String> values) throws UnsupportedStreamsKafkaConfigurationException {
 		for (String value : values) {
-			int idx = value.indexOf("=");
+			int idx = value.indexOf("="); //$NON-NLS-1$
 			if (idx == -1)
-				throw new UnsupportedStreamsKafkaConfigurationException("Invalid property: " + value
-						+ ", not in the key=value format");
+				throw new UnsupportedStreamsKafkaConfigurationException(Messages.getString("PROPERTY_NOT_IN_KEY_VALUE_FORMAT", value )); //$NON-NLS-1$
 			String name = value.substring(0, idx);
 			String v = value.substring(idx + 1, value.length());
 			properties.setProperty(name, v);
@@ -265,7 +264,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	}
 
 	public String getPropertiesFile() {
-		trace.log(TraceLevel.TRACE, "Properties file: " + propertiesFile);
+		trace.log(TraceLevel.TRACE, "Properties file: " + propertiesFile); //$NON-NLS-1$
     	if (propertiesFile == null) return null;
     	propertiesFile = getAbsoluteFilePath(propertiesFile);
 		return propertiesFile;
@@ -313,10 +312,10 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		
 		if (finalProperties.containsKey(jaasFilePropName)){
 			jaasFile = finalProperties.getProperty(jaasFilePropName);
-			trace.log(TraceLevel.INFO, "Found jaasFile in properties!");
+			trace.log(TraceLevel.INFO, "Found jaasFile in properties!"); //$NON-NLS-1$
 		}
 		
-		trace.log(TraceLevel.INFO, "Jaas file: " + jaasFile);		
+		trace.log(TraceLevel.INFO, "Jaas file: " + jaasFile);		 //$NON-NLS-1$
 		if (jaasFile == null) return null;
 		jaasFile = getAbsoluteFilePath(jaasFile);
 		return jaasFile;
@@ -328,7 +327,7 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 		// if the properties file is relative, the path is relative to the application directory
 		if (!file.isAbsolute())
 		{
-			filePath = getOperatorContext().getPE().getApplicationDirectory().getAbsolutePath() + "/" +  filePath;
+			filePath = getOperatorContext().getPE().getApplicationDirectory().getAbsolutePath() + "/" +  filePath; //$NON-NLS-1$
 		}
 		return filePath;
 	}
@@ -347,22 +346,22 @@ public abstract class KafkaBaseOper extends AbstractOperator {
 	public void shutdown() throws Exception {
 
         OperatorContext context = getOperatorContext();
-        trace.log(TraceLevel.ALL, "Operator " + context.getName() + " shutting down in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() );
+        trace.log(TraceLevel.ALL, "Operator " + context.getName() + " shutting down in PE: " + context.getPE().getPEId() + " in Job: " + context.getPE().getJobId() ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         
         // Must call super.shutdown()
         super.shutdown();
 	}
 	
-	public static final String BASE_DESC = 	"Specify properties as described here: http://kafka.apache.org/documentation.html#configuration. "
-			+ "If you are using Java security modules for login/authentication, ensure that they are compatible with IBM Java, as IBM Streams only runs "
-			+ "with IBM Java. The SPL Attribute Types supported are rstring, ustring, and blob. The topic must be of type rstring/ustring, while the key and message must "
-			+ "be of the same type (rstring, ustring, or blob). " 
-			+ "\\n\\n**Kafka 0.9 Server Support**: "
-			+ "By default this toolkit builds with Kafka 0.10 client JARs. The Kafka 0.10 client is not compatible with Kafka 0.9 brokers. "
-			+ "To use this operator with Kafka 0.9 brokers, you must rebuild with the kafka-0.9 target after cleaning. From the toolkit root directory: "
-			+ "\\n\\n ant clean"
-			+ "\\n\\n ant kafka-0.9" + 
-			"\\n\\n**AppConfig**: "
-			+ "You must provide properties for the operator using at least one of the following parameters: kafkaProperty, propertiesFile, or appConfigName. "
-			+ "The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. ";
+	public static final String BASE_DESC = 	"Specify properties as described here: http://kafka.apache.org/documentation.html#configuration. " //$NON-NLS-1$
+			+ "If you are using Java security modules for login/authentication, ensure that they are compatible with IBM Java, as IBM Streams only runs " //$NON-NLS-1$
+			+ "with IBM Java. The SPL Attribute Types supported are rstring, ustring, and blob. The topic must be of type rstring/ustring, while the key and message must " //$NON-NLS-1$
+			+ "be of the same type (rstring, ustring, or blob). "  //$NON-NLS-1$
+			+ "\\n\\n**Kafka 0.9 Server Support**: " //$NON-NLS-1$
+			+ "By default this toolkit builds with Kafka 0.10 client JARs. The Kafka 0.10 client is not compatible with Kafka 0.9 brokers. " //$NON-NLS-1$
+			+ "To use this operator with Kafka 0.9 brokers, you must rebuild with the kafka-0.9 target after cleaning. From the toolkit root directory: " //$NON-NLS-1$
+			+ "\\n\\n ant clean" //$NON-NLS-1$
+			+ "\\n\\n ant kafka-0.9" +  //$NON-NLS-1$
+			"\\n\\n**AppConfig**: " //$NON-NLS-1$
+			+ "You must provide properties for the operator using at least one of the following parameters: kafkaProperty, propertiesFile, or appConfigName. " //$NON-NLS-1$
+			+ "The hierarchy of properties goes: properties from appConfig beat out kafkaProperty parameter properties, which beat out properties from the propertiesFile. "; //$NON-NLS-1$
 }

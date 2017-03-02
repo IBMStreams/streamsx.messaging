@@ -5,10 +5,15 @@ package XMSSinkCommon;
 #######################################################################  
 use File::Basename;
 
+
+
 sub verify($) 
 {
-	
 	my ($model) = @_;
+
+	my $modelroot = $model->getContext()->getOperatorDirectory();
+	unshift @INC, dirname($modelroot) . "/../impl/nl/include";
+	require MessagingResource;
 
 
 	#Need to know about the reconnection policy
@@ -20,18 +25,18 @@ sub verify($)
 	#reconnectionBound parameter can only appear if reconnectionPolicy is  BoundedRetry
 	if (defined $reconnectionBound) {
 		if (!defined $reconnectionPolicy || $reconnectionPolicy->getValueAt(0)->getSPLExpression() ne "BoundedRetry") {
-			SPL::CodeGen::exitln("Operator \'XMSSink\': reconnectionBound parameter can only appear if reconnectionPolicy is  \'BoundedRetry\' ");
+			SPL::CodeGen::exitln(MessagingResource::MSGTK_RECONNECTIONBOUND_ONLY_IF_RECONNECTIONPOLICY_IS_BOUNDEDRETRY("XMSSink"));
 		}
 		#reconnectionBound cannot be negative
 		if ($reconnectionBound ->getValueAt(0)->getSPLExpression() <0)
 		{
-			SPL::CodeGen::exitln("Operator \'XMSSink\': reconnectionBound cannot be negative ");    
+			SPL::CodeGen::exitln(MessagingResource::MSGTK_RECONNECTIONBOUND_CANNOT_BE_NEGATIVE("XMSSink"));
 		}
 	}
 
 	#period parameter can only appear if reconnectionPolicy is defined
-	if (defined $period && !defined $reconnectionPolicy ) {        
-		SPL::CodeGen::exitln("Operator \'XMSSink\': period parameter can only appear if reconnectionPolicy is specified ");    
+	if (defined $period && !defined $reconnectionPolicy ) {
+		SPL::CodeGen::exitln(MessagingResource::MSGTK_PERIOD_PARAM_ONLY_IF_RECONNECTIONPOLICY_IS_SPECIFIED("XMSSink"));
 	}
 	
 	
@@ -45,9 +50,7 @@ sub verify($)
 
 	#native_schema should not be specified when message class is empty.
  	if (($msgType eq 'empty') && ($nparm > 0)){
-	      SPL::CodeGen::exitln("Operator \'XMSSink\': unable to use message class \'" . $msgType .
-		"\' in access specification " . $access->getName() .
-		" if native schema attributes have been supplied\n");
+		SPL::CodeGen::exitln(MessagingResource::MSGTK_UNABLE_TO_USE_MSG_CLASS_IN_ACCESS_SPEC_IF_NATIVE_SCHEMA_ATTRIBS_SUPPLIED("XMSSink", $msgType, $access->getName()));
 	}
 
 	
@@ -68,14 +71,13 @@ sub verify($)
 			# Input Tuple
 			if (SPL::CodeGen::Type::isTuple($errorAttributeType)) {
 				if($inStream->getSPLTupleType() ne $errorAttributeType){
-					SPL::CodeGen::exitln("Operator \'XMSSink\': The tuple attributes defined in the error stream do not match the tuple which is received\n");
+					SPL::CodeGen::exitln(MessagingResource::MSGTK_TUPLE_ATTRIBS_IN_ERROR_STREAM_DONT_MATCH_RECEIVED_TUPLE("XMSSink"));
 				}
 			}
 		}
 	}
 
 
-	my $modelroot = $model->getContext()->getOperatorDirectory();
 	unshift @INC, dirname($modelroot) . "/Common";	
 	require Connection;
 	require Access;
@@ -107,29 +109,22 @@ sub verify($)
     				
 		# Check that the user hasn't specified a length value for types other than String or ByteLists
 	    	if(($$parm{_type} ne "String") && ($$parm{_type} ne "Bytes") && ($$parm{_length} ne -1)){
-      			SPL::CodeGen::exitln("Operator \'XMSSink\': native schema attribute \'" . $$parm{_name} .
-			"\' in access specification " . $access->getName() .
-			" must not have a length specification \n");
+	    		SPL::CodeGen::exitln(MessagingResource::MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_MUST_NOT_LENGTH_SPEC("XMSSink", $$parm{_name}, $access->getName()));
 		}
         
 		#Verify if the attribute in native schema has a matching attribute in the input stream and if they have the same type     
 		my $inAttr =  $inStream->getAttributeByName ( $$parm{_name} );    
 		if ( defined $inAttr){
 			if (($inAttr->getSPLType() ne "int8") && ($inAttr->getSPLType() ne "uint8") && ($inAttr->getSPLType() ne "int16") && ($inAttr->getSPLType() ne "uint16") && ($inAttr->getSPLType() ne "int32") && ($inAttr->getSPLType() ne "uint32") && ($inAttr->getSPLType() ne "int64") && ($inAttr->getSPLType() ne "float32") && ($inAttr->getSPLType() ne "float64") && ($inAttr->getSPLType() ne "boolean") && ($inAttr->getSPLType() ne "blob") && ($inAttr->getSPLType() ne "rstring")){
-				SPL::CodeGen::exitln("Operator \'XMSSink\': Stream schema attribute \'" .$$parm{_name} . "\'is not a supported data type\n");
+				SPL::CodeGen::exitln(MessagingResource::MSGTK_STREAM_SCHEMA_ATTRIB_IS_NOT_SUPPORTED_DATA_TYPE("XMSSink", $$parm{_name}));
 			}     
 
 			if ($XMStypeTable{$inAttr->getSPLType()} ne $$parm{_type}){
-				SPL::CodeGen::exitln("Operator \'XMSSink\': native schema attribute \'" . $$parm{_name} .
-				"\' in access specification " . $access->getName() .
-				" has type \'" . $$parm{_type} .
-				"\' which does not match the attribute in the input stream schema\n");
+				SPL::CodeGen::exitln(MessagingResource::MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_HAS_TYPE_WHICH_DOSNT_MATCH_ATTRIB_IN_INPUT_STREAM_SCHEMA("XMSSink", $$parm{_name}, $access->getName(), $$parm{_type}));
 			}     
 		}
       		else{
-			SPL::CodeGen::exitln("Operator \'XMSSink\': native schema attribute \'" . $$parm{_name} .
-			"\' in access specification " . $access->getName() .
-			" has no matching attribute in the input stream schema\n");
+      		SPL::CodeGen::exitln(MessagingResource::MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_HAS_NO_MATCHING_ATTRIB_IN_INPUT_STREAM_SCHEMA("XMSSink", $$parm{_name}, $access->getName()));
 		}
 		push @$parmlist, $parm;
 	}
@@ -143,7 +138,7 @@ sub verify($)
 
 	        	#negative length is not allowed for message class map, stream and xml.
 			if($length < -1){
-				SPL::CodeGen::exitln("Operator \'XMSSink\': native schema attribute $name in access specification " . $access->getName() . " should not have a negative length\n");
+				SPL::CodeGen::exitln(MessagingResource::MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_SHOULD_NOT_HAVE_NEGATIVE_LENGTH("XMSSink", $name, $access->getName()));
 			}
 		}
 	}
@@ -157,7 +152,7 @@ sub verify($)
 
 			#negative length is not allowed for message class bytes other than -2 -4 -8
 			if($length <-1 && $length !=-2 && $length!=-4 && $length!=-8){
-				SPL::CodeGen::exitln("Operator \'XMSSink\': native schema attribute $name in access specification " . $access->getName() . " cannot have any other negative values than -2,-4 and -8 \n");
+				SPL::CodeGen::exitln(MessagingResource::MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_CANNOT_HAVE_OTHER_NEGATIVE_VALUES_THAN("XMSSink", $name, $access->getName()));
 			}
 		}
 	}
@@ -171,7 +166,7 @@ sub verify($)
 
 			#bytes data type is not allowed for message class wbe and wbe22
 			if($type eq 'Bytes'){
-				SPL::CodeGen::exitln("Operator \'XMSSink\': native schema attribute $name in access specification " . $access->getName() . " cannot have Bytes data for this message class \n");
+				SPL::CodeGen::exitln(MessagingResource::MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_CANNOT_HAVE_BYTES_DATA_FOR_THIS_MSG_CLASS("XMSSink", $name, $access->getName()));
 			}
 		}
 	}

@@ -687,6 +687,16 @@ The &lt;attribute> element has three possible attributes:
   <info:resources>
     <info:messageSet name="MessagingResource">
       <info:lang default="true">en_US/MessagingResource.xlf</info:lang>
+      <info:lang>de_DE/MessagingResource.xlf</info:lang>
+      <info:lang>es_ES/MessagingResource.xlf</info:lang>
+      <info:lang>fr_FR/MessagingResource.xlf</info:lang>
+      <info:lang>it_IT/MessagingResource.xlf</info:lang>
+      <info:lang>ja_JP/MessagingResource.xlf</info:lang>
+      <info:lang>ko_KR/MessagingResource.xlf</info:lang>
+      <info:lang>pt_BR/MessagingResource.xlf</info:lang>
+      <info:lang>ru_RU/MessagingResource.xlf</info:lang>
+      <info:lang>zh_CN/MessagingResource.xlf</info:lang>
+      <info:lang>zh_TW/MessagingResource.xlf</info:lang>
     </info:messageSet>
   </info:resources>
 </info:toolkitInfoModel>

@@ -25,6 +25,7 @@ import com.ibm.streams.operator.log4j.LoggerNames;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.metrics.Metric;
 import com.ibm.streamsx.messaging.common.PropertyProvider;
+import com.ibm.streamsx.messaging.mqtt.Messages;
 
 public class MqttClientWrapper implements MqttCallback {
 	private static final int COMMAND_TIMEOUT = 5000;
@@ -234,13 +235,13 @@ public class MqttClientWrapper implements MqttCallback {
 		conOpt.setUserName(userName);
 		conOpt.setPassword(password.toCharArray());
 		
-		TRACE.log(TraceLevel.INFO, "Using latest user credentials");
+		TRACE.log(TraceLevel.INFO, "Using latest user credentials"); //$NON-NLS-1$
 	   
 	    
 	}
 
 	private String newClientId() {
-		return "streams" + System.nanoTime();		
+		return "streams" + System.nanoTime();		 //$NON-NLS-1$
 	}
 
 	/**
@@ -259,11 +260,11 @@ public class MqttClientWrapper implements MqttCallback {
 			mqttClient.connect(conOpt);		
 			isConnected.setValue(1L);
 		} catch (MqttSecurityException e) {
-			TRACE.log(TraceLevel.ERROR, Messages.getString("Error_MqttClientWrapper.0"), e); //$NON-NLS-1$
-			LOG.log(TraceLevel.ERROR, Messages.getString("Error_MqttClientWrapper.0"), e); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR, Messages.getString("UNABLE_TO_CONNECT_TO_SERVER_CLIENT_WRAPPER"), e); //$NON-NLS-1$
+			LOG.log(TraceLevel.ERROR, Messages.getString("UNABLE_TO_CONNECT_TO_SERVER_CLIENT_WRAPPER"), e); //$NON-NLS-1$
 		} catch (MqttException e) {
-			TRACE.log(TraceLevel.ERROR,Messages.getString("Error_MqttClientWrapper.0"), e); //$NON-NLS-1$
-			LOG.log(TraceLevel.ERROR, Messages.getString("Error_MqttClientWrapper.0"), e); //$NON-NLS-1$
+			TRACE.log(TraceLevel.ERROR,Messages.getString("UNABLE_TO_CONNECT_TO_SERVER_CLIENT_WRAPPER"), e); //$NON-NLS-1$
+			LOG.log(TraceLevel.ERROR, Messages.getString("UNABLE_TO_CONNECT_TO_SERVER_CLIENT_WRAPPER"), e); //$NON-NLS-1$
 		}
 
 		return mqttClient.isConnected(); 
@@ -294,7 +295,7 @@ public class MqttClientWrapper implements MqttCallback {
     	
     	if (topics.length != qos.length)
     	{
-    		throw new RuntimeException(Messages.getString("Error_MqttClientWrapper.4")); //$NON-NLS-1$
+    		throw new RuntimeException(Messages.getString("NUMBER_OF_TOPICS_MUST_EQUAL_QOS_ENTRIES")); //$NON-NLS-1$
     	}
     	
     	if (TRACE.getLevel() == TraceLevel.INFO)

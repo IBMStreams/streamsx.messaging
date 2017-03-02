@@ -15,25 +15,25 @@ public class KafkaConfigUtilities {
 		final Logger trace = Logger.getLogger(KafkaConfigUtilities.class
 				.getCanonicalName());
 		
-		if (!props.containsKey("key.deserializer")){
+		if (!props.containsKey("key.deserializer")){ //$NON-NLS-1$
 			if(keyAH.isString()){
-				props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property key.serializer=org.apache.kafka.common.serialization.StringDeserializer" );
+				props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer"); //$NON-NLS-1$ //$NON-NLS-2$
+				trace.log(TraceLevel.INFO, "Adding unspecified property key.serializer=org.apache.kafka.common.serialization.StringDeserializer" ); //$NON-NLS-1$
 			}
 			else{
-				props.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property key.serializer=org.apache.kafka.common.serialization.ByteArrayDeserializer" );
+				props.put("key.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer"); //$NON-NLS-1$ //$NON-NLS-2$
+				trace.log(TraceLevel.INFO, "Adding unspecified property key.serializer=org.apache.kafka.common.serialization.ByteArrayDeserializer" ); //$NON-NLS-1$
 			}
 		}
 		
-		if (!props.containsKey("value.deserializer")){
+		if (!props.containsKey("value.deserializer")){ //$NON-NLS-1$
 			if(messageAH.isString()){
-				props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property value.serializer=org.apache.kafka.common.serialization.StringDeserializer" );
+				props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer"); //$NON-NLS-1$ //$NON-NLS-2$
+				trace.log(TraceLevel.INFO, "Adding unspecified property value.serializer=org.apache.kafka.common.serialization.StringDeserializer" ); //$NON-NLS-1$
 			}
 			else{
-				props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property value.serializer=org.apache.kafka.common.serialization.ByteArrayDeserializer" );
+				props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer"); //$NON-NLS-1$ //$NON-NLS-2$
+				trace.log(TraceLevel.INFO, "Adding unspecified property value.serializer=org.apache.kafka.common.serialization.ByteArrayDeserializer" ); //$NON-NLS-1$
 			}
 		}
 		
@@ -44,25 +44,25 @@ public class KafkaConfigUtilities {
 		final Logger trace = Logger.getLogger(KafkaConfigUtilities.class
 				.getCanonicalName());
 		
-		if (!props.containsKey("key.serializer")){
+		if (!props.containsKey("key.serializer")){ //$NON-NLS-1$
 			if(keyAH.isString()){
-				props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property key.serializer=org.apache.kafka.common.serialization.StringSerializer" );
+				props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer"); //$NON-NLS-1$ //$NON-NLS-2$
+				trace.log(TraceLevel.INFO, "Adding unspecified property key.serializer=org.apache.kafka.common.serialization.StringSerializer" ); //$NON-NLS-1$
 			}
 			else{
-				props.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property key.serializer=org.apache.kafka.common.serialization.ByteArraySerializer" );
+				props.put("key.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer"); //$NON-NLS-1$ //$NON-NLS-2$
+				trace.log(TraceLevel.INFO, "Adding unspecified property key.serializer=org.apache.kafka.common.serialization.ByteArraySerializer" ); //$NON-NLS-1$
 			}
 		}
 		
-		if (!props.containsKey("value.serializer")){
+		if (!props.containsKey("value.serializer")){ //$NON-NLS-1$
 			if(messageAH.isString()){
-				props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property value.serializer=org.apache.kafka.common.serialization.StringSerializer" );
+				props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer"); //$NON-NLS-1$ //$NON-NLS-2$
+				trace.log(TraceLevel.INFO, "Adding unspecified property value.serializer=org.apache.kafka.common.serialization.StringSerializer" ); //$NON-NLS-1$
 			}
 			else{
-				props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
-				trace.log(TraceLevel.INFO, "Adding unspecified property value.serializer=org.apache.kafka.common.serialization.ByteArraySerializer" );
+				props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer"); //$NON-NLS-1$ //$NON-NLS-2$
+				trace.log(TraceLevel.INFO, "Adding unspecified property value.serializer=org.apache.kafka.common.serialization.ByteArraySerializer" ); //$NON-NLS-1$
 			}
 		}
 		
@@ -71,13 +71,13 @@ public class KafkaConfigUtilities {
 	
 	public static String getStringProperty(String propName, Properties props) {
 		String propVal = props.getProperty(propName); 
-		String stringProp = "";
+		String stringProp = ""; //$NON-NLS-1$
 		final Logger trace = Logger.getLogger(KafkaConfigUtilities.class
 				.getCanonicalName());
 		if (propVal != null){
 				stringProp = props.getProperty(propName);
 		}
-		trace.log(TraceLevel.INFO, "Property " + propName + " has a final value of " + stringProp);
+		trace.log(TraceLevel.INFO, "Property " + propName + " has a final value of " + stringProp); //$NON-NLS-1$ //$NON-NLS-2$
 		return stringProp;
 	}
 }

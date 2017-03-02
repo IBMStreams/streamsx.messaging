@@ -46,3 +46,4 @@ com.ibm.streamsx.messaging/impl/lib/*.jar
 
 # temporary directories
 tmp
+/build.xml~

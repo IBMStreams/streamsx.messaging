@@ -6,3 +6,4 @@ opt/downloaded
 /target
 /.externalToolBuilders
 /bin/
+/info.xml~

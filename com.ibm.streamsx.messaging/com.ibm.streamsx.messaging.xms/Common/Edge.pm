@@ -9,6 +9,9 @@ use strict;
 use warnings;
 use SPL::CodeGen;
 
+require MessagingResource;
+
+
 my %XMStypeTable = (
 					"int8"=>"Byte",
   					"uint8"=>"Short",
@@ -37,7 +40,7 @@ sub connectionSetup {
         my $quotedConnDoc = SPL::CodeGen::compileTimeExpression($model, $connDocParam->getValueAt(0)); 
         @splitted = split(/"/, $quotedConnDoc);
         if (@splitted != 2) {       
-            SPL::CodeGen::exitln("Value of parameter \'connectionDocument\' has unexpected format: $quotedConnDoc");
+            SPL::CodeGen::exitln(MessagingResource::MSGTK_PARAM_HAS_UNEXPECTED_FORMAT('connectionDocument', $quotedConnDoc));
         }
         $connDocName= $splitted[1];
     }
@@ -48,8 +51,8 @@ sub connectionSetup {
     # Note: existence of connection parameter in the operator is guarenteed by operator.xml
     my $quotedConnName = $model->getParameterByName('connection')->getValueAt(0)->getSPLExpression();
     @splitted = split(/"/, $quotedConnName);   
-    if (@splitted > 2) {       
-        SPL::CodeGen::exitln("Value of parameter \'connection\' has unexpected format: $quotedConnName");
+    if (@splitted > 2) {
+    	SPL::CodeGen::exitln(MessagingResource::MSGTK_PARAM_HAS_UNEXPECTED_FORMAT('connection', $quotedConnName));
     }
     my $connName= $splitted[1];
     
@@ -67,14 +70,14 @@ sub connectionSetup {
     }
     if ($@) {
         my $msg = Connection->convertErrorToMessage($@);
-        SPL::CodeGen::exitln("ERROR: $msg");
+    	SPL::CodeGen::exitln(MessagingResource::MSGTK_ERROR_WITH_MESSAGE($msg));
     }
     
     # Note: existence of access parameter in the operator is guarenteed by operator.xml
     my $quotedAccessName = $model->getParameterByName('access')->getValueAt(0)->getSPLExpression();
     @splitted = split(/"/, $quotedAccessName);
     if (@splitted > 2) {       
-        SPL::CodeGen::exitln("Value of parameter \'access\' has unexpected format: $quotedAccessName");
+    	SPL::CodeGen::exitln(MessagingResource::MSGTK_PARAM_HAS_UNEXPECTED_FORMAT('access', $quotedAccessName));
     }
     my $accessName= $splitted[1];
     
@@ -92,11 +95,11 @@ sub connectionSetup {
     }
     if ($@) {
         my $msg = Connection->convertErrorToMessage($@);
-        SPL::CodeGen::exitln("ERROR: $msg");
+        SPL::CodeGen::exitln(MessagingResource::MSGTK_ERROR_WITH_MESSAGE($msg));
     }
 
     if (! $access->usesConnection($connName)) {
-        SPL::CodeGen::exitln("ERROR: Connection specification $connName is not the name of a uses_connection element of access specification $accessName");
+    	SPL::CodeGen::exitln(MessagingResource::MSGTK_CONNECTION_SPEC_NOT_NAME_OF_USESCONNECTION_IN_ACCESS_SPEC($connName, $accessName));
     }
     
     return ($conn, $access);
@@ -133,13 +136,13 @@ sub resolveParms {
         # Check whether a parameter with this name has been specified in the access specification.
         my $accessParmIndex = $access->getParameterIndexByName($operatorParmName);
         if ($accessParmIndex == -1) {
-            SPL::CodeGen::exitln("\'$operatorParmName\': Invalid parameter specified for \'$operClass\' operator, access specification \'$accessName\'");
+        	SPL::CodeGen::exitln(MessagingResource::MSGTK_INVALID_PARAM_SPECIFIED_FOR_OP_ACCESS_SPEC($operatorParmName, $operClass, $accessName));
         }
         
         # Check if we've already seen a parameter with this name.
         if (defined $$accessParmValues[$accessParmIndex]) {
             my $firstIndex = $$accessParmValues[$accessParmIndex]->{_index};
-            SPL::CodeGen::exitln("\'$operatorParmName\': Parmeter for access specification \'$accessName\' previously defined (at index $firstIndex)");
+            SPL::CodeGen::exitln(MessagingResource::MSGTK_PARAM_FOR_ACCESS_SPEC_PREVIOUSLY_DEFINED($operatorParmName, $accessName, $firstIndex));
         }
         
         # Check that the operator parameter has the correct number of values.
@@ -147,19 +150,17 @@ sub resolveParms {
         my $cardinality = $access->getParameterCardinalityAt($accessParmIndex);
         my $numValues = $operatorParm->getNumberOfValues();
         if ($cardinality == -1 && $numValues == 0) {
-            SPL::CodeGen::exitln("\'$operatorParmName\': Parameter for access specification \'$accessName\' supplied to \'$operClass\' operator expects at least one value");
-            
+        	SPL::CodeGen::exitln(MessagingResource::MSGTK_PARAM_FOR_ACCESS_SPEC_SUPPLIED_TO_OP_EXPECTS_MIN_ONE_VALUE($operatorParmName, $accessName, $operClass));
         }
         elsif ($cardinality >= 0 && $cardinality != $numValues) {
-            SPL::CodeGen::exitln("\'$operatorParmName\': Parameter for access specification \'$accessName\' supplied to \'$operClass\' operator expects $cardinality value" . (($cardinality != 1) ? "s" : ""));
-            
+        	SPL::CodeGen::exitln(MessagingResource::MSGTK_PARAM_FOR_ACCESS_SPEC_SUPPLIED_TO_OP_EXPECTS_CARDINALITY_VALUES($operatorParmName, $accessName, $operClass, $cardinality));
         }
         
         # Check that the operator parameter has the correct data type.
         my $actualParmType = $operatorParm->getValueAt(0)->getSPLType();
         my $formalParmType = $access->getParameterTypeAt($accessParmIndex);
         if ($actualParmType ne $formalParmType) {
-            SPL::CodeGen::exitln("\'$operClass\' operator expects type base \'$formalParmType\' (not \'$actualParmType\') for value of parameter \'$operatorParmName\' from access specification \'$accessName\'");
+        	SPL::CodeGen::exitln(MessagingResource::MSGTK_OP_EXPECTS_TYPE_BASE_FOR_PARAM_VALUE_FROM_ACCESS_SPEC($operClass, $formalParmType, $actualParmType, $operatorParmName, $accessName));
         }
         
         # The access specification contains parameter value checks (within a range or in a list), but
@@ -211,7 +212,7 @@ sub resolveParms {
                                      };
             next;
         }
-        SPL::CodeGen::exitln("\'$operClass\' operator expects mandatory parameter \'$ithParmName\' for access specification \'$accessName\'");
+        SPL::CodeGen::exitln(MessagingResource::MSGTK_OP_EXPECTS_MANDATORY_PARAM_FOR_ACCESS_SPEC($operClass, $ithParmName, $accessName));
         
         SPL::CodeGen::println("2: Parameter = " .
                               $$accessParmValues[$i]{_name} . " " .
@@ -242,9 +243,7 @@ sub restrictEnrichSchemaAttributes {
     for (my $i = 0; $i < $access->getNumberOfNativeSchemaAttributes(); ++$i) {
         my $extschemaName = $access->getNativeSchemaAttributeNameAt($i);
         if (exists $istreamAndQueryNames{$extschemaName}) {
-            SPL::CodeGen::exitln("\'$operatorClass\' operator has an attribute named \'$extschemaName\' " .
-                                 "in both its input stream and in the native schema for access specification \'" .
-                                 $access->getName() . "\'");
+        	SPL::CodeGen::exitln(MessagingResource::MSGTK_OP_HAS_ATTRIB_IN_INPUT_STREAM_AND_NATIVE_SCHEMA_FOR_ACCESS_SPEC($operatorClass, $extschemaName, $access->getName()));
         }
         else {
             $istreamAndQueryNames{$extschemaName} = $i;
@@ -260,9 +259,7 @@ sub restrictEnrichSchemaAttributes {
                 # automatically generated assignment if it were the name of an input stream attribute.
                 my $extSchemaAttrIndex = $istreamAndQueryNames{$outputAttr->getName()};
                 if ($XMStypeTable{$outputAttr->getSPLType()} ne $access->getNativeSchemaAttributeTypeAt($extSchemaAttrIndex)) {
-                    SPL::CodeGen::exitln("\'$operatorClass\' operator: type mismatch between output stream attribute \'" .
-                                         $outputAttr->getName() . "\' and the native schema attribute of the same name " .
-                                         "in access specification \'" . $access->getName() . "\'");
+                	SPL::CodeGen::exitln(MessagingResource::MSGTK_OP_HAS_TYPE_MISMATCH_BETWEEN_OUTPUT_STREAM_ATTRIB_AND_SAME_NAME_NATIVE_SCHEMA_ATTRIB($operatorClass, $outputAttr->getName(), $access->getName()));
                 }
                 @$ostreamAttrsFromQuery[$j] = {_name          => $outputAttr->getName(),
                                                _type          => $outputAttr->getSPLType(),
@@ -272,9 +269,7 @@ sub restrictEnrichSchemaAttributes {
             }
             else {
                 # No code generator assignment, and no matching native schema attribute - error.
-                SPL::CodeGen::exitln("\'$operatorClass\' operator: no matching attribute name found in the " .
-                                     "input stream or in the native schema of access specification \'" .
-                                     $access->getName() . "\' for the output attribute \'" . $outputAttr->getName() . "\'");
+                SPL::CodeGen::exitln(MessagingResource::MSGTK_OP_HAS_NO_MATCHING_ATTRIB_IN_INPUT_STREAM_OR_NATIVE_SCHEMA_OF_ACCESS_SPEC($operatorClass, $access->getName(), $outputAttr->getName()));
             }
         }
     }
@@ -307,9 +302,7 @@ sub restrictSourceSchemaAttributes {
                 my $extSchemaAttrIndex = $extSchemaNames{$outStreamAttrName};
                 my $outStreamAttrType = $outStreamAttr->getSPLType();
                 if ($XMStypeTable{$outStreamAttrType} ne $access->getNativeSchemaAttributeTypeAt($extSchemaAttrIndex)) {
-                    SPL::CodeGen::exitln("\'$operatorClass\' operator: type mismatch between output stream attribute " .
-                                         "\'$outStreamAttrName\' and the native schema attribute of the same name " .
-                                         "in access specification \'" . $access->getName() . "\'");
+                	SPL::CodeGen::exitln(MessagingResource::MSGTK_OP_HAS_TYPE_MISMATCH_BETWEEN_OUTPUT_STREAM_ATTRIB_AND_SAME_NAME_NATIVE_SCHEMA_ATTRIB($operatorClass, $outStreamAttrName, $access->getName()));
                 }
                 else {
                     @$ostreamAttrsFromQuery[$j] = {
@@ -322,9 +315,7 @@ sub restrictSourceSchemaAttributes {
             }
             else {
                 # No code generator assignment, and no matching native schema attribute - error.
-                SPL::CodeGen::exitln("\'$operatorClass\' operator: no matching attribute name found in the " .
-                                     "native schema of access specification \'" . $access->getName() .
-                                     "\' for the output attribute \'$outStreamAttrName\'");
+                SPL::CodeGen::exitln(MessagingResource::MSGTK_OP_HAS_NO_MATCHING_ATTRIB_IN_NATIVE_SCHEMA_OF_ACCESS_SPEC($operatorClass, $access->getName(), $outStreamAttrName));
             }
         }        
     }

@@ -37,7 +37,7 @@ public abstract class KafkaProducerClient extends KafkaBaseClient {
             public void onCompletion(RecordMetadata metadata, Exception e) {
                 if(e != null){
                     e.printStackTrace();
-                    trace.log(TraceLevel.ERROR, "Message exception: " + e.getMessage());
+                    trace.log(TraceLevel.ERROR, "Message exception: " + e.getMessage()); //$NON-NLS-1$
 	                messageException.set(true);
                 }
             }
@@ -58,7 +58,7 @@ class ProducerStringHelper extends KafkaProducerClient{
 			AttributeHelper messageAH, Properties props) {
 		super(topicAH, keyAH, messageAH, props);
 		producer = new KafkaProducer<String, String>(props);
-		trace.log(TraceLevel.INFO, "Creating producer of type KafkaProducer\\<String,String\\>" );
+		trace.log(TraceLevel.INFO, "Creating producer of type KafkaProducer\\<String,String\\>" ); //$NON-NLS-1$
 	}
 
 	@Override
@@ -97,7 +97,7 @@ class ProducerByteHelper extends KafkaProducerClient{
 			AttributeHelper messageAH, Properties props) {
 		super(topicAH, keyAH, messageAH, props);
 		producer = new KafkaProducer<byte[],byte[]>(props);
-		trace.log(TraceLevel.INFO, "Creating producer of type KafkaProducer\\<Byte,Byte\\>" );
+		trace.log(TraceLevel.INFO, "Creating producer of type KafkaProducer\\<Byte,Byte\\>" ); //$NON-NLS-1$
 	}
 
 

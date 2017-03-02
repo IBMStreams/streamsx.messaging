@@ -28,6 +28,7 @@ import com.ibm.streams.operator.model.CustomMetric;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streamsx.messaging.common.PropertyProvider;
+import com.ibm.streamsx.messaging.mqtt.Messages;
 
 public abstract class AbstractMqttOperator extends AbstractOperator {
 
@@ -113,7 +114,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 		if (!parameterNames.contains(PARAMNAME_SERVER_URI)
 				&& !parameterNames.contains(PARAMNAME_CONNECTION)) {
 			checker.setInvalidContext(
-					Messages.getString("Error_AbstractMqttOperator.7"), new Object[] {}); //$NON-NLS-1$
+					Messages.getString("SERVER_URI_OR_CONNECTION_MUST_BE_SET"), new Object[] {}); //$NON-NLS-1$
 		}
 
 		checker.checkExcludedParameters(PARAMNAME_SERVER_URI,
@@ -163,11 +164,11 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 			String password = provider.getProperty(passwordPropName);
 			
 			if(userName == null || userName.trim().length() == 0) {
-				checker.setInvalidContext(Messages.getString("Error_AbstractMqttOperator.12"), new Object[] {userPropName, appConfigName});
+				checker.setInvalidContext(Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG"), new Object[] {userPropName, appConfigName});	//$NON-NLS-1$
 			}
 			
 			if(password == null || password.trim().length() == 0) {
-				checker.setInvalidContext(Messages.getString("Error_AbstractMqttOperator.12"), new Object[] {passwordPropName, appConfigName});
+				checker.setInvalidContext(Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG"), new Object[] {passwordPropName, appConfigName});	//$NON-NLS-1$
 			}
 		}
 		
@@ -296,19 +297,19 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 				} else {
 					TRACE.log(
 							TraceLevel.ERROR,
-							Messages.getString("Error_AbstractMqttOperator.3") + getConnection()); //$NON-NLS-1$
+							Messages.getString("CANNOT_FIND_CONNECTION_IN_CONNECTION_DOC_WITH_NAME", getConnection())); //$NON-NLS-1$
 					LOG.log(LogLevel.ERROR,
-							Messages.getString("Error_AbstractMqttOperator.3") + getConnection()); //$NON-NLS-1$
+							Messages.getString("CANNOT_FIND_CONNECTION_IN_CONNECTION_DOC_WITH_NAME", getConnection())); //$NON-NLS-1$
 					throw new RuntimeException(
-							Messages.getString("Error_AbstractMqttOperator.5")); //$NON-NLS-1$
+							Messages.getString("CANNOT_FIND_CONNECTION_IN_CONNECTION_DOC")); //$NON-NLS-1$
 				}
 			} catch (SAXException e) {
 				TRACE.log(LogLevel.ERROR,
-						Messages.getString("Error_AbstractMqttOperator.6")); //$NON-NLS-1$
+						Messages.getString("CONNECTION_DOC_MALFORMED")); //$NON-NLS-1$
 				throw e;
 			} catch (IOException e) {
 				TRACE.log(LogLevel.ERROR,
-						Messages.getString("Error_AbstractMqttOperator.6")); //$NON-NLS-1$
+						Messages.getString("CONNECTION_DOC_MALFORMED")); //$NON-NLS-1$
 				throw e;
 			}
 		}
@@ -453,7 +454,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 			String value = checker.getOperatorContext().getParameterValues(parameterName).get(0);
 			
 			if(value == null || value.trim().length() == 0) {
-				checker.setInvalidContext(Messages.getString("Error_AbstractMqttOperator.11"), new Object[] {parameterName});
+				checker.setInvalidContext(Messages.getString("PARAM_MUST_BE_NON_EMPTY_STRING"), new Object[] {parameterName});	//$NON-NLS-1$
 			}
 		}
 	}
@@ -468,13 +469,13 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 
 				if (longVal.longValue() > max || longVal.longValue() < min) {
 					checker.setInvalidContext(
-							Messages.getString("Error_AbstractMqttOperator.0"), //$NON-NLS-1$
+							Messages.getString("NOT_IN_RANGE"), //$NON-NLS-1$
 							new Object[] { parameterName, min, max });
 				}
 			}
 		} catch (NumberFormatException e) {
 			checker.setInvalidContext(
-					Messages.getString("Error_AbstractMqttOperator.1"), //$NON-NLS-1$
+					Messages.getString("NOT_A_NUMBER"), //$NON-NLS-1$
 					new Object[] { parameterName });
 		}
 	}
@@ -498,7 +499,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 	
 				if (attrCount > 1) {
 					checker.setInvalidContext(
-							Messages.getString("Error_MqttSourceOperator.6"), new Object[] {}); //$NON-NLS-1$
+							Messages.getString("OUTPUT_PORT_EXPECTED_TO_HAVE_SINGLE_ATTRIB"), new Object[] {}); //$NON-NLS-1$
 				}
 	
 				checker.checkAttributeType(streamSchema.getAttribute(0),
@@ -537,7 +538,7 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 				errorOutputPort.submit(errorTuple);
 			} catch (Exception e) {
 				TRACE.log(TraceLevel.ERROR,
-						Messages.getString("Error_AbstractMqttOperator.10"), e); //$NON-NLS-1$
+						Messages.getString("CANNOT_SUBMIT_ERROR_TUPLE"), e); //$NON-NLS-1$
 			} finally {
 				if(crContext != null) {
 					crContext.releasePermit();

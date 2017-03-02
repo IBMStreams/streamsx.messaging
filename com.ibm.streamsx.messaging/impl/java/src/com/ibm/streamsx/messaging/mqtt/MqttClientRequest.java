@@ -14,10 +14,10 @@ import java.util.HashMap;
  */
 public class MqttClientRequest {
 	
-	private static final String MQTTSRC_TOPIC_REPLACE = "REPLACE";
-	private static final String MQTTSRC_TOPIC_UPDATE = "UPDATE";
-	private static final String MQTTSRC_TOPIC_REMOVE = "REMOVE";
-	private static final String MQTTSRC_TOPIC_ADD = "ADD";
+	private static final String MQTTSRC_TOPIC_REPLACE = "REPLACE"; //$NON-NLS-1$
+	private static final String MQTTSRC_TOPIC_UPDATE = "UPDATE"; //$NON-NLS-1$
+	private static final String MQTTSRC_TOPIC_REMOVE = "REMOVE"; //$NON-NLS-1$
+	private static final String MQTTSRC_TOPIC_ADD = "ADD"; //$NON-NLS-1$
 	
 	public enum MqttClientRequestType {CONNECT, ADD_TOPICS, REMOVE_TOPICS, UPDATE_TOPICS, REPLACE_TOPICS};
 	

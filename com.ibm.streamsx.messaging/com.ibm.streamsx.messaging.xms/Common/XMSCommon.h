@@ -97,11 +97,11 @@ xmsINT createAdminObjects() {
 		xms::InitialContext context;
 
 		if (pInitialContext == NULL) {
-			SPLAPPLOG(L_ERROR, INITIALCONTEXT_NON_EXISTENT, "XMSCommon");
+			SPLAPPLOG(L_ERROR, MSGTK_INITIALCONTEXT_NON_EXISTENT, "XMSCommon");
 			if (isErrorPortSpecified==true)
 			{
 				//Append to the InitializationErrMsg
-				InitializationErrMsg<<"Serious Error - InitialContext was not specified";
+				InitializationErrMsg<<MSGTK_INITIALCONTEXT_NON_EXISTENT;
 			}
 			nRC = XMS_E_BAD_PARAMETER;
 		}
@@ -113,11 +113,11 @@ xmsINT createAdminObjects() {
 				// Lookup & create the connection factory
 				xms::PropertyContext * pPC = context.lookup(*pConnectionFactory);
 				if (pPC == NULL) {
-					SPLAPPLOG(L_ERROR, CONFAC_LOOKUP_FAILURE, "XMSCommon");
+					SPLAPPLOG(L_ERROR, MSGTK_CONFAC_LOOKUP_FAILURE, "XMSCommon");
 					if (isErrorPortSpecified==true)
 					{
 						//Append to the InitializationErrMsg
-						InitializationErrMsg<<"Unable to lookup connection factory";
+						InitializationErrMsg<<MSGTK_CONFAC_LOOKUP_FAILURE;
 					}
 					nRC = XMS_E_BAD_PARAMETER;
 				}
@@ -131,11 +131,11 @@ xmsINT createAdminObjects() {
 					SPLAPPTRC(L_TRACE, "About to look up the Destination " << *pDestination, "XMSCommon");
 					pPC = context.lookup(*pDestination);
 					if (pPC == NULL) {
-						SPLAPPLOG(L_ERROR, DEST_LOOKUP_FAILURE, "XMSCommon");
+						SPLAPPLOG(L_ERROR, MSGTK_DEST_LOOKUP_FAILURE, "XMSCommon");
 						if (isErrorPortSpecified==true)
 						{
 							//Append to the InitializationErrMsg
-							InitializationErrMsg<<"Unable to lookup Destination";
+							InitializationErrMsg<<MSGTK_DEST_LOOKUP_FAILURE;
 						}
 						nRC = XMS_E_BAD_PARAMETER;
 					}
@@ -145,11 +145,11 @@ xmsINT createAdminObjects() {
 				}
 			} catch (xms::Exception & ex) {
 				// Unable to lookup connection factory or destination.
-				SPLAPPLOG(L_ERROR, CONFAC_DEST_LOOKUP_FAILURE, "XMSCommon");
+				SPLAPPLOG(L_ERROR, MSGTK_CONFAC_DEST_LOOKUP_FAILURE, "XMSCommon");
 				if (isErrorPortSpecified==true)
 				{
 					//Append to the InitializationErrMsg
-					InitializationErrMsg<<"Unable to lookup connection factory or destination";
+					InitializationErrMsg<<MSGTK_CONFAC_DEST_LOOKUP_FAILURE;
 				}
 				processException(ex);
 				nRC = ex.getErrorCode();
@@ -157,22 +157,22 @@ xmsINT createAdminObjects() {
 		}
 	} catch (xms::Exception & ex) {
 		// Unable to create initial context.
-		SPL::rstring logmsg = INITIALCONTEXT_CREATION_ERROR(ex.getErrorString().c_str());
+		SPL::rstring logmsg = MSGTK_INITIALCONTEXT_CREATION_ERROR(ex.getErrorString().c_str());
 		SPLAPPLOG(L_ERROR, logmsg, "XMSCommon");
 		if (isErrorPortSpecified==true)
 		{
 			//Append to the InitializationErrMsg
-			InitializationErrMsg<<"Unable to create initial context, exception = "<<ex.getErrorString().c_str();
+			InitializationErrMsg<<logmsg;
 		}
 		processException(ex);
 		nRC = ex.getErrorCode();
 	} catch (std::exception & ex) {
 		// Unable to create initial context.
-		SPLAPPLOG(L_ERROR, ADMINISTERED_OBJECT_ERROR, "XMSCommon");
+		SPLAPPLOG(L_ERROR, MSGTK_ADMINISTERED_OBJECT_ERROR, "XMSCommon");
 		if (isErrorPortSpecified==true)
 		{
 			//Append to the InitializationErrMsg
-			InitializationErrMsg<<"Exception occurred when creating administered objects";
+			InitializationErrMsg<<MSGTK_ADMINISTERED_OBJECT_ERROR;
 		}
 		nRC = -1;
 	}
@@ -196,7 +196,7 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 	xmsINT nRC = XMS_OK;
 
 	try {
-			SPLAPPLOG(L_INFO, XMS_CONNECT, "XMSCommon");
+			SPLAPPLOG(L_INFO, MSGTK_XMS_CONNECT, "XMSCommon");
 
 			//set the reconnectionAttemptDelay to period
 			float reconnectionAttemptDelay = period;
@@ -211,10 +211,10 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 
 				//Check if ReconnectionPolicy is noRetry, then abort
 				if(reconnectionPolicy==2){
-					SPLAPPLOG(L_ERROR, CONNECTION_FAILURE_NORETRY,"XMSCommon");
+					SPLAPPLOG(L_ERROR, MSGTK_CONNECTION_FAILURE_NORETRY,"XMSCommon");
 					if (isErrorPortSpecified==true)
 					{					
-						InitializationErrMsg<<"XMSDBG Connection to XMS failed...Did not try to reconnect as the policy is noReconnect";
+						InitializationErrMsg<<MSGTK_CONNECTION_FAILURE_NORETRY;
 					}
 					throw new xms::Exception();
 				}
@@ -231,7 +231,7 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 						counter++;
 						nConnectionAttempts++;
 						updatePerformanceCounters();
-						SPL::rstring logmsg = CONNECTION_FAILURE_BOUNDEDRETRY(reconnectionAttemptDelay,counter);
+						SPL::rstring logmsg = MSGTK_CONNECTION_FAILURE_BOUNDEDRETRY(reconnectionAttemptDelay,counter);
 						SPLAPPLOG(L_INFO, logmsg, "XMSCommon");
 						getPE().blockUntilShutdownRequest((double)reconnectionAttemptDelay);
 						if(counter >= reconnectionBound)
@@ -258,7 +258,7 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 						while ((nRC=connect())!=XMS_OK){
 							nConnectionAttempts++;
 							updatePerformanceCounters();
-							SPL::rstring logmsg = CONNECTION_FAILURE_INFINITERETRY(reconnectionAttemptDelay);
+							SPL::rstring logmsg = MSGTK_CONNECTION_FAILURE_INFINITERETRY(reconnectionAttemptDelay);
 							SPLAPPLOG(L_INFO, logmsg,"XMSCommon");
 							getPE().blockUntilShutdownRequest((double)reconnectionAttemptDelay);
 						}
@@ -308,12 +308,12 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
                 										iDeliveryMode);
                 								} catch (xms::Exception & ex) {
                 									// Unable to set the delivery mode
-											SPL::rstring logmsg = SET_DELIVERY_MODE_FAILURE(ex.getErrorString().c_str());
+											SPL::rstring logmsg = MSGTK_SET_DELIVERY_MODE_FAILURE(ex.getErrorString().c_str());
                 									SPLAPPLOG(L_ERROR, logmsg, "XMSCommon");
 													if (isErrorPortSpecified==true)
 													{
 														//Added  to append to the InitializationErrMsg
-														InitializationErrMsg<<"Unable to set Delivery Mode, exception = "<<ex.getErrorString().c_str();
+														InitializationErrMsg<<logmsg;
 													}
                 									processException(ex);
                 									nRC = ex.getErrorCode();
@@ -321,12 +321,12 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 				      	
                 					} catch (xms::Exception & ex) {
                 						// Unable to create producer
-								SPL::rstring logmsg = CREATE_PRODUCER_EXCEPTION(ex.getErrorString().c_str());
+								SPL::rstring logmsg = MSGTK_CREATE_PRODUCER_EXCEPTION(ex.getErrorString().c_str());
                 						SPLAPPLOG(L_ERROR, logmsg,"XMSCommon");
 										if (isErrorPortSpecified==true)
 										{		
 											//Added  to append to the InitializationErrMsg
-											InitializationErrMsg<<"Unable to create Producer, exception = "<<ex.getErrorString().c_str();
+											InitializationErrMsg<<logmsg;
 										}
                 						processException(ex);
                 						nRC = ex.getErrorCode();
@@ -342,12 +342,12 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 	      	
                 					} catch (xms::Exception & ex) {
                 						// Unable to create consumer
-								SPL::rstring logmsg = CREATE_CONSUMER_EXCEPTION(ex.getErrorString().c_str());
+								SPL::rstring logmsg = MSGTK_CREATE_CONSUMER_EXCEPTION(ex.getErrorString().c_str());
                 						SPLAPPLOG(L_ERROR, logmsg, "XMSCommon");
 										if (isErrorPortSpecified==true)
 										{
 											//Added  to append to the InitializationErrMsg
-											InitializationErrMsg<<"Unable to create Consumer, exception = "<<ex.getErrorString().c_str();
+											InitializationErrMsg<<logmsg;
 										}
                 						processException(ex);
                 						nRC = ex.getErrorCode();
@@ -355,24 +355,24 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
                 				}
                 		} catch (xms::Exception & ex) {
                 			// Unable to create destination
-                			SPL::rstring logmsg = CREATE_DESTINATION_EXCEPTION(ex.getErrorString().c_str());
+                			SPL::rstring logmsg = MSGTK_CREATE_DESTINATION_EXCEPTION(ex.getErrorString().c_str());
                 			SPLAPPLOG(L_ERROR, logmsg, "XMSCommon");
 							if (isErrorPortSpecified==true)
 							{
 								//Added  to append to the InitializationErrMsg
-								InitializationErrMsg<<"Unable to create Destination, exception = "<<ex.getErrorString().c_str();
+								InitializationErrMsg<<logmsg;
 							}
                 			processException(ex);
                 			nRC = ex.getErrorCode();
                 		}
                 } catch (xms::Exception & ex) {
                 	// Unable to create the session
-			SPL::rstring logmsg = CREATE_SESSION_EXCEPTION(ex.getErrorString().c_str());
+			SPL::rstring logmsg = MSGTK_CREATE_SESSION_EXCEPTION(ex.getErrorString().c_str());
                 	SPLAPPLOG(L_ERROR, logmsg, "XMSCommon");
 					if (isErrorPortSpecified==true)
 					{
 						//Added  to append to the InitializationErrMsg
-						InitializationErrMsg<<"Unable to create Session, exception = "<<ex.getErrorString().c_str();
+						InitializationErrMsg<<logmsg;
 					}
                 	processException(ex);
                 	nRC = ex.getErrorCode();
@@ -380,21 +380,21 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 
 			} catch (std::exception & ex) {
 				// Some other exception
-				SPL::rstring logmsg = XMS_API_OBJECT_ERROR(ex.what());
+				SPL::rstring logmsg = MSGTK_XMS_API_OBJECT_ERROR(ex.what());
 				SPLAPPLOG(L_ERROR, logmsg, "XMSCommon");
 				if (isErrorPortSpecified==true)
 				{
 					//Append to the InitializationErrMsg
-					InitializationErrMsg<<"Exception occurred when creating XMS api objects";
+					InitializationErrMsg<<logmsg;
 				}
 				nRC = -1;
 		} catch (...) {
 			// Unknown other exception
-			SPLAPPLOG(L_ERROR, XMS_API_UNKNOWN_EXCEPTION, "XMSCommon");
+			SPLAPPLOG(L_ERROR, MSGTK_XMS_API_UNKNOWN_EXCEPTION, "XMSCommon");
 			if (isErrorPortSpecified==true)
 			{
 				//Append to the InitializationErrMsg
-				InitializationErrMsg<<"Unknown Exception occurred when creating XMS api objects";
+				InitializationErrMsg<<MSGTK_XMS_API_UNKNOWN_EXCEPTION;
 			}
 			nRC = -1;
 	}
@@ -420,12 +420,12 @@ xmsINT connect() {
 		}
 	} catch (xms::Exception & ex) {
 		// Unable to create the connection
-		SPL::rstring logmsg = CREATE_CONNECTION_EXCEPTION(ex.getErrorString().c_str());
+		SPL::rstring logmsg = MSGTK_CREATE_CONNECTION_EXCEPTION(ex.getErrorString().c_str());
 		SPLAPPLOG(L_ERROR, logmsg, "XMSCommon");
 		if (isErrorPortSpecified==true)
 		{
 			//Append to the InitializationErrMsg
-			InitializationErrMsg<<"Unable to create Connection, exception = "<<ex.getErrorString().c_str();
+			InitializationErrMsg<<logmsg;
 		}
 		processException(ex);
 		nRC = ex.getErrorCode();
@@ -530,7 +530,7 @@ xmsVOID dumpError(xmsHErrorBlock hError)
 		
 		jmsexception, pszExceptionType, nReason, szText, szData);
 
-		SPL::rstring logmsg = XMS_JMS_EXCEPTION(szErrorMsg);
+		SPL::rstring logmsg = MSGTK_XMS_JMS_EXCEPTION(szErrorMsg);
 
 		SPLAPPLOG(L_ERROR, logmsg, "XMSCommon");
 		if (isErrorPortSpecified==true)

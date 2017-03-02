@@ -40,8 +40,8 @@ public class RabbitMQSink extends RabbitMQBaseOper {
 		// Must call super.initialize(context) to correctly setup an operator.
 		super.initialize(context);
 		super.initSchema(getInput(0).getStreamSchema());
-		trace.log(TraceLevel.INFO, "Operator " + context.getName() + " initializing in PE: "
-				+ context.getPE().getPEId() + " in Job: "
+		trace.log(TraceLevel.INFO, "Operator " + context.getName() + " initializing in PE: " //$NON-NLS-1$ //$NON-NLS-2$
+				+ context.getPE().getPEId() + " in Job: " //$NON-NLS-1$
 				+ context.getPE().getJobId());
 
 	}
@@ -49,9 +49,9 @@ public class RabbitMQSink extends RabbitMQBaseOper {
 	@Override
 	public synchronized void allPortsReady() throws Exception {
 		OperatorContext context = getOperatorContext();
-		trace.log(TraceLevel.INFO, "Operator " + context.getName()
-				+ " all ports are ready in PE: " + context.getPE().getPEId()
-				+ " in Job: " + context.getPE().getJobId());
+		trace.log(TraceLevel.INFO, "Operator " + context.getName() //$NON-NLS-1$
+				+ " all ports are ready in PE: " + context.getPE().getPEId() //$NON-NLS-1$
+				+ " in Job: " + context.getPE().getJobId()); //$NON-NLS-1$
 
 	}
 
@@ -83,7 +83,7 @@ public class RabbitMQSink extends RabbitMQBaseOper {
 		}
 		
 		byte[] message = messageAH.getBytes(tuple);
-		String routingKey = "";
+		String routingKey = ""; //$NON-NLS-1$
 		Map<String, Object> headers = new HashMap<String, Object>();
 		if (routingKeyAH.isAvailable()) {
 			routingKey = tuple.getString(routingKeyAH.getName());
@@ -99,7 +99,7 @@ public class RabbitMQSink extends RabbitMQBaseOper {
 		try {
 			if (trace.isLoggable(TraceLevel.DEBUG))
 				trace.log(TraceLevel.DEBUG,
-						"Producing message: " + message.toString() + " in thread: " + Thread.currentThread().getName());
+						"Producing message: " + message.toString() + " in thread: " + Thread.currentThread().getName()); //$NON-NLS-1$ //$NON-NLS-2$
 			channel.basicPublish(exchangeName, routingKey, propsBuilder.build(), message);
 			if (isConnected.getValue() == 0){
 				// We succeeded at publish, so we must be connected
@@ -109,7 +109,7 @@ public class RabbitMQSink extends RabbitMQBaseOper {
 				isConnected.setValue(1); 
 			}
 		} catch (Exception e) {
-			trace.log(TraceLevel.ERROR, "Exception message:" + e.getMessage() + "\r\n");
+			trace.log(TraceLevel.ERROR, "Exception message:" + e.getMessage() + "\r\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			handleFailedPublish(message, routingKey, propsBuilder);
 		}
 	}
@@ -121,7 +121,7 @@ public class RabbitMQSink extends RabbitMQBaseOper {
 			attemptCount++;
 			try {
 				Thread.sleep(messageSendRetryDelay);
-				trace.log(TraceLevel.ERROR, "Attempting to resend. Try number: " + attemptCount);
+				trace.log(TraceLevel.ERROR, "Attempting to resend. Try number: " + attemptCount); //$NON-NLS-1$
 				channel.basicPublish(exchangeName, routingKey, propsBuilder.build(), message);
 				failedToSend = false;
 			} catch (Exception e1) {
@@ -132,7 +132,7 @@ public class RabbitMQSink extends RabbitMQBaseOper {
 		// if we still can't send after the number of maxMessageSendRetries,
 		// we want to log error and move on
 		if (failedToSend) {
-			trace.log(TraceLevel.ERROR, "Failed to send message after " + attemptCount + " attempts.");
+			trace.log(TraceLevel.ERROR, "Failed to send message after " + attemptCount + " attempts."); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
@@ -162,18 +162,18 @@ public class RabbitMQSink extends RabbitMQBaseOper {
 	}
 	
 	public static final String DESC = 
-			"This operator acts as a RabbitMQ producer, sending messages to a RabbitMQ broker. " + 
-			"The broker is assumed to be already configured and running. " +
-			"The incoming stream can have three attributes: message, routing_key, and messageHeader. " +
-			"The message is a required attribute. " +
-			"The exchange name, queue name, and routing key can be specified using parameters. " +
-			"If a specified exchange does not exist, it will be created as a non-durable exchange. " + 
-			"All exchanges created by this operator are non-durable and auto-delete."  +  
-			"This operator supports direct, fanout, and topic exchanges. It does not support header exchanges. " +
-			"Messages are non-persistent and sending will only be attempted once by default. " + 
-			"This behavior can be modified using the deliveryMode and maxMessageSendRetries parameters. " + 
-			"\\n\\n**Behavior in a Consistent Region**" + 
-			"\\nThis operator can participate in a consistent region. It cannot be the start of a consistent region. " + 
+			"This operator acts as a RabbitMQ producer, sending messages to a RabbitMQ broker. " +  //$NON-NLS-1$
+			"The broker is assumed to be already configured and running. " + //$NON-NLS-1$
+			"The incoming stream can have three attributes: message, routing_key, and messageHeader. " + //$NON-NLS-1$
+			"The message is a required attribute. " + //$NON-NLS-1$
+			"The exchange name, queue name, and routing key can be specified using parameters. " + //$NON-NLS-1$
+			"If a specified exchange does not exist, it will be created as a non-durable exchange. " +  //$NON-NLS-1$
+			"All exchanges created by this operator are non-durable and auto-delete."  +   //$NON-NLS-1$
+			"This operator supports direct, fanout, and topic exchanges. It does not support header exchanges. " + //$NON-NLS-1$
+			"Messages are non-persistent and sending will only be attempted once by default. " +  //$NON-NLS-1$
+			"This behavior can be modified using the deliveryMode and maxMessageSendRetries parameters. " +  //$NON-NLS-1$
+			"\\n\\n**Behavior in a Consistent Region**" +  //$NON-NLS-1$
+			"\\nThis operator can participate in a consistent region. It cannot be the start of a consistent region. " +  //$NON-NLS-1$
 			BASE_DESC
 			;
 }

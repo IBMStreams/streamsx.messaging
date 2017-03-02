@@ -53,6 +53,7 @@ import com.ibm.streams.operator.types.RString;
 import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
 import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 import com.ibm.streamsx.messaging.common.PropertyProvider;
+import com.ibm.streamsx.messaging.mqtt.Messages;
 
 /**
  * Class for an operator that consumes tuples and does not produce an output stream. 
@@ -84,9 +85,9 @@ description=SPLDocConstants.MQTTSINK_OP_DESCRIPTION)
 @Icons(location16="icons/MQTTSink_16.gif", location32="icons/MQTTSink_32.gif")
 public class MqttSinkOperator extends AbstractMqttOperator implements StateHandler{
 	 
-	private static final String CLASS_NAME = "com.ibm.streamsx.messaging.mqtt.MqttSinkOperator";
+	private static final String CLASS_NAME = "com.ibm.streamsx.messaging.mqtt.MqttSinkOperator"; //$NON-NLS-1$
 	static Logger TRACE = Logger.getLogger(MqttSinkOperator.class);
-	static Logger LOGGER = Logger.getLogger(LoggerNames.LOG_FACILITY + "." + CLASS_NAME);
+	static Logger LOGGER = Logger.getLogger(LoggerNames.LOG_FACILITY + "." + CLASS_NAME); //$NON-NLS-1$
 	
 	// Parameters
 	private String topic;
@@ -194,7 +195,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 						}
 						else
 						{
-							String errorMsg = Messages.getString("Error_MqttSinkOperator.0", pubTopic, msgQos); //$NON-NLS-1$
+							String errorMsg = Messages.getString("TOPIC_OR_QOS_INVALID", pubTopic, msgQos); //$NON-NLS-1$
 							TRACE.log(TraceLevel.ERROR, errorMsg); 
 							submitToErrorPort(errorMsg, crContext);
 						}
@@ -211,7 +212,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 						
 						if (!connected)
 						{
-							String errorMsg = Messages.getString("Error_MqttSinkOperator.1", getServerUri()); //$NON-NLS-1$
+							String errorMsg = Messages.getString("UNABLE_TO_CONNECT_TO_SERVER_WITH_URI", getServerUri()); //$NON-NLS-1$
 							submitToErrorPort(errorMsg, crContext);
 							throw new RuntimeException(errorMsg); 
 						}
@@ -237,7 +238,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 						}
 						else
 						{
-							String errorMsg = Messages.getString("Error_MqttSinkOperator.0", pubTopic, msgQos); //$NON-NLS-1$
+							String errorMsg = Messages.getString("TOPIC_OR_QOS_INVALID", pubTopic, msgQos); //$NON-NLS-1$
 							TRACE.log(TraceLevel.ERROR, errorMsg); //$NON-NLS-1$
 							submitToErrorPort(errorMsg, crContext);
 						}
@@ -255,10 +256,10 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 					// do not rethrow exception, log and keep going
 					if(e instanceof MqttException && ((MqttException) e).getReasonCode() == MqttException.REASON_CODE_CLIENT_TIMEOUT ) {
 						// defected a command timeout
-						TRACE.log(TraceLevel.WARN, Messages.getString("Warning_MqttSinkOperator.0")); //$NON-NLS-1$
+						TRACE.log(TraceLevel.WARN, Messages.getString("TIMED_OUT_WAITING_FOR_SERVER_RESPONSE")); //$NON-NLS-1$
 					}
 					else {
-						String errorMsg = Messages.getString("Error_MqttSinkOperator.2"); //$NON-NLS-1$
+						String errorMsg = Messages.getString("UNABLE_TO_PUBLISH_MSG"); //$NON-NLS-1$
 						TRACE.log(TraceLevel.ERROR, errorMsg, e); 
 						submitToErrorPort(errorMsg, crContext);
 					}
@@ -292,12 +293,12 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 					
 					mqttWrapper.connect(getReconnectionBound(), getPeriod());
 				} catch (URISyntaxException e) {
-					String errorMsg = Messages.getString(Messages.getString("Error_MqttSinkOperator.22")); //$NON-NLS-1$
+					String errorMsg = Messages.getString(Messages.getString("UNABLE_TO_CONNECT_TO_SERVER")); //$NON-NLS-1$
 					TRACE.log(TraceLevel.ERROR, errorMsg, e);
 					submitToErrorPort(errorMsg, crContext);	
 					throw new RuntimeException(e);
 				} catch (Exception e) {
-					String errorMsg = Messages.getString(Messages.getString("Error_MqttSinkOperator.22")); //$NON-NLS-1$
+					String errorMsg = Messages.getString(Messages.getString("UNABLE_TO_CONNECT_TO_SERVER")); //$NON-NLS-1$
 					TRACE.log(TraceLevel.ERROR, errorMsg, e);
 					submitToErrorPort(errorMsg, crContext);			
 					
@@ -324,11 +325,11 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 			
 			// if there is a control port, a warning message is issued as control port is not supported in a consistent region
 			if(inputPorts.size() > 1) {
-				LOGGER.warn("Having a control port in a consistent region is not supported. The control information may not be replayed, persisted and restored correctly.  You may need to manually replay the control signals to bring the operator back to a consistent state.");
+				LOGGER.warn(Messages.getString("CTRL_PORT_IN_CONSISTENT_REGION_NOT_SUPPORTED")); //$NON-NLS-1$
 			}
 			
 			if(cContext.isStartOfRegion()) {
-				checker.setInvalidContext("The following operator cannot be the start of a consistent region: MQTTSink.", null);
+				checker.setInvalidContext(Messages.getString("OP_CANNOT_BE_START_OF_CONSISTENT_REGION"), new String[] {"MQTTSink"}); //$NON-NLS-1$
 			}
 		}
 	}
@@ -348,7 +349,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 		
 		if (!hasTopic)
 		{
-			checker.setInvalidContext(Messages.getString("Error_MqttSinkOperator.7"), null); //$NON-NLS-1$
+			checker.setInvalidContext(Messages.getString("TOPIC_OR_TOPICATTRIB_MUST_BE_SPECIFIED"), null); //$NON-NLS-1$
 		}
 		
 		check = check & hasTopic;
@@ -407,7 +408,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 			    	dataAttribute = streamSchema.getAttribute(0);
 			    }
 			    else {
-			    	dataAttribute = streamSchema.getAttribute("data");
+			    	dataAttribute = streamSchema.getAttribute("data"); //$NON-NLS-1$
 			    }
 			    							
 			    // the default data attribute must be present and must be either BLOB or RSTRING
@@ -415,7 +416,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 			    	checker.checkAttributeType(dataAttribute, MetaType.RSTRING, MetaType.BLOB );
 			    }
 			    else {
-				    checker.setInvalidContext(Messages.getString("Error_MqttSinkOperator.5"), new Object[]{}); //$NON-NLS-1$
+				    checker.setInvalidContext(Messages.getString("DATA_ATTRIB_NOT_FOUND_FROM_INPUT_PORT"), new Object[]{}); //$NON-NLS-1$
 			    }
 			}
 			
@@ -488,27 +489,27 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 		String uri = getServerUri();
 		String topic = getTopics();
 		TRACE.log(TraceLevel.INFO,
-				"MQTTSink - Registering for data governance with server uri: " + uri + " and topic: " + topic);
+				"MQTTSink - Registering for data governance with server uri: " + uri + " and topic: " + topic); //$NON-NLS-1$ //$NON-NLS-2$
 
 		if (topic != null && !topic.isEmpty() && uri != null && !uri.isEmpty()) {
 			DataGovernanceUtil.registerForDataGovernance(this, topic, IGovernanceConstants.ASSET_MQTT_TOPIC_TYPE, uri,
-					IGovernanceConstants.ASSET_MQTT_SERVER_TYPE, false, "MQTTSink");
+					IGovernanceConstants.ASSET_MQTT_SERVER_TYPE, false, "MQTTSink"); //$NON-NLS-1$
 		} else {
 			TRACE.log(TraceLevel.INFO,
-					"MQTTSink - Registering for data governance -- aborted. topic and/or url is null");
+					"MQTTSink - Registering for data governance -- aborted. topic and/or url is null"); //$NON-NLS-1$
 		}
 	}
 
 	private void registerServerForDataGovernance() {
 		String uri = getServerUri();
-		TRACE.log(TraceLevel.INFO, "MQTTSource - Registering only server for data governance with server uri: " + uri);
+		TRACE.log(TraceLevel.INFO, "MQTTSource - Registering only server for data governance with server uri: " + uri); //$NON-NLS-1$
 
 		if (uri != null && !uri.isEmpty()) {
 			DataGovernanceUtil.registerForDataGovernance(this, uri, IGovernanceConstants.ASSET_MQTT_SERVER_TYPE, null,
-					null, false, "MQTTSink");
+					null, false, "MQTTSink"); //$NON-NLS-1$
 		} else {
 			TRACE.log(TraceLevel.INFO,
-					"MQTTSource - Registering only server for data governance -- aborted. uri is null");
+					"MQTTSource - Registering only server for data governance -- aborted. uri is null"); //$NON-NLS-1$
 		}
 	}
 	
@@ -539,7 +540,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
     public void process(StreamingInput<Tuple> stream, Tuple tuple)  throws Exception {
     	
     	if(isRelaunching()) {
-    		TRACE.log(TraceLevel.DEBUG, "Operator is re-launching, disgard incoming tuple " + tuple.toString());
+    		TRACE.log(TraceLevel.DEBUG, "Operator is re-launching, discard incoming tuple " + tuple.toString()); //$NON-NLS-1$
     	    return;
     	}
     	
@@ -598,7 +599,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 				}
 			}
 		} catch (Exception e) {
-			String errorMsg = Messages.getString("Error_MqttSinkOperator.21", tuple.toString()); //$NON-NLS-1$
+			String errorMsg = Messages.getString("CANNOT_PROCESS_CTRL_SIGNAL", tuple.toString()); //$NON-NLS-1$
 			TRACE.log(TraceLevel.ERROR, errorMsg); //$NON-NLS-1$
 			submitToErrorPort(errorMsg, crContext);
 		}
@@ -716,12 +717,12 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 
 	@Override
 	public void close() throws IOException {
-		TRACE.log(TraceLevel.DEBUG, "StateHandler close");
+		TRACE.log(TraceLevel.DEBUG, "StateHandler close"); //$NON-NLS-1$
 	}
 
 	@Override
 	public void checkpoint(Checkpoint checkpoint) throws Exception {
-		TRACE.log(TraceLevel.DEBUG, "Checkpoint " + checkpoint.getSequenceId());
+		TRACE.log(TraceLevel.DEBUG, "Checkpoint " + checkpoint.getSequenceId()); //$NON-NLS-1$
 		
 		String currentServerUri = this.getServerUri();
 		checkpoint.getOutputStream().writeObject(currentServerUri);
@@ -730,14 +731,14 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 
 	@Override
 	public void drain() throws Exception {
-		TRACE.log(TraceLevel.DEBUG, "Drain pending tuples...");
+		TRACE.log(TraceLevel.DEBUG, "Drain pending tuples..."); //$NON-NLS-1$
 
 		if(tupleQueue.peek() != null) {
 			synchronized(drainLock) {
 				if(tupleQueue.peek() != null) {
 					drainLock.wait(IMqttConstants.CONSISTENT_REGION_DRAIN_WAIT_TIME);
 					if(tupleQueue.peek() != null) {
-						throw new Exception(Messages.getString("Error_MqttSinkOperator.3"));
+						throw new Exception(Messages.getString("TIMED_OUT_WAITING_FOR_TUPLES_DRAINING")); //$NON-NLS-1$
 					}
 				}
 			}
@@ -746,7 +747,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 
 	@Override
 	public void reset(Checkpoint checkpoint) throws Exception {
-		TRACE.log(TraceLevel.DEBUG, "Reset to checkpoint " + checkpoint.getSequenceId());
+		TRACE.log(TraceLevel.DEBUG, "Reset to checkpoint " + checkpoint.getSequenceId()); //$NON-NLS-1$
 		
 		resetServerUri((String) checkpoint.getInputStream().readObject());
 		resetRelaunching();
@@ -754,7 +755,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 
 	@Override
 	public void resetToInitialState() throws Exception {
-		TRACE.log(TraceLevel.DEBUG, "Reset to initial state");
+		TRACE.log(TraceLevel.DEBUG, "Reset to initial state"); //$NON-NLS-1$
 		
 		if(initState != null && initState.initialServerUri != null) {
 			resetServerUri(initState.initialServerUri);
@@ -764,7 +765,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 
 	@Override
 	public void retireCheckpoint(long id) throws Exception {
-		TRACE.log(TraceLevel.DEBUG, "Retire checkpoint" + id);	
+		TRACE.log(TraceLevel.DEBUG, "Retire checkpoint" + id);	 //$NON-NLS-1$
 	}
 	
 	private void resetServerUri(String serverUri) {
@@ -777,7 +778,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 	}
 	
 	private void initRelaunching(OperatorContext opContext) {
-		TRACE.log(TraceLevel.DEBUG, "Relaunching set to true");		 
+		TRACE.log(TraceLevel.DEBUG, "Relaunching set to true");		  //$NON-NLS-1$
 
 		isRelaunching = false; 
 		 		if (crContext != null ) 
@@ -790,7 +791,7 @@ public class MqttSinkOperator extends AbstractMqttOperator implements StateHandl
 	}
 	
 	private void resetRelaunching() {
-		TRACE.log(TraceLevel.DEBUG, "Relaunching set to false"); 
+		TRACE.log(TraceLevel.DEBUG, "Relaunching set to false");  //$NON-NLS-1$
 		isRelaunching = false; 
 	}
 	

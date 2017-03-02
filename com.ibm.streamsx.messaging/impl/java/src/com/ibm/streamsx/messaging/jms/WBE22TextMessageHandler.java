@@ -70,13 +70,12 @@ class WBE22TextMessageHandler extends BaseXMLMessageHandler {
 		// create elements for constructing the xml document
 		// with wbe22 mesage format
 		Element field;
-		Element rootElement = document.createElement("connector"); // creates a
-																	// element
-		// for root tuple
-		rootElement.setAttribute("name", "System S");
-		rootElement.setAttribute("version", "2.2");
-		Element rootEle1 = document.createElement("connector-object");
-		rootEle1.setAttribute("name", eventName);
+		// creates an element for root tuple
+		Element rootElement = document.createElement("connector");	//$NON-NLS-1$ 
+		rootElement.setAttribute("name", "System S"); //$NON-NLS-1$ //$NON-NLS-2$
+		rootElement.setAttribute("version", "2.2"); //$NON-NLS-1$ //$NON-NLS-2$
+		Element rootEle1 = document.createElement("connector-object"); //$NON-NLS-1$
+		rootEle1.setAttribute("name", eventName); //$NON-NLS-1$
 		rootElement.appendChild(rootEle1);
 		String stringdata = new String();
 		// variable to specify if any of the attributes in the message is
@@ -89,8 +88,8 @@ class WBE22TextMessageHandler extends BaseXMLMessageHandler {
 
 			final String name = currentObject.getName();
 			final int length = currentObject.getLength();
-			field = document.createElement("field"); // create another element
-			field.setAttribute("name", name);
+			field = document.createElement("field"); // create another element //$NON-NLS-1$
+			field.setAttribute("name", name); //$NON-NLS-1$
 			// handle based on data type
 			switch (tuple.getStreamSchema().getAttribute(name).getType()
 					.getMetaType()) {

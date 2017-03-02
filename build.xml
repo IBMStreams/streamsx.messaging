@@ -96,14 +96,14 @@
 
 	<!-- Targets called on samples -->
 	<target name="indextoolkit">
-		<echo message="Tookit to index: ${basedir}" />
+		<echo message="Toolkit to index: ${basedir}" />
 		<exec executable="${streams.install}/bin/spl-make-toolkit">
 			<arg value="--directory" />
 			<arg value="${basedir}" />
 		</exec>
 	</target>
 	<target name="cleantoolkit">
-		<echo message="Tookit to clean: ${basedir}" />
+		<echo message="Toolkit to clean: ${basedir}" />
 		<exec executable="${streams.install}/bin/spl-make-toolkit">
 			<arg value="--clean" />
 			<arg value="--directory" />
@@ -112,7 +112,7 @@
 	</target>
 	<target name="spldoctoolkit">
 		<property name="tkdir" value="${basedir}" />
-		<echo message="Tookit to SPLDOC: ${tkdir}" />
+		<echo message="Toolkit to SPLDOC: ${tkdir}" />
 		<exec executable="${streams.install}/bin/spl-make-doc">
 			<arg value="--include-composite-operator-diagram" />
 			<arg value="--author" />
