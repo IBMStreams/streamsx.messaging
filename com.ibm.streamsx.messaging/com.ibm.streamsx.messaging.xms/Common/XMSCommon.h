@@ -265,7 +265,7 @@ xmsINT createXMS(const xmsINT producerOrConsumer,const xmsINT reconnectionPolicy
 					}
 				}
 
-                SPLAPPLOG(L_INFO, CONNECTION_SUCCESSFUL, "XMSCommon");
+                SPLAPPLOG(L_INFO, MSGTK_CONNECTION_SUCCESSFUL, "XMSCommon");
                 SPLAPPTRC(L_TRACE, "Now creating other XMS api objects", "XMSCommon");
 
                 try {
