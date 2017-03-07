@@ -84,17 +84,19 @@ uHW+r/2HBE66JnkyMA6FrAcA2Qji+N7D5WoAAAAASUVORK5CYII="
       ><set attributeName="visibility" from="hidden" end="sdt0.mouseout" to="visible" begin="sdt0.mouseover"
     /></g
     ><g visibility="hidden" style="stroke:none;font-style:italic;font-size:12px;font-family:&apos;Helvetica&apos;,&apos;SansSerif&apos;;"
-    ><rect x="47.65" y="28.0" width="454.61996" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="77.0"
-      /><text x="48.65" y="41.0"
+    ><rect x="47.65" y="13.0" width="454.61996" style="fill:rgb(230,230,255);stroke:rgb(0,0,80);" rx="2.0" ry="2.0" height="92.0"
+      /><text x="48.65" y="26.0"
       >Required: access, connection / Optional: codepage, </text
-      ><text x="48.65" y="56.0"
+      ><text x="48.65" y="41.0"
       >reconnectionPolicy, reconnectionBound, period, </text
-      ><text x="48.65" y="71.0"
+      ><text x="48.65" y="56.0"
       >connectionDocument, maxMessageSendRetries, messageSendRetryDelay, </text
-      ><text x="48.65" y="86.0"
+      ><text x="48.65" y="71.0"
       >consistentRegionQueueName, appConfigName, userPropName, </text
+      ><text x="48.65" y="86.0"
+      >passwordPropName, sslConnection, keyStore, keyStorePassword, </text
       ><text x="48.65" y="101.0"
-      >passwordPropName</text
+      >trustStore, trustStorePassword</text
       ><set attributeName="visibility" from="hidden" end="sdt1.mouseout" to="visible" begin="sdt1.mouseover"
     /></g
     ><g visibility="hidden" style="stroke:none;font-style:italic;font-size:12px;font-family:&apos;Helvetica&apos;,&apos;SansSerif&apos;;"

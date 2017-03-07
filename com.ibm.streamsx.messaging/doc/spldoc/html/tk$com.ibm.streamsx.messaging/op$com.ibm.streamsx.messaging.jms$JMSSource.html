@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Messaging Toolkit Doc</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSource</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.1</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSource</p>
 
 </div>
 
@@ -36,6 +36,17 @@
 </p>
 
 <p class="p">The <tt class="ph tt">JMSSource</tt> operator converts each WebSphere MQ or Apache Active MQ message to a separate tuple and sends it to the output stream. A single message is converted into a single tuple.
+</p>
+
+</div>
+
+<div class="section"><h2 class="title sectiontitle">SSL Support
+</h2>
+
+<p class="p">The <tt class="ph tt">JMSSource</tt> operator provides support for SSL via these parameters: <em class="ph i">sslConnection</em>, <em class="ph i">keyStore</em>, <em class="ph i">keyStorePassword</em> and <em class="ph i">trustStore</em>.  When <em class="ph i">sslConnection</em> is set to <tt class="ph tt">true</tt>, the <em class="ph i">keyStore</em>, <em class="ph i">keyStorePassword</em> and <em class="ph i">trustStore</em> parameters must be set. 
+</p>
+
+<p class="p"><strong class="ph b">Note:</strong> The <tt class="ph tt">JMSSource</tt> operator configures SSL by setting the JVM system properties via calls to <tt class="ph tt">System.property()</tt>.  Java operators that are fused into the same PE share the same JVM. This implies that any other Java operators fused into the  same PE as the <tt class="ph tt">JMSSource</tt> operator will have these SSL properties set. If this is undesirable, then the <tt class="ph tt">JMSSource</tt> operator should be placed into it's own PE. 
 </p>
 
 </div>
@@ -189,14 +200,14 @@
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 14 parameters.
+  <dd class="dd">This operator supports 19 parameters.
 <p class="p"> Required: 
 <a class="xref" href="#spldoc_operator__parameter__access">access</a>, <a class="xref" href="#spldoc_operator__parameter__connection">connection</a>
 
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__appConfigName">appConfigName</a>, <a class="xref" href="#spldoc_operator__parameter__codepage">codepage</a>, <a class="xref" href="#spldoc_operator__parameter__connectionDocument">connectionDocument</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__messageIDOutAttrName">messageIDOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__messageSelector">messageSelector</a>, <a class="xref" href="#spldoc_operator__parameter__passwordPropName">passwordPropName</a>, <a class="xref" href="#spldoc_operator__parameter__period">period</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionBound">reconnectionBound</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionPolicy">reconnectionPolicy</a>, <a class="xref" href="#spldoc_operator__parameter__triggerCount">triggerCount</a>, <a class="xref" href="#spldoc_operator__parameter__userPropName">userPropName</a>
+<a class="xref" href="#spldoc_operator__parameter__appConfigName">appConfigName</a>, <a class="xref" href="#spldoc_operator__parameter__codepage">codepage</a>, <a class="xref" href="#spldoc_operator__parameter__connectionDocument">connectionDocument</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__keyStore">keyStore</a>, <a class="xref" href="#spldoc_operator__parameter__keyStorePassword">keyStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__messageIDOutAttrName">messageIDOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__messageSelector">messageSelector</a>, <a class="xref" href="#spldoc_operator__parameter__passwordPropName">passwordPropName</a>, <a class="xref" href="#spldoc_operator__parameter__period">period</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionBound">reconnectionBound</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionPolicy">reconnectionPolicy</a>, <a class="xref" href="#spldoc_operator__parameter__sslConnection">sslConnection</a>, <a class="xref" href="#spldoc_operator__parameter__triggerCount">triggerCount</a>, <a class="xref" href="#spldoc_operator__parameter__trustStore">trustStore</a>, <a class="xref" href="#spldoc_operator__parameter__trustStorePassword">trustStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__userPropName">userPropName</a>
 
 </p>
 </dd>
@@ -320,14 +331,14 @@
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 14 parameters.
+This operator supports 19 parameters.
 <p class="p"> Required: 
 <a class="xref" href="#spldoc_operator__parameter__access">access</a>, <a class="xref" href="#spldoc_operator__parameter__connection">connection</a>
 
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__appConfigName">appConfigName</a>, <a class="xref" href="#spldoc_operator__parameter__codepage">codepage</a>, <a class="xref" href="#spldoc_operator__parameter__connectionDocument">connectionDocument</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__messageIDOutAttrName">messageIDOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__messageSelector">messageSelector</a>, <a class="xref" href="#spldoc_operator__parameter__passwordPropName">passwordPropName</a>, <a class="xref" href="#spldoc_operator__parameter__period">period</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionBound">reconnectionBound</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionPolicy">reconnectionPolicy</a>, <a class="xref" href="#spldoc_operator__parameter__triggerCount">triggerCount</a>, <a class="xref" href="#spldoc_operator__parameter__userPropName">userPropName</a>
+<a class="xref" href="#spldoc_operator__parameter__appConfigName">appConfigName</a>, <a class="xref" href="#spldoc_operator__parameter__codepage">codepage</a>, <a class="xref" href="#spldoc_operator__parameter__connectionDocument">connectionDocument</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__keyStore">keyStore</a>, <a class="xref" href="#spldoc_operator__parameter__keyStorePassword">keyStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__messageIDOutAttrName">messageIDOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__messageSelector">messageSelector</a>, <a class="xref" href="#spldoc_operator__parameter__passwordPropName">passwordPropName</a>, <a class="xref" href="#spldoc_operator__parameter__period">period</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionBound">reconnectionBound</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionPolicy">reconnectionPolicy</a>, <a class="xref" href="#spldoc_operator__parameter__sslConnection">sslConnection</a>, <a class="xref" href="#spldoc_operator__parameter__triggerCount">triggerCount</a>, <a class="xref" href="#spldoc_operator__parameter__trustStore">trustStore</a>, <a class="xref" href="#spldoc_operator__parameter__trustStorePassword">trustStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__userPropName">userPropName</a>
 
 </p>
 <dl class="dl">
@@ -505,6 +516,74 @@ This operator supports 14 parameters.
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__keyStore"><!-- --></a><tt class="ph tt">keyStore</tt></dt>
+
+<dd class="dd">
+<p class="p">This parameter specifies the path to the keyStore. If a relative path is specified, the path is relative to the application directory. The <em class="ph i">sslConnection</em> parameter must be set to true for this parameter to have any effect.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__keyStorePassword"><!-- --></a><tt class="ph tt">keyStorePassword</tt></dt>
+
+<dd class="dd">
+<p class="p">This parameter specifies the password for the keyStore given by the <em class="ph i">keyStore</em> parameter. The <em class="ph i">sslConnection</em> parameter must be set to <tt class="ph tt">true</tt> for this parameter to have any effect.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
      </li>
 
   </ul>
@@ -704,6 +783,40 @@ This operator supports 14 parameters.
 
 
 
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__sslConnection"><!-- --></a><tt class="ph tt">sslConnection</tt></dt>
+
+<dd class="dd">
+<p class="p">This parameter specifies whether the operator should attempt to connect using SSL. If this parameter is specified, then the <em class="ph i">keyStore</em>, <em class="ph i">keyStorePassword</em> and <em class="ph i">trustStore</em> parameters must also be specified. The default value is <tt class="ph tt">false</tt>.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
 <dt class="dt dlterm"><a name="spldoc_operator__parameter__triggerCount"><!-- --></a><tt class="ph tt">triggerCount</tt></dt>
 
 <dd class="dd">
@@ -722,6 +835,74 @@ This operator supports 14 parameters.
      </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__trustStore"><!-- --></a><tt class="ph tt">trustStore</tt></dt>
+
+<dd class="dd">
+<p class="p">This parameter specifies the path to the trustStore. If a relative path is specified, the path is relative to the application directory. The <em class="ph i">sslConnection</em> parameter must be set to true for this parameter to have any effect.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__trustStorePassword"><!-- --></a><tt class="ph tt">trustStorePassword</tt></dt>
+
+<dd class="dd">
+<p class="p">This parameter specifies the password for the trustStore given by the <em class="ph i">trustStore</em> parameter. The <em class="ph i">sslConnection</em> parameter must be set to <tt class="ph tt">true</tt> for this parameter to have any effect.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__expressionmode">ExpressionMode</a>: AttributeFree
      </li>
 
   </ul>
