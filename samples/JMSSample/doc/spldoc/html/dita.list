@@ -1,4 +1,4 @@
-#Mon Nov 23 14:00:32 EST 2015
+#Thu Oct 06 16:01:50 EDT 2016
 copytosourcelist=
 hreftargetslist=tk$JMSSample/ix$Namespace.xml,tk$JMSSample/tk$JMSSample.xml,toolkits/ix$Namespace.xml,tk$JMSSample/ns$com.ibm.streamsx.messaging.sample.jms.xml,toolkits/toolkits.xml
 fullditatopicfile=fullditatopic.list
@@ -37,7 +37,7 @@ codereffile=coderef.list
 keylist=
 codereflist=
 user.input.file.listfile=usr.input.file.list
-user.input.dir=/homes/hny4/congli/git/streamsx.messaging/samples/JMSSample/doc/spldoc/dita
+user.input.dir=/homes/hny5/cooka/Downloads/messaging501_Oct6/streamsx.messaging/samples/JMSSample/doc/spldoc/dita
 uplevels=
 tempdirToinputmapdir.relative.value=
 conrefpushfile=conrefpush.list

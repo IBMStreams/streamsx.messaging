@@ -1,4 +1,4 @@
-#Mon Nov 23 14:01:35 EST 2015
+#Thu Oct 06 16:03:04 EDT 2016
 copytosourcelist=
 hreftargetslist=tk$MqttSample/ix$Namespace.xml,toolkits/ix$Namespace.xml,tk$MqttSample/tk$MqttSample.xml,tk$MqttSample/ns$application.xml,toolkits/toolkits.xml
 fullditatopicfile=fullditatopic.list
@@ -37,7 +37,7 @@ codereffile=coderef.list
 keylist=
 codereflist=
 user.input.file.listfile=usr.input.file.list
-user.input.dir=/homes/hny4/congli/git/streamsx.messaging/samples/MqttSample/doc/spldoc/dita
+user.input.dir=/homes/hny5/cooka/Downloads/messaging501_Oct6/streamsx.messaging/samples/MqttSample/doc/spldoc/dita
 uplevels=
 tempdirToinputmapdir.relative.value=
 conrefpushfile=conrefpush.list
