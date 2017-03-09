@@ -15,10 +15,13 @@ use com.ibm.streamsx.messaging.kafka::*;
  * ssl.truststore.location=<truststore.jks-location>
  * ssl.truststore.password=<passw0rd>
  *
- * To use with Message Hub, first enter your Message Hub credentials into the
- * username and password fields of etc/jaas.conf, and place the following JAR
- * in [messaging toolkit location]/opt/downloaded:
- *   - messagehub.login-1.0.0.jar
+ * To use with Message Hub:
+ *    1.  Obtain the Message Hub service credentials.  You will need the username, 
+ *        password and the  list of SASL brokers.
+ *    2.  Replace the bootstrap.servers list with the SASL broker list in 
+ *        the etc/consumers.properties and etc/producer.properties files
+ *    3.  Specify username and password in the jaas.conf file
+ *    4.  Build the application
  * 
  */
 
