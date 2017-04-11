@@ -19,7 +19,7 @@ To get started with working with this toolkit:
 * https://github.com/IBMStreams/streamsx.messaging/wiki/Getting-Started-with-Toolkit-Development
 * [Kafka Operators Getting Started Guide](http://ibmstreams.github.io/streamsx.documentation/docs/4.1/messaging/kafka-operators-getting-started/)
 * [JMS Operators Getting Started Guide](http://ibmstreams.github.io/streamsx.documentation/docs/4.1/messaging/jms-operators-getting-started/)
-* [The messages and the NLS for toolkits](https://github.com/IBMStreams/administration/wiki/The-messages-and-the-NLS-for-toolkits)
+* [The messages and the NLS for toolkits](https://github.com/IBMStreams/administration/wiki/Messages-and-National-Language-Support-for-toolkits)
 
 
 To learn more about Streams:
