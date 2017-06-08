@@ -13,7 +13,7 @@ This toolkit contains support for:
 * XMS
 
 Check out our SPLDOC here: 
-* http://http://ibmstreams.github.io/streamsx.messaging/com.ibm.streamsx.messaging/doc/spldoc/html/index.html
+* http://ibmstreams.github.io/streamsx.messaging/com.ibm.streamsx.messaging/doc/spldoc/html/index.html
 
 To get started with working with this toolkit:
 * https://github.com/IBMStreams/streamsx.messaging/wiki/Getting-Started-with-Toolkit-Development
