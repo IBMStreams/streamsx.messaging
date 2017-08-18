@@ -31,9 +31,17 @@ import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 	description="The tuples arriving on this port are expected to contain three attributes \\\"key\\\", \\\"topic\\\" and \\\"message\\\". " +
 			"Out of these \\\"message\\\", is a required attribute."))
 @PrimitiveOperator(name=KafkaSink.OPER_NAME, description=KafkaSink.DESC)
-@Icons(location16="icons/KafkaProducer_16.gif", location32="icons/KafkaProducer_32.gif")
+@Icons(location16="icons/KafkaProducer_deprecated_16.gif", location32="icons/KafkaProducer_deprecated_32.gif")
 public class KafkaSink extends KafkaBaseOper {
+
+	private static final String DEPRECATION_MESSAGE = "The `com.ibm.streamsx.messaging.kafka.KafkaProducer` operator is "
+			+ "deprecated and is replaced by the `com.ibm.streamsx.kafka.KafkaProducer` "
+			+ "operator in the `com.ibm.streamsx.kafka` toolkit. The deprecated operator "
+			+ "might be removed in a future release.";
 	
+	static {
+		System.err.println(KafkaSink.DEPRECATION_MESSAGE);
+	}
 	
 	static final String OPER_NAME =  "KafkaProducer"; //$NON-NLS-1$
 	
@@ -56,7 +64,7 @@ public class KafkaSink extends KafkaBaseOper {
 		return checker.checkExcludedParameters("topic", "topicAttribute") && //$NON-NLS-1$ //$NON-NLS-2$
 			   checker.checkExcludedParameters("topicAttribute", "topic"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-
+	
 	//consistent region checks
 	@ContextCheck(compile = true)
 	public static void checkInConsistentRegion(OperatorContextChecker checker) {
@@ -80,6 +88,8 @@ public class KafkaSink extends KafkaBaseOper {
 	@Override
 	public void initialize(OperatorContext context) throws Exception
 			{
+		trace.log(TraceLevel.ERROR, KafkaSink.DEPRECATION_MESSAGE);
+		
 		super.initialize(context);
 		super.initSchema(getInput(0).getStreamSchema());
 		
@@ -166,7 +176,8 @@ public class KafkaSink extends KafkaBaseOper {
 		producerClient = getNewProducerClient(topicAH, keyAH, messageAH, finalProperties);
 	}
 
-	public static final String DESC = 
+	public static final String DESC = "**DEPRECATED**: " + KafkaSink.DEPRECATION_MESSAGE + "\\n" + //$NON-NLS-1$
+			"\\n" + //$NON-NLS-1$
 			"This operator acts as a Kafka producer sending tuples as messages to a Kafka broker. " +  //$NON-NLS-1$
 			"The broker is assumed to be already configured and running. " + //$NON-NLS-1$
 			"The incoming stream can have three attributes: topic, key and message. " + //$NON-NLS-1$
