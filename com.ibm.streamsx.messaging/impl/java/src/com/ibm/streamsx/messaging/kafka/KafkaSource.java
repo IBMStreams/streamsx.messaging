@@ -51,10 +51,18 @@ import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 @OutputPorts(@OutputPortSet(cardinality=1, optional=false, 
 	description="Messages received from Kafka are sent on this output port."))
 @PrimitiveOperator(name=KafkaSource.OPER_NAME, description=KafkaSource.DESC)
-@Icons(location16="icons/KafkaConsumer_16.gif", location32="icons/KafkaConsumer_32.gif")
+@Icons(location16="icons/KafkaConsumer_deprecated_16.gif", location32="icons/KafkaConsumer_deprecated_32.gif")
 public class KafkaSource extends KafkaBaseOper implements StateHandler{
 
+	private static final String DEPRECATION_MESSAGE = "The `com.ibm.streamsx.messaging.kafka.KafkaConsumer` operator is "
+			+ "deprecated and is replaced by the `com.ibm.streamsx.kafka.KafkaConsumer` "
+			+ "operator in the `com.ibm.streamsx.kafka` toolkit. The deprecated operator "
+			+ "might be removed in a future release.";
 
+	static {
+		System.err.println(KafkaSource.DEPRECATION_MESSAGE);
+	}
+	
 	static final String OPER_NAME = "KafkaConsumer"; //$NON-NLS-1$
 	// private int threadsPerTopic = 1;
 	private List<Integer> partitions = new ArrayList<Integer>();
@@ -89,8 +97,6 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
     private Map<Integer,Metric> startingOffsetsMetrics;
     private Map<Integer,Metric> ckptOffsetsMetrics;
     private Map<Integer,Metric> regionCkptOffsetsMetrics;
-
-
 	
 	//consistent region checks
 	@ContextCheck(compile = true)
@@ -135,6 +141,8 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 	@Override
 	public void initialize(OperatorContext context)
 			throws Exception {
+		trace.log(TraceLevel.ERROR, KafkaSource.DEPRECATION_MESSAGE);
+		
 		super.initialize(context);
 		super.initSchema(getOutput(0).getStreamSchema());
 
@@ -390,7 +398,9 @@ public class KafkaSource extends KafkaBaseOper implements StateHandler{
 		}
 	}
 
-	public static final String DESC = "This operator acts as a Kafka consumer receiving messages for one or more topics. " //$NON-NLS-1$
+	public static final String DESC = "**DEPRECATED**: " + KafkaSource.DEPRECATION_MESSAGE + "\\n" //$NON-NLS-1$
+			+ "\\n" //$NON-NLS-1$
+			+ "This operator acts as a Kafka consumer receiving messages for one or more topics. " //$NON-NLS-1$
 			+ "Ordering of messages is only guaranteed per Kafka topic partition. " + BASE_DESC + // common //$NON-NLS-1$
 																									// description
 																									// between
