@@ -4,8 +4,6 @@
  *******************************************************************************/
 package com.ibm.streamsx.messaging.jms;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -186,7 +184,7 @@ class JMSConnectionHelper implements ExceptionListener {
 
 	// logger to get error messages
 	private Logger logger;
-	private Logger tracer = Logger.getLogger(this.getClass().getName());
+	private static final Logger tracer = Logger.getLogger(JMSConnectionHelper.class.getName());
 	
 	// This constructor sets the parameters required to create a connection for
 	// JMSSource
@@ -238,11 +236,11 @@ class JMSConnectionHelper implements ExceptionListener {
      */
     @Override
     public void onException (JMSException ex) {
-        tracer.log(LogLevel.ERROR, "onException: " + ex.toString());
+        tracer.log(LogLevel.ERROR, "onException: " + ex.toString()); //$NON-NLS-1$
         try {
             this.recoverSession();
         } catch (JMSException | ConnectionException e) {
-            tracer.log(LogLevel.ERROR, "onException: " + e.toString());
+            tracer.log(LogLevel.ERROR, "onException: " + e.toString()); //$NON-NLS-1$
         } catch (InterruptedException e) {
             // ignore interruption of notification thread
         }
@@ -416,7 +414,7 @@ class JMSConnectionHelper implements ExceptionListener {
 			    getProducerCR().setTimeToLive(TimeUnit.MILLISECONDS.convert(7L, TimeUnit.DAYS));
 			    getProducerCR().setDeliveryMode(DeliveryMode.PERSISTENT);
 			    // start the connection
-                tracer.log (LogLevel.INFO, "going to start the connection for producer in client acknowledge mode ...");
+                tracer.log (LogLevel.INFO, "going to start the connection for producer in client acknowledge mode ..."); //$NON-NLS-1$
 				getConnect().start();
 			}
 			
@@ -438,10 +436,10 @@ class JMSConnectionHelper implements ExceptionListener {
 			// Its JMSSource, So we will create a consumer
 			setConsumer(getSession().createConsumer(dest, messageSelector));
 			// start the connection
-            tracer.log (LogLevel.INFO, "going to start consumer connection ...");
+            tracer.log (LogLevel.INFO, "going to start consumer connection ..."); //$NON-NLS-1$
 			getConnect().start();
 		}
-		tracer.log (LogLevel.INFO, "connection successfully created");
+		tracer.log (LogLevel.INFO, "connection successfully created"); //$NON-NLS-1$
 		// create connection is successful, return true
 		return true;
 	}
@@ -531,7 +529,7 @@ class JMSConnectionHelper implements ExceptionListener {
 			}
 		}
 		catch (JMSException e) {
-		    tracer.log (LogLevel.ERROR, e.toString());
+		    tracer.log (LogLevel.ERROR, "receiveMessage - " + e.toString()); //$NON-NLS-1$
 			// If the JMSSource operator was interrupted in middle
 			if (e.toString().contains("java.lang.InterruptedException")) { //$NON-NLS-1$
 				throw new java.lang.InterruptedException();
@@ -608,13 +606,13 @@ class JMSConnectionHelper implements ExceptionListener {
 
 		try {
 			synchronized (getSession()) {
-			    tracer.log(LogLevel.INFO, "recoverSession");
+			    tracer.log(LogLevel.INFO, "recoverSession"); //$NON-NLS-1$
 				getSession().recover();
-                tracer.log(LogLevel.INFO, "recoverSession - session recovered");
+                tracer.log(LogLevel.INFO, "recoverSession - session recovered"); //$NON-NLS-1$
 			}
 		} catch (JMSException e) {
 			
-            tracer.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
+            tracer.log(LogLevel.INFO, "attempting to reconnect"); //$NON-NLS-1$
 			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT"); //$NON-NLS-1$
 			setConnect(null);
 			createConnection();
@@ -639,14 +637,25 @@ class JMSConnectionHelper implements ExceptionListener {
 		}
 	}
 
-	// close the connection
-	public void closeConnection() throws JMSException {
+	// close and invalidate the connection
+	public void closeConnection() {
 
 		if (getSession() != null) {
-			getSession().close();
+			try {
+                getSession().close();
+            } catch (JMSException e) {
+                // ignore
+            }
 		}
 		if (getConnect() != null) {
-			getConnect().close();
+			try {
+                getConnect().close();
+            } catch (JMSException e) {
+                // ignore
+            }
+			finally {
+			    setConnect(null);
+			}
 		}
 	}
 }
