@@ -4,16 +4,17 @@
  *******************************************************************************/
 package com.ibm.streamsx.messaging.jms;
 
-import com.ibm.streams.operator.metrics.Metric;
-import com.ibm.streamsx.messaging.common.PropertyProvider;
-
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
+import javax.jms.ExceptionListener;
 import javax.jms.InvalidSelectorException;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -24,12 +25,15 @@ import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
 import com.ibm.streams.operator.logging.LogLevel;
+import com.ibm.streams.operator.metrics.Metric;
+import com.ibm.streamsx.messaging.common.PropertyProvider;
 
 /* This class contains all the connection related information, creating maintaining and closing a connection to the JMSProvider
  * Sending and Receiving JMS messages
  */
-class JMSConnectionHelper {
+class JMSConnectionHelper implements ExceptionListener {
 
 	// variables required to create connection
 	// connection factory
@@ -182,7 +186,8 @@ class JMSConnectionHelper {
 
 	// logger to get error messages
 	private Logger logger;
-
+	private Logger tracer = Logger.getLogger(this.getClass().getName());
+	
 	// This constructor sets the parameters required to create a connection for
 	// JMSSource
 	JMSConnectionHelper(ConnectionDocumentParser connectionDocumentParser,ReconnectionPolicies reconnectionPolicy,
@@ -226,11 +231,27 @@ class JMSConnectionHelper {
 
 	}
 
-	// Method to create the initial connection
+	
+	/**
+	 * Called asynchronously to notify problems with the connection
+     * @see javax.jms.ExceptionListener#onException(javax.jms.JMSException)
+     */
+    @Override
+    public void onException (JMSException ex) {
+        tracer.log(LogLevel.ERROR, "onException: " + ex.toString());
+        try {
+            this.recoverSession();
+        } catch (JMSException | ConnectionException e) {
+            tracer.log(LogLevel.ERROR, "onException: " + e.toString());
+        } catch (InterruptedException e) {
+            // ignore interruption of notification thread
+        }
+    }
+
+    // Method to create the initial connection
 	public void createInitialConnection() throws ConnectionException,
 			InterruptedException {
 		createConnection();
-		return;
 	}
 	
 	
@@ -369,7 +390,8 @@ class JMSConnectionHelper {
 			setConnect(connFactory.createConnection(userPrincipal, userCredential));
 		else
 			setConnect(connFactory.createConnection());
-		
+		getConnect().setExceptionListener (this);
+
 		// Create session from connection; false means
 		// session is not transacted.
 		
@@ -394,6 +416,7 @@ class JMSConnectionHelper {
 			    getProducerCR().setTimeToLive(TimeUnit.MILLISECONDS.convert(7L, TimeUnit.DAYS));
 			    getProducerCR().setDeliveryMode(DeliveryMode.PERSISTENT);
 			    // start the connection
+                tracer.log (LogLevel.INFO, "going to start the connection for producer in client acknowledge mode ...");
 				getConnect().start();
 			}
 			
@@ -415,8 +438,10 @@ class JMSConnectionHelper {
 			// Its JMSSource, So we will create a consumer
 			setConsumer(getSession().createConsumer(dest, messageSelector));
 			// start the connection
+            tracer.log (LogLevel.INFO, "going to start consumer connection ...");
 			getConnect().start();
 		}
+		tracer.log (LogLevel.INFO, "connection successfully created");
 		// create connection is successful, return true
 		return true;
 	}
@@ -506,6 +531,7 @@ class JMSConnectionHelper {
 			}
 		}
 		catch (JMSException e) {
+		    tracer.log (LogLevel.ERROR, e.toString());
 			// If the JMSSource operator was interrupted in middle
 			if (e.toString().contains("java.lang.InterruptedException")) { //$NON-NLS-1$
 				throw new java.lang.InterruptedException();
@@ -523,7 +549,6 @@ class JMSConnectionHelper {
 			synchronized (getSession()) {
 				return (getConsumer().receive(timeout));
 			}
-			
 		}
 	}
 	
@@ -583,10 +608,13 @@ class JMSConnectionHelper {
 
 		try {
 			synchronized (getSession()) {
+			    tracer.log(LogLevel.INFO, "recoverSession");
 				getSession().recover();
+                tracer.log(LogLevel.INFO, "recoverSession - session recovered");
 			}
 		} catch (JMSException e) {
 			
+            tracer.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT");
 			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT"); //$NON-NLS-1$
 			setConnect(null);
 			createConnection();
@@ -594,7 +622,6 @@ class JMSConnectionHelper {
 			synchronized (getSession()) {
 				getSession().recover();
 			}
-			
 		}
 	}
 	

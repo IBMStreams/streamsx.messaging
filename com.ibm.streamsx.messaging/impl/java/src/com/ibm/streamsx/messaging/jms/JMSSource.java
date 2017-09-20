@@ -9,13 +9,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.jms.JMSException;
@@ -746,7 +743,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 			throw e1;
 		}
 
-		long timeout = isInConsistentRegion ? JMSSource.RECEIVE_TIMEOUT : 0;
+		long timeout = JMSSource.RECEIVE_TIMEOUT;
 		long sessionCreationTime = 0;
 
 		while (!Thread.interrupted()) {
