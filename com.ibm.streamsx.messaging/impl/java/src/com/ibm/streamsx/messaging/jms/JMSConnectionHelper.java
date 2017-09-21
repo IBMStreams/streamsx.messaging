@@ -231,19 +231,13 @@ class JMSConnectionHelper implements ExceptionListener {
 
 	
 	/**
-	 * Called asynchronously to notify problems with the connection
+	 * Called asynchronously to notify problems with the connection.
+	 * Here we have no implementation except tracing the problem.
      * @see javax.jms.ExceptionListener#onException(javax.jms.JMSException)
      */
     @Override
     public void onException (JMSException ex) {
         tracer.log(LogLevel.ERROR, "onException: " + ex.toString()); //$NON-NLS-1$
-        try {
-            this.recoverSession();
-        } catch (JMSException | ConnectionException e) {
-            tracer.log(LogLevel.ERROR, "onException: " + e.toString()); //$NON-NLS-1$
-        } catch (InterruptedException e) {
-            // ignore interruption of notification thread
-        }
     }
 
     // Method to create the initial connection
