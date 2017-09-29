@@ -11,7 +11,7 @@
 
 <%SPL::CodeGen::headerPrologue($model);%>
 
-class MY_OPERATOR : public MY_BASE_OPERATOR ,public xms::MessageListener {
+class MY_OPERATOR : public MY_BASE_OPERATOR ,public xms::MessageListener, public xms::ExceptionListener {
 	
 public:
 
@@ -39,6 +39,9 @@ public:
  * Message listener implementation 
  */
 	virtual xmsVOID onMessage(xms::Message * pMsg);
+	
+	// Exception listener implementation
+	virtual xmsVOID onException (xms::Exception * pExp);
 	
 	// Performance Metrics
 	SPL::int64 nMessagesRead;
