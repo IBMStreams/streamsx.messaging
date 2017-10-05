@@ -230,7 +230,7 @@ public class MqttClientWrapper implements MqttCallback {
 		}
 		
 		String userName = propProvider.getProperty(userPropName);
-		String password = propProvider.getProperty(passwordPropName);
+		String password = propProvider.getProperty(passwordPropName, false);
 		
 		conOpt.setUserName(userName);
 		conOpt.setPassword(password.toCharArray());
