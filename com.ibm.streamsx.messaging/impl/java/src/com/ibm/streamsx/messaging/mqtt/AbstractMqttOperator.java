@@ -116,6 +116,8 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 			checker.setInvalidContext(
 					Messages.getString("SERVER_URI_OR_CONNECTION_MUST_BE_SET"), new Object[] {}); //$NON-NLS-1$
 		}
+	    // get a all properties
+	    // reload configuration each time to get latest property value
 
 		checker.checkExcludedParameters(PARAMNAME_SERVER_URI,
 				PARAMNAME_CONNECTION, PARAMNAME_CONNDOC);
@@ -160,8 +162,8 @@ public abstract class AbstractMqttOperator extends AbstractOperator {
 			
 			PropertyProvider provider = new PropertyProvider(checker.getOperatorContext().getPE(), appConfigName);
 			
-			String userName = provider.getProperty(userPropName);
-			String password = provider.getProperty(passwordPropName);
+			String userName = provider.getProperty(userPropName, false);
+			String password = provider.getProperty(passwordPropName, false);
 			
 			if(userName == null || userName.trim().length() == 0) {
 				checker.setInvalidContext(Messages.getString("PROPERTY_NOT_FOUND_IN_APP_CONFIG"), new Object[] {userPropName, appConfigName});	//$NON-NLS-1$

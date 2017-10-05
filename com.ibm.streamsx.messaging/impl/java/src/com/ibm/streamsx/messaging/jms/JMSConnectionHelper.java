@@ -445,7 +445,7 @@ class JMSConnectionHelper implements ExceptionListener {
 		}
 		
 		String userName = propertyProvider.getProperty(userPropName);
-		String password = propertyProvider.getProperty(passwordPropName);
+		String password = propertyProvider.getProperty(passwordPropName, false);
 		
 		if(this.userPrincipal == userName && this.userCredential == password) {
 			return false;

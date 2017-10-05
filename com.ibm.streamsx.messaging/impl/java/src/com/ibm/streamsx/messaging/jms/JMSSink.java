@@ -517,8 +517,8 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			
 			PropertyProvider provider = new PropertyProvider(checker.getOperatorContext().getPE(), appConfigName);
 			
-			String userName = provider.getProperty(userPropName);
-			String password = provider.getProperty(passwordPropName);
+			String userName = provider.getProperty(userPropName, false);
+			String password = provider.getProperty(passwordPropName, false);
 			
 			if(userName == null || userName.trim().length() == 0) {
 				logger.log(LogLevel.ERROR, "PROPERTY_NOT_FOUND_IN_APP_CONFIG", new String[] {userPropName, appConfigName}); //$NON-NLS-1$
