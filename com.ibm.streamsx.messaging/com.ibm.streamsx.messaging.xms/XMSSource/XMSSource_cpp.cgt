@@ -350,29 +350,13 @@ MY_OPERATOR::MY_OPERATOR(): nMessagesReadPC( getContext().getMetrics().getCustom
 	pQueueURI = NULL;
 	pTopicURI = NULL;
 	pDest = NULL;
-
-	iDeliveryMode = XMSC_DELIVERY_NOT_PERSISTENT;
-	
-	fatalError = false;
 	connected = false;
-
+	iDeliveryMode = XMSC_DELIVERY_NOT_PERSISTENT;
 	periodVal = <%=$periodVal%>;
 	//Now attempt to create the XMS objects
-	if (createAdminObjects() != XMS_OK)
-		fatalError = true;
-	else if (createXMS(CONSUMER,<%=$reconnectionPolicy%>,<%=$reconnectionBound%>,(xmsFLOAT)periodVal) == XMS_OK)
-	{
-		connected = true;
-		//In case of initial connection failure, we need to set a flag to avoid reconnection when the MQ is down from the beginning, to distinguish the case for transient conection failure
-		isInitialConnectionFailure=false;
-
-	}
-	else
-	{
-		isInitialConnectionFailure=true;
-	}
+	fatalError = createAdminObjects() != XMS_OK;
 	SPLAPPTRC(L_DEBUG, "Exit: Constructor", "XMSSource");
-
+	if (fatalError) throw xms::Exception();
 }
 
 
@@ -399,10 +383,7 @@ void MY_OPERATOR::allPortsReady()
 {
 	// Notifies that all ports are ready. No tuples should be submitted before
 	// this. Source operators can use this method to spawn threads.
-
-
 	createThreads(1); // Create source thread
-
 }
 
 
@@ -418,39 +399,45 @@ void MY_OPERATOR::initialize()
 // Processing for source and threaded operators  
 void MY_OPERATOR::process(uint32_t idx)
 {
+	SPLAPPTRC(L_TRACE, "Entry: process()", "XMSSource");
 	SPL::rstring logmsg;
 	ostringstream ErrMsg;
 	initialize();
-	SPLAPPTRC(L_TRACE, "Entry: process()", "XMSSource");
-	
-	if (fatalError == true){
-		
-		SPLAPPLOG(L_ERROR, MSGTK_PREVIOUS_ERROR, "XMSSource");
-		<% if (defined $operatorErrorPort ) { %>
-			ErrMsg<<MSGTK_PREVIOUS_ERROR;
-		    sendOutputErrorMsg(ErrMsg);
-		<% }%>
-	}
-
-	else{
-		try
-		{
-			consumer.setMessageListener(this);
-			conn.start();
-			SPLAPPTRC(L_TRACE, "Message Listener attached", "XMSSource");
-			getPE().blockUntilShutdownRequest();
+	if (!getPE().getShutdownRequested()) {
+		try {
+			// createXMS(...) can block for a long time dependent on reconnection policy;
+			// in case of infinite retry even until a shutdown has been requested.
+			// Thats why we check for shutdown request after return of this method.
+			xmsINT rc = createXMS(CONSUMER,<%=$reconnectionPolicy%>,<%=$reconnectionBound%>,(xmsFLOAT)periodVal);
+			if (!getPE().getShutdownRequested()) {
+				if (rc == XMS_OK) {
+					connected = true;
+					conn.setExceptionListener (this);
+					SPLAPPTRC(L_DEBUG, "Exception Listener attached", "XMSSource");
+					consumer.setMessageListener(this);
+					SPLAPPTRC(L_DEBUG, "Message Listener attached", "XMSSource");
+					conn.start();
+					SPLAPPTRC(L_DEBUG, "Connection started", "XMSSource");
+					getPE().blockUntilShutdownRequest();
+				}
+				else {
+					isInitialConnectionFailure=true;
+					throw xms::Exception();
+				}
+			}
 		}
 		catch (xms::Exception & ex) {
 			logmsg = MSGTK_MESSAGE_LISTENER_ERROR(ex.getErrorString().c_str());
 			SPLAPPLOG(L_ERROR, logmsg, "XMSSource");
 			<%	if (defined $operatorErrorPort ) { %>
-				ErrMsg<<logmsg;
-				sendOutputErrorMsg(ErrMsg);
+			ErrMsg<<logmsg;
+			sendOutputErrorMsg(ErrMsg);
 			<% }%>
 			processException(ex);
+			throw;
 		}
-		SPLAPPTRC(L_TRACE, "Exit: process()", "XMSSource");
-	}	
+	}
+	SPLAPPTRC(L_TRACE, "Exit: process()", "XMSSource");
 }
 
 
@@ -468,6 +455,78 @@ inline std::string MY_OPERATOR::xms2std(const xms::String & pString)
 {
 	return std::string(pString.c_str());
 }
+
+// ExceptionListener implementation.
+xmsVOID MY_OPERATOR::onException (xms::Exception * pExp) {
+	ostringstream ost;
+	pExp->dump (ost);
+	SPLAPPTRC (L_ERROR, "onException: " << ost.str(), "XMSSource");
+	processException (*pExp);
+	delete pExp;
+	
+	// immediate reconnection would fail - sleep for reconnection or initial period
+	double sleepTime = <%=$initDelayParmValue%> > 0? <%=$initDelayParmValue%>: periodVal;
+	SPLAPPTRC (L_INFO, "onException: waiting for "<< sleepTime << " seconds before reconnection attempt", "XMSSource");
+	getPE().blockUntilShutdownRequest (sleepTime);
+	if (getPE().getShutdownRequested()) {
+		return;
+	}
+	
+	try {
+		conn.stop();
+	} catch (xms::Exception & ex) { /*ignore*/ }
+	try {
+		conn.close();
+	} catch (xms::Exception & ex) { /*ignore*/ }
+	// createXMS can block a longer - time dependent on reconnection policy,
+	// in case of infinite retry until a shutdown has been requested.
+	// Thats why we check for shutdown request after return of this method.
+	xmsINT resultCode = createXMS (CONSUMER,<%=$reconnectionPolicy%>,<%=$reconnectionBound%>,(xmsFLOAT)periodVal);
+	
+	if (getPE().getShutdownRequested()) {
+		return;
+	}
+	
+	if (resultCode == XMS_OK) {
+		try {
+			conn.setExceptionListener (this);
+			SPLAPPTRC(L_DEBUG, "Exception Listener attached", "XMSSource");
+			consumer.setMessageListener(this);
+			SPLAPPTRC(L_DEBUG, "Message Listener attached", "XMSSource");
+			conn.start();
+			SPLAPPTRC(L_DEBUG, "Connection started", "XMSSource");
+		}
+		catch (xms::Exception & ex) {
+			SPL::rstring logmsg;
+			ostringstream ErrMsg;
+			ex.dump (ErrMsg);
+			logmsg = MSGTK_MESSAGE_LISTENER_ERROR(ex.getErrorString().c_str());
+			SPLAPPLOG(L_ERROR, logmsg, "XMSSource");
+			SPLAPPTRC(L_ERROR, "exception handling failed: " << ErrMsg.str(), "XMSSource");
+			<%	if (defined $operatorErrorPort ) { %>
+				ErrMsg<<logmsg;
+				sendOutputErrorMsg(ErrMsg);
+			<% }%>
+			processException(ex);
+		}
+	}
+	else {
+		SPL::rstring logmsg;
+		ostringstream ErrMsg;
+		logmsg = MSGTK_PREVIOUS_ERROR;
+		SPLAPPLOG(L_ERROR, logmsg, "XMSSource");
+		SPLAPPTRC(L_ERROR, logmsg << ": " << resultCode, "XMSSource");
+		<%	if (defined $operatorErrorPort ) { %>
+			ErrMsg<<logmsg << ": " << resultCode;
+			sendOutputErrorMsg(ErrMsg);
+		<% }%>
+		// Reconnecting failed. The operator will never again receive data from QM due to an error condition.
+		// The PE would appear healthy, but this operator would not be functional any more.
+		// To indicate this serious problem, shutdown the PE by throwing an exception.
+		throw xms::Exception();
+	}
+}
+
 
 /*
  * SYNOPSIS:   Overloaded virtual method for the message listener. This

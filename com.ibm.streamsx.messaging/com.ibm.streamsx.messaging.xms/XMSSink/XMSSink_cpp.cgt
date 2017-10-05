@@ -6,9 +6,9 @@
 %>
 
 <%
-   my $isInConsistentRegion = $model->getContext()->getOptionalContext("ConsistentRegion");
+my $isInConsistentRegion = $model->getContext()->getOptionalContext("ConsistentRegion");
 %>
- 
+
 <%
 # Set up commonly used variables
 my $connTag = 'XMS';  
@@ -27,12 +27,12 @@ use File::Basename;
 use Cwd 'realpath';
 my $modelroot = $model->getContext()->getOperatorDirectory();
 unshift @INC, dirname($modelroot) . "/Common";	
-	require Connection;
-	require Access;
-	require Edge;
-	require MessagingResource;
+require Connection;
+require Access;
+require Edge;
+require MessagingResource;
 
-	
+
 # Set up the objects that interface with this operator's connection specification and access specification.
 my ($conn, $access) = Edge::connectionSetup($model, $connTag, $accessTag);
 
@@ -85,16 +85,16 @@ else{
 	}
 	else {
 		if ( $reconnectionPolicy->getValueAt(0)->getSPLExpression()  eq "NoRetry" ){
-			#reconnectionPolicy is NoRetry, reconnectionBound is 0
+#reconnectionPolicy is NoRetry, reconnectionBound is 0
 			$reconnectionBound=0;
 		}
 		else {
 			if ( $reconnectionPolicy->getValueAt(0)->getSPLExpression()  eq "BoundedRetry" ){
-				#reconnectionPolicy is BoundedRetry and reconnectionBound is absent, default value 5 is used
+#reconnectionPolicy is BoundedRetry and reconnectionBound is absent, default value 5 is used
 				$reconnectionBound=5;
 			}
 			else { 
-				#reconnectionPolicy is infiniteRetry
+#reconnectionPolicy is infiniteRetry
 				$reconnectionBound=-1;
 			}
 		}
@@ -135,132 +135,132 @@ using namespace streams_boost;
 <%SPL::CodeGen::implementationPrologue($model);%>
 
 <%
-    ### Consistent region ERROR message ###
-    my $crContext = $model->getContext()->getOptionalContext("ConsistentRegion");
-    if($crContext && $crContext->isStartOfRegion()) {
-        SPL::CodeGen::exitln(MessagingResource::MSGTK_OP_CANNOT_BE_IN_CONSISTENT_REGION("XMSSink"));
-    }
+### Consistent region ERROR message ###
+my $crContext = $model->getContext()->getOptionalContext("ConsistentRegion");
+if($crContext && $crContext->isStartOfRegion()) {
+	SPL::CodeGen::exitln(MessagingResource::MSGTK_OP_CANNOT_BE_IN_CONSISTENT_REGION("XMSSink"));
+}
 %>
 
 // Constructor
 MY_OPERATOR::MY_OPERATOR() : nTruncatedInserts(0),nTruncatedInsertsPC( getContext().getMetrics().getCustomMetricByName("nTruncatedInserts")),nFailedInserts(0),nFailedInsertsPC( getContext().getMetrics().getCustomMetricByName("nFailedInserts")),nConnectionAttempts(0),nConnectionAttemptsPC( getContext().getMetrics().getCustomMetricByName("nConnectionAttempts"))
 {
 	SPLAPPTRC(L_DEBUG, "Entry: Constructor", "XMSSink");
-	
+
 	<%if ($isInConsistentRegion) {%>
 	_crContext = static_cast<ConsistentRegionContext *> (getContext().getOptionalContext(CONSISTENT_REGION));
-	
+
 	getContext().registerStateHandler(*this);
 	<%}%>
-	
+
 	std::ostringstream ErrMsg;
-	
+
 	//Check if error port is specified and likewise set the isErrorPortSpecified variable
 	<%if ($model->getNumberOfOutputPorts() == 1) { %>
-		isErrorPortSpecified=true;
+	isErrorPortSpecified=true;
 	<% }
 	else{%>
-		isErrorPortSpecified=false;
+	isErrorPortSpecified=false;
 	<%}%>
-	
+
 	//Initialize member variables using values from the Connection document
-    	<%
-     
-  	# InitialContext and ConnectionFactory are guaranteed to be there by the XML Schema 
-  	my $ic =$conn->getAttributeByName('initial_context');
-
-    use URI;
-    
-    # support relative binding file path.
-    if(!defined ($ic) || $ic eq '') {
-        SPL::CodeGen::exitln(MessagingResource::MSGTK_VALUE_MUST_BE_SPECIFIED_FOR_INITIAL_CONTEXT_ATTRIB_IN_CONNECTION_DOC());
-    }
-
-    my $url = new URI($ic);
-    
-    if($url->scheme eq '') {
-        SPL::CodeGen::exitln(MessagingResource::MSGTK_INVALID_INITIAL_CONTEXT_FORMAT_DETECTED());
-    }
-
-    if($url->scheme eq 'file') {
-        my $path = $url->path;
-        
-        # This is a relative path
-        if(substr($path, 0, 1) ne '/') {
-            $ic = $path;
-        }
-        # if it ends with a / then append .bindings
-        if(substr($ic,-1) eq '/') {
-            $ic .= '.bindings';
-        }
-    }
-    
-  	# Append .bindings to the URL, if it is a file based one that refers to a directory. The XMS client requires this
-  	# If it starts with file:///  and it ends with a / then append .bindings
-  	#if ((substr($ic,0,8) eq 'file:///') &&  (substr($ic,-1)  eq '/')){
-    #   	$ic .= '.bindings';                      	
-    #	}
-    #
-  	%>
-  	
-  	std::string initContext = "<%=$ic %>";
-  	
-  	// process relative file path
-  	if(initContext.find("file:") == std::string::npos) {
-  	    streams_boost::filesystem::path filePath(initContext);
-  	
-  	    if(filePath.is_relative()) {
-            // if relative, convert to absolute path using the application directory as the base
-            filePath = streams_boost::filesystem::absolute(filePath, getPE().getApplicationDirectory());
-            initContext = filePath.string();
-        }
-        
-        initContext = "file://" + initContext;
-  	}
-  	 	
-  	
- 	pInitialContext = new xms::String(initContext);
- 	pConnectionFactory = new xms::String("<%=$conn->getAttributeByName('connection_factory'); %>");
- 
-
- 	// Obtain the User id and password  
- 	<% if ($conn->hasAttributeName('user')) { %>
- 		pUserID = new xms::String("<%=$conn->getAttributeByName('user'); %>");  
- 	<% } 
- 	else { %>
- 		pUserID = NULL;   
- 	<% } %> 
- 
- 	<% if ($conn->hasAttributeName('password')) { %>
- 		pPassword = new xms::String("<%=$conn->getAttributeByName('password'); %>"); 
- 	<% } 
- 	else { %>
- 		pPassword = NULL;  
- 	<% } %>
- 	
- 	
- 	// message_class tells us what type of XMS message is to be output 
- 	<%
- 	my $msgType = $access->getAttributeByName('message_class');
- 	%> 
- 	
- 	
 	<%
- 	
- 	my $nparm = $access->getNumberOfNativeSchemaAttributes();	
-	#Retrieve the attributes from the incoming tuple and create a list of these after some checks.
+
+# InitialContext and ConnectionFactory are guaranteed to be there by the XML Schema 
+	my $ic =$conn->getAttributeByName('initial_context');
+
+	use URI;
+
+# support relative binding file path.
+	if(!defined ($ic) || $ic eq '') {
+		SPL::CodeGen::exitln(MessagingResource::MSGTK_VALUE_MUST_BE_SPECIFIED_FOR_INITIAL_CONTEXT_ATTRIB_IN_CONNECTION_DOC());
+	}
+
+	my $url = new URI($ic);
+
+	if($url->scheme eq '') {
+		SPL::CodeGen::exitln(MessagingResource::MSGTK_INVALID_INITIAL_CONTEXT_FORMAT_DETECTED());
+	}
+
+	if($url->scheme eq 'file') {
+		my $path = $url->path;
+
+# This is a relative path
+		if(substr($path, 0, 1) ne '/') {
+			$ic = $path;
+		}
+# if it ends with a / then append .bindings
+		if(substr($ic,-1) eq '/') {
+			$ic .= '.bindings';
+		}
+	}
+
+# Append .bindings to the URL, if it is a file based one that refers to a directory. The XMS client requires this
+# If it starts with file:///  and it ends with a / then append .bindings
+#if ((substr($ic,0,8) eq 'file:///') &&  (substr($ic,-1)  eq '/')){
+#   	$ic .= '.bindings';                      	
+#	}
+#
+	%>
+
+	std::string initContext = "<%=$ic %>";
+
+	// process relative file path
+	if(initContext.find("file:") == std::string::npos) {
+		streams_boost::filesystem::path filePath(initContext);
+
+		if(filePath.is_relative()) {
+			// if relative, convert to absolute path using the application directory as the base
+			filePath = streams_boost::filesystem::absolute(filePath, getPE().getApplicationDirectory());
+			initContext = filePath.string();
+		}
+
+		initContext = "file://" + initContext;
+	}
+
+
+	pInitialContext = new xms::String(initContext);
+	pConnectionFactory = new xms::String("<%=$conn->getAttributeByName('connection_factory'); %>");
+
+
+	// Obtain the User id and password  
+	<% if ($conn->hasAttributeName('user')) { %>
+	pUserID = new xms::String("<%=$conn->getAttributeByName('user'); %>");  
+	<% } 
+	else { %>
+	pUserID = NULL;   
+	<% } %> 
+
+	<% if ($conn->hasAttributeName('password')) { %>
+	pPassword = new xms::String("<%=$conn->getAttributeByName('password'); %>"); 
+	<% } 
+	else { %>
+	pPassword = NULL;  
+	<% } %>
+
+
+	// message_class tells us what type of XMS message is to be output 
+	<%
+	my $msgType = $access->getAttributeByName('message_class');
+	%> 
+
+
+	<%
+
+	my $nparm = $access->getNumberOfNativeSchemaAttributes();	
+#Retrieve the attributes from the incoming tuple and create a list of these after some checks.
 	my $parmlist = [];
 	for ( my $i=0; $i < $nparm; $i++ ){
 		my $parm = {};
-    		$$parm{_name} = $access->getNativeSchemaAttributeNameAt($i);
-	    	$$parm{_type} = $access->getNativeSchemaAttributeTypeAt($i);
-    		$$parm{_length} = $access->getNativeSchemaAttributeLengthAt($i);
-    		push @$parmlist, $parm;
+		$$parm{_name} = $access->getNativeSchemaAttributeNameAt($i);
+		$$parm{_type} = $access->getNativeSchemaAttributeTypeAt($i);
+		$$parm{_length} = $access->getNativeSchemaAttributeLengthAt($i);
+		push @$parmlist, $parm;
 	}   	    
 
 	%>
 
-    
+
 	//Initialize variables that are to do with the access spec
 	pDestination = new xms::String("<%=$access->getAttributeByName('identifier'); %>");
 	pQueueURI = NULL;
@@ -270,26 +270,32 @@ MY_OPERATOR::MY_OPERATOR() : nTruncatedInserts(0),nTruncatedInsertsPC( getContex
 	fatalError = false;
 	connected = false;
 
- 
+
 	//Set the periodValue
 	periodVal = <%=$periodVal%>;
 
 
 	//Now attempt to create the XMS objects 
- 	if (createAdminObjects() != XMS_OK)
+	if (createAdminObjects() != XMS_OK) {
 		fatalError = true;
- 	else if (createXMS(PRODUCER,<%=$reconnectionPolicy%>,<%=$reconnectionBound%>,(xmsFLOAT)periodVal) == XMS_OK)
+	}
+	// In the constructor we try to connect with policy NoRetry to avoid long or even endless blocking of 
+	// createXMS (...) if one of the other reconnection policies has been specified. Blocking constructor
+	// might cause timeouts in the runtime on job submission.
+	// 
+	// In tuple processing we can wait forever when we reconnect.
+	else if (createXMS(PRODUCER, /*NoRetry*/2, 0, (xmsFLOAT)periodVal) == XMS_OK)
 	{
 		connected = true;
 		//In case of initial connection failure, we need to set a flag to avoid reconnection when the MQ is down from the beginning, to distinguish the case for transient conection failure
 		isInitialConnectionFailure=false;
-		
+
 	}
 	else
 	{
 		isInitialConnectionFailure=true;
 	}
-	
+
 	SPLAPPTRC(L_DEBUG, "Exit: Constructor", "XMSSink");
 
 }
@@ -297,20 +303,20 @@ MY_OPERATOR::MY_OPERATOR() : nTruncatedInserts(0),nTruncatedInsertsPC( getContex
 
 //send the output to the error port if error port is specified and tuple information is present
 void MY_OPERATOR::sendOutputErrorMsg(ostringstream& ErrMsg, Tuple const & tuple){
-	
+
 	//Append the initialization error message 
 	ostringstream PrintMessage;
 	PrintMessage<<InitializationErrMsg.str();
 	PrintMessage<<ErrMsg.str();
-		
+
 	<%
 	if (defined $operatorErrorPort) {
 		print "OPort0Type otupleError;\n";
 		foreach my $errorAttribute (@{($operatorErrorPort)->getAttributes()}) {
 			my $errorAttributeName = $errorAttribute->getName();
 			my $errorAttributeType = $errorAttribute->getSPLType();
-			
-			# Input Tuple
+
+# Input Tuple
 			if (SPL::CodeGen::Type::isTuple($errorAttributeType)) {
 				print "// Copy tuple from input data as is;\n";
 				print "otupleError.set_$errorAttributeName(tuple) ;\n";
@@ -322,7 +328,7 @@ void MY_OPERATOR::sendOutputErrorMsg(ostringstream& ErrMsg, Tuple const & tuple)
 		print" submit(otupleError, 0); \n";
 	}
 	%>
-	
+
 }
 
 
@@ -337,348 +343,353 @@ MY_OPERATOR::~MY_OPERATOR()
 void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 {
 	ErrMsg.flush();
-	SPLAPPTRC(L_TRACE, "Entry: process0(const <%=$inStream->getSPLTupleType()%>", "XMSSink");
+	SPLAPPTRC(L_DEBUG, "Entry: process0(const <%=$inStream->getSPLTupleType()%>", "XMSSink");
 	SPL::rstring logmsg;
 	// = PROCESSING_TUPLE(tuple);
 	//SPLAPPLOG(L_INFO, logmsg, "XMSSink");
-		
-	
+
+
 	if (fatalError == true){
 		SPLAPPLOG(L_ERROR, MSGTK_PREVIOUS_ERROR, "XMSSink");
 		<% if (defined $operatorErrorPort ) { %>
-			SPLAPPLOG(L_INFO, MSGTK_SEND_TUPLE_ERROR_PORT, "XMSSink");
-		    	sendOutputErrorMsg(ErrMsg,tuple);
+		SPLAPPLOG(L_INFO, MSGTK_SEND_TUPLE_ERROR_PORT, "XMSSink");
+		sendOutputErrorMsg(ErrMsg,tuple);
 		<% }%>
 	}
 	else {
 		if (connected == false) {
-			
-			//We need not try to re-connect if its initial connection failure for the first tuple
-			if(isInitialConnectionFailure==true) {
-				isInitialConnectionFailure=false;
+
+			// Recreate the XMS objects if we don't have any (this could happen after a connection failure)
+			// Note, that createXMS can block until shutdown request with reconnectionPolicy == InfiniteRetry
+			if (createXMS(PRODUCER,<%=$reconnectionPolicy%>,<%=$reconnectionBound%>,(xmsFLOAT)periodVal)  == XMS_OK) {
+				connected = true;
 			}
 			else {
-				// Recreate the XMS objects if we don't have any (this could happen after a connection failure)
-				if (createXMS(PRODUCER,<%=$reconnectionPolicy%>,<%=$reconnectionBound%>,(xmsFLOAT)periodVal)  == XMS_OK)
-					connected = true;
+				if (getPE().getShutdownRequested()) {
+					SPLAPPTRC(L_INFO, "process (tuple): shutdown requested. Stopping reconnection attempt and dropping tuple", "XMSSink");
+					return;
+				}
+				// we came out of createXMS(...) with error other than OPERATOR_SHUTDOWN_IN_PROGRESS
+				// We could not reconnect with configured policy --> throw exception and terminate PE
+				throw xms::Exception();
 			}
 		}
-		
-		 
+
+
 		// Carry on only if we have managed to get a connection 
 		if (connected == false){
 			<%	if (defined $operatorErrorPort ) { %>
-				ErrMsg << MSGTK_MESSAGE_DROPPED;
-	    		sendOutputErrorMsg(ErrMsg,tuple);
+			ErrMsg << MSGTK_MESSAGE_DROPPED;
+			sendOutputErrorMsg(ErrMsg,tuple);
 			<% }%>
 			SPLAPPLOG(L_ERROR, MSGTK_MESSAGE_DROPPED, "XMSSink");
 			nFailedInserts++;
 			updatePerformanceCounters();
 			SPLAPPTRC(L_TRACE, "Exit: process0(const <%=$inStream->getSPLTupleType()%>)", "XMSSink");
-	       	return;
+			return;
 		}     
-		
-		
+
+
 		/*
-		* In this version of the operator, the message classes that would be supported are: map, stream, bytes, xml, wbe, wbe22 and empty.
-		* The data types that would be supported by all of these message classes are uint8, int8, uint16, int16, uint32, int32, int64, float32, float64, boolean and rstring
-		* The data type blob would be supported by map, stream, xml and bytes.
-		* The truncation of rstring attribute would happen in accordance to the length specified in the native schema in map, stream, bytes and xml.
-		*/
-		
+		 * In this version of the operator, the message classes that would be supported are: map, stream, bytes, xml, wbe, wbe22 and empty.
+		 * The data types that would be supported by all of these message classes are uint8, int8, uint16, int16, uint32, int32, int64, float32, float64, boolean and rstring
+		 * The data type blob would be supported by map, stream, xml and bytes.
+		 * The truncation of rstring attribute would happen in accordance to the length specified in the native schema in map, stream, bytes and xml.
+		 */
+
 		try
 		{		     
-			
+
 			// Used to increment the performance counter nDroppedMessages	 
 			boolean truncated = false;
-    			const IPort0Type& t = (const IPort0Type&) tuple;
+			const IPort0Type& t = (const IPort0Type&) tuple;
 			// Generate the code to create and populate the XMS message. This code depends on the message class
-    			
+
 			<%	
 			if ( $msgType eq 'map' || $msgType eq 'stream')
 			{
 				my $mesgType = $msgType eq 'map' ? 'Map' : 'Stream';
 				my $setWrite = $msgType eq 'map' ? 'set' : 'write';
-				
+
 				%>
 				xms::<%=$mesgType%>Message tempmsg = sess.create<%=$mesgType%>Message();
 				xms::<%=$mesgType%>Message& msg = tempmsg;
-						     
+
 
 				<%
-		    		foreach my $attribute (@$parmlist) {   
-	     				my $name = $$attribute{_name};
-	     				my $type = $$attribute{_type};
-           				my $length = $$attribute{_length};
-   					        				
-					my $optName = $msgType eq 'map' ? "\"$name\"," : "";
-					print "SPLAPPTRC(L_TRACE, \"Processing attribute $name\", \"XMSSink\");\n";
-
-             				
-					#Special code is needed to handle byte arrays  
-					if ($type eq "Bytes"){ %>
-						{
-							const SPL::blob& b = t.get_<%=$name%>(); 
-							uint64_t size;
-							const unsigned char *data = b.getData (size);
-            	
-							//Handle zero length in native schema
-							<% if($length==0){ %>
-								size = 0;
-								if(!truncated){
-									nTruncatedInserts++;
-									truncated = true;	
-								}
-							<%}%>
-						
-	            					if(size>0){
-            							<% if ($length > 0){ %>
-                							if(size><%=$length%>){
-                								if(!truncated){
-											nTruncatedInserts++;
-											truncated = true;	
-										}
-							 		}
-									size = (size > <%=$length%>) ? <%=$length%>: size;
-								<% } %>
-								SPLAPPTRC(L_TRACE, "Processing blob of length "<<size, "XMSSink");
-								msg.<%=$setWrite%>Bytes(<%=$optName%>(xmsSBYTE *)data,(xmsINT)size);
-	       	     				}	    
-						}             
-					<% } 
-
-
-					#special code is needed to handle strings
-					elsif($type eq "String"){ %>
-						{
-							const SPL::rstring data = t.get_<%=$name%>(); 
-							uint64_t size = data.string().length();
-							<% if ($length >= 0){ %>
-       		           				if(size><%=$length%>){
-									if(!truncated){
-										nTruncatedInserts++;
-										truncated = true;
-									}
-								}
-								size = (size > <%=$length%>) ? <%=$length%>: size;
-							<% } %>
-			
-							string Strdata = (rstring)(data.string().substr(0,size));
-							const SPL::rstring data2 = rstring(Strdata);
-							SPLAPPTRC(L_TRACE, "Processing string of length "<<size, "XMSSink");
-							msg.<%=$setWrite%>String(<%=$optName%>data2);
-						}
-					<% } 
-
-              
-	             			# Other datatypes can be simply copied across
-					else{  %>
-						msg.<%=$setWrite%><%=$type%>(<%=$optName%> t.get_<%=$name%>());
-					<% } 
-				}
-			} 
-			
-			
-				 		
-	 		elsif ($msgType eq 'bytes')
-			{   
-				print 'xms::BytesMessage tempmsg = sess.createBytesMessage();';	
-				print 'xms::BytesMessage& msg = tempmsg;';	
-				
 				foreach my $attribute (@$parmlist) {   
 					my $name = $$attribute{_name};
 					my $type = $$attribute{_type};
 					my $length = $$attribute{_length};
-	
+
+					my $optName = $msgType eq 'map' ? "\"$name\"," : "";
 					print "SPLAPPTRC(L_TRACE, \"Processing attribute $name\", \"XMSSink\");\n";
-             
-             
-					# Special code is needed to handle byte arrays  
+
+
+#Special code is needed to handle byte arrays  
 					if ($type eq "Bytes"){ %>
-						{
-							const SPL::blob& b = t.get_<%=$name%>();
-							uint64_t length;
-	            					const unsigned char *data = b.getData (length);
-    	        			
-		        	    			//Handle zero length in native schema
-            						<% if($length==0){ %>
-            							length = 0;
-            							if(!truncated){
+					{
+						const SPL::blob& b = t.get_<%=$name%>(); 
+						uint64_t size;
+						const unsigned char *data = b.getData (size);
+
+						//Handle zero length in native schema
+						<% if($length==0){ %>
+						size = 0;
+						if(!truncated){
+							nTruncatedInserts++;
+							truncated = true;	
+						}
+						<%}%>
+
+						if(size>0){
+							<% if ($length > 0){ %>
+							if(size><%=$length%>){
+								if(!truncated){
 									nTruncatedInserts++;
 									truncated = true;	
 								}
-    	        					<% } %>
-        	    			
-		            				if(length>0){
-								<% if ($length > 0){ %>
-									if(length> <%=$length%>){
-										if(!truncated){
-											nTruncatedInserts++;
-											truncated = true;
-										}
-									}
-									length = (length > <%=$length%>) ? <%=$length%> : length;
-              		     				<% } %>
+							}
+							size = (size > <%=$length%>) ? <%=$length%>: size;
+							<% } %>
+							SPLAPPTRC(L_TRACE, "Processing blob of length "<<size, "XMSSink");
+							msg.<%=$setWrite%>Bytes(<%=$optName%>(xmsSBYTE *)data,(xmsINT)size);
+						}	    
+					}             
+					<% } 
 
-		
-								<% if($length==-2){ %>
-									if(length >65535){
-										length = 65535;
-										if(!truncated){
-											nTruncatedInserts++;
-											truncated = true;
-										}
-									}
-									msg.writeShort(length);
-								<% } %>
-		
-								<% if($length==-4){ %>
-									if(length >4294967295){
-										length = 4294967295;
-										if(!truncated){
-											nTruncatedInserts++;
-											truncated = true;
-										}
-									}
-									msg.writeInt(length);
-								<% } %>
-		
-								<% if($length==-8){ %>
-									if(length > 18446744073709551615L){
-										length = 18446744073709551615L;
-										if(!truncated){
-											nTruncatedInserts++;
-											truncated = true;
-										}
-									}
-									msg.writeLong(length);	
-								<% } %>
-								SPLAPPTRC(L_TRACE, "Processing blob of length "<<length, "XMSSink");
-								msg.writeBytes((xmsSBYTE *)data,(xmsINT)length);
-            							
-								//If the native schema contains a length, then pad out with space characters, if necessary
-								<% if ($length > 0) { %>
-									for (int i=length; i<<%=$length%>; i++) 
-										msg.writeByte(' '); 
-								<% } %>
-							
+
+#special code is needed to handle strings
+					elsif($type eq "String"){ %>
+					{
+						const SPL::rstring data = t.get_<%=$name%>(); 
+						uint64_t size = data.string().length();
+						<% if ($length >= 0){ %>
+						if(size><%=$length%>){
+							if(!truncated){
+								nTruncatedInserts++;
+								truncated = true;
 							}
 						}
-					<% }
-				
-		
-					#Special code is needed to handle strings		
-					elsif ($type eq 'String'){	%>
-						{ 
-							uint64_t length;
-							//const char *cStr = (t.get_<%=$name%>()).c_str();
-							//length = strlen(cStr);
-							const SPL::rstring& str = t.get_<%=$name%>();
-							const char *cStr = str.c_str();
-							length = str.size();
-							
-							  
-							//Handle zero length in native schema
-							<% if($length==0){ %>
-								length = 0;
+						size = (size > <%=$length%>) ? <%=$length%>: size;
+						<% } %>
+
+						string Strdata = (rstring)(data.string().substr(0,size));
+						const SPL::rstring data2 = rstring(Strdata);
+						SPLAPPTRC(L_TRACE, "Processing string of length "<<size, "XMSSink");
+						msg.<%=$setWrite%>String(<%=$optName%>data2);
+					}
+					<% } 
+
+
+# Other datatypes can be simply copied across
+					else{  %>
+					msg.<%=$setWrite%><%=$type%>(<%=$optName%> t.get_<%=$name%>());
+					<% } 
+				}
+			} 
+
+
+
+			elsif ($msgType eq 'bytes')
+			{   
+				print 'xms::BytesMessage tempmsg = sess.createBytesMessage();';	
+				print 'xms::BytesMessage& msg = tempmsg;';	
+
+				foreach my $attribute (@$parmlist) {   
+					my $name = $$attribute{_name};
+					my $type = $$attribute{_type};
+					my $length = $$attribute{_length};
+
+					print "SPLAPPTRC(L_TRACE, \"Processing attribute $name\", \"XMSSink\");\n";
+
+
+# Special code is needed to handle byte arrays  
+					if ($type eq "Bytes"){ %>
+					{
+						const SPL::blob& b = t.get_<%=$name%>();
+						uint64_t length;
+						const unsigned char *data = b.getData (length);
+
+						//Handle zero length in native schema
+						<% if($length==0){ %>
+						length = 0;
+						if(!truncated){
+							nTruncatedInserts++;
+							truncated = true;	
+						}
+						<% } %>
+
+						if(length>0){
+							<% if ($length > 0){ %>
+							if(length> <%=$length%>){
 								if(!truncated){
 									nTruncatedInserts++;
 									truncated = true;
 								}
+							}
+							length = (length > <%=$length%>) ? <%=$length%> : length;
 							<% } %>
 
-							if (length>0){
-								<% if ($length > 0){ %>
-									if(length><%=$length%>){
-										if(!truncated){
-											nTruncatedInserts++;
-											truncated = true;	
-										}
-									}
-									length = (length > <%=$length%>) ? <%=$length%> : length;
-								<% } %>
-          							
-								
 
-								<% if($length==-2){ %>
-									if(length >65535){
-										length = 65535;
-										if(!truncated){
-											nTruncatedInserts++;
-											truncated = true;	
-										}
-									}
-									msg.writeShort(length);
-								<% }%>
-		
-								<% if($length==-4){ %>
-									if(length >4294967295){
-										length = 4294967295;
-										if(!truncated){
-											nTruncatedInserts++;
-											truncated = true;	
-										}
-									}
-									msg.writeInt(length);
-								<% }%>
-			
-								<% if($length==-8){%>
-									if(length > 18446744073709551615L){
-										length = 18446744073709551615L;
-										if(!truncated){
-											nTruncatedInserts++;
-											truncated = true;
-										}
-									}
-									msg.writeLong(length);
-								<% } %>
-		
-								SPLAPPTRC(L_TRACE, "Processing string of length "<<length, "XMSSink");
-  	         						msg.writeBytes((xmsSBYTE*) cStr,length);
-						
-								//If the native schema contains a length, then pad out with space characters, if necessary
-								<% if ($length > 0){ %>
-									for (int i=length; i<<%=$length%>; i++) 
-										msg.writeByte(' ');
-								<% } %>
-							} 
+							<% if($length==-2){ %>
+							if(length >65535){
+								length = 65535;
+								if(!truncated){
+									nTruncatedInserts++;
+									truncated = true;
+								}
+							}
+							msg.writeShort(length);
+							<% } %>
+
+							<% if($length==-4){ %>
+							if(length >4294967295){
+								length = 4294967295;
+								if(!truncated){
+									nTruncatedInserts++;
+									truncated = true;
+								}
+							}
+							msg.writeInt(length);
+							<% } %>
+
+							<% if($length==-8){ %>
+							if(length > 18446744073709551615L){
+								length = 18446744073709551615L;
+								if(!truncated){
+									nTruncatedInserts++;
+									truncated = true;
+								}
+							}
+							msg.writeLong(length);	
+							<% } %>
+							SPLAPPTRC(L_TRACE, "Processing blob of length "<<length, "XMSSink");
+							msg.writeBytes((xmsSBYTE *)data,(xmsINT)length);
+
+							//If the native schema contains a length, then pad out with space characters, if necessary
+							<% if ($length > 0) { %>
+							for (int i=length; i<<%=$length%>; i++) 
+								msg.writeByte(' '); 
+							<% } %>
+
 						}
+					}
 					<% }
-				
 
-					#other datatypes can be copied across				 	 
+
+#Special code is needed to handle strings		
+					elsif ($type eq 'String'){	%>
+					{ 
+						uint64_t length;
+						//const char *cStr = (t.get_<%=$name%>()).c_str();
+						//length = strlen(cStr);
+						const SPL::rstring& str = t.get_<%=$name%>();
+						const char *cStr = str.c_str();
+						length = str.size();
+
+
+						//Handle zero length in native schema
+						<% if($length==0){ %>
+						length = 0;
+						if(!truncated){
+							nTruncatedInserts++;
+							truncated = true;
+						}
+						<% } %>
+
+						if (length>0){
+							<% if ($length > 0){ %>
+							if(length><%=$length%>){
+								if(!truncated){
+									nTruncatedInserts++;
+									truncated = true;	
+								}
+							}
+							length = (length > <%=$length%>) ? <%=$length%> : length;
+							<% } %>
+
+
+
+							<% if($length==-2){ %>
+							if(length >65535){
+								length = 65535;
+								if(!truncated){
+									nTruncatedInserts++;
+									truncated = true;	
+								}
+							}
+							msg.writeShort(length);
+							<% }%>
+
+							<% if($length==-4){ %>
+							if(length >4294967295){
+								length = 4294967295;
+								if(!truncated){
+									nTruncatedInserts++;
+									truncated = true;	
+								}
+							}
+							msg.writeInt(length);
+							<% }%>
+
+							<% if($length==-8){%>
+							if(length > 18446744073709551615L){
+								length = 18446744073709551615L;
+								if(!truncated){
+									nTruncatedInserts++;
+									truncated = true;
+								}
+							}
+							msg.writeLong(length);
+							<% } %>
+
+							SPLAPPTRC(L_TRACE, "Processing string of length "<<length, "XMSSink");
+							msg.writeBytes((xmsSBYTE*) cStr,length);
+
+							//If the native schema contains a length, then pad out with space characters, if necessary
+							<% if ($length > 0){ %>
+							for (int i=length; i<<%=$length%>; i++) 
+								msg.writeByte(' ');
+							<% } %>
+						} 
+					}
+					<% }
+
+
+#other datatypes can be copied across				 	 
 					else { %>
-	         				msg.write<%=$type%>(t.get_<%=$name%>());
+					msg.write<%=$type%>(t.get_<%=$name%>());
 					<% }
 				}
 			}
-			
-			 
-	 		elsif ($msgType eq 'wbe' || $msgType eq 'wbe22') 
+
+
+			elsif ($msgType eq 'wbe' || $msgType eq 'wbe22') 
 			{  
-				# Syntax for WBE message is msg.setType("name", tuple.get_name()); 
+# Syntax for WBE message is msg.setType("name", tuple.get_name()); 
 				print 'xms::TextMessage msg = sess.createTextMessage();';
-	   			print 'WBEMessage *wmsg = new WBEMessage("',$inStream->getCppTupleName(),'");';	
+				print 'WBEMessage *wmsg = new WBEMessage("',$inStream->getCppTupleName(),'");';	
 
 				foreach my $attribute (@$parmlist) {   
 					my $name = $$attribute{_name};
 					my $type = $$attribute{_type}; 
 					print "SPLAPPTRC(L_TRACE, \"Processing attribute $name\", \"XMSSink\");\n"; %>
 					wmsg->set<%=$type%>("<%=$name%>",t.get_<%=$name%>());
- 				<%}
+					<%}
 
 				print 'msg.setText(wmsg->toString());';
-           		}
-            
-            
+			}
+
+
 			elsif ($msgType eq 'xml') 
 			{
-				# Syntax for XML message is msg.setType("name", tuple.get_name());   
+# Syntax for XML message is msg.setType("name", tuple.get_name());   
 				print 'xms::TextMessage tempmsg = sess.createTextMessage();';
 				print 'xms::TextMessage& msg = tempmsg;';
-     
+
 				print 'XMLMessage *xmsg = new XMLMessage();';	
-	 
+
 				foreach my $attribute (@$parmlist) {   
 					my $name = $$attribute{_name};
 					my $type = $$attribute{_type};
@@ -687,136 +698,140 @@ void MY_OPERATOR::process(Tuple const & tuple, uint32_t port)
 					print "SPLAPPTRC(L_TRACE, \"Processing attribute $name\", \"XMSSink\");\n";
 
 					if($type eq "Bytes"){      %>              
-						{
-							const SPL::blob& b = t.get_<%=$name%>(); 
-							uint64_t size;
-							const unsigned char *data = b.getData (size);
-							
-							//Handle zero length in native schema
-							<% if($length==0){ %>
-								size = 0;
+					{
+						const SPL::blob& b = t.get_<%=$name%>(); 
+						uint64_t size;
+						const unsigned char *data = b.getData (size);
+
+						//Handle zero length in native schema
+						<% if($length==0){ %>
+						size = 0;
+						if(!truncated){
+							nTruncatedInserts++;
+							truncated = true;
+						}
+						<% } %>
+
+						if(size>0){
+							<% if ($length > 0){ %>
+							if(size><%=$length%>){
 								if(!truncated){
 									nTruncatedInserts++;
 									truncated = true;
 								}
+							}
+							size = (size > <%=$length%>) ? <%=$length%> : size;			               
 							<% } %>
+							SPLAPPTRC(L_TRACE, "Processing blob of length "<<size, "XMSSink");
+							xmsg->set<%=$type%>("<%=$name%>","<%=$SPLType%>",(xmsSBYTE *) data,(xmsINT)size);
+						}
+					}
+					<% }
 
-							if(size>0){
-								<% if ($length > 0){ %>
-									if(size><%=$length%>){
-										if(!truncated){
-											nTruncatedInserts++;
-											truncated = true;
-										}
-									}
-									size = (size > <%=$length%>) ? <%=$length%> : size;			               
-								<% } %>
-								SPLAPPTRC(L_TRACE, "Processing blob of length "<<size, "XMSSink");
-								xmsg->set<%=$type%>("<%=$name%>","<%=$SPLType%>",(xmsSBYTE *) data,(xmsINT)size);
+
+					elsif ($type eq 'String'){	%>
+					{
+						//const char *cStr = (t.get_<%=$name%>()).c_str();
+						//int length = strlen(cStr);
+						const SPL::rstring& str = t.get_<%=$name%>();
+						const char *cStr = str.c_str();
+						uint64_t length = str.size();
+
+						<% if ($length >= 0){ %>
+						if(length><%=$length%>){
+							if(!truncated){
+								nTruncatedInserts++;
+								truncated = true;
 							}
 						}
-					<% }
-		
-						
-					elsif ($type eq 'String'){	%>
-						{
-							//const char *cStr = (t.get_<%=$name%>()).c_str();
-							//int length = strlen(cStr);
-							const SPL::rstring& str = t.get_<%=$name%>();
-							const char *cStr = str.c_str();
-							uint64_t length = str.size();
-							
-           						<% if ($length >= 0){ %>
-								if(length><%=$length%>){
-									if(!truncated){
-										nTruncatedInserts++;
-										truncated = true;
-									}
-								}
-								length = (length > <%=$length%>) ? <%=$length%> : length;
-							<%}%>
-		
-							string data = cStr;
-							data = data.substr(0,length);
-							const char * data2 = data.c_str();
-							SPLAPPTRC(L_TRACE, "Processing string of length "<<length, "XMSSink");
-							xmsg->set<%=$type%>("<%=$name%>","<%=$SPLType%>",data2);
-						}
+						length = (length > <%=$length%>) ? <%=$length%> : length;
+						<%}%>
+
+						string data = cStr;
+						data = data.substr(0,length);
+						const char * data2 = data.c_str();
+						SPLAPPTRC(L_TRACE, "Processing string of length "<<length, "XMSSink");
+						xmsg->set<%=$type%>("<%=$name%>","<%=$SPLType%>",data2);
+					}
 					<% } 	 
-		
+
 					else{ %>
-						xmsg->set<%=$type%>("<%=$name%>","<%=$SPLType%>", t.get_<%=$name%>());
+					xmsg->set<%=$type%>("<%=$name%>","<%=$SPLType%>", t.get_<%=$name%>());
 
 					<% }
 				}%>
 				msg.setText(xmsg->toString());
-			<%}
-			
-			
-	  		else
+				<%}
+
+
+			else
 			{ 
-				#  Default to a standard message with no message body.
+#  Default to a standard message with no message body.
 				print 'xms::Message msg = sess.createMessage();';
 			}	   
 			%>
-			
+
 			//Now send the message
+			SPLAPPTRC (L_DEBUG, "going to send message ...", "XMSSink");
 			producer.send(msg);
 			logmsg = MSGTK_SENT_MESSAGE(msg.getJMSMessageID().c_str());
 			SPLAPPLOG(L_INFO, logmsg, "XMSSink");
-			
+
 		} catch (xms::Exception & ex) {
 			// Unable to send
+			ostringstream ost;
+			ex.dump (ost);
+			SPLAPPTRC (L_ERROR, "Sending message failed: " << ost.str(), "XMSSink");
 			nFailedInserts++;
 			logmsg = MSGTK_EXCEPTION(ex.getErrorString().c_str(),ex.getErrorCode());
 			SPLAPPLOG(L_ERROR, logmsg, "XMSSink");
 			processException(ex);
 
 			<%	if (defined $operatorErrorPort ) { %>
-				ErrMsg << logmsg;
-				sendOutputErrorMsg(ErrMsg,tuple);
+			ErrMsg << logmsg;
+			sendOutputErrorMsg(ErrMsg,tuple);
 			<% }%>
-	   
+
 			// Close the connection. This will automatically close and delete dependent objects
-	 		try {
+			try {
 				conn.close();
 			} catch (...) {
 				SPLAPPTRC(L_WARN, "The connection could not be closed. An exception occured during close of connection", "XMSSink");
 			}
 			connected = false; // indicate that we don't have a Connection any more
-		
+
 		} catch (DistilleryException & ex) {
 			nFailedInserts++;
 			// Streams runtime exception
 			logmsg = MSGTK_STREAMS_EXCEPTION(ex.what(),ex.getExplanation());
 			<%	if (defined $operatorErrorPort ) { %>
-				ErrMsg << logmsg;
-				sendOutputErrorMsg(ErrMsg,tuple);
+			ErrMsg << logmsg;
+			sendOutputErrorMsg(ErrMsg,tuple);
 			<% }%>
-			
+
 			SPLAPPLOG(L_ERROR, logmsg, "XMSSink");
-		
+
 		} catch (std::exception & ex) {
 			nFailedInserts++;
 			// Some other exception
 			logmsg = MSGTK_OTHER_EXCEPTION(ex.what());
 			<%	if (defined $operatorErrorPort ) { %>
-				ErrMsg << logmsg;
-				sendOutputErrorMsg(ErrMsg,tuple);
+			ErrMsg << logmsg;
+			sendOutputErrorMsg(ErrMsg,tuple);
 			<% }%>
 			SPLAPPLOG(L_ERROR, logmsg, "XMSSink");
-		
+
 		} catch (...) {
 			nFailedInserts++;
 			// Some unknown exception
 			<%	if (defined $operatorErrorPort ) { %>
-				ErrMsg << MSGTK_UNKNOWN_EXCEPTION;
-				sendOutputErrorMsg(ErrMsg,tuple);
+			ErrMsg << MSGTK_UNKNOWN_EXCEPTION;
+			sendOutputErrorMsg(ErrMsg,tuple);
 			<% }%>
 			SPLAPPLOG(L_ERROR, MSGTK_UNKNOWN_EXCEPTION, "XMSSink");
 		}
 	}	
-    
+
 	// Now update our performance metrics. 
 	updatePerformanceCounters();
 	SPLAPPTRC(L_TRACE, "Exit: process0(const <%=$inStream->getSPLTupleType()%>)", "XMSSink");
@@ -842,75 +857,75 @@ void MY_OPERATOR::updatePerformanceCounters() {
  * Class to help build the special XML format used for WBE 2.2 messages *
  ***********************************************************************/
 
-	MY_OPERATOR::WBEMessage::WBEMessage(const char* eventName) {
-		closed = false;
-		result<<"<connector name='System S' version='2.2'><connector-bundle name='"<<eventName<<"' type='Event'><connector-object name='"<<eventName<<"'>";
+MY_OPERATOR::WBEMessage::WBEMessage(const char* eventName) {
+	closed = false;
+	result<<"<connector name='System S' version='2.2'><connector-bundle name='"<<eventName<<"' type='Event'><connector-object name='"<<eventName<<"'>";
+}
+
+void MY_OPERATOR::WBEMessage::setFloat(const char* name,const xmsFLOAT value) {
+	if (closed == false) {
+		std::ostringstream ostr;
+		SPL::serializeWithPrecision(ostr,value);
+		result<<"<field name='"<<name<<"'>"<<ostr.str()<<"</field>";
 	}
+}
 
-	void MY_OPERATOR::WBEMessage::setFloat(const char* name,const xmsFLOAT value) {
-		if (closed == false) {
-			std::ostringstream ostr;
-			SPL::serializeWithPrecision(ostr,value);
-			result<<"<field name='"<<name<<"'>"<<ostr.str()<<"</field>";
-		}
+void MY_OPERATOR::WBEMessage::setDouble(const char* name,const xmsDOUBLE value) {
+	if (closed == false) {
+		std::ostringstream ostr;
+		SPL::serializeWithPrecision(ostr,value);
+		result<<"<field name='"<<name<<"'>"<<ostr.str()<<"</field>";
 	}
+}
 
-	void MY_OPERATOR::WBEMessage::setDouble(const char* name,const xmsDOUBLE value) {
-		if (closed == false) {
-			std::ostringstream ostr;
-			SPL::serializeWithPrecision(ostr,value);
-			result<<"<field name='"<<name<<"'>"<<ostr.str()<<"</field>";
-		}
+void MY_OPERATOR::WBEMessage::setByte(const char* name,const unsigned int value) {
+	if (closed == false) {
+		result<<"<field name='"<<name<<"'>"<<value<<"</field>";
 	}
+}
 
-	void MY_OPERATOR::WBEMessage::setByte(const char* name,const unsigned int value) {
-		if (closed == false) {
-			result<<"<field name='"<<name<<"'>"<<value<<"</field>";
-		}
+void MY_OPERATOR::WBEMessage::setShort(const char* name,const xmsSHORT value) {
+	if (closed == false) {
+		result<<"<field name='"<<name<<"'>"<<value<<"</field>";
 	}
+}
 
-	void MY_OPERATOR::WBEMessage::setShort(const char* name,const xmsSHORT value) {
-		if (closed == false) {
-			result<<"<field name='"<<name<<"'>"<<value<<"</field>";
-		}
+void MY_OPERATOR::WBEMessage::setInt(const char* name,const xmsINT value) {
+	if (closed == false) {
+		result<<"<field name='"<<name<<"'>"<<value<<"</field>";
 	}
+}
 
-	void MY_OPERATOR::WBEMessage::setInt(const char* name,const xmsINT value) {
-		if (closed == false) {
-			result<<"<field name='"<<name<<"'>"<<value<<"</field>";
-		}
+void MY_OPERATOR::WBEMessage::setLong(const char* name,const xmsLONG value) {
+	if (closed == false) {
+		result<<"<field name='"<<name<<"'>"<<value<<"</field>";			
 	}
+}
 
-	void MY_OPERATOR::WBEMessage::setLong(const char* name,const xmsLONG value) {
-		if (closed == false) {
-			result<<"<field name='"<<name<<"'>"<<value<<"</field>";			
-		}
+void MY_OPERATOR::WBEMessage::setString(const char* name,const rstring& value) {
+	if (closed == false) {
+		result<<"<field name='"<<name<<"'>"<<value.c_str()<<"</field>";
 	}
+}
 
-	void MY_OPERATOR::WBEMessage::setString(const char* name,const rstring& value) {
-		if (closed == false) {
-			result<<"<field name='"<<name<<"'>"<<value.c_str()<<"</field>";
-		}
+void MY_OPERATOR::WBEMessage::setBoolean(const char* name,const xmsBOOL value) {
+	if (closed == false) {
+		if (value==true)
+			result<<"<field name='"<<name<<"'>"<<"true"<<"</field>";
+
+		else
+			result<<"<field name='"<<name<<"'>"<<false<<"</field>";
+
 	}
+}
 
-	void MY_OPERATOR::WBEMessage::setBoolean(const char* name,const xmsBOOL value) {
-		if (closed == false) {
-	    	if (value==true)
-				result<<"<field name='"<<name<<"'>"<<"true"<<"</field>";
-
-			else
-				result<<"<field name='"<<name<<"'>"<<false<<"</field>";
-
-		}
+xms::String MY_OPERATOR::WBEMessage::toString() {
+	if (closed == false) {
+		result<<"</connector-object></connector-bundle></connector>";
+		closed = true;
 	}
-
-	xms::String MY_OPERATOR::WBEMessage::toString() {
-		if (closed == false) {
-			result<<"</connector-object></connector-bundle></connector>";
-			closed = true;
-		}
-		return (result.str());
-	}
+	return (result.str());
+}
 
 <% } 
 
@@ -920,75 +935,75 @@ elsif ($msgType eq 'wbe') { %>
  * Class to help build the special XML format used for WBE 6.2 messages *
  ***********************************************************************/
 
-	MY_OPERATOR::WBEMessage::WBEMessage(const char* eventName) {
-		closed = false;
-		evName = eventName;
-		result<<"<connector xmlns='http://wbe.ibm.com/6.2/Event/"<<eventName<<"' name='System S' version='6.2'><connector-bundle name='"<<eventName<<"' type='Event'><"<<eventName<<">";
-	}
+MY_OPERATOR::WBEMessage::WBEMessage(const char* eventName) {
+	closed = false;
+	evName = eventName;
+	result<<"<connector xmlns='http://wbe.ibm.com/6.2/Event/"<<eventName<<"' name='System S' version='6.2'><connector-bundle name='"<<eventName<<"' type='Event'><"<<eventName<<">";
+}
 
-	void MY_OPERATOR::WBEMessage::setFloat(const char* name,const xmsFLOAT value) {
-		if (closed == false) {
-			std::ostringstream ostr;
-			SPL::serializeWithPrecision(ostr,value);
-			result<<"<"<<name<<" data-type='real'>"<<ostr.str()<<"</"<<name<<">";
-		}
+void MY_OPERATOR::WBEMessage::setFloat(const char* name,const xmsFLOAT value) {
+	if (closed == false) {
+		std::ostringstream ostr;
+		SPL::serializeWithPrecision(ostr,value);
+		result<<"<"<<name<<" data-type='real'>"<<ostr.str()<<"</"<<name<<">";
 	}
-	
-	void MY_OPERATOR::WBEMessage::setDouble(const char* name,const xmsDOUBLE value) {
-		if (closed == false) {
-			std::ostringstream ostr;
-			SPL::serializeWithPrecision(ostr,value);
-			result<<"<"<<name<<" data-type='real'>"<<ostr.str()<<"</"<<name<<">";
-		}
-	}
+}
 
-	void MY_OPERATOR::WBEMessage::setByte(const char* name,const unsigned int value) {
-		if (closed == false) {
-			result<<"<"<<name<<" data-type='integer'>"<<value<<"</"<<name<<">";
-		}
+void MY_OPERATOR::WBEMessage::setDouble(const char* name,const xmsDOUBLE value) {
+	if (closed == false) {
+		std::ostringstream ostr;
+		SPL::serializeWithPrecision(ostr,value);
+		result<<"<"<<name<<" data-type='real'>"<<ostr.str()<<"</"<<name<<">";
 	}
+}
 
-	void MY_OPERATOR::WBEMessage::setShort(const char* name,const xmsSHORT value) {
-		if (closed == false) {
-			result<<"<"<<name<<" data-type='integer'>"<<value<<"</"<<name<<">";
-		}
+void MY_OPERATOR::WBEMessage::setByte(const char* name,const unsigned int value) {
+	if (closed == false) {
+		result<<"<"<<name<<" data-type='integer'>"<<value<<"</"<<name<<">";
 	}
+}
 
-	void MY_OPERATOR::WBEMessage::setInt(const char* name,const xmsINT value) {
-		if (closed == false) {
-			result<<"<"<<name<<" data-type='integer'>"<<value<<"</"<<name<<">";
-		}
+void MY_OPERATOR::WBEMessage::setShort(const char* name,const xmsSHORT value) {
+	if (closed == false) {
+		result<<"<"<<name<<" data-type='integer'>"<<value<<"</"<<name<<">";
 	}
+}
 
-	void MY_OPERATOR::WBEMessage::setLong(const char* name,const xmsLONG value) {
-		if (closed == false) {
-			result<<"<"<<name<<" data-type='integer'>"<<value<<"</"<<name<<">";
-		}
+void MY_OPERATOR::WBEMessage::setInt(const char* name,const xmsINT value) {
+	if (closed == false) {
+		result<<"<"<<name<<" data-type='integer'>"<<value<<"</"<<name<<">";
 	}
+}
 
-	void MY_OPERATOR::WBEMessage::setString(const char* name,const rstring& value) {
-		if (closed == false) {
-			result<<"<"<<name<<" data-type='string'>"<<value.c_str()<<"</"<<name<<">";
-		}
+void MY_OPERATOR::WBEMessage::setLong(const char* name,const xmsLONG value) {
+	if (closed == false) {
+		result<<"<"<<name<<" data-type='integer'>"<<value<<"</"<<name<<">";
 	}
+}
 
-	void MY_OPERATOR::WBEMessage::setBoolean(const char* name,const xmsBOOL value) {
-		if (closed == false) {
-	    	if (value==true)
-				result<<"<"<<name<<" data-type='boolean'>true</"<<name<<">";
-            	else
-				result<<"<"<<name<<" data-type='boolean'>false</"<<name<<">";
-		}
+void MY_OPERATOR::WBEMessage::setString(const char* name,const rstring& value) {
+	if (closed == false) {
+		result<<"<"<<name<<" data-type='string'>"<<value.c_str()<<"</"<<name<<">";
 	}
+}
 
-	xms::String MY_OPERATOR::WBEMessage::toString() {
-		if (closed == false) {
-			result<<"</"<<evName<<"></connector-bundle></connector>";
-			closed = true;
-		}
-		return (result.str());
+void MY_OPERATOR::WBEMessage::setBoolean(const char* name,const xmsBOOL value) {
+	if (closed == false) {
+		if (value==true)
+			result<<"<"<<name<<" data-type='boolean'>true</"<<name<<">";
+		else
+			result<<"<"<<name<<" data-type='boolean'>false</"<<name<<">";
 	}
-	
+}
+
+xms::String MY_OPERATOR::WBEMessage::toString() {
+	if (closed == false) {
+		result<<"</"<<evName<<"></connector-bundle></connector>";
+		closed = true;
+	}
+	return (result.str());
+}
+
 <% } 
 
 
@@ -997,92 +1012,92 @@ elsif ($msgType eq 'xml') { %>
  * Class to help build the "generic" XML format messages               *
  ***********************************************************************/
 
-	MY_OPERATOR::XMLMessage::XMLMessage() {
-		closed = false;
-		result<<"<?xml version=\"1.0\"?><tuple xmlns=\"http://www.ibm.com/xmlns/prod/streams/spl/tuple\">";
-	}
+MY_OPERATOR::XMLMessage::XMLMessage() {
+	closed = false;
+	result<<"<?xml version=\"1.0\"?><tuple xmlns=\"http://www.ibm.com/xmlns/prod/streams/spl/tuple\">";
+}
 
-	void MY_OPERATOR::XMLMessage::setFloat(const char* name,const char* type,const xmsFLOAT value) {
-		if (closed == false) {
-			std::ostringstream ostr;
-			SPL::serializeWithPrecision(ostr,value);
-			result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<ostr.str()<<"</attr>";
-		}
+void MY_OPERATOR::XMLMessage::setFloat(const char* name,const char* type,const xmsFLOAT value) {
+	if (closed == false) {
+		std::ostringstream ostr;
+		SPL::serializeWithPrecision(ostr,value);
+		result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<ostr.str()<<"</attr>";
 	}
-	
-	void MY_OPERATOR::XMLMessage::setDouble(const char* name, const char* type,const xmsDOUBLE value) {
-		if (closed == false) {
-			std::ostringstream ostr;
-			SPL::serializeWithPrecision(ostr,value);
-			result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<ostr.str()<<"</attr>";
-		}
-	}
+}
 
-	void MY_OPERATOR::XMLMessage::setByte(const char* name, const char* type,const unsigned int value) {
-		if (closed == false) {
-			result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<value<<"</attr>";
-		}
+void MY_OPERATOR::XMLMessage::setDouble(const char* name, const char* type,const xmsDOUBLE value) {
+	if (closed == false) {
+		std::ostringstream ostr;
+		SPL::serializeWithPrecision(ostr,value);
+		result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<ostr.str()<<"</attr>";
 	}
+}
 
-	void MY_OPERATOR::XMLMessage::setBytes(const char* name, const char* type,const xmsSBYTE* value, const xmsINT length) {
-		if (closed == false) {
-			char pVal[length*2];
-			char nvalue[length];
-	  		char b;
-  			for(int y=0, x=0; y<length; y++,x++) 
-  			{
-  				nvalue[y]=0xff & value[y];
-	    			b = ((nvalue[y] >> 4));
-    				pVal[x] = (char)(b > 9 ? b + 0x37 : b + 0x30);
-    				b = ((nvalue[y] & 0xF));
-    				pVal[++x] = (char)(b > 9 ? b + 0x37 : b + 0x30);
-	  		}
-			string modStrVal = pVal;
-			string newStr = modStrVal.substr(0,length*2);
-			result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<newStr<<"</attr>";
-		}
+void MY_OPERATOR::XMLMessage::setByte(const char* name, const char* type,const unsigned int value) {
+	if (closed == false) {
+		result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<value<<"</attr>";
 	}
-	
-	void MY_OPERATOR::XMLMessage::setShort(const char* name, const char* type,const xmsSHORT value) {
-		if (closed == false) {
-			result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<value<<"</attr>";
-		}
-	}
+}
 
-	void MY_OPERATOR::XMLMessage::setInt(const char* name, const char* type,const xmsINT value) {
-		if (closed == false) {
-			result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<value<<"</attr>";
+void MY_OPERATOR::XMLMessage::setBytes(const char* name, const char* type,const xmsSBYTE* value, const xmsINT length) {
+	if (closed == false) {
+		char pVal[length*2];
+		char nvalue[length];
+		char b;
+		for(int y=0, x=0; y<length; y++,x++) 
+		{
+			nvalue[y]=0xff & value[y];
+			b = ((nvalue[y] >> 4));
+			pVal[x] = (char)(b > 9 ? b + 0x37 : b + 0x30);
+			b = ((nvalue[y] & 0xF));
+			pVal[++x] = (char)(b > 9 ? b + 0x37 : b + 0x30);
 		}
+		string modStrVal = pVal;
+		string newStr = modStrVal.substr(0,length*2);
+		result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<newStr<<"</attr>";
 	}
+}
 
-	void MY_OPERATOR::XMLMessage::setLong(const char* name, const char* type,const xmsLONG value) {
-		if (closed == false) {
-			result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<value<<"</attr>";
-		}
+void MY_OPERATOR::XMLMessage::setShort(const char* name, const char* type,const xmsSHORT value) {
+	if (closed == false) {
+		result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<value<<"</attr>";
 	}
+}
 
-	void MY_OPERATOR::XMLMessage::setString(const char* name, const char* type,const rstring& value) {
-		if (closed == false) {
-			result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<value.c_str()<<"</attr>";
-		}
-	}	
-	
-	void MY_OPERATOR::XMLMessage::setBoolean(const char* name, const char* type,const xmsBOOL value) {
-		if (closed == false) {
-		    	if (value==true)
-				result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<"true"<<"</attr>";
-            		else
-				result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<"false"<<"</attr>";
-		}
+void MY_OPERATOR::XMLMessage::setInt(const char* name, const char* type,const xmsINT value) {
+	if (closed == false) {
+		result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<value<<"</attr>";
 	}
+}
 
-	string MY_OPERATOR::XMLMessage::toString() {
-		if (closed == false) {
-			result<<"</tuple>";
-			closed = true;
-		}
-		return (result.str());
+void MY_OPERATOR::XMLMessage::setLong(const char* name, const char* type,const xmsLONG value) {
+	if (closed == false) {
+		result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<value<<"</attr>";
 	}
+}
+
+void MY_OPERATOR::XMLMessage::setString(const char* name, const char* type,const rstring& value) {
+	if (closed == false) {
+		result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<value.c_str()<<"</attr>";
+	}
+}	
+
+void MY_OPERATOR::XMLMessage::setBoolean(const char* name, const char* type,const xmsBOOL value) {
+	if (closed == false) {
+		if (value==true)
+			result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<"true"<<"</attr>";
+		else
+			result<<"<attr name=\""<<name<<"\" type=\""<<type<<"\">"<<"false"<<"</attr>";
+	}
+}
+
+string MY_OPERATOR::XMLMessage::toString() {
+	if (closed == false) {
+		result<<"</tuple>";
+		closed = true;
+	}
+	return (result.str());
+}
 
 <% } %>
 
@@ -1095,16 +1110,16 @@ void MY_OPERATOR::checkpoint(Checkpoint & ckpt)
 
 void MY_OPERATOR::reset(Checkpoint & ckpt)
 {
-   SPLAPPTRC(L_TRACE, "Reset: " << ckpt.getSequenceId(), "CONSISTENT");
+	SPLAPPTRC(L_TRACE, "Reset: " << ckpt.getSequenceId(), "CONSISTENT");
 }
 
 void MY_OPERATOR::resetToInitialState()
 {
-    SPLAPPTRC(L_TRACE, "Reset to Initial State. ", "CONSISTENT");
+	SPLAPPTRC(L_TRACE, "Reset to Initial State. ", "CONSISTENT");
 }
 
 void MY_OPERATOR::drain() {
-    SPLAPPTRC(L_TRACE, "Drain Operator", "CONSISTENT");
+	SPLAPPTRC(L_TRACE, "Drain Operator", "CONSISTENT");
 }
 
 void MY_OPERATOR::retireCheckpoint(int64_t id) {

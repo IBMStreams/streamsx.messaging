@@ -8,12 +8,8 @@ package com.ibm.streamsx.messaging.jms;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.jms.Message;
@@ -60,6 +56,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	 */
 	private static Logger logger = Logger.getLogger(LoggerNames.LOG_FACILITY
 			+ "." + CLASS_NAME, "com.ibm.streamsx.messaging.jms.JMSMessages"); //$NON-NLS-1$ //$NON-NLS-2$
+    private static final Logger tracer = Logger.getLogger(CLASS_NAME);
 	
 	// property names used in message header
 	public static final String OP_CKP_NAME_PROPERTITY = "StreamsOperatorCkpName"; //$NON-NLS-1$
@@ -721,47 +718,61 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	}
 
 	@Override
-	public void process(StreamingInput<Tuple> stream, Tuple tuple)
-			throws InterruptedException, ConnectionException,
-			UnsupportedEncodingException, ParserConfigurationException,
-			TransformerException, Exception {
+	public void process(StreamingInput<Tuple> stream, Tuple tuple) throws Exception {
 		
 		boolean msgSent = false;
-		
-		// Create the initial connection for the first time only
-		// This is only called if the operator is NOT in a consistent region.
-		if(consistentRegionContext == null) {
-			if (isInitialConnection) {
-				jmsConnectionHelper.createInitialConnection();	
-				isInitialConnection = false;
-			}	
-		}
-		
-		// Construct the JMS message based on the message type taking the
-		// attributes from the tuple.
-		Message message = mhandler.convertTupleToMessage(tuple,
-				jmsConnectionHelper.getSession());
-		// Send the message
-		// If an exception occured while sending , drop the particular tuple.
-		
 		if(consistentRegionContext == null) {
 			// Operator is not in a consistent region
-			msgSent = jmsConnectionHelper.sendMessage(message);
+		    if (isInitialConnection) {
+		        jmsConnectionHelper.createInitialConnection();	
+		        isInitialConnection = false;
+		    }	
+		    
+            Message message;
+            try {
+                // Construct the JMS message based on the message type taking the
+                // attributes from the tuple. If the session is closed, we will be thrown out by JMSException.
+                message = mhandler.convertTupleToMessage(tuple,
+                        jmsConnectionHelper.getSession());
+                msgSent = jmsConnectionHelper.sendMessage(message);
+            } catch (UnsupportedEncodingException | ParserConfigurationException | TransformerException e) {
+                tracer.log (LogLevel.ERROR, "Failure creating JMS message from input tuple: " + e.toString()); //$NON-NLS-1$
+                // no further action; tuple is dropped and sent to error port if present
+            } catch (/*JMS*/Exception e) {
+                tracer.log (LogLevel.ERROR, "failure creating or sending JMS message: " + e.toString()
+                        + ". Trying to reconnect and re-send message"); //$NON-NLS-1$
+                try {
+                    isInitialConnection = true;
+                    jmsConnectionHelper.closeConnection();
+                    jmsConnectionHelper.createInitialConnection();
+                    isInitialConnection = false;
+                    message = mhandler.convertTupleToMessage(tuple, jmsConnectionHelper.getSession());
+                    msgSent = jmsConnectionHelper.sendMessage(message);
+                } catch (Exception finalExc) {
+                    tracer.log (LogLevel.ERROR, "Tuple dropped. Final failure re-sending tuple: " + finalExc.toString()); //$NON-NLS-1$
+                    // no further action; tuple is dropped and sent to error port if present
+                }
+            }
 		}
 		else {
+		    // consistent region
+		    // Construct the JMS message based on the message type taking the
+		    // attributes from the tuple.
+		    // propagate all exceptions to the runtime to restart the consistent region in case of failure
+		    Message message = mhandler.convertTupleToMessage(tuple,
+		            jmsConnectionHelper.getSession());
 			msgSent = jmsConnectionHelper.sendMessageNoRetry(message);
 		}
 		
 		if (!msgSent) {
-									
+		    if (tracer.isLoggable(LogLevel.FINE)) tracer.log(LogLevel.FINE, "tuple dropped"); //$NON-NLS-1$
 			logger.log(LogLevel.ERROR, "EXCEPTION_SINK"); //$NON-NLS-1$
 			if (hasErrorPort) {
+			    // throws Exception
 				sendOutputErrorMsg(tuple,
 						Messages.getString("EXCEPTION_SINK")); //$NON-NLS-1$
 			}
-			
 		}
-
 	}
 
 	// Method to send the error message to the error output port if one is
