@@ -720,8 +720,8 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	@Override
 	public void process(StreamingInput<Tuple> stream, Tuple tuple) throws Exception {
 		
-		boolean msgSent = false;
 		if(consistentRegionContext == null) {
+		    boolean msgSent = false;
 			// Operator is not in a consistent region
 		    if (isInitialConnection) {
 		        jmsConnectionHelper.createInitialConnection();	
@@ -753,6 +753,15 @@ public class JMSSink extends AbstractOperator implements StateHandler{
                     // no further action; tuple is dropped and sent to error port if present
                 }
             }
+            if (!msgSent) {
+                if (tracer.isLoggable(LogLevel.FINE)) tracer.log(LogLevel.FINE, "tuple dropped"); //$NON-NLS-1$
+                logger.log(LogLevel.ERROR, "EXCEPTION_SINK"); //$NON-NLS-1$
+                if (hasErrorPort) {
+                    // throws Exception
+                    sendOutputErrorMsg(tuple,
+                            Messages.getString("EXCEPTION_SINK")); //$NON-NLS-1$
+                }
+            }
 		}
 		else {
 		    // consistent region
@@ -761,17 +770,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		    // propagate all exceptions to the runtime to restart the consistent region in case of failure
 		    Message message = mhandler.convertTupleToMessage(tuple,
 		            jmsConnectionHelper.getSession());
-			msgSent = jmsConnectionHelper.sendMessageNoRetry(message);
-		}
-		
-		if (!msgSent) {
-		    if (tracer.isLoggable(LogLevel.FINE)) tracer.log(LogLevel.FINE, "tuple dropped"); //$NON-NLS-1$
-			logger.log(LogLevel.ERROR, "EXCEPTION_SINK"); //$NON-NLS-1$
-			if (hasErrorPort) {
-			    // throws Exception
-				sendOutputErrorMsg(tuple,
-						Messages.getString("EXCEPTION_SINK")); //$NON-NLS-1$
-			}
+			jmsConnectionHelper.sendMessageNoRetry(message);
 		}
 	}
 
