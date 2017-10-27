@@ -547,35 +547,16 @@ class JMSConnectionHelper implements ExceptionListener {
 	// Send message without retry in case of failure
 	// i.e connection problems, this method raise the error back to caller.
 	// No connection or message retry will be attempted.
-	boolean sendMessageNoRetry(Message message) throws JMSException {
-		
-		boolean res = false;
-		
+	void sendMessageNoRetry(Message message) throws JMSException {
 		try {
-				
-			// try to send the message
 			synchronized (getSession()) {
 				getProducer().send(message);
-				res = true;
-					
 			}
 		}
 		catch (JMSException e) {
-			// error has occurred, log error and try sending message again
 			logger.log(LogLevel.WARN, "ERROR_DURING_SEND", new Object[] { e.toString() }); //$NON-NLS-1$
-			
-			// If the exception is caused by message format, then we can return peacefully as connection is still good.
-			if(!(e instanceof MessageFormatException)) {
-				throw e;
-			}
-			
+			throw e;
 		}
-
-		if(!res) {
-			nFailedInserts.incrementValue(1);
-		}
-		
-		return res;
 	}
 	
 	// send a consistent region message to the consistent region queue
