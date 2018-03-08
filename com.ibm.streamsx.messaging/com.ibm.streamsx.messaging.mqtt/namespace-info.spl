@@ -1,4 +1,9 @@
 /**
+ * **Deprecation of MQTT functions**
+ *
+ * The MQTT functions (operators, functions, SPL types) of this toolkit available in the `com.ibm.streamsx.messaging.mqtt` SPL namespace is deprecated.
+ * Please migrate to the `streamsx.mqtt` toolkit.
+ *
  * + Operator control input port
  * 
  * Some of the operators in the Messaging Toolkit provide the capability to specify an optional control input port.

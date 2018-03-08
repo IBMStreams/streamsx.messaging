@@ -7,7 +7,14 @@ package com.ibm.streamsx.messaging.mqtt;
 public class SPLDocConstants {
 
 	// SPL Documentation for MQTTSource
-	static final String MQTTSRC_OP_DESCRIPTION = "The MQTTSource operator subscribes to MQTT topics and receives messages when they are published to subscribed topics. You specify the list of topics that you want to subscribe to and the quality of service (QoS) for the topics when you connect to the MQTT server. You can update the list of topics and the QoS levels at run time by using the optional control input port.\\n\\n" //$NON-NLS-1$
+	static final String MQTTSRC_DEPRECATION_MESSAGE = "The `com.ibm.streamsx.messaging.mqtt.MQTTSource` operator is "
+      + "deprecated and is replaced by the `com.ibm.streamsx.mqtt.MQTTSource` "
+      + "operator in the `com.ibm.streamsx.mqtt` toolkit. The deprecated operator "
+      + "might be removed in a future release.";
+	
+	static final String MQTTSRC_OP_DESCRIPTION = "**DEPRECATED**: " + SPLDocConstants.MQTTSRC_DEPRECATION_MESSAGE + "\\n"
+	    + "\\n" 
+	    + "The MQTTSource operator subscribes to MQTT topics and receives messages when they are published to subscribed topics. You specify the list of topics that you want to subscribe to and the quality of service (QoS) for the topics when you connect to the MQTT server. You can update the list of topics and the QoS levels at run time by using the optional control input port.\\n\\n" //$NON-NLS-1$
 			+ "**Behavior in a consistent region** \\n\\n" //$NON-NLS-1$
 			+ "MQTTSource operator cannot be part of a consistent region. Connect MQTTSource operator to an ReplayableStart operator from the Standard Toolkit to achieve tuple replay. " //$NON-NLS-1$
 			+ "Messages are stored in an internal buffer before they are submitted to the output port.  To reduce the chance of tuple loss during application failure, you may use the \'messageQueueSize\' parameter to control this internal buffer size."; //$NON-NLS-1$
@@ -27,7 +34,16 @@ public class SPLDocConstants {
 	static final String MQTTSRC_PARAM_MESSAGE_SIZE_DESC = "Specify size of internal buffer for queueing incoming tuples. The default buffer size is 50 tuples."; //$NON-NLS-1$
 
 	// SPL Documnetation for MQTTSink
-	static final String MQTTSINK_OP_DESCRIPTION = "The MQTTSink operator creates a message for every tuple it receives on its input port and publishes the message to an MQTT server. You can use the topic parameter to specify the topic that you want to publish to, or you can use an attribute from the input tuple to identify the topic that you want to publish to at run time.  The input tuple can optionally contain the topic and QoS for the message. This information is not considered to be part of the data.  \\n\\n" //$NON-NLS-1$
+	
+	static final String MQTTSINK_DEPRECATION_MESSAGE = "The `com.ibm.streamsx.messaging.mqtt.MQTTSink` operator is "
+      + "deprecated and is replaced by the `com.ibm.streamsx.mqtt.MQTTSink` "
+      + "operator in the `com.ibm.streamsx.mqtt` toolkit. The deprecated operator "
+      + "might be removed in a future release.";
+
+	
+	static final String MQTTSINK_OP_DESCRIPTION = "**DEPRECATED**: " + SPLDocConstants.MQTTSINK_DEPRECATION_MESSAGE + "\\n"
+      + "\\n" 
+      + "The MQTTSink operator creates a message for every tuple it receives on its input port and publishes the message to an MQTT server. You can use the topic parameter to specify the topic that you want to publish to, or you can use an attribute from the input tuple to identify the topic that you want to publish to at run time.  The input tuple can optionally contain the topic and QoS for the message. This information is not considered to be part of the data.  \\n\\n" //$NON-NLS-1$
 			+ "**Behavior in a consistent region** \\n\\n" //$NON-NLS-1$
 			+ "MQTTSink operator can be an operator within the reachability graph of a consistent region, but it can not be placed at start of a consistent region. " //$NON-NLS-1$
 			+ "Having a control port in a consistent region is not supported.  The control information may not be replayed, persisted and restored correctly. " //$NON-NLS-1$
