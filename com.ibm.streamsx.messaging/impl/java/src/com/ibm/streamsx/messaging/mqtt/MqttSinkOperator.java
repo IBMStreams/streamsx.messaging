@@ -82,8 +82,12 @@ description=SPLDocConstants.MQTTSINK_OP_DESCRIPTION)
 @OutputPorts({
 		@OutputPortSet(description = SPLDocConstants.MQTTSINK_OUTPUT_PORT0, cardinality = 1, optional = true, windowPunctuationOutputMode = WindowPunctuationOutputMode.Free) })
 @Libraries(value = {"opt/downloaded/*"} )
-@Icons(location16="icons/MQTTSink_16.gif", location32="icons/MQTTSink_32.gif")
+@Icons(location16="icons/MQTTSink_deprecated_16.gif", location32="icons/MQTTSink_deprecated_32.gif")
 public class MqttSinkOperator extends AbstractMqttOperator implements StateHandler{
+
+    static {
+        System.err.println(SPLDocConstants.MQTTSINK_DEPRECATION_MESSAGE);
+    }
 	 
 	private static final String CLASS_NAME = "com.ibm.streamsx.messaging.mqtt.MqttSinkOperator"; //$NON-NLS-1$
 	static Logger TRACE = Logger.getLogger(MqttSinkOperator.class);

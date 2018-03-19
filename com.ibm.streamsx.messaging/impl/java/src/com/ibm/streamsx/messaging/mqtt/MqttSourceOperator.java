@@ -76,8 +76,12 @@ import com.ibm.streamsx.messaging.mqtt.MqttClientRequest.MqttClientRequestType;
 		@OutputPortSet(description = SPLDocConstants.MQTTSRC_OUPUT_PORT_0, cardinality = 1, optional = false, windowPunctuationOutputMode = WindowPunctuationOutputMode.Free),
 		@OutputPortSet(description = SPLDocConstants.MQTTSRC_OUTPUT_PORT_1, optional = true, cardinality = 1, windowPunctuationOutputMode = WindowPunctuationOutputMode.Free) })
 @Libraries(value = { "opt/downloaded/*" })
-@Icons(location16 = "icons/MQTTSource_16.gif", location32 = "icons/MQTTSource_32.gif")
+@Icons(location16 = "icons/MQTTSource_deprecated_16.gif", location32 = "icons/MQTTSource_deprecated_32.gif")
 public class MqttSourceOperator extends AbstractMqttOperator { 
+
+    static {
+        System.err.println(SPLDocConstants.MQTTSRC_DEPRECATION_MESSAGE);
+    }
 	
 	private static Logger TRACE = Logger.getLogger(MqttSourceOperator.class);
 	
