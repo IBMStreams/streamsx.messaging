@@ -26,6 +26,14 @@ import com.rabbitmq.client.AMQP.BasicProperties;
 @PrimitiveOperator(name = "RabbitMQSink", description = RabbitMQSink.DESC)
 public class RabbitMQSink extends RabbitMQBaseOper {
 
+	private static final String DEPRECATION_MESSAGE = "The `com.ibm.streamsx.messaging.rabbitmq.RabbitMQSink` operator"
+			+ "is deprecated and is replaced by the `com.ibm.streamsx.rabbitmq.RabbitMQSink` operator in the"
+			+ "`com.ibm.streamsx.rabbitmq` toolkit. The deprecated operator might be removed in a future release.";
+	
+	static {
+		System.err.println(RabbitMQSink.DEPRECATION_MESSAGE);
+	}
+	
 	private final Logger trace = Logger.getLogger(RabbitMQSink.class
 			.getCanonicalName());
 	Integer deliveryMode = 1;
@@ -34,8 +42,8 @@ public class RabbitMQSink extends RabbitMQBaseOper {
 	private boolean firstConnection = true;
 	
 	@Override
-	public synchronized void initialize(OperatorContext context)
-			throws Exception {
+	public synchronized void initialize(OperatorContext context) throws Exception {
+		trace.log(TraceLevel.ERROR, RabbitMQSink.DEPRECATION_MESSAGE);
 
 		// Must call super.initialize(context) to correctly setup an operator.
 		super.initialize(context);
@@ -161,7 +169,8 @@ public class RabbitMQSink extends RabbitMQBaseOper {
 		super.shutdown(); 
 	}
 	
-	public static final String DESC = 
+	public static final String DESC = "**DEPRECATED**: " + RabbitMQSink.DEPRECATION_MESSAGE + "\\n" + //$NON-NLS-1$
+			"\\n" + //$NON-NLS-1$
 			"This operator acts as a RabbitMQ producer, sending messages to a RabbitMQ broker. " +  //$NON-NLS-1$
 			"The broker is assumed to be already configured and running. " + //$NON-NLS-1$
 			"The incoming stream can have three attributes: message, routing_key, and messageHeader. " + //$NON-NLS-1$
