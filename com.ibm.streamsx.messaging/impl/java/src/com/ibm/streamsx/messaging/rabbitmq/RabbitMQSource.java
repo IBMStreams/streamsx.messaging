@@ -17,11 +17,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Logger;
 
 import com.ibm.streams.operator.OperatorContext;
+import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamingOutput;
-import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.logging.TraceLevel;
 import com.ibm.streams.operator.model.OutputPortSet;
@@ -29,13 +30,11 @@ import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
 import com.ibm.streams.operator.state.ConsistentRegionContext;
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.ShutdownSignalException;
-
-import java.util.logging.Logger;
 
 /**
  * This operator was originally contributed by Mohamed-Ali Said @saidmohamedali
@@ -43,6 +42,14 @@ import java.util.logging.Logger;
 @OutputPorts(@OutputPortSet(cardinality = 1, optional = false, description = "Messages received from Kafka are sent on this output port."))
 @PrimitiveOperator(name = "RabbitMQSource", description = RabbitMQSource.DESC)
 public class RabbitMQSource extends RabbitMQBaseOper {
+	private static final String DEPRECATION_MESSAGE = "The `com.ibm.streamsx.messaging.rabbitmq.RabbitMQSource` operator"
+			+ "is deprecated and is replaced by the `com.ibm.streamsx.rabbitmq.RabbitMQSource` operator in the"
+			+ "`com.ibm.streamsx.rabbitmq` toolkit. The deprecated operator might be removed in a future release.";
+	
+	static {
+		System.err.println(RabbitMQSource.DEPRECATION_MESSAGE);
+	}
+	
 
 	private List<String> routingKeys = new ArrayList<String>();
 	
@@ -67,6 +74,7 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 	@Override
 	public synchronized void initialize(OperatorContext context)
 			throws Exception {
+		trace.log(TraceLevel.ERROR, RabbitMQSource.DEPRECATION_MESSAGE);
 		
 		super.initialize(context);
 		super.initSchema(getOutput(0).getStreamSchema());
@@ -298,7 +306,8 @@ public class RabbitMQSource extends RabbitMQBaseOper {
 		super.shutdown();
 	}
 	
-	public static final String DESC = 
+	public static final String DESC = "**DEPRECATED**: " + RabbitMQSource.DEPRECATION_MESSAGE + "\\n" + //$NON-NLS-1$
+			"\\n" + //$NON-NLS-1$
 			"This operator acts as a RabbitMQ consumer, pulling messages from a RabbitMQ broker. " +  //$NON-NLS-1$
 			"The broker is assumed to be already configured and running. " + //$NON-NLS-1$
 			"The outgoing stream can have three attributes: message, routing_key, and messageHeader. " + //$NON-NLS-1$
