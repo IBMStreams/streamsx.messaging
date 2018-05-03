@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- begin_generated_IBM_copyright_prolog                             -->
-<!--                                                                  -->
-<!-- This is an automatically generated copyright prolog.             -->
-<!-- After initializing,  DO NOT MODIFY OR MOVE                       -->
-<!-- **************************************************************** -->
-<!-- Licensed Materials - Property of IBM                             -->
-<!-- 5724-Y95                                                         -->
-<!-- (C) Copyright IBM Corp.  2012, 2016    All Rights Reserved.      -->
-<!-- US Government Users Restricted Rights - Use, duplication or      -->
-<!-- disclosure restricted by GSA ADP Schedule Contract with          -->
-<!-- IBM Corp.                                                        -->
-<!--                                                                  -->
-<!-- end_generated_IBM_copyright_prolog                               -->
+<!-- Copyright (C) 2012-2017, International Business Machines Corporation -->
+<!-- All Rights Reserved                                                  -->
 <xliff version="1.1" xmlns="urn:oasis:names:tc:xliff:document:1.1" 
                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                      xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.1 _path_/xliff-core-1.1.xsd">
@@ -585,7 +574,7 @@
     	
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1305" extraData="MSGTK_INVALID_PARAM_SPECIFIED_FOR_OP_ACCESS_SPEC" resname="CDIST1305E">
             <source>''{0}'': Invalid parameter specified for ''{1}'' operator, access specification ''{2}''.</source>
-            <target>“{0}”：为“{1}”运算符指定的访问规范“{2}”的参数无效。</target>
+            <target>“{0}”：为“{1}”操作程序指定的访问规范“{2}”的参数无效。</target>
          </trans-unit><!--used-->
     	
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1306" extraData="MSGTK_PARAM_FOR_ACCESS_SPEC_PREVIOUSLY_DEFINED" resname="CDIST1306E">
@@ -595,132 +584,132 @@
         	        	
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1307" extraData="MSGTK_PARAM_FOR_ACCESS_SPEC_SUPPLIED_TO_OP_EXPECTS_MIN_ONE_VALUE" resname="CDIST1307E">
             <source>''{0}'': Parameter for access specification ''{1}'' supplied to ''{2}'' operator expects at least one value.</source>
-            <target>“{0}”：为运算符“{2}”提供的访问规范“{1}”的参数预期至少具有一个值。</target>
+            <target>“{0}”：为操作程序“{2}”提供的访问规范“{1}”的参数预期至少具有一个值。</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1308" extraData="MSGTK_PARAM_FOR_ACCESS_SPEC_SUPPLIED_TO_OP_EXPECTS_CARDINALITY_VALUES" resname="CDIST1308E">
             <source>''{0}'': Parameter for access specification ''{1}'' supplied to ''{2}'' operator expects {3} value(s).</source>
-            <target>“{0}”：为运算符“{2}”提供的访问规范“{1}”的参数预期具有 {3} 个值。</target>
+            <target>“{0}”：为操作程序“{2}”提供的访问规范“{1}”的参数预期具有 {3} 个值。</target>
          </trans-unit><!--used-->
             
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1309" extraData="MSGTK_OP_EXPECTS_TYPE_BASE_FOR_PARAM_VALUE_FROM_ACCESS_SPEC" resname="CDIST1309E">
             <source>''{0}'' operator expects type base ''{1}'' (not ''{2}'') for value of parameter ''{3}'' from access specification ''{4}''.</source>
-            <target>“{0}”运算符预期访问规范“{4}”中参数“{3}”的值具有基本类型“{1}”而不是“{2}”。</target>
+            <target>“{0}”操作程序预期访问规范“{4}”中参数“{3}”的值具有基本类型“{1}”而不是“{2}”。</target>
          </trans-unit><!--used-->
              	
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1310" extraData="MSGTK_OP_EXPECTS_MANDATORY_PARAM_FOR_ACCESS_SPEC" resname="CDIST1310E">
             <source>''{0}'' operator expects mandatory parameter ''{1}'' for access specification ''{2}''.</source>
-            <target>“{0}”运算符预期访问规范“{2}”具有必填参数“{1}”。</target>
+            <target>“{0}”操作程序预期访问规范“{2}”具有必填参数“{1}”。</target>
          </trans-unit><!--used-->
         	
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1311" extraData="MSGTK_OP_HAS_ATTRIB_IN_INPUT_STREAM_AND_NATIVE_SCHEMA_FOR_ACCESS_SPEC" resname="CDIST1311E">
             <source>''{0}'' operator has an attribute named ''{1}'' in both its input stream and in the native schema for access specification ''{2}''.</source>
-            <target>“{0}”运算符在其输入流中和访问规范“{2}”的本机模式中都具有名为“{1}”的属性。</target>
+            <target>“{0}”操作程序在其输入流中和访问规范“{2}”的本机模式中都具有名为“{1}”的属性。</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1312" extraData="MSGTK_OP_HAS_TYPE_MISMATCH_BETWEEN_OUTPUT_STREAM_ATTRIB_AND_SAME_NAME_NATIVE_SCHEMA_ATTRIB" resname="CDIST1312E">
             <source>''{0}'' operator: type mismatch between output stream attribute ''{1}'' and the native schema attribute of the same name in access specification ''{2}''.</source>
-            <target>“{0}”运算符：输出流属性“{1}”与访问规范“{2}”中同名本机模式属性之间存在类型不匹配。</target>
+            <target>“{0}”操作程序：输出流属性“{1}”与访问规范“{2}”中同名本机模式属性之间存在类型不匹配。</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1313" extraData="MSGTK_OP_HAS_NO_MATCHING_ATTRIB_IN_INPUT_STREAM_OR_NATIVE_SCHEMA_OF_ACCESS_SPEC" resname="CDIST1313E">
             <source>''{0}'' operator: no matching attribute name found in the input stream or in the native schema of access specification ''{1}'' for the output attribute ''{2}''.</source>
-            <target>“{0}”运算符：在输入流中或输出属性“{2}”的访问规范“{1}”的本机模式中未找到匹配的属性名称。</target>
+            <target>“{0}”操作程序：在输入流中或输出属性“{2}”的访问规范“{1}”的本机模式中未找到匹配的属性名称。</target>
          </trans-unit><!--used-->
         	
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1314" extraData="MSGTK_OP_HAS_NO_MATCHING_ATTRIB_IN_NATIVE_SCHEMA_OF_ACCESS_SPEC" resname="CDIST1314E">
             <source>''{0}'' operator: no matching attribute name found in the native schema of access specification ''{1}'' for the output attribute ''{2}''</source>
-            <target>“{0}”运算符：在输出属性“{2}”的访问规范“{1}”的本机模式中未找到匹配的属性名称。</target>
+            <target>“{0}”操作程序：在输出属性“{2}”的访问规范“{1}”的本机模式中未找到匹配的属性名称。</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1315" extraData="MSGTK_RECONNECTIONBOUND_ONLY_IF_RECONNECTIONPOLICY_IS_BOUNDEDRETRY" resname="CDIST1315E">
             <source>Operator ''{0}'': reconnectionBound parameter can only appear if reconnectionPolicy is  ''BoundedRetry''.</source>
-            <target>运算符“{0}”：仅当 reconnectionPolicy 为“BoundedRetry”时，reconnectionBound 参数才能出现。</target>
+            <target>操作程序“{0}”：仅当 reconnectionPolicy 为“BoundedRetry”时，reconnectionBound 参数才能出现。</target>
          </trans-unit><!--used-->
                 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1316" extraData="MSGTK_RECONNECTIONBOUND_CANNOT_BE_NEGATIVE" resname="CDIST1316E">
             <source>Operator ''{0}'': reconnectionBound cannot be negative.</source>
-            <target>运算符“{0}”：reconnectionBound 不能为负数。</target>
+            <target>操作程序“{0}”：reconnectionBound 不能为负数。</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1317" extraData="MSGTK_PERIOD_PARAM_ONLY_IF_RECONNECTIONPOLICY_IS_SPECIFIED" resname="CDIST1317E">
             <source>Operator ''{0}'': period parameter can only appear if reconnectionPolicy is specified.</source>
-            <target>运算符“{0}”：仅当指定了 reconnectionPolicy 时，period 参数才能出现。</target>
+            <target>操作程序“{0}”：仅当指定了 reconnectionPolicy 时，period 参数才能出现。</target>
          </trans-unit><!--used-->
 			
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1318" extraData="MSGTK_UNABLE_TO_USE_MSG_CLASS_IN_ACCESS_SPEC_IF_NATIVE_SCHEMA_ATTRIBS_SUPPLIED" resname="CDIST1318E">
             <source>Operator ''{0}'': unable to use message class ''{1}'' in access specification {2} if native schema attributes have been supplied.</source>
-            <target>运算符“{0}”：如果提供了本机模式属性，那么无法在访问规范 {2} 中使用消息类“{1}”。</target>
+            <target>操作程序“{0}”：如果提供了本机模式属性，那么无法在访问规范 {2} 中使用消息类“{1}”。</target>
          </trans-unit><!--used-->
 			
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1319" extraData="MSGTK_TUPLE_ATTRIBS_IN_ERROR_STREAM_DONT_MATCH_RECEIVED_TUPLE" resname="CDIST1319E">
             <source>Operator ''{0}'': The tuple attributes defined in the error stream do not match the tuple which is received.</source>
-            <target>运算符“{0}”：错误流中定义的元组属性与接收到的元组不匹配。</target>
+            <target>操作程序“{0}”：错误流中定义的元组属性与接收到的元组不匹配。</target>
          </trans-unit><!--used-->
  			
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1320" extraData="MSGTK_ERROR_OUTPUT_PORT_CAN_ONLY_CONTAIN_RSTRING" resname="CDIST1320E">
             <source>Operator ''{0}'': The error output port can only contain an rstring.</source>
-            <target>运算符“{0}”：错误输出端口只能包含 rstring。</target>
+            <target>操作程序“{0}”：错误输出端口只能包含 rstring。</target>
          </trans-unit><!--used-->
 					
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1321" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_MUST_NOT_LENGTH_SPEC" resname="CDIST1321E">
             <source>Operator ''{0}'': native schema attribute ''{1}'' in access specification {2} must not have a length specification.</source>
-            <target>运算符“{0}”：访问规范 {2} 中的本机模式属性“{1}”不得具有长度指定项。</target>
+            <target>操作程序“{0}”：访问规范 {2} 中的本机模式属性“{1}”不得具有长度指定项。</target>
          </trans-unit><!--used-->
 				
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1322" extraData="MSGTK_STREAM_SCHEMA_ATTRIB_IS_NOT_SUPPORTED_DATA_TYPE" resname="CDIST1322E">
             <source>Operator ''{0}'': Stream schema attribute ''{1}'' is not a supported data type.</source>
-            <target>运算符“{0}”：流模式属性“{1}”不是受支持的数据类型。</target>
+            <target>操作程序“{0}”：流模式属性“{1}”不是受支持的数据类型。</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1323" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_HAS_TYPE_WHICH_DOSNT_MATCH_ATTRIB_IN_INPUT_STREAM_SCHEMA" resname="CDIST1323E">
             <source>Operator ''{0}'': native schema attribute ''{1}'' in access specification {2} has type ''{3}'' which does not match the attribute in the input stream schema.</source>
-            <target>运算符“{0}”：访问规范 {2} 中的本机模式属性“{1}”的类型为“{3}”，该类型与输入流模式中的属性不匹配。</target>
+            <target>操作程序“{0}”：访问规范 {2} 中的本机模式属性“{1}”的类型为“{3}”，该类型与输入流模式中的属性不匹配。</target>
          </trans-unit><!--used-->
 				
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1324" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_HAS_TYPE_WHICH_DOSNT_MATCH_ATTRIB_IN_OUTPUT_STREAM_SCHEMA" resname="CDIST1324E">
             <source>Operator ''{0}'': native schema attribute ''{1}'' in access specification {2} has type ''{3}'' which does not match the attribute in the input stream schema.</source>
-            <target>运算符“{0}”：访问规范 {2} 中的本机模式属性“{1}”的类型为“{3}”，该类型与输入流模式中的属性不匹配。</target>
+            <target>操作程序“{0}”：访问规范 {2} 中的本机模式属性“{1}”的类型为“{3}”，该类型与输入流模式中的属性不匹配。</target>
          </trans-unit><!--used-->
 				
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1325" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_HAS_NO_MATCHING_ATTRIB_IN_INPUT_STREAM_SCHEMA" resname="CDIST1325E">
             <source>Operator ''{0}'': native schema attribute ''{1}'' in access specification {2} has no matching attribute in the input stream schema.</source>
-            <target>运算符“{0}”：访问规范 {2} 中的本机模式属性“{1}”在输入流模式中没有匹配的属性。</target>
+            <target>操作程序“{0}”：访问规范 {2} 中的本机模式属性“{1}”在输入流模式中没有匹配的属性。</target>
          </trans-unit><!--used-->
       		
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1326" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_DEFINED_TWICE_IN_ACCESS_SPEC" resname="CDIST1326E">
             <source>Operator ''{0}'': native schema attribute ''{1}'' defined twice in access specification {2}.</source>
-            <target>运算符“{0}”：本机模式属性“{1}”在访问规范 {2} 中定义了两次。</target>
+            <target>操作程序“{0}”：本机模式属性“{1}”在访问规范 {2} 中定义了两次。</target>
          </trans-unit><!--used-->
 				
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1327" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_SHOULD_NOT_HAVE_NEGATIVE_LENGTH" resname="CDIST1327E">
             <source>Operator ''{0}'': native schema attribute {1} in access specification {2} should not have a negative length.</source>
-            <target>运算符“{0}”：访问规范 {2} 中的本机模式属性 {1} 不应具有负数长度。</target>
+            <target>操作程序“{0}”：访问规范 {2} 中的本机模式属性 {1} 不应具有负数长度。</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1328" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_CANNOT_HAVE_OTHER_NEGATIVE_VALUES_THAN" resname="CDIST1328E">
             <source>Operator ''{0}'': native schema attribute {1} in access specification {2} cannot have any other negative values than -2,-4 and -8.</source>
-            <target>运算符“{0}”：访问规范 {2} 中的本机模式属性 {1} 不得具有除 -2、-4 和 -8 之外的任何其他负数值。</target>
+            <target>操作程序“{0}”：访问规范 {2} 中的本机模式属性 {1} 不得具有除 -2、-4 和 -8 之外的任何其他负数值。</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1329" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_CANNOT_HAVE_BYTES_DATA_FOR_THIS_MSG_CLASS" resname="CDIST1329E">
             <source>Operator ''{0}'': native schema attribute {1} in access specification {2} cannot have Bytes data for this message class.</source>
-            <target>运算符“{0}”：对于此消息类，访问规范 {2} 中的本机模式属性 {1} 不能具有 Bytes 数据。</target>
+            <target>操作程序“{0}”：对于此消息类，访问规范 {2} 中的本机模式属性 {1} 不能具有 Bytes 数据。</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1330" extraData="MSGTK_OUTPUT_STREAM_ATTRIB_HAS_NO_MATCHING_ATTRIB_IN_NATIVE_SCHEMA_OF_ACCESS_SPEC" resname="CDIST1330E">
             <source>Operator ''{0}'': output stream attribute ''{1}'' has no matching attribute in the native schema in access specification {2}.</source>
-            <target>运算符“{0}”：输出流属性“{1}”在访问规范 {2} 的本机模式中没有匹配的属性。</target>
+            <target>操作程序“{0}”：输出流属性“{1}”在访问规范 {2} 的本机模式中没有匹配的属性。</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1331" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_DEFINED_IN_ACCESS_SPEC_MUST_HAVE_VALID_LENGTH_SPEC" resname="CDIST1331E">
             <source>Operator ''{0}'': native schema attribute ''{1}'' defined in access specification ''{2}'' must have a valid length specification.</source>
-            <target>运算符“{0}”：访问规范“{2}”中定义的本机模式属性“{1}”必须具有有效的长度指定项。</target>
+            <target>操作程序“{0}”：访问规范“{2}”中定义的本机模式属性“{1}”必须具有有效的长度指定项。</target>
          </trans-unit><!--used-->
 				
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1332" extraData="MSGTK_OP_CANNOT_BE_IN_CONSISTENT_REGION" resname="CDIST1332E">
             <source>The following operator cannot be in a consistent region: {0}</source>
-            <target>以下运算符不能位于一致区域中：{0}</target>
+            <target>以下操作程序不能位于一致区域中：{0}</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1333" extraData="MSGTK_VALUE_MUST_BE_SPECIFIED_FOR_INITIAL_CONTEXT_ATTRIB_IN_CONNECTION_DOC" resname="CDIST1333E">
