@@ -24,11 +24,9 @@ IBM MessageSight v1.1 and v1.2.
 The `KafkaProducer` and `KafkaConsumer` operators support Kafka v0.10.0.0 brokers. For 0.9 brokers, you make rebuild the toolkit for Kafka 0.9 by running the following commands:
 `ant clean; ant kafka-0.9` For older versions of Kafka brokers, you must use older versions of this toolkit.  
 
-**Restriction**: The `XMSSource` and `XMSSink`, operators in the Messaging Toolkit
-are not supported on POWER7 or POWER 8 Systems. You must use x86_64 systems. 
+**Restriction**: The `XMSSource` and `XMSSink` operators in the Messaging Toolkit are supported on x86_64 systems. 
 
-**Restriction**: The `XMSSource` and `XMSSink`, operators in the Messaging Toolkit
-are not supported on RHEL 7 platforms.
+**Restriction**: The `XMSSource` and `XMSSink` operators in the Messaging Toolkit are not supported on RHEL 7 platforms.
 
 The following figure shows how the `XMSSink` and `XMSSource` operators in the Messaging Toolkit use standard XMS architecture and APIs. 
 {doc/images/8751_dgm1.gif|This diagram illustrates the XMS APIs that are used to communicate between InfoSphere Streams, an XMS client, and a WebSphere MQ server.}
@@ -89,7 +87,7 @@ Alternatively, you can fully qualify the operators that are provided by toolkit 
 # Procedure
 
 1. Review the list of restrictions for the InfoSphere Streams specialized toolkits in the product documentation.
-   For example, the `XMSSource` and `XMSSink` operators are not supported on POWER7 or POWER 8 systems. 
+   For example, the `XMSSource` and `XMSSink` operators are supported on x86_64 systems. 
 2. Verify that the appropriate environment variables are set for the messaging systems that you use.
    * If you use `JMSSink` or `JMSSource` operators to connect to WebSphere MQ or Apache ActiveMQ systems,
      set **STREAMS_MESSAGING_WMQ_HOME** or **STREAMS_MESSAGING_AMQ_HOME** respectively.
@@ -680,7 +678,7 @@ The &lt;attribute> element has three possible attributes:
      * composite types
      * xml
 </info:description>
-    <info:version>5.3.6</info:version>
+    <info:version>5.3.7</info:version>
     <info:requiredProductVersion>4.2.0.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>
