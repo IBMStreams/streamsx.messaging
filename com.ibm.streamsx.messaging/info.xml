@@ -382,7 +382,7 @@ The &lt;destination> element has three attributes:
     If this attribute is not specified, the default value is non_persistent.
 * message_class
   * This attribute value specifies how a stream tuple is serialized into a WebSphere MQ or an Apache ActiveMQ message.
-    It operates with the &lt;native_schema> element. The value can be: bytes, empty, map, stream, wbe, wbe22, or xml.
+    It operates with the &lt;native_schema> element. The value can be: bytes, empty, map, stream, text, wbe, wbe22, or xml.
 
 ++++ Message class formats in the Messaging Toolkit
 
@@ -390,7 +390,7 @@ The message class specifies the type of XMS or JMS message that is output or exp
 It also affects how the message payload is converted to tuples or vice versa.
 
 The Messaging Toolkit supports the following values for the message_class attribute in the &lt;destination> element:
-bytes, empty, map, stream, wbe, wbe22, and xml.
+bytes, empty, map, stream, text, wbe, wbe22, and xml.
 
 When the message_class attribute value is `bytes`:
 * The `XMSSink` operator constructs an XMS BytesMessage.
@@ -478,6 +478,12 @@ When the message_class attribute value is `stream`:
   * If the StreamMessage does not contain enough attributes, the operator discards the entire message and logs a run-time error.
   * If the StreamMessage contains an attribute with a null value, the corresponding output stream attribute is set
     to the default value for its type.
+
+When the message_class attribute value is `text`:
+When the text message class is specified in the connection document, the native schema must contain a single attribute of a String type.
+Text messages must be encoded in UTF-8. For support of other encoding, use bytes message class.
+* The `JMSSink` and `XMSSink` operators construct a JMS TextMessage and the output schema for JMSSink must contain a single String attribute.
+* The `JMSSource` and `XMSSource` operators expect a JMS TextMessage and the input schema for JMSSource must contain a single String attribute.
 
 When the message_class attribute value is `wbe`:
 * The `XMSSink` operator constructs an XMS TextMessage. The `JMSSink` operator constructs a JMS TextMessage.
@@ -678,7 +684,7 @@ The &lt;attribute> element has three possible attributes:
      * composite types
      * xml
 </info:description>
-    <info:version>5.3.8</info:version>
+    <info:version>5.3.9</info:version>
     <info:requiredProductVersion>4.2.0.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>
