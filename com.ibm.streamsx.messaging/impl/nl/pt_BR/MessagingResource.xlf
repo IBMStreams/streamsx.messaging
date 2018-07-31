@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- begin_generated_IBM_copyright_prolog                             -->
-<!--                                                                  -->
-<!-- This is an automatically generated copyright prolog.             -->
-<!-- After initializing,  DO NOT MODIFY OR MOVE                       -->
-<!-- **************************************************************** -->
-<!-- Licensed Materials - Property of IBM                             -->
-<!-- 5724-Y95                                                         -->
-<!-- (C) Copyright IBM Corp.  2012, 2016    All Rights Reserved.      -->
-<!-- US Government Users Restricted Rights - Use, duplication or      -->
-<!-- disclosure restricted by GSA ADP Schedule Contract with          -->
-<!-- IBM Corp.                                                        -->
-<!--                                                                  -->
-<!-- end_generated_IBM_copyright_prolog                               -->
+<!-- Copyright (C) 2012-2017, International Business Machines Corporation -->
+<!-- All Rights Reserved                                                  -->
 <xliff version="1.1" xmlns="urn:oasis:names:tc:xliff:document:1.1" 
                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                      xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.1 _path_/xliff-core-1.1.xsd">
@@ -81,7 +70,7 @@
          
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1400" extraData="MSGTK_INITIALCONTEXT_NON_EXISTENT" resname="CDIST1400E">
             <source>A value for the InitialContext was not specified.</source>
-            <target>Não foi especificado um valor para InitialContext. </target>
+            <target>Não foi especificado um valor para InitialContext.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1401" extraData="MSGTK_CONFAC_LOOKUP_FAILURE" resname="CDIST1401E">
@@ -91,12 +80,12 @@
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1402" extraData="MSGTK_DEST_LOOKUP_FAILURE" resname="CDIST1402E">
             <source>The system cannot look up the Destination.</source>
-            <target>O sistema não pode consultar o Destino. </target>
+            <target>O sistema não pode consultar o Destino.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1403" extraData="MSGTK_CONFAC_DEST_LOOKUP_FAILURE" resname="CDIST1403E">
             <source>The system cannot look up the Connection Factory or the Destination.</source>
-            <target>O sistema não pode consultar o Connection Factory ou o Destino. </target>
+            <target>O sistema não pode consultar o Connection Factory ou o Destino.</target>
          </trans-unit><!--used-->
        
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1404" extraData="MSGTK_INITIALCONTEXT_CREATION_ERROR" resname="CDIST1404E">
@@ -106,12 +95,12 @@
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1405" extraData="MSGTK_ADMINISTERED_OBJECT_ERROR" resname="CDIST1405E">
             <source>Exception occurred during the creation of the administered objects.</source>
-            <target>Ocorreu uma exceção durante a criação dos objetos administrados. </target>
+            <target>Ocorreu uma exceção durante a criação dos objetos administrados.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1406" extraData="MSGTK_CONNECTION_FAILURE_NORETRY" resname="CDIST1406E">
             <source>The connection to the IBM Message Service Client failed. The NoRetry value of the reConnection Policy mandates that a reconnection is not allowed.</source>
-            <target>A conexão com o IBM Message Service Client falhou. O valor NoRetry da Política reConnection determina que não é permitida uma reconexão. </target>
+            <target>A conexão com o IBM Message Service Client falhou. O valor NoRetry da Política reConnection determina que não é permitida uma reconexão.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1407" extraData="MSGTK_SET_DELIVERY_MODE_FAILURE" resname="CDIST1407E">
@@ -146,7 +135,7 @@
        
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1413" extraData="MSGTK_XMS_API_UNKNOWN_EXCEPTION" resname="CDIST1413E">
             <source>An unknown exception occurred during the creation of the IBM Message Service Client Application Programming Interface Objects.</source>
-            <target>Ocorreu uma exceção desconhecida durante a criação dos Objetos da Interface de Programação de Aplicativos do IBM Message Service Client. </target>
+            <target>Ocorreu uma exceção desconhecida durante a criação dos Objetos da Interface de Programação de Aplicativos do IBM Message Service Client.</target>
          </trans-unit><!--used-->
        
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1414" extraData="MSGTK_CREATE_CONNECTION_EXCEPTION" resname="CDIST1414E">
@@ -161,12 +150,12 @@
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1416" extraData="MSGTK_PREVIOUS_ERROR" resname="CDIST1416E">
             <source>The system cannot proceed because of the previous errors.</source>
-            <target>O sistema não pode continuar devido aos erros anteriores. </target>
+            <target>O sistema não pode continuar devido aos erros anteriores.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1417" extraData="MSGTK_MESSAGE_DROPPED" resname="CDIST1417E">
             <source>The message was dropped because the system was not connected to the IBM Message Service Client.</source>
-            <target>A mensagem foi descartada porque o sistema não estava conectado ao IBM Message Service Client. </target>
+            <target>A mensagem foi descartada porque o sistema não estava conectado ao IBM Message Service Client.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1418" extraData="MSGTK_EXCEPTION" resname="CDIST1418E">
@@ -186,7 +175,7 @@
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1421" extraData="MSGTK_UNKNOWN_EXCEPTION" resname="CDIST1421E">
             <source>An unknown exception occurred while the system was sending the message.</source>
-            <target>Ocorreu uma exceção desconhecida enquanto o sistema estava enviando a mensagem. </target>
+            <target>Ocorreu uma exceção desconhecida enquanto o sistema estava enviando a mensagem.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1422" extraData="MSGTK_MESSAGE_LISTENER_ERROR" resname="CDIST1422E">
@@ -318,32 +307,32 @@
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1460" extraData="MSGTK_DISCARD_MSG_WRONG_TYPE" resname="CDIST1460W">
             <source>The message has the wrong type and is being discarded. The expected message type was {0}, but the a {1} message was received.</source>
-            <target>A mensagem tem o tipo errado e está sendo descartada. O tipo de mensagem esperado era {0}, mas foi recebida a mensagem {1}. </target>
+            <target>A mensagem tem o tipo errado e está sendo descartada. O tipo de mensagem esperado era {0}, mas foi recebida a mensagem {1}.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1461" extraData="MSGTK_DISCARD_MSG_INVALID_LENGTH" resname="CDIST1461W">
             <source>The message was discarded because the message length of {0} is not valid.</source>
-            <target>A mensagem foi descartada porque o comprimento da mensagem de {0} não é válido. </target>
+            <target>A mensagem foi descartada porque o comprimento da mensagem de {0} não é válido.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1462" extraData="MSGTK_DISCARD_MSG_TOO_SHORT" resname="CDIST1462W">
             <source>The message was discarded because the message is too short.</source>
-            <target>A mensagem foi descartada porque é muito curta. </target>
+            <target>A mensagem foi descartada porque é muito curta.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1463" extraData="MSGTK_DISCARD_MSG_MISSING_BODY" resname="CDIST1463W">
             <source>The message was discarded because the message does not contain a body. A {0} message was expected.</source>
-            <target>A mensagem foi descartada porque não contém um corpo. Era esperada uma mensagem {0}. </target>
+            <target>A mensagem foi descartada porque não contém um corpo. Era esperada uma mensagem {0}.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1464" extraData="MSGTK_DISCARD_MSG_UNRECOG_TYPE" resname="CDIST1464W">
             <source>The message was discarded because the type is not recognized.</source>
-            <target>A mensagem foi descartada porque o tipo não é reconhecido. </target>
+            <target>A mensagem foi descartada porque o tipo não é reconhecido.</target>
          </trans-unit><!--used-->
  
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1465" extraData="MSGTK_DISCARD_MSG_MISSING_ATTR" resname="CDIST1465W">
             <source>The message was discarded, because at least one attribute is missing: {0}</source>
-            <target>A mensagem foi descartada porque pelo menos um atributo está ausente: {0} </target>
+            <target>A mensagem foi descartada porque pelo menos um atributo está ausente: {0}</target>
          </trans-unit><!--used-->
 
 <!--
@@ -385,7 +374,7 @@
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1520" extraData="MSGTK_XMS_CONNECT" resname="CDIST1520I">
             <source>The system is about to connect to the IBM Message Service Client.</source>
-            <target>O sistema está prestes a se conectar ao IBM Message Service Client. </target>
+            <target>O sistema está prestes a se conectar ao IBM Message Service Client.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1521" extraData="MSGTK_CONNECTION_FAILURE_BOUNDEDRETRY" resname="CDIST1521I">
@@ -400,12 +389,12 @@
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1523" extraData="MSGTK_CONNECTION_SUCCESSFUL" resname="CDIST1523I">
             <source>The connection to the IBM Message Service Client succeeded.</source>
-            <target>A conexão com o IBM Message Service Client foi bem-sucedida. </target>
+            <target>A conexão com o IBM Message Service Client foi bem-sucedida.</target>
          </trans-unit><!--used-->  
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1524" extraData="MSGTK_SEND_TUPLE_ERROR_PORT" resname="CDIST1524I">
             <source>The tuple is being sent to the error output port.</source>
-            <target>A tupla está sendo enviada para a porta de saída de erro. </target>
+            <target>A tupla está sendo enviada para a porta de saída de erro.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1525" extraData="MSGTK_SENT_MESSAGE" resname="CDIST1525I">
@@ -415,7 +404,7 @@
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1526" extraData="MSGTK_INIT_WAIT" resname="CDIST1526I">
             <source>The wait time before starting is {0} seconds.</source>
-            <target>O tempo de espera antes do início é de {0} segundos. </target>
+            <target>O tempo de espera antes do início é de {0} segundos.</target>
          </trans-unit><!--used-->
 <!--
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1528" extraData="MSGTK_MQTT_CLIENT_DISCONNECTED" resname="CDIST1528I">
@@ -485,7 +474,7 @@
          
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1585" extraData="MSGTK_CONNECTION_XML_DOC_NOT_READABLE_CHECK_PERMISSIONS" resname="CDIST1585E">
             <source>Connection XML document ''{0}'' is not readable. Please, check permissions.</source>
-            <target>O documento XML ''{0}'' de conexão não é legível. Verifique as permissões. </target>
+            <target>O documento XML ''{0}'' de conexão não é legível. Verifique as permissões.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1586" extraData="MSGTK_DOC_IS_DIR_NOT_XML_DOC" resname="CDIST1586E">
@@ -600,7 +589,7 @@
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1308" extraData="MSGTK_PARAM_FOR_ACCESS_SPEC_SUPPLIED_TO_OP_EXPECTS_CARDINALITY_VALUES" resname="CDIST1308E">
             <source>''{0}'': Parameter for access specification ''{1}'' supplied to ''{2}'' operator expects {3} value(s).</source>
-            <target>''{0}'': O parâmetro para especificação de acesso ''{1}'' fornecido para o operador ''{2}'' espera {3} valor(es). </target>
+            <target>''{0}'': O parâmetro para especificação de acesso ''{1}'' fornecido para o operador ''{2}'' espera {3} valor(es).</target>
          </trans-unit><!--used-->
             
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1309" extraData="MSGTK_OP_EXPECTS_TYPE_BASE_FOR_PARAM_VALUE_FROM_ACCESS_SPEC" resname="CDIST1309E">
@@ -640,7 +629,7 @@
                 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1316" extraData="MSGTK_RECONNECTIONBOUND_CANNOT_BE_NEGATIVE" resname="CDIST1316E">
             <source>Operator ''{0}'': reconnectionBound cannot be negative.</source>
-            <target>Operador ''{0}'': reconnectionBound não pode ser negativo. </target>
+            <target>Operador ''{0}'': reconnectionBound não pode ser negativo.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1317" extraData="MSGTK_PERIOD_PARAM_ONLY_IF_RECONNECTIONPOLICY_IS_SPECIFIED" resname="CDIST1317E">
@@ -650,17 +639,17 @@
 			
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1318" extraData="MSGTK_UNABLE_TO_USE_MSG_CLASS_IN_ACCESS_SPEC_IF_NATIVE_SCHEMA_ATTRIBS_SUPPLIED" resname="CDIST1318E">
             <source>Operator ''{0}'': unable to use message class ''{1}'' in access specification {2} if native schema attributes have been supplied.</source>
-            <target>Operador ''{0}'': não é possível usar a classe de mensagem ''{1}'' na especificação de acesso {2} se os atributos de esquema nativo tiverem sido fornecidos. </target>
+            <target>Operador ''{0}'': não é possível usar a classe de mensagem ''{1}'' na especificação de acesso {2} se os atributos de esquema nativo tiverem sido fornecidos.</target>
          </trans-unit><!--used-->
 			
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1319" extraData="MSGTK_TUPLE_ATTRIBS_IN_ERROR_STREAM_DONT_MATCH_RECEIVED_TUPLE" resname="CDIST1319E">
             <source>Operator ''{0}'': The tuple attributes defined in the error stream do not match the tuple which is received.</source>
-            <target>Operador ''{0}'': Os atributos de tupla definidos no fluxo de erros não correspondem à tupla recebida. </target>
+            <target>Operador ''{0}'': Os atributos de tupla definidos no fluxo de erros não correspondem à tupla recebida.</target>
          </trans-unit><!--used-->
  			
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1320" extraData="MSGTK_ERROR_OUTPUT_PORT_CAN_ONLY_CONTAIN_RSTRING" resname="CDIST1320E">
             <source>Operator ''{0}'': The error output port can only contain an rstring.</source>
-            <target>Operador ''{0}'': A porta de saída de erro pode conter somente um rstring. </target>
+            <target>Operador ''{0}'': A porta de saída de erro pode conter somente um rstring.</target>
          </trans-unit><!--used-->
 					
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1321" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_MUST_NOT_LENGTH_SPEC" resname="CDIST1321E">
@@ -700,12 +689,12 @@
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1328" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_CANNOT_HAVE_OTHER_NEGATIVE_VALUES_THAN" resname="CDIST1328E">
             <source>Operator ''{0}'': native schema attribute {1} in access specification {2} cannot have any other negative values than -2,-4 and -8.</source>
-            <target>Operador ''{0}'': o atributo de esquema nativo {1} na especificação de acesso {2} não pode ter outros valores negativos diferentes de -2,-4 e -8. </target>
+            <target>Operador ''{0}'': o atributo de esquema nativo {1} na especificação de acesso {2} não pode ter outros valores negativos diferentes de -2,-4 e -8.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1329" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_IN_ACCESS_SPEC_CANNOT_HAVE_BYTES_DATA_FOR_THIS_MSG_CLASS" resname="CDIST1329E">
             <source>Operator ''{0}'': native schema attribute {1} in access specification {2} cannot have Bytes data for this message class.</source>
-            <target>Operador ''{0}'': o atributo de esquema nativo {1} na especificação de acesso {2} não pode ter dados de Bytes para essa classe de mensagem. </target>
+            <target>Operador ''{0}'': o atributo de esquema nativo {1} na especificação de acesso {2} não pode ter dados de Bytes para essa classe de mensagem.</target>
          </trans-unit><!--used-->
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1330" extraData="MSGTK_OUTPUT_STREAM_ATTRIB_HAS_NO_MATCHING_ATTRIB_IN_NATIVE_SCHEMA_OF_ACCESS_SPEC" resname="CDIST1330E">
@@ -715,7 +704,7 @@
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1331" extraData="MSGTK_NATIVE_SCHEMA_ATTRIB_DEFINED_IN_ACCESS_SPEC_MUST_HAVE_VALID_LENGTH_SPEC" resname="CDIST1331E">
             <source>Operator ''{0}'': native schema attribute ''{1}'' defined in access specification ''{2}'' must have a valid length specification.</source>
-            <target>Operador ''{0}'': o atributo de esquema nativo ''{1}'' definido na especificação de acesso ''{2}'' deve ter uma especificação de comprimento válida. </target>
+            <target>Operador ''{0}'': o atributo de esquema nativo ''{1}'' definido na especificação de acesso ''{2}'' deve ter uma especificação de comprimento válida.</target>
          </trans-unit><!--used-->
 				
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1332" extraData="MSGTK_OP_CANNOT_BE_IN_CONSISTENT_REGION" resname="CDIST1332E">
@@ -725,12 +714,12 @@
 
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1333" extraData="MSGTK_VALUE_MUST_BE_SPECIFIED_FOR_INITIAL_CONTEXT_ATTRIB_IN_CONNECTION_DOC" resname="CDIST1333E">
             <source>A value must be specified for initial_context attribute in connection document.</source>
-            <target>Deve ser especificado um valor para o atributo initial_context no documento de conexão. </target>
+            <target>Deve ser especificado um valor para o atributo initial_context no documento de conexão.</target>
          </trans-unit><!--used-->
 				
          <trans-unit id="StreamsMessagingToolkitMessages_CDIST1334" extraData="MSGTK_INVALID_INITIAL_CONTEXT_FORMAT_DETECTED" resname="CDIST1334E">
             <source>Invalid initial_context format detected.</source>
-            <target>Detectado formato initial_context inválido. </target>
+            <target>Detectado formato initial_context inválido.</target>
          </trans-unit><!--used-->
 				
       </group>

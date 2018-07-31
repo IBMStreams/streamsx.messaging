@@ -5,11 +5,11 @@
   <info:identity>
     <info:name>com.ibm.streamsx.messaging</info:name>
     <info:description>
-The Messaging toolkit project is an open source IBM InfoSphere Streams toolkit project.
-It is focused on the development of operators and functions that help you use InfoSphere Streams
+The Messaging toolkit project is an open source IBM Streams toolkit project.
+It is focused on the development of operators and functions that help you use IBM Streams
 to interact with messaging systems such as Kafka, JMS, XMS, and MQTT. 
 
-The operators provide the ability for InfoSphere Streams applications to send and receive data
+The operators provide the ability for IBM Streams applications to send and receive data
 from a queue or topic that is posted on Kafka, WebSphere MQ, Apache ActiveMQ or MQ Telemetry Transport (MQTT) server.
 
 In particular, the `XMSSource` and `XMSSink` operators in the Messaging Toolkit use the standard XMS architecture
@@ -24,14 +24,12 @@ IBM MessageSight v1.1 and v1.2.
 The `KafkaProducer` and `KafkaConsumer` operators support Kafka v0.10.0.0 brokers. For 0.9 brokers, you make rebuild the toolkit for Kafka 0.9 by running the following commands:
 `ant clean; ant kafka-0.9` For older versions of Kafka brokers, you must use older versions of this toolkit.  
 
-**Restriction**: The `XMSSource` and `XMSSink`, operators in the Messaging Toolkit
-are not supported on POWER7 or POWER 8 Systems. You must use x86_64 systems. 
+**Restriction**: The `XMSSource` and `XMSSink` operators in the Messaging Toolkit are supported on x86_64 systems. 
 
-**Restriction**: The `XMSSource` and `XMSSink`, operators in the Messaging Toolkit
-are not supported on RHEL 7 platforms.
+**Restriction**: The `XMSSource` and `XMSSink` operators in the Messaging Toolkit are not supported on RHEL 7 platforms.
 
 The following figure shows how the `XMSSink` and `XMSSource` operators in the Messaging Toolkit use standard XMS architecture and APIs. 
-{doc/images/8751_dgm1.gif|This diagram illustrates the XMS APIs that are used to communicate between InfoSphere Streams, an XMS client, and a WebSphere MQ server.}
+{doc/images/8751_dgm1.gif|This diagram illustrates the XMS APIs that are used to communicate between IBM Streams, an XMS client, and a WebSphere MQ server.}
 
 For example:
 * The `CreateProducer` API creates a message producer to send messages to the specified destination.
@@ -52,9 +50,9 @@ or the SPL compiler to be aware of the location of the toolkit.
 
 # Before you begin
 
-* Install IBM InfoSphere Streams.  Configure the product environment variables by entering the following command: 
+* Install IBM Streams.  Configure the product environment variables by entering the following command: 
       source product-installation-root-directory/4.0.0.0/bin/streamsprofile.sh
-* Install a supported version of WebSphere MQ Client, Apache ActiveMQ and XMS client on the same machine as InfoSphere Streams.    
+* Install a supported version of WebSphere MQ Client, Apache ActiveMQ and XMS client on the same machine as IBM Streams.    
   WebSphere MQ Server might or might not be on the same machine.  
   
   For Kafka and MQTT, the toolkit ships with a set of required clients, and therefore this configuration
@@ -62,8 +60,8 @@ or the SPL compiler to be aware of the location of the toolkit.
   
   * Apache ActiveMQ
     * The `JMSSource` and `JMSSink` operators support Apache ActiveMQ 5.7 and up.
-      * The Apache ActiveMQ libraries must be installed on same machine as IBM InfoSphere Streams
-        because the `JMSSink` and `JMSSource` operators require the libraries that are installed with IBM InfoSphere Streams.
+      * The Apache ActiveMQ libraries must be installed on same machine as IBM Streams
+        because the `JMSSink` and `JMSSource` operators require the libraries that are installed with IBM Streams.
         However, the ActiveMQ instance to which a message is sent can be a different machine. 
         You must set the **STREAMS_MESSAGING_AMQ_HOME** environment variable to the location where Apache ActiveMQ is installed. For example: 
             export STREAMS_MESSAGING_AMQ_HOME=&quot;/home/streamsuser/ApacheActiveMQ&quot;
@@ -88,8 +86,8 @@ Alternatively, you can fully qualify the operators that are provided by toolkit 
 
 # Procedure
 
-1. Review the list of restrictions for the InfoSphere Streams specialized toolkits in the product documentation.
-   For example, the `XMSSource` and `XMSSink` operators are not supported on POWER7 or POWER 8 systems. 
+1. Review the list of restrictions for the IBM Streams specialized toolkits in the product documentation.
+   For example, the `XMSSource` and `XMSSink` operators are supported on x86_64 systems. 
 2. Verify that the appropriate environment variables are set for the messaging systems that you use.
    * If you use `JMSSink` or `JMSSource` operators to connect to WebSphere MQ or Apache ActiveMQ systems,
      set **STREAMS_MESSAGING_WMQ_HOME** or **STREAMS_MESSAGING_AMQ_HOME** respectively.
@@ -103,7 +101,7 @@ Alternatively, you can fully qualify the operators that are provided by toolkit 
         sc -t $STREAMS_INSTALL/toolkits/com.ibm.streamsx.messaging -M MyMain
     where MyMain is the name of the SPL main composite.
     **Note**: These command parameters override the **STREAMS_SPLPATH** environment variable.
-  * Add the toolkit location in InfoSphere Streams Studio.
+  * Add the toolkit location in IBM Streams Studio.
 4. Develop your application. To avoid the need to fully qualify the operators, add a use directive in your application. 
   * For example, you can add the following clause in your SPL source file:
         use com.ibm.streamsx.messaging.jms::*;
@@ -116,7 +114,7 @@ Alternatively, you can fully qualify the operators that are provided by toolkit 
         use com.ibm.streamsx.messaging.xms::XMSSource;
         use com.ibm.streamsx.messaging.kafka::KafkaConsumer;
 5. Build your application.  You can use the **sc** command or Streams Studio.  
-6. Start the InfoSphere Streams instance. 
+6. Start the IBM Streams instance. 
 7. Run the application. You can submit the application as a job by using the **streamtool submitjob** command or by using Streams Studio. 
 
 + Connection specifications document
@@ -384,7 +382,7 @@ The &lt;destination> element has three attributes:
     If this attribute is not specified, the default value is non_persistent.
 * message_class
   * This attribute value specifies how a stream tuple is serialized into a WebSphere MQ or an Apache ActiveMQ message.
-    It operates with the &lt;native_schema> element. The value can be: bytes, empty, map, stream, wbe, wbe22, or xml.
+    It operates with the &lt;native_schema> element. The value can be: bytes, empty, map, stream, text, wbe, wbe22, or xml.
 
 ++++ Message class formats in the Messaging Toolkit
 
@@ -392,7 +390,7 @@ The message class specifies the type of XMS or JMS message that is output or exp
 It also affects how the message payload is converted to tuples or vice versa.
 
 The Messaging Toolkit supports the following values for the message_class attribute in the &lt;destination> element:
-bytes, empty, map, stream, wbe, wbe22, and xml.
+bytes, empty, map, stream, text, wbe, wbe22, and xml.
 
 When the message_class attribute value is `bytes`:
 * The `XMSSink` operator constructs an XMS BytesMessage.
@@ -443,7 +441,7 @@ When the message_class attribute value is `bytes`:
 
 When the message_class attribute value is `empty`:
 * The `XMSSink` operator construct an empty XMS message. The `JMSSink` operator construct an empty JMS message.
-  For example, you can use an empty XMS message to verify that your InfoSphere Streams application can connect
+  For example, you can use an empty XMS message to verify that your IBM Streams application can connect
   to the WebSphere MQ server and that the message reaches its destination.
   **Note**: This message_class value cannot be used with a &lt;native_schema> element.
 * The `XMSSource` operator expects an empty XMS message. It emits a tuple with attribute values that are assigned by the SPL program.
@@ -480,6 +478,12 @@ When the message_class attribute value is `stream`:
   * If the StreamMessage does not contain enough attributes, the operator discards the entire message and logs a run-time error.
   * If the StreamMessage contains an attribute with a null value, the corresponding output stream attribute is set
     to the default value for its type.
+
+When the message_class attribute value is `text`:
+When the text message class is specified in the connection document, the native schema must contain a single attribute of a String type.
+Text messages must be encoded in UTF-8. For support of other encoding, use bytes message class.
+* The `JMSSink` and `XMSSink` operators construct a JMS TextMessage and the output schema for JMSSink must contain a single String attribute.
+* The `JMSSource` and `XMSSource` operators expect a JMS TextMessage and the input schema for JMSSource must contain a single String attribute.
 
 When the message_class attribute value is `wbe`:
 * The `XMSSink` operator constructs an XMS TextMessage. The `JMSSink` operator constructs a JMS TextMessage.
@@ -680,7 +684,7 @@ The &lt;attribute> element has three possible attributes:
      * composite types
      * xml
 </info:description>
-    <info:version>5.3.4</info:version>
+    <info:version>5.3.9</info:version>
     <info:requiredProductVersion>4.2.0.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>
