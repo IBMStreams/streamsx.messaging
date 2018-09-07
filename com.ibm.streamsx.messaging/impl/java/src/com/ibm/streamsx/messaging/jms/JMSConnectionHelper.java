@@ -81,7 +81,7 @@ class JMSConnectionHelper implements ExceptionListener {
 	private final boolean useClientAckMode;
 	
 	// JMS message selector
-	private String messageSelector;
+	private String messageSelector = null;
 	
 	// Timestamp of session creation
 	private long sessionCreationTime;
@@ -97,12 +97,12 @@ class JMSConnectionHelper implements ExceptionListener {
 	
 	private PropertyProvider propertyProvider = null;
 	
-	private String userPropName;
+	private String userPropName = null;
 	
-	private String passwordPropName;
+	private String passwordPropName = null;
 	
 	// CR queue name
-	private String destinationCR;
+	private String destinationCR = null;
 	
 	private ConnectionDocumentParser connectionDocumentParser = null;
 
@@ -226,7 +226,6 @@ class JMSConnectionHelper implements ExceptionListener {
 		this(connectionDocumentParser, reconnectionPolicy, reconnectionBound, period, isProducer,
 			 maxMessageRetry, messageRetryDelay, nReconnectionAttempts, logger, useClientAckMode, msgSelectorCR, propertyProvider, userPropName, passwordPropName, destinationCR);
 		this.nFailedInserts = nFailedInserts;
-
 	}
 
 	
@@ -297,6 +296,7 @@ class JMSConnectionHelper implements ExceptionListener {
 	private synchronized void createConnection() throws ConnectionException,
 			InterruptedException {
 		int nConnectionAttempts = 0;
+
 		// Check if connection exists or not.
 		if (!isConnectValid()) {
 
@@ -350,7 +350,7 @@ class JMSConnectionHelper implements ExceptionListener {
 					}
 					// sleep for delay interval
 					Thread.sleep(delay);
-					// Incremet the metric nReconnectionAttempts
+					// Increment the metric nReconnectionAttempts
 					nReconnectionAttempts.incrementValue(1);
 				}
 
@@ -445,7 +445,10 @@ class JMSConnectionHelper implements ExceptionListener {
 		}
 		
 		String userName = propertyProvider.getProperty(userPropName);
+		logger.log(LogLevel.INFO, "APP_CONFIG_USERNAME", new Object[] { userName }); //$NON-NLS-1$
+
 		String password = propertyProvider.getProperty(passwordPropName, false);
+		logger.log(LogLevel.INFO, "APP_CONFIG_PASSWORD", new Object[] { password }); //$NON-NLS-1$
 		
 		if(this.userPrincipal == userName && this.userCredential == password) {
 			return false;
@@ -472,7 +475,7 @@ class JMSConnectionHelper implements ExceptionListener {
 
 		boolean res = false;
 		int count = 0;
-		
+		 
 		do {
 			
 			try {

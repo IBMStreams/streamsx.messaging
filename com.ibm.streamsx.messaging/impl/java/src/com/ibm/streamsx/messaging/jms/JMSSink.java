@@ -176,30 +176,30 @@ public class JMSSink extends AbstractOperator implements StateHandler{
     private ConsistentRegionContext consistentRegionContext;
     
     // CR queue name for storing checkpoint information
-    private String consistentRegionQueueName;
+    private String consistentRegionQueueName = null;
     
     // variable to keep track of last successful check point sequeuce id.
     private long lastSuccessfulCheckpointId = 0;
     
     // unique id to identify messages on CR queue
-    private String operatorUniqueID;
+    private String operatorUniqueID = null;
     
     // application configuration name
-    private String appConfigName;
+    private String appConfigName = null;
     
     // user property name stored in application configuration
-    private String userPropName;
+    private String userPropName = null;
     
     // password property name stored in application configuration
-    private String passwordPropName;
+    private String passwordPropName = null;
     
-    private String keyStore;
+    private String keyStore = null;
     
-    private String trustStore;
+    private String trustStore = null;
     
-    private String keyStorePassword;
+    private String keyStorePassword = null;
     
-    private String trustStorePassword;
+    private String trustStorePassword = null;
     
     private boolean sslConnection;
 
@@ -340,7 +340,7 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	}
 	
 	public String getConnectionDocument() {
-		
+	
 		if (connectionDocument == null)
 		{
 			connectionDocument = getOperatorContext().getPE().getApplicationDirectory() + "/etc/connections.xml"; //$NON-NLS-1$

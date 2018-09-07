@@ -13,8 +13,8 @@ import com.ibm.streamsx.messaging.i18n.Messages;
 // This class provides configuration data stored in PE
 public class PropertyProvider {
 
-    private ProcessingElement pe;
-    private String configurationName;
+    private ProcessingElement pe = null;
+    private String configurationName = null;
     private Map<String,String> configuration = null;
 
     public PropertyProvider(ProcessingElement pe, String configurationName) {

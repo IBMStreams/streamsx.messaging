@@ -130,10 +130,10 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	// UTF-8
 	private String codepage = "UTF-8"; //$NON-NLS-1$
 	// This mandatory parameter access specifies access specification name.
-	private String access;
+	private String access = null;
 	// This mandatory parameter connection specifies name of the connection
 	// specification containing a JMS element
-	private String connection;
+	private String connection = null;
 	// This optional parameter connectionDocument specifies the pathname of a
 	// file containing the connection information.
 	// If present, it must have exactly one value that is a String constant.
@@ -183,21 +183,21 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	private Object resetLock = new Object();
 	
 	 // application configuration name
-    private String appConfigName;
+    private String appConfigName = null;
     
     // user property name stored in application configuration
-    private String userPropName;
+    private String userPropName = null;
     
     // password property name stored in application configuration
-    private String passwordPropName;
+    private String passwordPropName = null;
     
-    private String keyStore;
+    private String keyStore = null;
     
-    private String trustStore;
+    private String trustStore = null;
     
-    private String keyStorePassword;
+    private String keyStorePassword = null;
     
-    private String trustStorePassword;
+    private String trustStorePassword = null;
     
     private boolean sslConnection;
 
