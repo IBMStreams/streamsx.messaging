@@ -478,6 +478,8 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	 */
 	@ContextCheck(compile = false)
 	public static void checkParametersRuntime(OperatorContextChecker checker) {
+		
+		tracer.log(TraceLevel.TRACE, "Begin checkParametersRuntime()"); //$NON-NLS-1$
 
 		OperatorContext context = checker.getOperatorContext();
 
@@ -569,7 +571,8 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 						new Object[] {passwordPropName, appConfigName});
 			}
         }
-		
+        
+        tracer.log(TraceLevel.TRACE, "End checkParametersRuntime()"); //$NON-NLS-1$		
 	}
 
 	// add check for reconnectionPolicy is present if either period or
@@ -592,6 +595,8 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 			IOException, ParseConnectionDocumentException, SAXException,
 			NamingException, ConnectionException, Exception {
 
+		tracer.log(TraceLevel.TRACE, "Begin initialize()"); //$NON-NLS-1$
+		
 		super.initialize(context);
 		
 		consistentRegionContext = context.getOptionalContext(ConsistentRegionContext.class);
@@ -690,6 +695,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		// register for data governance
 		registerForDataGovernance(connectionDocumentParser.getProviderURL(), connectionDocumentParser.getDestination());
 
+		tracer.log(TraceLevel.TRACE, "End initialize()"); //$NON-NLS-1$
 	}
 
 	protected String getAbsolutePath(String filePath) {

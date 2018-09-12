@@ -17,7 +17,6 @@ import javax.jms.InvalidSelectorException;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
-import javax.jms.MessageFormatException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.naming.Context;
@@ -25,6 +24,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import com.ibm.streams.operator.logging.LogLevel;
+import com.ibm.streams.operator.logging.TraceLevel;
 import com.ibm.streams.operator.metrics.Metric;
 import com.ibm.streamsx.messaging.common.PropertyProvider;
 
@@ -254,8 +254,8 @@ class JMSConnectionHelper implements ExceptionListener {
 	// this subroutine creates the initial jndi context by taking the mandatory
 	// and optional parameters
 
-	private void createAdministeredObjects()
-			throws NamingException {
+	private void createAdministeredObjects() throws NamingException {
+		tracer.log(TraceLevel.TRACE, "Begin createAdministeredObjects()"); //$NON-NLS-1$
 
 		// Create a JNDI API InitialContext object if none exists
 		// create a properties object and add all the mandatory and optional
@@ -288,13 +288,16 @@ class JMSConnectionHelper implements ExceptionListener {
 			destCR = (Destination) jndiContext.lookup(destinationCR);
 		}
 
+		tracer.log(TraceLevel.TRACE, "End createAdministeredObjects()"); //$NON-NLS-1$
 		return;
 	}
 
 	// this subroutine creates the connection, it always verifies if we have a
 	// successfull existing connection before attempting to create one.
-	private synchronized void createConnection() throws ConnectionException,
-			InterruptedException {
+	private synchronized void createConnection() throws ConnectionException, InterruptedException {
+		
+		tracer.log(TraceLevel.TRACE, "Begin createConnection()"); //$NON-NLS-1$
+
 		int nConnectionAttempts = 0;
 
 		// Check if connection exists or not.
@@ -357,9 +360,12 @@ class JMSConnectionHelper implements ExceptionListener {
 			}
 
 		}
+		tracer.log(TraceLevel.TRACE, "End createConnection()"); //$NON-NLS-1$
 	}
 	
 	private synchronized void createConnectionNoRetry() throws ConnectionException {
+
+		tracer.log(TraceLevel.TRACE, "Begin createConnectionNoRetry()"); //$NON-NLS-1$
 		
 		if (!isConnectValid()) {
 			try {
@@ -370,11 +376,14 @@ class JMSConnectionHelper implements ExceptionListener {
 						Messages.getString("CONNECTION_TO_JMS_FAILED_NO_RECONNECT_AS_RECONNECT_POLICY_DOES_NOT_APPLY")); //$NON-NLS-1$
 			}
 		}
+
+		tracer.log(TraceLevel.TRACE, "End createConnectionNoRetry()"); //$NON-NLS-1$
 	}
 
 	// this subroutine creates the connection, producer and consumer, throws a
 	// JMSException if it fails
 	private boolean connect(boolean isProducer) throws JMSException {
+		tracer.log(TraceLevel.TRACE, "Begin connect()"); //$NON-NLS-1$
 
 		// Create connection.
 		if (userPrincipal != null && !userPrincipal.isEmpty() && 
@@ -434,28 +443,37 @@ class JMSConnectionHelper implements ExceptionListener {
 			getConnect().start();
 		}
 		tracer.log (LogLevel.INFO, "connection successfully created"); //$NON-NLS-1$
+		tracer.log(TraceLevel.TRACE, "End connect()"); //$NON-NLS-1$
+		
 		// create connection is successful, return true
 		return true;
 	}
 	
     private boolean refreshUserCredential() {
-		
+		tracer.log(TraceLevel.TRACE, "Begin refreshUserCredential()"); //$NON-NLS-1$
 		if(propertyProvider == null) {
+			tracer.log(TraceLevel.TRACE, "End refreshUserCredential() - there is no application configuration"); //$NON-NLS-1$
 			return false;
 		}
 		
 		String userName = propertyProvider.getProperty(userPropName);
-		logger.log(LogLevel.INFO, "APP_CONFIG_USERNAME", new Object[] { userName }); //$NON-NLS-1$
-
 		String password = propertyProvider.getProperty(passwordPropName, false);
-		logger.log(LogLevel.INFO, "APP_CONFIG_PASSWORD", new Object[] { password }); //$NON-NLS-1$
 		
+		tracer.log(TraceLevel.DEBUG, "User name retrieved from application configuration: " + userName ); //$NON-NLS-1$
+		if(password != null && !password.isEmpty())
+			tracer.log(TraceLevel.DEBUG, "Password retrieved from application configuration"); //$NON-NLS-1$
+		else
+			tracer.log(TraceLevel.DEBUG, "No password retrieved from application configuration"); //$NON-NLS-1$
+		
+		// TODO: Aren't the following checks kind of redundant?
 		if(this.userPrincipal == userName && this.userCredential == password) {
+			tracer.log(TraceLevel.TRACE, "End refreshUserCredential() - user credentials unchanged"); //$NON-NLS-1$
 			return false;
 		}
 		
 		if((this.userPrincipal != null && userName != null && this.userPrincipal.equals(userName))
 			&& (this.userCredential != null && password != null && this.userCredential.equals(password))) {
+			tracer.log(TraceLevel.TRACE, "End refreshUserCredential() - user credentials unchanged"); //$NON-NLS-1$
 			return false;
 		}
 		
@@ -463,15 +481,16 @@ class JMSConnectionHelper implements ExceptionListener {
 		this.userPrincipal = userName;
 		this.userCredential = password;
 		
+		tracer.log(TraceLevel.TRACE, "End refreshUserCredential()"); //$NON-NLS-1$
 		return true;
 	}
 
 	// subroutine which on receiving a message, send it to the
 	// destination,update the metric
 	// nFailedInserts if the send fails
+	boolean sendMessage(Message message) throws ConnectionException, InterruptedException {
 
-	boolean sendMessage(Message message) throws ConnectionException,
-			InterruptedException {
+		tracer.log(TraceLevel.TRACE, "Begin sendMessage()"); //$NON-NLS-1$
 
 		boolean res = false;
 		int count = 0;
@@ -512,13 +531,16 @@ class JMSConnectionHelper implements ExceptionListener {
 			nFailedInserts.incrementValue(1);
 		}
 		
+		tracer.log(TraceLevel.TRACE, "End sendMessage()"); //$NON-NLS-1$
 		return res;
 	}
 
 	// this subroutine receives messages from a message consumer
 	// This method supports the receive method with timeout
-	Message receiveMessage(long timeout) throws ConnectionException, InterruptedException,
-			JMSException {
+	Message receiveMessage(long timeout) throws ConnectionException, InterruptedException, JMSException {
+
+		tracer.log(TraceLevel.TRACE, "Into receiveMessage()"); //$NON-NLS-1$
+
 		try {
 			// try to receive a message via blocking method
 			synchronized (getSession()) {
@@ -551,6 +573,7 @@ class JMSConnectionHelper implements ExceptionListener {
 	// i.e connection problems, this method raise the error back to caller.
 	// No connection or message retry will be attempted.
 	void sendMessageNoRetry(Message message) throws JMSException {
+		tracer.log(TraceLevel.TRACE, "Begin sendMessageNoRetry()"); //$NON-NLS-1$
 		try {
 			synchronized (getSession()) {
 				getProducer().send(message);
@@ -560,19 +583,25 @@ class JMSConnectionHelper implements ExceptionListener {
 			logger.log(LogLevel.WARN, "ERROR_DURING_SEND", new Object[] { e.toString() }); //$NON-NLS-1$
 			throw e;
 		}
+		tracer.log(TraceLevel.TRACE, "End sendMessageNoRetry()"); //$NON-NLS-1$
 	}
 	
 	// send a consistent region message to the consistent region queue
 	void sendCRMessage(Message message) throws JMSException {
+		
+		tracer.log(TraceLevel.TRACE, "Begin sendCRMessage()"); //$NON-NLS-1$
 			
 		synchronized (getSession()) {
 			getProducerCR().send(message);
 		}
-
+		
+		tracer.log(TraceLevel.TRACE, "End sendCRMessage()"); //$NON-NLS-1$
 	}
 		
 	// receive a message from consistent region queue
 	Message receiveCRMessage(long timeout) throws JMSException {
+		
+		tracer.log(TraceLevel.TRACE, "Into receiveCRMessage()"); //$NON-NLS-1$
 		
 		synchronized (getSession()) {
 			return (getConsumerCR().receive(timeout));
@@ -581,6 +610,8 @@ class JMSConnectionHelper implements ExceptionListener {
 	
 	// Recovers session causing unacknowledged message to be re-delivered
 	public void recoverSession() throws JMSException, ConnectionException, InterruptedException {
+
+		tracer.log(TraceLevel.TRACE, "Begin recoverSession()"); //$NON-NLS-1$
 
 		try {
 			synchronized (getSession()) {
@@ -599,25 +630,35 @@ class JMSConnectionHelper implements ExceptionListener {
 				getSession().recover();
 			}
 		}
+		
+		tracer.log(TraceLevel.TRACE, "End recoverSession()"); //$NON-NLS-1$
 	}
 	
 	public void commitSession() throws JMSException {
 		
+		tracer.log(TraceLevel.TRACE, "Begin commitSession()"); //$NON-NLS-1$
+		
 		synchronized (getSession()) {
 			getSession().commit();
 		}
+		
+		tracer.log(TraceLevel.TRACE, "End commitSession()"); //$NON-NLS-1$
 	}
 	
 	public void roolbackSession() throws JMSException {
 		
+		tracer.log(TraceLevel.TRACE, "Begin roolbackSession()"); //$NON-NLS-1$
+		
 		synchronized (getSession()) {
 			getSession().rollback();
 		}
+		
+		tracer.log(TraceLevel.TRACE, "End roolbackSession()"); //$NON-NLS-1$
 	}
 
 	// close and invalidate the connection
 	public void closeConnection() {
-
+		tracer.log(TraceLevel.TRACE, "Begin closeConnection()"); //$NON-NLS-1$
 		if (getSession() != null) {
 			try {
                 getSession().close();
@@ -635,5 +676,6 @@ class JMSConnectionHelper implements ExceptionListener {
 			    setConnect(null);
 			}
 		}
+		tracer.log(TraceLevel.TRACE, "End closeConnection()"); //$NON-NLS-1$
 	}
 }

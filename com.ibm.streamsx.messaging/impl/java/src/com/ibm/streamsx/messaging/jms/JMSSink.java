@@ -444,6 +444,9 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 	 */
 	@ContextCheck(compile = false)
 	public static void checkParametersRuntime(OperatorContextChecker checker) {
+		
+		tracer.log(TraceLevel.TRACE, "Begin checkParametersRuntime()"); //$NON-NLS-1$
+		
 		OperatorContext context = checker.getOperatorContext();
 
 		if ((context.getParameterNames().contains("reconnectionBound"))) { //$NON-NLS-1$
@@ -536,6 +539,8 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			
 			}
         }
+		
+		tracer.log(TraceLevel.TRACE, "End checkParametersRuntime()"); //$NON-NLS-1$
 	}
 
 	// add compile time check for either period or reconnectionBound to be
@@ -565,6 +570,9 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			throws ParserConfigurationException, InterruptedException,
 			IOException, ParseConnectionDocumentException, SAXException,
 			NamingException, ConnectionException, Exception {
+		
+		tracer.log(TraceLevel.TRACE, "Begin initialize()"); //$NON-NLS-1$
+		
 		super.initialize(context);
 		
 		JmsClasspathUtil.setupClassPaths(context);
@@ -694,6 +702,8 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 
 		// register for data governance
 		registerForDataGovernance(connectionDocumentParser.getProviderURL(), connectionDocumentParser.getDestination());
+		
+		tracer.log(TraceLevel.TRACE, "End initialize()"); //$NON-NLS-1$
 	}
 
 	protected String getAbsolutePath(String filePath) {
