@@ -130,10 +130,10 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	// UTF-8
 	private String codepage = "UTF-8"; //$NON-NLS-1$
 	// This mandatory parameter access specifies access specification name.
-	private String access;
+	private String access = null;
 	// This mandatory parameter connection specifies name of the connection
 	// specification containing a JMS element
-	private String connection;
+	private String connection = null;
 	// This optional parameter connectionDocument specifies the pathname of a
 	// file containing the connection information.
 	// If present, it must have exactly one value that is a String constant.
@@ -183,21 +183,21 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	private Object resetLock = new Object();
 	
 	 // application configuration name
-    private String appConfigName;
+    private String appConfigName = null;
     
     // user property name stored in application configuration
-    private String userPropName;
+    private String userPropName = null;
     
     // password property name stored in application configuration
-    private String passwordPropName;
+    private String passwordPropName = null;
     
-    private String keyStore;
+    private String keyStore = null;
     
-    private String trustStore;
+    private String trustStore = null;
     
-    private String keyStorePassword;
+    private String keyStorePassword = null;
     
-    private String trustStorePassword;
+    private String trustStorePassword = null;
     
     private boolean sslConnection;
 
@@ -478,6 +478,8 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	 */
 	@ContextCheck(compile = false)
 	public static void checkParametersRuntime(OperatorContextChecker checker) {
+		
+		tracer.log(TraceLevel.TRACE, "Begin checkParametersRuntime()"); //$NON-NLS-1$
 
 		OperatorContext context = checker.getOperatorContext();
 
@@ -569,7 +571,8 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 						new Object[] {passwordPropName, appConfigName});
 			}
         }
-		
+        
+        tracer.log(TraceLevel.TRACE, "End checkParametersRuntime()"); //$NON-NLS-1$		
 	}
 
 	// add check for reconnectionPolicy is present if either period or
@@ -592,6 +595,8 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 			IOException, ParseConnectionDocumentException, SAXException,
 			NamingException, ConnectionException, Exception {
 
+		tracer.log(TraceLevel.TRACE, "Begin initialize()"); //$NON-NLS-1$
+		
 		super.initialize(context);
 		
 		consistentRegionContext = context.getOptionalContext(ConsistentRegionContext.class);
@@ -690,6 +695,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		// register for data governance
 		registerForDataGovernance(connectionDocumentParser.getProviderURL(), connectionDocumentParser.getDestination());
 
+		tracer.log(TraceLevel.TRACE, "End initialize()"); //$NON-NLS-1$
 	}
 
 	protected String getAbsolutePath(String filePath) {

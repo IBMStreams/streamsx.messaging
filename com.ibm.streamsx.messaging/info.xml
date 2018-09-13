@@ -684,7 +684,7 @@ The &lt;attribute> element has three possible attributes:
      * composite types
      * xml
 </info:description>
-    <info:version>5.3.9</info:version>
+    <info:version>5.3.10</info:version>
     <info:requiredProductVersion>4.2.0.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>
