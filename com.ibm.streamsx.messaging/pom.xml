@@ -6,7 +6,7 @@
     <groupId>com.ibm.streamsx.messaging</groupId>
     <artifactId>streamsx.messaging</artifactId>
     <packaging>jar</packaging>
-    <version>5.3.10</version>
+    <version>5.3.11</version>
     <name>com.ibm.streamsx.messaging</name>
     <repositories>
         <repository>
