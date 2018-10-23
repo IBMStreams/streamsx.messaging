@@ -6,7 +6,7 @@
     <groupId>com.ibm.streamsx.messaging</groupId>
     <artifactId>streamsx.messaging</artifactId>
     <packaging>jar</packaging>
-    <version>5.3.10</version>
+    <version>5.3.11</version>
     <name>com.ibm.streamsx.messaging</name>
     <repositories>
         <repository>
@@ -25,20 +25,20 @@
     <properties>
     </properties>
     <dependencies>
+    	<dependency>
+    		<groupId>org.apache.geronimo.specs</groupId>
+    		<artifactId>geronimo-jms_1.1_spec</artifactId>
+    		<version>1.1.1</version>
+    	</dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
             <version>0.10.0.0</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-client</artifactId>
-            <version>5.14.1</version>
-        </dependency>
-        <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
-            <version>3.6.2</version>
+            <version>5.4.3</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.paho</groupId>

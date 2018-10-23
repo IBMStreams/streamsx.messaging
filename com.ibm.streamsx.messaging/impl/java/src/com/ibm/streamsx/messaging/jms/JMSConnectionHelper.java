@@ -387,10 +387,14 @@ class JMSConnectionHelper implements ExceptionListener {
 
 		// Create connection.
 		if (userPrincipal != null && !userPrincipal.isEmpty() && 
-				userCredential != null && !userCredential.isEmpty() )
+				userCredential != null && !userCredential.isEmpty() ) {
+			tracer.log(TraceLevel.TRACE, "Create connection for user: " + userPrincipal); //$NON-NLS-1$
 			setConnect(connFactory.createConnection(userPrincipal, userCredential));
-		else
+		}
+		else {
+			tracer.log(TraceLevel.TRACE, "Create connection with empty credentials"); //$NON-NLS-1$
 			setConnect(connFactory.createConnection());
+		}
 		getConnect().setExceptionListener (this);
 
 		// Create session from connection; false means

@@ -51,12 +51,6 @@ public class RabbitMQConnectionExceptionHandler implements ExceptionHandler {
 	}
 
 	@Override
-	public void handleFlowListenerException(Channel arg0, Throwable arg1) {
-		arg1.printStackTrace();
-		trace.log(TraceLevel.ERROR, Messages.getString("SEE_STDOUT_FOR_FULL_STACK_TRACE", arg1.getMessage())); //$NON-NLS-1$
-	}
-
-	@Override
 	public void handleReturnListenerException(Channel arg0, Throwable arg1) {
 		arg1.printStackTrace();
 		trace.log(TraceLevel.ERROR, Messages.getString("SEE_STDOUT_FOR_FULL_STACK_TRACE", arg1.getMessage())); //$NON-NLS-1$
