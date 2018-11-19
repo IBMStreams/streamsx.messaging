@@ -233,9 +233,14 @@ class ConnectionDocumentParser {
 
 	// subroutine to parse and validate the connection document
 	// called by both the JMSSink and JMSSource
-	public void parseAndValidateConnectionDocument(String connectionDocument, String connection, String access,
-			StreamSchema streamSchema, boolean isProducer, File applicationDir) throws ParseConnectionDocumentException, SAXException,
-			IOException, ParserConfigurationException {
+	public void parseAndValidateConnectionDocument(	String connectionDocument,
+													String connection,
+													String access,
+													StreamSchema streamSchema,
+													boolean isProducer,
+													File applicationDir)
+		throws ParseConnectionDocumentException, SAXException, IOException, ParserConfigurationException
+	{
 		// validate the connections document against the xsd
 		validateConnectionsXML(connectionDocument);
 		// create document builder

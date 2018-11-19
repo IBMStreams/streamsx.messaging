@@ -155,8 +155,8 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	// InfiniteRetry.
 	// If not specified, it is set to BoundedRetry with a reconnectionBound of 5
 	// and a period of 60 seconds.
-	private ReconnectionPolicies reconnectionPolicy = ReconnectionPolicies
-			.valueOf("BoundedRetry"); //$NON-NLS-1$
+	private ReconnectionPolicies reconnectionPolicy = ReconnectionPolicies.valueOf("BoundedRetry"); //$NON-NLS-1$
+	
 	// This optional parameter period specifies the time period in seconds which
 	// the
 	// operator will wait before trying to reconnect.
@@ -580,8 +580,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	@ContextCheck(compile = true)
 	public static void checkParameters(OperatorContextChecker checker) {
 		checker.checkDependentParameters("period", "reconnectionPolicy"); //$NON-NLS-1$ //$NON-NLS-2$
-		checker.checkDependentParameters("reconnectionBound", //$NON-NLS-1$
-				"reconnectionPolicy"); //$NON-NLS-1$
+		checker.checkDependentParameters("reconnectionBound", "reconnectionPolicy"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		// Make sure if appConfigName is specified then both userPropName and passwordPropName are needed
 		checker.checkDependentParameters("appConfigName", "userPropName", "passwordPropName"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -637,26 +636,28 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 		// check if connections file is valid, if any of the below checks fail,
 		// the operator throws a runtime error and abort
 
-		connectionDocumentParser.parseAndValidateConnectionDocument(
-				getConnectionDocument(), connection, access, streamSchema, false, context.getPE().getApplicationDirectory());
+		connectionDocumentParser.parseAndValidateConnectionDocument(getConnectionDocument(),
+																	connection,
+																	access,
+																	streamSchema,
+																	false,
+																	context.getPE().getApplicationDirectory());
 
 		// codepage parameter can come only if message class is bytes
-
-		if (connectionDocumentParser.getMessageType() != MessageClass.bytes
-				&& context.getParameterNames().contains("codepage")) { //$NON-NLS-1$
-			throw new ParseConnectionDocumentException(
-					Messages.getString("CODEPAGE_APPEARS_ONLY_WHEN_MSG_CLASS_IS_BYTES")); //$NON-NLS-1$
+		if (connectionDocumentParser.getMessageType() != MessageClass.bytes &&
+			context.getParameterNames().contains("codepage")) //$NON-NLS-1$
+		{
+			throw new ParseConnectionDocumentException(Messages.getString("CODEPAGE_APPEARS_ONLY_WHEN_MSG_CLASS_IS_BYTES")); //$NON-NLS-1$
 		}
-		// populate the message type and isAMQ
 
+		// populate the message type and isAMQ
 		messageType = connectionDocumentParser.getMessageType();
 		isAMQ = connectionDocumentParser.isAMQ();
-		// parsing connection document is successful, we can go ahead and create
-		// connection
+
+		// parsing connection document is successful,
+		// we can go ahead and create connection
 		// isProducer, false implies Consumer
-		
         PropertyProvider propertyProvider = null;
-		
 		if(getAppConfigName() != null) {
 			propertyProvider = new PropertyProvider(context.getPE(), getAppConfigName());
 		}
@@ -719,46 +720,51 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	}
 
 	@Override
-	protected void process() throws IOException, ConnectionException{
-		
-		boolean isInConsistentRegion = consistentRegionContext != null;
-		boolean isTriggerOperator = isInConsistentRegion && consistentRegionContext.isTriggerOperator();
-		
-		int msgIDAttrIndex = -1;
+	protected void process() throws IOException, ConnectionException
+	{
+		boolean	isInConsistentRegion	= consistentRegionContext != null;
+		boolean	isTriggerOperator		= isInConsistentRegion && consistentRegionContext.isTriggerOperator();
+		int		msgIdAttrIndex			= -1;
 		
 		if(this.getMessageIDOutAttrName() != null) {
 			StreamSchema streamSchema = getOutput(0).getStreamSchema();
-			msgIDAttrIndex = streamSchema.getAttributeIndex(this.getMessageIDOutAttrName());
+			msgIdAttrIndex = streamSchema.getAttributeIndex(this.getMessageIDOutAttrName());
 		}
 		
 		
 		// create the initial connection.
-	    try {
-			jmsConnectionHelper.createInitialConnection();
+	    try
+	    {
+	    	jmsConnectionHelper.createInitialConnection();
 			if(isInConsistentRegion) {
 				notifyResetLock(true);
 		    }
-	    } catch (InterruptedException e) {
+	    }
+	    catch (InterruptedException ie)
+	    {
 	        return;
-		} catch (ConnectionException e) {
+		}
+	    catch (ConnectionException ce)
+	    {
 			
 			if(isInConsistentRegion) {
 				notifyResetLock(false);
 			}
 			// Initial connection fails to be created.
 			// throw the exception.
-			throw e;
+			throw ce;
 		}
 
-		long timeout = JMSSource.RECEIVE_TIMEOUT;
-		long sessionCreationTime = 0;
+		long timeout				= JMSSource.RECEIVE_TIMEOUT;
+		long sessionCreationTime	= 0;
 
-		while (!Thread.interrupted()) {
+		while (!Thread.interrupted())
+		{
 			// read a message from the consumer
-			
-			try {
-				
-				if(isInConsistentRegion) {
+			try
+			{
+				if(isInConsistentRegion)
+				{
 					consistentRegionContext.acquirePermit();
 					
 					// A checkpoint has been made, thus acknowledging the last sent message
@@ -775,16 +781,23 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 					}
 				}
 
-				Message m = null;
-				try {
-				    m = jmsConnectionHelper.receiveMessage(timeout);
-				} catch (ConnectionException | InterruptedException e) {
-				    throw e;
-				} catch (/*JMS*/Exception e) {
+				Message msg = null;
+				try
+				{
+				    msg = jmsConnectionHelper.receiveMessage(timeout);
+				}
+				catch (ConnectionException | InterruptedException ceie)
+				{
+				    throw ceie;
+				}
+				catch (/*JMS*/Exception e)
+				{
 				    // receive retry after reconnection attempt failed
 				    continue;
                 }
-				if (m == null) {
+				
+				if (msg == null)
+				{
 					continue;
 				}
 				
@@ -792,31 +805,33 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 				// nMessagesRead indicates the number of messages which we have
 				// read from the JMS Provider successfully
 				nMessagesRead.incrementValue(1);
-				try {
-				
-    				if(isInConsistentRegion) {
+				try
+				{
+    				if(isInConsistentRegion)
+    				{
     					// following section takes care of possible duplicate messages
     					// i.e connection re-created due to failure causing unacknowledged message to be delivered again
     					// we don't want to process duplicate messages again.
-    					if(crState.getLastMsgSent() == null) {
+    					if(crState.getLastMsgSent() == null)
+    					{
     						sessionCreationTime = jmsConnectionHelper.getSessionCreationTime();
     					}
-    					else {
+    					else
+    					{
     						// if session has been re-created and message is duplicate,ignore
     						if(jmsConnectionHelper.getSessionCreationTime() > sessionCreationTime && 
-    						   isDuplicateMsg(m, crState.getLastMsgSent().getJMSTimestamp(), crState.getMsgIDWIthSameTS())) {
-    						    logger.log(LogLevel.INFO, "IGNORED_DUPLICATED_MSG", m.getJMSMessageID()); //$NON-NLS-1$
+    						   isDuplicateMsg(msg, crState.getLastMsgSent().getJMSTimestamp(), crState.getMsgIDWIthSameTS())) {
+    						    logger.log(LogLevel.INFO, "IGNORED_DUPLICATED_MSG", msg.getJMSMessageID()); //$NON-NLS-1$
     							continue;
     						}
     					}
     				}
     				
+    				
     				OutputTuple dataTuple = dataOutputPort.newTuple();
 				
-    				// convert the message to the output Tuple using the appropriate
-    				// message handler
-    				MessageAction returnVal = messageHandlerImpl
-    						.convertMessageToTuple(m, dataTuple);
+    				// convert the message to the output Tuple using the appropriate message handler
+    				MessageAction returnVal = messageHandlerImpl.convertMessageToTuple(msg, dataTuple);
     				
     				// take an action based on the return type
     				switch (returnVal) {
@@ -865,8 +880,8 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
     					break;
     				// the message was read successfully
     				case SUCCESSFUL_MESSAGE:
-    					if(msgIDAttrIndex != -1 && m.getJMSMessageID() != null) {
-    						dataTuple.setObject(msgIDAttrIndex, new RString(m.getJMSMessageID()));
+    					if(msgIdAttrIndex != -1 && msg.getJMSMessageID() != null) {
+    						dataTuple.setObject(msgIdAttrIndex, new RString(msg.getJMSMessageID()));
     					}
     					dataOutputPort.submit(dataTuple);
     					break;
@@ -884,7 +899,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
     				
     				// set last processed message
     				if(isInConsistentRegion) {
-    					crState.setLastMsgSent(m);
+    					crState.setLastMsgSent(msg);
     				}
     				
     				// If the consistent region is driven by operator, then
@@ -898,7 +913,8 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
     					}
     			    }
 				}
-				catch (Exception /*UnsupportedEncodingException | JMSException*/ e) {
+				catch (Exception /*UnsupportedEncodingException | JMSException*/ e)
+				{
 				    nMessagesDropped.incrementValue(1);
 	                tracer.log(LogLevel.WARN, "failed to convert JMS message to tuple: " + e.toString(), "JMSSource");
 	                logger.log(LogLevel.WARN, "DISCARD_MESSAGE_MESSAGE_VARIABLE", e.toString()); //$NON-NLS-1$
@@ -908,17 +924,21 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	                    sendOutputErrorMsg(Messages.getString("DISCARD_MESSAGE_MESSAGE_VARIABLE", e.toString()));
 	                }
 				}
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException e) {
 			    // Thread has been interrupted, interrupted state is set; we will leave the while loop - no further action
-			} catch (IOException | ConnectionException e) {
+			}
+			catch (IOException | ConnectionException e) {
 			    // problem resetting CR --> throw
 			    // final problem with connection
 			    throw e;
-            } catch (Exception e) {
+            }
+			catch (Exception e) {
                 // failed to send output tuple
                 nMessagesDropped.incrementValue(1);
                 tracer.log (LogLevel.WARN, "failed to submit output tuple: " + e.toString(), "JMSSource");
-            } finally {
+            }
+			finally {
 				if(consistentRegionContext != null) {
 					consistentRegionContext.releasePermit();
 				}
