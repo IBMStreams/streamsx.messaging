@@ -41,7 +41,7 @@ class JMSConnectionHelper implements ExceptionListener {
 	// jndi context
 	private Context jndiContext = null;
 	// connection
-	private Connection connect = null;
+	private Connection connection = null;
 	// JMS message producer
 	private MessageProducer producer = null;
 	// JMS message consumer
@@ -133,8 +133,8 @@ class JMSConnectionHelper implements ExceptionListener {
 	}
 
 	// procedure to detrmine if there exists a valid connection or not
-	private boolean isConnectValid() {
-		if (connect != null)
+	private boolean isConnectionValid() {
+		if (connection != null)
 			return true;
 		return false;
 	}
@@ -173,13 +173,13 @@ class JMSConnectionHelper implements ExceptionListener {
 
 	// setter for connect
 	// connect is thread safe.Hence not synchronizing.
-	private void setConnect(Connection connect) {
-		this.connect = connect;
+	private void setConnection(Connection connection) {
+		this.connection = connection;
 	}
 
 	// getter for connect
-	private Connection getConnect() {
-		return connect;
+	private Connection getConnection() {
+		return connection;
 	}
 
 	// logger to get error messages
@@ -301,7 +301,7 @@ class JMSConnectionHelper implements ExceptionListener {
 		int nConnectionAttempts = 0;
 
 		// Check if connection exists or not.
-		if (!isConnectValid()) {
+		if (!isConnectionValid()) {
 
 			// Delay in miliseconds as specified in period parameter
 			final long delay = TimeUnit.MILLISECONDS.convert((long) period,
@@ -367,7 +367,7 @@ class JMSConnectionHelper implements ExceptionListener {
 
 		tracer.log(TraceLevel.TRACE, "Begin createConnectionNoRetry()"); //$NON-NLS-1$
 		
-		if (!isConnectValid()) {
+		if (!isConnectionValid()) {
 			try {
 				connect(isProducer);
 			} catch (JMSException e) {
@@ -389,22 +389,22 @@ class JMSConnectionHelper implements ExceptionListener {
 		if (userPrincipal != null && !userPrincipal.isEmpty() && 
 				userCredential != null && !userCredential.isEmpty() ) {
 			tracer.log(TraceLevel.TRACE, "Create connection for user: " + userPrincipal); //$NON-NLS-1$
-			setConnect(connFactory.createConnection(userPrincipal, userCredential));
+			setConnection(connFactory.createConnection(userPrincipal, userCredential));
 		}
 		else {
 			tracer.log(TraceLevel.TRACE, "Create connection with empty credentials"); //$NON-NLS-1$
-			setConnect(connFactory.createConnection());
+			setConnection(connFactory.createConnection());
 		}
-		getConnect().setExceptionListener (this);
+		getConnection().setExceptionListener (this);
 
 		// Create session from connection; false means
 		// session is not transacted.
 		
 		if(isProducer) {
-			setSession(getConnect().createSession(this.useClientAckMode, Session.AUTO_ACKNOWLEDGE));
+			setSession(getConnection().createSession(this.useClientAckMode, Session.AUTO_ACKNOWLEDGE));
 		}
 		else {
-			setSession(getConnect().createSession(false, (this.useClientAckMode) ? Session.CLIENT_ACKNOWLEDGE : Session.AUTO_ACKNOWLEDGE));
+			setSession(getConnection().createSession(false, (this.useClientAckMode) ? Session.CLIENT_ACKNOWLEDGE : Session.AUTO_ACKNOWLEDGE));
 		}
 		
 
@@ -422,14 +422,15 @@ class JMSConnectionHelper implements ExceptionListener {
 			    getProducerCR().setDeliveryMode(DeliveryMode.PERSISTENT);
 			    // start the connection
                 tracer.log (LogLevel.INFO, "going to start the connection for producer in client acknowledge mode ..."); //$NON-NLS-1$
-				getConnect().start();
+				getConnection().start();
 			}
 			
 			// set the delivery mode if it is specified
 			// default is non-persistent
 			if (deliveryMode == null) {
 				getProducer().setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-			} else {
+			}
+			else {
 				if (deliveryMode.trim().toLowerCase().equals("non_persistent")) { //$NON-NLS-1$
 					getProducer().setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 				}
@@ -439,12 +440,13 @@ class JMSConnectionHelper implements ExceptionListener {
 				}
 			}
 
-		} else {
+		}
+		else {
 			// Its JMSSource, So we will create a consumer
 			setConsumer(getSession().createConsumer(dest, messageSelector));
 			// start the connection
             tracer.log (LogLevel.INFO, "going to start consumer connection ..."); //$NON-NLS-1$
-			getConnect().start();
+			getConnection().start();
 		}
 		tracer.log (LogLevel.INFO, "connection successfully created"); //$NON-NLS-1$
 		tracer.log(TraceLevel.TRACE, "End connect()"); //$NON-NLS-1$
@@ -523,7 +525,7 @@ class JMSConnectionHelper implements ExceptionListener {
 				
 				// Recreate the connection objects if we don't have any (this
 				// could happen after a connection failure)
-				setConnect(null);
+				setConnection(null);
 				createConnection();
 			}
 			
@@ -559,7 +561,7 @@ class JMSConnectionHelper implements ExceptionListener {
 			}
 			// Recreate the connection objects if we don't have any (this
 			// could happen after a connection failure)
-			setConnect(null);
+			setConnection(null);
 			logger.log(LogLevel.WARN, "ERROR_DURING_RECEIVE", //$NON-NLS-1$
 					new Object[] { e.toString() });
 			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT"); //$NON-NLS-1$
@@ -627,7 +629,7 @@ class JMSConnectionHelper implements ExceptionListener {
 			
             tracer.log(LogLevel.INFO, "attempting to reconnect"); //$NON-NLS-1$
 			logger.log(LogLevel.INFO, "ATTEMPT_TO_RECONNECT"); //$NON-NLS-1$
-			setConnect(null);
+			setConnection(null);
 			createConnection();
 			
 			synchronized (getSession()) {
@@ -670,14 +672,14 @@ class JMSConnectionHelper implements ExceptionListener {
                 // ignore
             }
 		}
-		if (getConnect() != null) {
+		if (getConnection() != null) {
 			try {
-                getConnect().close();
+                getConnection().close();
             } catch (JMSException e) {
                 // ignore
             }
 			finally {
-			    setConnect(null);
+			    setConnection(null);
 			}
 		}
 		tracer.log(TraceLevel.TRACE, "End closeConnection()"); //$NON-NLS-1$
