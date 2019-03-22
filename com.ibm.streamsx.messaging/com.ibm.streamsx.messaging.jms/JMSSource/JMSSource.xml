@@ -83,6 +83,16 @@ The following types of exceptions can occur:
      * The **connectionsDocument** parameter refers to an file that does not exist.
      * The **connectionsDocument** parameter is not specified and the `connections.xml` file is not present in the default location.
      * The **messageIDOutAttrName** parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.
+     * The **jmsDestinationOutAttrName** parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.
+     * The **jmsDeliveryModeOutAttrName** parameter is specified but the attribute is not found in output schema or the type of attribute is not a int32 type.
+     * The **jmsExpirationOutAttrName** parameter is specified but the attribute is not found in output schema or the type of attribute is not a int64 type.
+     * The **jmsPriorityOutAttrName** parameter is specified but the attribute is not found in output schema or the type of attribute is not a int32 type.
+     * The **jmsMessageIDOutAttrName** parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.
+     * The **jmsTimestampOutAttrName** parameter is specified but the attribute is not found in output schema or the type of attribute is not a int64 type.
+     * The **jmsCorrelationIDOutAttrName** parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.
+     * The **jmsReplyToOutAttrName** parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.
+     * The **jmsTypeOutAttrName** parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.
+     * The **jmsRedeliveredOutAttrName** parameter is specified but the attribute is not found in output schema or the type of attribute is not a boolean type.
  * Run time errors that cause a message to be dropped and an error message to be logged.
    * The `JMSSource` operator throws an exception and discards the message in the following cases.
      The trace and log information for these exceptions is logged in the console logs
@@ -319,9 +329,99 @@ This parameter must be greater than zero and must be set if the JMSSource operat
         <cardinality>1</cardinality>
       </parameter>
        <parameter>
-	  <name>messageIDOutAttrName</name>
+      <name>messageIDOutAttrName</name>
         <description>
         Output attribute on output data stream to assign message ID to, the specified attribute in output stream must be of type rstring.
+        </description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+       <parameter>
+      <name>jmsDestinationOutAttrName</name>
+        <description>
+        Output attribute on output data stream to assign JMSDestination to, the specified attribute in output stream must be of type rstring.
+        </description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+       <parameter>
+      <name>jmsDeliveryModeOutAttrName</name>
+        <description>
+        Output attribute on output data stream to assign JMSDeliveryMode to, the specified attribute in output stream must be of type int32.
+        </description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+       <parameter>
+      <name>jmsExpirationOutAttrName</name>
+        <description>
+        Output attribute on output data stream to assign JMSExpiration to, the specified attribute in output stream must be of type int64.
+        </description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+       <parameter>
+      <name>jmsPriorityOutAttrName</name>
+        <description>
+        Output attribute on output data stream to assign JMSPriority to, the specified attribute in output stream must be of type int32.
+        </description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+       <parameter>
+      <name>jmsMessageIDOutAttrName</name>
+        <description>
+        Output attribute on output data stream to assign JMSMessageID to, the specified attribute in output stream must be of type rstring.
+        </description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+       <parameter>
+      <name>jmsTimestampOutAttrName</name>
+        <description>
+        Output attribute on output data stream to assign JMSTimestamp to, the specified attribute in output stream must be of type int64.
+        </description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+       <parameter>
+      <name>jmsCorrelationIDOutAttrName</name>
+        <description>
+        Output attribute on output data stream to assign JMSCorrelationID to, the specified attribute in output stream must be of type rstring.
+        </description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+       <parameter>
+      <name>jmsReplyToOutAttrName</name>
+        <description>
+        Output attribute on output data stream to assign JMSReplyTo to, the specified attribute in output stream must be of type rstring.
+        </description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+       <parameter>
+      <name>jmsTypeOutAttrName</name>
+        <description>
+        Output attribute on output data stream to assign JMSType to, the specified attribute in output stream must be of type rstring.
+        </description>
+        <optional>true</optional>
+        <type>rstring</type>
+        <cardinality>1</cardinality>
+      </parameter>
+       <parameter>
+      <name>jmsRedeliveredOutAttrName</name>
+        <description>
+        Output attribute on output data stream to assign JMSRedelivered to, the specified attribute in output stream must be of type boolean.
         </description>
         <optional>true</optional>
         <type>rstring</type>

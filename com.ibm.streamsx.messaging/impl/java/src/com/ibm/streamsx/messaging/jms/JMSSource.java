@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -180,6 +181,29 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	
 	private String messageIDOutAttrName = null;
 	
+	private String jmsDestinationOutAttrName = null;
+	private String jmsDeliveryModeOutAttrName = null;
+	private String jmsExpirationOutAttrName = null;
+	private String jmsPriorityOutAttrName = null;
+	private String jmsMessageIDOutAttrName = null;
+	private String jmsTimestampOutAttrName = null;
+	private String jmsCorrelationIDOutAttrName = null;
+	private String jmsReplyToOutAttrName = null;
+	private String jmsTypeOutAttrName = null;
+	private String jmsRedeliveredOutAttrName = null;
+	 
+	private static List<String> jmsHeaderValOutAttrNames = Arrays.asList("messageIDOutAttrName",
+																		"jmsDestinationOutAttrName",
+																		"jmsDeliveryModeOutAttrName",
+																		"jmsExpirationOutAttrName", 
+																		"jmsPriorityOutAttrName",
+																		"jmsMessageIDOutAttrName",
+																		"jmsTimestampOutAttrName", 
+																		"jmsCorrelationIDOutAttrName",
+																		"jmsReplyToOutAttrName", 
+																		"jmsTypeOutAttrName", 
+																		"jmsRedeliveredOutAttrName");
+	
 	private Object resetLock = new Object();
 	
 	 // application configuration name
@@ -281,6 +305,96 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 	@Parameter(optional = true)
 	public void setMessageIDOutAttrName(String messageIDOutAttrName) {
 		this.messageIDOutAttrName = messageIDOutAttrName;
+	}
+
+	public String getJmsDestinationOutAttrName() {
+		return jmsDestinationOutAttrName;
+	}
+
+	@Parameter(optional = true, description = "The name of the output attribute to store into the JMS Header information JMSDestination" )
+	public void setJmsDestinationOutAttrName(String jmsDestinationOutAttrName) {
+		this.jmsDestinationOutAttrName = jmsDestinationOutAttrName;
+	}
+
+	public String getJmsDeliveryModeOutAttrName() {
+		return jmsDeliveryModeOutAttrName;
+	}
+
+	@Parameter(optional = true, description = "The name of the output attribute to store into the JMS Header information JMSDeliveryMode" )
+	public void setJmsDeliveryModeOutAttrName(String jmsDeliveryModeOutAttrName) {
+		this.jmsDeliveryModeOutAttrName = jmsDeliveryModeOutAttrName;
+	}
+
+	public String getJmsExpirationOutAttrName() {
+		return jmsExpirationOutAttrName;
+	}
+
+	@Parameter(optional = true, description = "The name of the output attribute to store into the JMS Header information JMSExpiration" )
+public void setJmsExpirationOutAttrName(String jmsExpirationOutAttrName) {
+		this.jmsExpirationOutAttrName = jmsExpirationOutAttrName;
+	}
+
+	public String getJmsPriorityOutAttrName() {
+		return jmsPriorityOutAttrName;
+	}
+
+	@Parameter(optional = true, description = "The name of the output attribute to store into the JMS Header information JMSPriority" )
+	public void setJmsPriorityOutAttrName(String jmsPriorityOutAttrName) {
+		this.jmsPriorityOutAttrName = jmsPriorityOutAttrName;
+	}
+
+	public String getJmsMessageIDOutAttrName() {
+		return jmsMessageIDOutAttrName;
+	}
+
+	@Parameter(optional = true, description = "The name of the output attribute to store into the JMS Header information JMSMessageID" )
+	public void setJmsMessageIDOutAttrName(String jmsMessageIDOutAttrName) {
+		this.jmsMessageIDOutAttrName = jmsMessageIDOutAttrName;
+	}
+
+	public String getJmsTimestampOutAttrName() {
+		return jmsTimestampOutAttrName;
+	}
+
+	@Parameter(optional = true, description = "The name of the output attribute to store into the JMS Header information JMSTimestamp" )
+	public void setJmsTimestampOutAttrName(String jmsTimestampOutAttrName) {
+		this.jmsTimestampOutAttrName = jmsTimestampOutAttrName;
+	}
+
+	public String getJmsCorrelationIDOutAttrName() {
+		return jmsCorrelationIDOutAttrName;
+	}
+
+	@Parameter(optional = true, description = "The name of the output attribute to store into the JMS Header information JMSCorrelationID" )
+	public void setJmsCorrelationIDOutAttrName(String jmsCorrelationIDOutAttrName) {
+		this.jmsCorrelationIDOutAttrName = jmsCorrelationIDOutAttrName;
+	}
+
+	public String getJmsReplyToOutAttrName() {
+		return jmsReplyToOutAttrName;
+	}
+
+	@Parameter(optional = true, description = "The name of the output attribute to store into the JMS Header information JMSReplyTo" )
+	public void setJmsReplyToOutAttrName(String jmsReplyToOutAttrName) {
+		this.jmsReplyToOutAttrName = jmsReplyToOutAttrName;
+	}
+
+	public String getJmsTypeOutAttrName() {
+		return jmsTypeOutAttrName;
+	}
+
+	@Parameter(optional = true, description = "The name of the output attribute to store into the JMS Header information JMSType" )
+	public void setJmsTypeOutAttrName(String jmsTypeOutAttrName) {
+		this.jmsTypeOutAttrName = jmsTypeOutAttrName;
+	}
+
+	public String getJmsRedeliveredOutAttrName() {
+		return jmsRedeliveredOutAttrName;
+	}
+
+	@Parameter(optional = true, description = "The name of the output attribute to store into the JMS Header information JMSRedelivered" )
+	public void setJmsRedeliveredOutAttrName(String jmsRedeliveredOutAttrName) {
+		this.jmsRedeliveredOutAttrName = jmsRedeliveredOutAttrName;
 	}
 
 	public String getMessageSelector() {
@@ -531,20 +645,37 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 			}
 		}
 		
-        if (checker.getOperatorContext().getParameterNames().contains("messageIDOutAttrName")) { //$NON-NLS-1$
-    		
-    		List<String> parameterValues = checker.getOperatorContext().getParameterValues("messageIDOutAttrName"); //$NON-NLS-1$
-    		String outAttributeName = parameterValues.get(0);
-	    	List<StreamingOutput<OutputTuple>> outputPorts = checker.getOperatorContext().getStreamingOutputs();
-	    	if (outputPorts.size() > 0)
-	    	{
-	    		StreamingOutput<OutputTuple> outputPort = outputPorts.get(0);
-	    		StreamSchema streamSchema = outputPort.getStreamSchema();
-	    		boolean check = checker.checkRequiredAttributes(streamSchema, outAttributeName);
-	    		if (check)
-	    			checker.checkAttributeType(streamSchema.getAttribute(outAttributeName), MetaType.RSTRING);
+		for(String jmsHeaderValOutAttrName : jmsHeaderValOutAttrNames ) {
+	        if (checker.getOperatorContext().getParameterNames().contains(jmsHeaderValOutAttrName)) { 
+	    		
+	    		List<String> parameterValues = checker.getOperatorContext().getParameterValues(jmsHeaderValOutAttrName); 
+	    		String outAttributeName = parameterValues.get(0);
+		    	List<StreamingOutput<OutputTuple>> outputPorts = checker.getOperatorContext().getStreamingOutputs();
+		    	if (outputPorts.size() > 0)
+		    	{
+		    		StreamingOutput<OutputTuple> outputPort = outputPorts.get(0);
+		    		StreamSchema streamSchema = outputPort.getStreamSchema();
+		    		boolean check = checker.checkRequiredAttributes(streamSchema, outAttributeName);
+		    		if (check) {
+		    			switch (jmsHeaderValOutAttrName) {
+		    			case "jmsDeliveryModeOutAttrName":
+		    			case "jmsPriorityOutAttrName":
+		    				checker.checkAttributeType(streamSchema.getAttribute(outAttributeName), MetaType.INT32);
+		    				break;
+		    			case "jmsExpirationOutAttrName":
+		    			case "jmsTimestampOutAttrName":
+		    				checker.checkAttributeType(streamSchema.getAttribute(outAttributeName), MetaType.INT64);
+		    				break;
+		    			case "jmsRedeliveredOutAttrName":
+		    				checker.checkAttributeType(streamSchema.getAttribute(outAttributeName), MetaType.BOOLEAN);
+		    				break;
+		    			default:
+		    				checker.checkAttributeType(streamSchema.getAttribute(outAttributeName), MetaType.RSTRING);
+		    			}
+		    		}
+		    	}
 	    	}
-    	}
+		}
         
         if((checker.getOperatorContext().getParameterNames().contains("appConfigName"))) { //$NON-NLS-1$
         	String appConfigName = checker.getOperatorContext().getParameterValues("appConfigName").get(0); //$NON-NLS-1$
@@ -719,18 +850,14 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 				providerURL, IGovernanceConstants.ASSET_JMS_SERVER_TYPE, true, "JMSSource"); //$NON-NLS-1$
 	}
 
+	/* (non-Javadoc)
+	 * @see com.ibm.streams.operator.samples.patterns.ProcessTupleProducer#process()
+	 */
 	@Override
 	protected void process() throws IOException, ConnectionException
 	{
 		boolean	isInConsistentRegion	= consistentRegionContext != null;
 		boolean	isTriggerOperator		= isInConsistentRegion && consistentRegionContext.isTriggerOperator();
-		int		msgIdAttrIndex			= -1;
-		
-		if(this.getMessageIDOutAttrName() != null) {
-			StreamSchema streamSchema = getOutput(0).getStreamSchema();
-			msgIdAttrIndex = streamSchema.getAttributeIndex(this.getMessageIDOutAttrName());
-		}
-		
 		
 		// create the initial connection.
 	    try
@@ -880,9 +1007,7 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
     					break;
     				// the message was read successfully
     				case SUCCESSFUL_MESSAGE:
-    					if(msgIdAttrIndex != -1 && msg.getJMSMessageID() != null) {
-    						dataTuple.setObject(msgIdAttrIndex, new RString(msg.getJMSMessageID()));
-    					}
+    					handleJmsHeaderValues(msg, dataTuple);
     					dataOutputPort.submit(dataTuple);
     					break;
     				default:
@@ -945,6 +1070,113 @@ public class JMSSource extends ProcessTupleProducer implements StateHandler{
 			}
 		}
 	}
+
+
+	/**
+	 * Handles the values of the JMSHeader of the current message. It first checks
+	 * if there is an attribute in the Stream to write the header value into.
+	 *  
+	 * @param msg			The current JMS message.
+	 * @param outTuple		The output tuple.
+	 * @throws JMSException 
+	 */
+	private void handleJmsHeaderValues(Message msg, OutputTuple outTuple) throws JMSException {
+
+		int messageIDAttrIdx		= -1;
+		int jmsDestinationAttrIdx	= -1;
+		int jmsDeliveryModeAttrIdx	= -1;
+		int jmsExpirationAttrIdx	= -1;
+		int jmsPriorityAttrIdx		= -1;
+		int jmsMessageIDAttrIdx		= -1;
+		int jmsTimestampAttrIdx		= -1;
+		int jmsCorrelationIDAttrIdx	= -1;
+		int jmsReplyToAttrIdx		= -1;
+		int jmsTypeAttrIdx			= -1;
+		int jmsRedeliveredAttrIdx	= -1;
+				
+		
+		StreamSchema streamSchema = getOutput(0).getStreamSchema();
+
+		
+		if(this.getMessageIDOutAttrName() != null) {
+			messageIDAttrIdx = streamSchema.getAttributeIndex(this.getMessageIDOutAttrName());
+		}
+		if(messageIDAttrIdx != -1 && msg.getJMSMessageID() != null) {
+			outTuple.setObject(messageIDAttrIdx, new RString(msg.getJMSMessageID()));
+		}
+
+		
+		if(this.getJmsDestinationOutAttrName() != null) {
+			jmsDestinationAttrIdx = streamSchema.getAttributeIndex(this.getJmsDestinationOutAttrName());
+		}
+		if(jmsDestinationAttrIdx != -1 && msg.getJMSDestination() != null) {
+			outTuple.setObject(jmsDestinationAttrIdx, new RString(msg.getJMSDestination().toString()));
+		}
+		
+		if(this.getJmsDeliveryModeOutAttrName() != null) {
+			jmsDeliveryModeAttrIdx = streamSchema.getAttributeIndex(this.getJmsDeliveryModeOutAttrName());
+		}
+		if(jmsDeliveryModeAttrIdx != -1) {
+			outTuple.setObject(jmsDeliveryModeAttrIdx, new Integer(msg.getJMSDeliveryMode()));
+		}
+		
+		if(this.getJmsExpirationOutAttrName() != null) {
+			jmsExpirationAttrIdx = streamSchema.getAttributeIndex(this.getJmsExpirationOutAttrName());
+		}
+		if(jmsExpirationAttrIdx != -1) {
+			outTuple.setObject(jmsExpirationAttrIdx, new Long(msg.getJMSExpiration()));
+		}
+		
+		if(this.getJmsPriorityOutAttrName() != null) {
+			jmsPriorityAttrIdx = streamSchema.getAttributeIndex(this.getJmsPriorityOutAttrName());
+		}
+		if(jmsPriorityAttrIdx != -1) {
+			outTuple.setObject(jmsPriorityAttrIdx, new Integer(msg.getJMSPriority()));
+		}
+		
+		if(this.getJmsMessageIDOutAttrName() != null) {
+			jmsMessageIDAttrIdx = streamSchema.getAttributeIndex(this.getJmsMessageIDOutAttrName());
+		}
+		if(jmsMessageIDAttrIdx != -1 && msg.getJMSMessageID() != null) {
+			outTuple.setObject(jmsMessageIDAttrIdx, new RString(msg.getJMSMessageID()));
+		}
+
+		if(this.getJmsTimestampOutAttrName() != null) {
+			jmsTimestampAttrIdx = streamSchema.getAttributeIndex(this.getJmsTimestampOutAttrName());
+		}
+		if(jmsTimestampAttrIdx != -1) {
+			outTuple.setObject(jmsTimestampAttrIdx, new Long(msg.getJMSTimestamp()));
+		}
+		
+		if(this.getJmsCorrelationIDOutAttrName() != null) {
+			jmsCorrelationIDAttrIdx = streamSchema.getAttributeIndex(this.getJmsCorrelationIDOutAttrName());
+		}
+		if(jmsCorrelationIDAttrIdx != -1 && msg.getJMSCorrelationID() != null) {
+			outTuple.setObject(jmsCorrelationIDAttrIdx, new RString(msg.getJMSCorrelationID()));
+		}
+		
+		if(this.getJmsReplyToOutAttrName() != null) {
+			jmsReplyToAttrIdx = streamSchema.getAttributeIndex(this.getJmsReplyToOutAttrName());
+		}
+		if(jmsReplyToAttrIdx != -1 && msg.getJMSReplyTo() != null) {
+			outTuple.setObject(jmsReplyToAttrIdx, new RString(msg.getJMSReplyTo().toString()));
+		}
+				
+		if(this.getJmsTypeOutAttrName() != null) {
+			jmsTypeAttrIdx = streamSchema.getAttributeIndex(this.getJmsTypeOutAttrName());
+		}
+		if(jmsTypeAttrIdx != -1 && msg.getJMSType() != null) {
+			outTuple.setObject(jmsTypeAttrIdx, new RString(msg.getJMSType()));
+		}
+		
+		if(this.getJmsRedeliveredOutAttrName() != null) {
+			jmsRedeliveredAttrIdx = streamSchema.getAttributeIndex(this.getJmsRedeliveredOutAttrName());
+		}
+		if(jmsRedeliveredAttrIdx != -1) {
+			outTuple.setObject(jmsRedeliveredAttrIdx, new Boolean(msg.getJMSRedelivered()));
+		}
+	}
+	
 
 	// Send the error message on to the error output port if one is specified
 	private void sendOutputErrorMsg(String errorMessage) {
