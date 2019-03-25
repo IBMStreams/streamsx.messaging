@@ -20,6 +20,8 @@ public class JmsClasspathUtil {
 		
 		tracer.log(TraceLevel.TRACE, "Setting up classpath"); //$NON-NLS-1$
 		
+		boolean classpathSet = false;
+		
 		String AMQ_HOME = System.getenv("STREAMS_MESSAGING_AMQ_HOME"); //$NON-NLS-1$
 		if (AMQ_HOME != null) {
 			
@@ -35,6 +37,7 @@ public class JmsClasspathUtil {
 			catch (MalformedURLException e) {
 				tracer.log(TraceLevel.ERROR, "Failed to add class libs to context: " + e.getMessage()); //$NON-NLS-1$
 			}
+			classpathSet = true;
 		}
 	
 		String WMQ_HOME = System.getenv("STREAMS_MESSAGING_WMQ_HOME"); //$NON-NLS-1$
@@ -50,7 +53,15 @@ public class JmsClasspathUtil {
 			catch (MalformedURLException e) {
 				tracer.log(TraceLevel.ERROR, "Failed to add class libs to context: " + e.getMessage()); //$NON-NLS-1$
 			}
+			classpathSet = true;
 		}
+		
+		if(	classpathSet != true ) {
+			tracer.log(TraceLevel.ERROR, "No classpath has been set!"); //$NON-NLS-1$
+		}
+		
+		tracer.log(TraceLevel.TRACE, "Finished etting up classpath!"); //$NON-NLS-1$
+
 	}
 
 }
