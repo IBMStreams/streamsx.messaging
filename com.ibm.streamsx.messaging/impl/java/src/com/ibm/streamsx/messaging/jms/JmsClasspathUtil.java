@@ -5,6 +5,8 @@
 package com.ibm.streamsx.messaging.jms;
 
 import java.net.MalformedURLException;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.ibm.streams.operator.OperatorContext;
@@ -21,6 +23,18 @@ public class JmsClasspathUtil {
 		tracer.log(TraceLevel.TRACE, "Setting up classpath"); //$NON-NLS-1$
 		
 		boolean classpathSet = false;
+
+		
+		// Dump the provided environment
+		Map<String,String>	sysEnvMap	= System.getenv();
+		Set<String>			sysEnvKeys	= sysEnvMap.keySet();
+		tracer.log(TraceLevel.TRACE, "------------------------------------------------------------------------------------"); //$NON-NLS-1$
+		tracer.log(TraceLevel.TRACE, "--- System Environment used during initialization"); //$NON-NLS-1$
+		for( String key : sysEnvKeys) {
+			tracer.log(TraceLevel.TRACE, key + " = " + System.getenv(key)); //$NON-NLS-1$
+		}
+		tracer.log(TraceLevel.TRACE, "------------------------------------------------------------------------------------"); //$NON-NLS-1$
+		
 		
 		String AMQ_HOME = System.getenv("STREAMS_MESSAGING_AMQ_HOME"); //$NON-NLS-1$
 		if (AMQ_HOME != null) {
@@ -60,7 +74,7 @@ public class JmsClasspathUtil {
 			tracer.log(TraceLevel.ERROR, "No classpath has been set!"); //$NON-NLS-1$
 		}
 		
-		tracer.log(TraceLevel.TRACE, "Finished etting up classpath!"); //$NON-NLS-1$
+		tracer.log(TraceLevel.TRACE, "Finished setting up classpath!"); //$NON-NLS-1$
 
 	}
 
