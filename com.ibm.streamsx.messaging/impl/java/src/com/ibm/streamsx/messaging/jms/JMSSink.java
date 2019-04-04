@@ -573,12 +573,18 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 		
 		tracer.log(TraceLevel.TRACE, "Begin initialize()"); //$NON-NLS-1$
 		
+		tracer.log(TraceLevel.TRACE, "Calling super class initialization"); //$NON-NLS-1$
 		super.initialize(context);
+		tracer.log(TraceLevel.TRACE, "Returned from super class initialization"); //$NON-NLS-1$
+		
 		
 		JmsClasspathUtil.setupClassPaths(context);
 		
 		// set SSL system properties
 		if(isSslConnection()) {
+			
+			tracer.log(TraceLevel.TRACE, "Setting up SSL connection"); //$NON-NLS-1$
+
 			if(context.getParameterNames().contains("keyStore"))
 				System.setProperty("javax.net.ssl.keyStore", getAbsolutePath(getKeyStore()));				
 			if(context.getParameterNames().contains("keyStorePassword"))
