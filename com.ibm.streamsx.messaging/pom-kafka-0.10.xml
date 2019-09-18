@@ -6,7 +6,7 @@
     <groupId>com.ibm.streamsx.messaging</groupId>
     <artifactId>streamsx.messaging</artifactId>
     <packaging>jar</packaging>
-    <version>5.3.13</version>
+    <version>5.4.2</version>
     <name>com.ibm.streamsx.messaging</name>
     <repositories>
         <repository>
@@ -43,7 +43,7 @@
         <dependency>
             <groupId>org.eclipse.paho</groupId>
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
-            <version>1.0.1</version>
+            <version>1.2.1</version>
         </dependency>
     </dependencies>
     <build>

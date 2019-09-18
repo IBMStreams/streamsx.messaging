@@ -194,9 +194,9 @@ The following example shows connection specification that contains a &lt;JMS> el
       &lt;connection_specification name=&quot;amqConn&quot;>
         &lt;JMS initial_context=&quot;org.apache.activemq.jndi.ActiveMQInitialContextFactory&quot;
         provider_url = &quot;tcp://machinename.com:61616&quot;
-        connection_factory = &quot;ConnectionFactory&quot;/>
+        connection_factory = &quot;ConnectionFactory&quot;
         user=&quot;user1&quot;
-        password=&quot;password1&quot;
+        password=&quot;password1&quot;/>
       &lt;/connection_specification>
     &lt;/connection_specifications>
 
@@ -684,7 +684,7 @@ The &lt;attribute> element has three possible attributes:
      * composite types
      * xml
 </info:description>
-    <info:version>5.4.1</info:version>
+    <info:version>5.4.2</info:version>
     <info:requiredProductVersion>4.2.0.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>
