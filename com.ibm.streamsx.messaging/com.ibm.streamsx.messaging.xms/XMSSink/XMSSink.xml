@@ -7,6 +7,10 @@ others. All Rights Reserved.
   <cppOperatorModel>
     <context>
       <description docHref="doc/${nl}/spldoc/html/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSink.html">
+**DEPRECATED**: The `com.ibm.streamsx.messaging.xms.XMSSink` operator is deprecated. There is no toolkit
+providing a replacement operator. The deprecated operator might be removed in a future release.
+
+
 The `XMSSink` operator takes messages from IBM InfoSphere Streams and can send them to a WebSphere MQ queue or topic.
 
 The incoming tuple from InfoSphere Streams can be one or many of the following data types:
@@ -160,8 +164,8 @@ The following is a sample `connections.xml` file:
 	  &lt;/access_specifications>
 	&lt;/st:connections>	
 </description>
-      <iconUri size="16">XMSSink_16.gif</iconUri>
-      <iconUri size="32">XMSSink_32.gif</iconUri>
+      <iconUri size="16">XMSSink_deprecated_16.gif</iconUri>
+      <iconUri size="32">XMSSink_deprecated_32.gif</iconUri>
       <metrics>
         <metric>
           <name>nTruncatedInserts</name>
