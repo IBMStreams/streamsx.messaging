@@ -41,6 +41,7 @@ import com.ibm.streams.operator.state.StateHandler;
 import com.ibm.streamsx.messaging.common.DataGovernanceUtil;
 import com.ibm.streamsx.messaging.common.IGovernanceConstants;
 import com.ibm.streamsx.messaging.common.PropertyProvider;
+import com.ibm.streamsx.messaging.rabbitmq.RabbitMQSink;
 
 
 //The JMSSink operator publishes data from Streams to a JMS Provider queue or a topic.
@@ -570,6 +571,8 @@ public class JMSSink extends AbstractOperator implements StateHandler{
 			throws ParserConfigurationException, InterruptedException,
 			IOException, ParseConnectionDocumentException, SAXException,
 			NamingException, ConnectionException, Exception {
+		
+		tracer.log(TraceLevel.ERROR, "The `com.ibm.streamsx.messaging.jms.JMSSink` operator is deprecated and is replaced by the `com.ibm.streamsx.jms.JMSSink` operator in the `com.ibm.streamsx.jms` toolkit. The deprecated operator might be removed in a future release."); //$NON-NLS-1$
 		
 		tracer.log(TraceLevel.TRACE, "Begin initialize()"); //$NON-NLS-1$
 		

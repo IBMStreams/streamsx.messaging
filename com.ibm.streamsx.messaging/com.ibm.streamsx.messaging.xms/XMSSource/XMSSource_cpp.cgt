@@ -160,7 +160,7 @@ using namespace streams_boost;
 // Constructor
 MY_OPERATOR::MY_OPERATOR(): nMessagesReadPC( getContext().getMetrics().getCustomMetricByName("nMessagesRead")),nMessagesDroppedPC( getContext().getMetrics().getCustomMetricByName("nMessagesDropped")),nConnectionAttemptsPC( getContext().getMetrics().getCustomMetricByName("nConnectionAttempts"))
 {
-
+	SPLAPPTRC(L_ERROR, "The `com.ibm.streamsx.messaging.xms.XMSSource` operator is deprecated. There is no toolkit providing a replacement operator. The deprecated operator might be removed in a future release.", "XMSSink");
 	SPLAPPTRC(L_DEBUG, "Entry: Constructor", "XMSSource");
 
 	periodVal=0.0;

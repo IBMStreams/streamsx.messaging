@@ -13,6 +13,10 @@
   <javaOperatorModel>
     <context> 
       <description docHref="doc/${nl}/spldoc/html/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSource.html">
+**DEPRECATED**: The `com.ibm.streamsx.messaging.jms.JMSSource` operator is deprecated
+and is replaced by the `com.ibm.streamsx.jms.JMSSource` operator in the `com.ibm.streamsx.jms` toolkit.
+The deprecated operator might be removed in a future release.
+
 The `JMSSource` operator reads data from a WebSphere MQ or an Apache Active MQ queue
 or a topic and creates tuples from the read data. 
 
@@ -188,8 +192,8 @@ This example shows the use of multiple `JMSSource` operators with different para
 	}
 	}                                                                                           
 </description>
-  	  <iconUri size="16">JMSSource_16.gif</iconUri>
-	  <iconUri size="32">JMSSource_32.gif</iconUri>
+  	  <iconUri size="16">JMSSource_deprecated_16.gif</iconUri>
+	  <iconUri size="32">JMSSource_deprecated_32.gif</iconUri>
 	  <metrics>
       	<metric>
           <name>nMessagesRead</name>

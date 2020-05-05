@@ -727,6 +727,8 @@ public void setJmsExpirationOutAttrName(String jmsExpirationOutAttrName) {
 			throws ParserConfigurationException, InterruptedException,
 			IOException, ParseConnectionDocumentException, SAXException,
 			NamingException, ConnectionException, Exception {
+		
+		tracer.log(TraceLevel.ERROR, "The `com.ibm.streamsx.messaging.jms.JMSSource` operator is deprecated and is replaced by the `com.ibm.streamsx.jms.JMSSource` operator in the `com.ibm.streamsx.jms` toolkit. The deprecated operator might be removed in a future release."); //$NON-NLS-1$
 
 		tracer.log(TraceLevel.TRACE, "Begin initialize()"); //$NON-NLS-1$
 		

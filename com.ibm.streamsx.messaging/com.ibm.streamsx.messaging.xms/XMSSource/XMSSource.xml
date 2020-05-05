@@ -7,6 +7,10 @@ others. All Rights Reserved.
   <cppOperatorModel>
     <context>
       <description docHref="doc/${nl}/spldoc/html/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSource.html">
+**DEPRECATED**: The `com.ibm.streamsx.messaging.xms.XMSSource` operator is deprecated. There is no toolkit
+providing a replacement operator. The deprecated operator might be removed in a future release.
+
+
 The `XMSSource` operator reads data from a WebSphere MQ queue or topic and creates tuples out of it.
 
 Each input WebSphere MQ message is converted to a separate tuple and sent to the output stream. 
@@ -142,8 +146,8 @@ This example demonstrates the use of multiple `XMSSource` operators with differe
 
 This example uses the same `connections.xml` that is provided in the example for the `XMSSink` operator.
 </description>
-      <iconUri size="16">XMSSource_16.gif</iconUri>
-      <iconUri size="32">XMSSource_32.gif</iconUri>
+      <iconUri size="16">XMSSource_deprecated_16.gif</iconUri>
+      <iconUri size="32">XMSSource_deprecated_32.gif</iconUri>
       <metrics>
         <metric>
           <name>nMessagesRead</name>

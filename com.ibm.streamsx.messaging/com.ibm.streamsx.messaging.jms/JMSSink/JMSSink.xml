@@ -9,6 +9,11 @@
   <javaOperatorModel>
     <context>
       <description docHref="doc/${nl}/spldoc/html/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSink.html">
+**DEPRECATED**: The `com.ibm.streamsx.messaging.jms.JMSSink` operator is deprecated
+and is replaced by the `com.ibm.streamsx.jms.JMSSink` operator in the `com.ibm.streamsx.jms` toolkit.
+The deprecated operator might be removed in a future release.
+
+
 The `JMSSink` operator creates messages from InfoSphere Streams tuples
 and writes the messages to a WebSphere MQ or an Apache Active MQ queue or topic.
 
@@ -183,8 +188,8 @@ The following example shows a sample connections.xml file:
 	&lt;/access_specifications>
 	&lt;/st:connections>
 </description>
-      <iconUri size="16">JMSSink_16.gif</iconUri>
-      <iconUri size="32">JMSSink_32.gif</iconUri>
+      <iconUri size="16">JMSSink_deprecated_16.gif</iconUri>
+      <iconUri size="32">JMSSink_deprecated_32.gif</iconUri>
       <metrics>
         <metric>
           <name>nTruncatedInserts</name>
