@@ -7,32 +7,32 @@
 <meta name="copyright" content="(C) Copyright 2005"/>
 <meta name="DC.rights.owner" content="(C) Copyright 2005"/>
 <meta name="DC.Type" content="reference"/>
-<meta name="DC.Title" content="Toolkit com.ibm.streamsx.messaging 5.1.1"/>
+<meta name="DC.Title" content="Toolkit com.ibm.streamsx.messaging 5.4.3"/>
 <meta name="DC.Format" content="XHTML"/>
 <meta name="DC.Identifier" content="spldoc_toolkit"/>
 <link rel="stylesheet" type="text/css" href="../../html/commonltr.css"/>
 <link rel="stylesheet" type="text/css" href="../../html/spldoc.css"/>
-<title>Toolkit com.ibm.streamsx.messaging 5.1.1</title>
+<title>Toolkit com.ibm.streamsx.messaging 5.4.3</title>
 </head>
 <body id="spldoc_toolkit">
 
 
-<h1 class="title topictitle1 spltoolkitname">Toolkit <tt class="ph tt">com.ibm.streamsx.messaging 5.1.1</tt></h1>
+<h1 class="title topictitle1 spltoolkitname">Toolkit <tt class="ph tt">com.ibm.streamsx.messaging 5.4.3</tt></h1>
 
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; com.ibm.streamsx.messaging 5.1.1</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; com.ibm.streamsx.messaging 5.4.3</p>
 
 </div>
 
 <div class="section"><h2 class="title sectiontitle splhead-1">General Information</h2>
 
 
-<p class="p">The Messaging toolkit project is an open source IBM InfoSphere Streams toolkit project. It is focused on the development of operators and functions that help you use InfoSphere Streams to interact with messaging systems such as Kafka, JMS, XMS, and MQTT. 
+<p class="p">The Messaging toolkit project is an open source IBM Streams toolkit project. It is focused on the development of operators and functions that help you use IBM Streams to interact with messaging systems such as Kafka, JMS, XMS, and MQTT. 
 </p>
 
-<p class="p">The operators provide the ability for InfoSphere Streams applications to send and receive data from a queue or topic that is posted on Kafka, WebSphere MQ, Apache ActiveMQ or MQ Telemetry Transport (MQTT) server.
+<p class="p">The operators provide the ability for IBM Streams applications to send and receive data from a queue or topic that is posted on Kafka, WebSphere MQ, Apache ActiveMQ or MQ Telemetry Transport (MQTT) server.
 </p>
 
 <p class="p">In particular, the <tt class="ph tt">XMSSource</tt> and <tt class="ph tt">XMSSink</tt> operators in the Messaging Toolkit use the standard XMS architecture and APIs to read and write data from WebSphere MQ v7.5 and v8.0. 
@@ -47,13 +47,13 @@
 <p class="p">The <tt class="ph tt">KafkaProducer</tt> and <tt class="ph tt">KafkaConsumer</tt> operators support Kafka v0.10.0.0 brokers. For 0.9 brokers, you make rebuild the toolkit for Kafka 0.9 by running the following commands: <tt class="ph tt">ant clean; ant kafka-0.9</tt> For older versions of Kafka brokers, you must use older versions of this toolkit.  
 </p>
 
-<p class="p"><strong class="ph b">Restriction</strong>: The <tt class="ph tt">XMSSource</tt> and <tt class="ph tt">XMSSink</tt>, operators in the Messaging Toolkit are not supported on POWER7 or POWER 8 Systems. You must use x86_64 systems. 
+<p class="p"><strong class="ph b">Restriction</strong>: The <tt class="ph tt">XMSSource</tt> and <tt class="ph tt">XMSSink</tt> operators in the Messaging Toolkit are supported on x86_64 systems. 
 </p>
 
-<p class="p"><strong class="ph b">Restriction</strong>: The <tt class="ph tt">XMSSource</tt> and <tt class="ph tt">XMSSink</tt>, operators in the Messaging Toolkit are not supported on RHEL 7 platforms.
+<p class="p"><strong class="ph b">Restriction</strong>: The <tt class="ph tt">XMSSource</tt> and <tt class="ph tt">XMSSink</tt> operators in the Messaging Toolkit are not supported on RHEL 7 platforms.
 </p>
 
-<p class="p">The following figure shows how the <tt class="ph tt">XMSSink</tt> and <tt class="ph tt">XMSSource</tt> operators in the Messaging Toolkit use standard XMS architecture and APIs.  <br/><img class="image" src="../../image/copy/1$8751_dgm1.gif" alt="This diagram illustrates the XMS APIs that are used to communicate between InfoSphere Streams, an XMS client, and a WebSphere MQ server."/><br/>
+<p class="p">The following figure shows how the <tt class="ph tt">XMSSink</tt> and <tt class="ph tt">XMSSource</tt> operators in the Messaging Toolkit use standard XMS architecture and APIs.  <br/><img class="image" src="../../image/copy/1$8751_dgm1.gif" alt="This diagram illustrates the XMS APIs that are used to communicate between IBM Streams, an XMS client, and a WebSphere MQ server."/><br/>
 </p>
 
 <div class="p">For example:
@@ -90,7 +90,7 @@
   
   <dt class="dt dlterm">Version</dt>
 
-  <dd class="dd">5.1.1</dd>
+  <dd class="dd">5.4.3</dd>
 
   
   
@@ -190,7 +190,7 @@
       <dd class="dd"/>
 
       <dd class="dd">
-Operator control input port: Some of the operators in the Messaging Toolkit provide the capability to specify an optional control input port.
+<strong class="ph b">Deprecation of MQTT functions</strong> 
       </dd>
 
       <dd class="dd"><dl class="dl">

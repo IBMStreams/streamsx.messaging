@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.1</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$2.html">Connection specifications document</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$7.html">Access_specification element</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$8.html">Destination element</a> &gt; Message class formats in the Messaging Toolkit</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.4.3</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$2.html">Connection specifications document</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$7.html">Access_specification element</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging$8.html">Destination element</a> &gt; Message class formats in the Messaging Toolkit</p>
 
 </div>
 
@@ -31,7 +31,7 @@
 <p class="p">The message class specifies the type of XMS or JMS message that is output or expected by the operators in the Messaging Toolkit.  It also affects how the message payload is converted to tuples or vice versa.
 </p>
 
-<p class="p">The Messaging Toolkit supports the following values for the message_class attribute in the &lt;destination&gt; element: bytes, empty, map, stream, wbe, wbe22, and xml.
+<p class="p">The Messaging Toolkit supports the following values for the message_class attribute in the &lt;destination&gt; element: bytes, empty, map, stream, text, wbe, wbe22, and xml.
 </p>
 
 <div class="p">When the message_class attribute value is <tt class="ph tt">bytes</tt>:
@@ -70,7 +70,7 @@
 
 <div class="p">When the message_class attribute value is <tt class="ph tt">empty</tt>:
 <ul class="ul">
-<li class="li"> The <tt class="ph tt">XMSSink</tt> operator construct an empty XMS message. The <tt class="ph tt">JMSSink</tt> operator construct an empty JMS message.   For example, you can use an empty XMS message to verify that your InfoSphere Streams application can connect   to the WebSphere MQ server and that the message reaches its destination.   <strong class="ph b">Note</strong>: This message_class value cannot be used with a &lt;native_schema&gt; element.</li>
+<li class="li"> The <tt class="ph tt">XMSSink</tt> operator construct an empty XMS message. The <tt class="ph tt">JMSSink</tt> operator construct an empty JMS message.   For example, you can use an empty XMS message to verify that your IBM Streams application can connect   to the WebSphere MQ server and that the message reaches its destination.   <strong class="ph b">Note</strong>: This message_class value cannot be used with a &lt;native_schema&gt; element.</li>
 
 <li class="li"> The <tt class="ph tt">XMSSource</tt> operator expects an empty XMS message. It emits a tuple with attribute values that are assigned by the SPL program.   This behavior is not supported if a &lt;native_schema&gt; element is defined or if there are any unassigned attributes.   The <tt class="ph tt">JMSSource</tt> operator expects an empty JMS message.</li>
 
@@ -115,6 +115,16 @@
 
 </ul>
 </li>
+
+</ul>
+
+</div>
+
+<div class="p">When the message_class attribute value is <tt class="ph tt">text</tt>: When the text message class is specified in the connection document, the native schema must contain a single attribute of a String type. Text messages must be encoded in UTF-8. For support of other encoding, use bytes message class.
+<ul class="ul">
+<li class="li"> The <tt class="ph tt">JMSSink</tt> and <tt class="ph tt">XMSSink</tt> operators construct a JMS TextMessage and the output schema for JMSSink must contain a single String attribute.</li>
+
+<li class="li"> The <tt class="ph tt">JMSSource</tt> and <tt class="ph tt">XMSSource</tt> operators expect a JMS TextMessage and the input schema for JMSSource must contain a single String attribute.</li>
 
 </ul>
 

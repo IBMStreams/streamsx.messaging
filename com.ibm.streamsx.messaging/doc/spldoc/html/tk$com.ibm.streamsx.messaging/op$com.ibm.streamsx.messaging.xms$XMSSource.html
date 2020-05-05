@@ -22,15 +22,18 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.1</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a> &gt; XMSSource</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.4.3</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.xms.html">com.ibm.streamsx.messaging.xms</a> &gt; XMSSource</p>
 
 </div>
 
 <div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSource.svg" width="672" height="112"/>
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.xms$XMSSource.svg" width="872" height="112"/>
 </div>
 
 <div class="section">
+
+<p class="p"><strong class="ph b">DEPRECATED</strong>: The <tt class="ph tt">com.ibm.streamsx.messaging.xms.XMSSource</tt> operator is deprecated. There is no toolkit providing a replacement operator. The deprecated operator might be removed in a future release.
+</p>
 
 <p class="p">The <tt class="ph tt">XMSSource</tt> operator reads data from a WebSphere MQ queue or topic and creates tuples out of it.
 </p>
@@ -233,7 +236,7 @@
       
         <dt class="dt dlterm">Assignments</dt>
 
-        <dd class="dd">This operator allows any SPL expression of the correct type to be assigned to output attributes.</dd>
+        <dd class="dd">This port set allows any SPL expression of the correct type to be assigned to output attributes.</dd>
 
       
     </dl>
@@ -620,11 +623,11 @@ stream&lt;${streamType}&gt; ${streamName} = XMSSource()   {
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics">Metrics</a></strong></p>
 <dl class="dl">
   
-    <dt class="dt dlterm"><tt class="ph tt">nMessagesRead</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+    <dt class="dt dlterm"><tt class="ph tt">nConnectionAttempts</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
 
     <dd class="dd">
 
-<p class="p">The number of messages read successfully.
+<p class="p">The number of connection attempts that are made before a successful connection.
 </p>
 
      <p class="p"/>
@@ -646,11 +649,11 @@ stream&lt;${streamType}&gt; ${streamName} = XMSSource()   {
 
   
   
-    <dt class="dt dlterm"><tt class="ph tt">nConnectionAttempts</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+    <dt class="dt dlterm"><tt class="ph tt">nMessagesRead</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
 
     <dd class="dd">
 
-<p class="p">The number of connection attempts that are made before a successful connection.
+<p class="p">The number of messages read successfully.
 </p>
 
      <p class="p"/>

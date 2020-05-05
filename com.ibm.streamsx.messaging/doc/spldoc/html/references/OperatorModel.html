@@ -272,6 +272,7 @@ portions. One example for the Barrier operator is as follows:
 </p>
 
 <div class="p">
+
 <pre class="pre codeblock">
 &lt;codeTemplates&gt;
   &lt;codeTemplate name="Barrier"&gt;
@@ -291,6 +292,7 @@ portions. One example for the Barrier operator is as follows:
   &lt;/codeTemplate&gt;
 &lt;/codeTemplates&gt;
 </pre>
+
 
     </div>
 </dd>
@@ -321,6 +323,7 @@ The generated SPL expression tree includes:
 </p>
 
 <div class="p">
+
 <pre class="pre codeblock">
 &lt;expressionTree cppCode="SPL::BeJwrMUoyTEwyTAIAC7UCCQ({attr:0}, {attr:1})"&gt;
   &lt;literal cppCode="SPL::BeJwrMUoyTEwyTAIAC7UCCQ({attr:0}, {attr:1})" type="1"&gt;
@@ -344,6 +347,7 @@ The generated SPL expression tree includes:
         &lt;/value&gt;
       &lt;/attr&gt;
 </pre>
+
 
 </div>
 
@@ -532,7 +536,7 @@ any input stream attributes. For example: output <tt class="ph tt">Out : x = 3 +
 <li class="li"><tt class="ph tt">Constant:</tt> This means that the assignments made to output attributes of this port need to be 
 compile-time evaluatable to a constant. For example: output <tt class="ph tt">Out : x = 3 + pow(2, 3);</tt>, but not <tt class="ph tt">x = random(3)</tt>.</li>
 
-<li class="li"><tt class="ph tt">Expression:</tt> This is the most flexible expression mode, any SPL expression of correct type can appear as an assignment to the output attributes of this port. For example: output Out : x = A.y + B.z;.</li>
+<li class="li"><tt class="ph tt">Expression:</tt> This is the most flexible expression mode, any SPL expression of correct type can appear as an assignment to the output attributes of this port. For example: output<tt class="ph tt"> Out : x = A.y + B.z;</tt>.</li>
 
 <li class="li"><tt class="ph tt">Nonexistent:</tt> This means that output attribute assignments cannot be specified in the SPL source for this port.</li>
 
@@ -548,7 +552,11 @@ compile-time evaluatable to a constant. For example: output <tt class="ph tt">Ou
 The <tt class="ph tt">autoAssignment</tt> element defines whether unassigned attributes will be automatically assigned from the attributes of the input ports.
 If set to true, the SPL compiler will rewrite (at compile-time) the operator invocation as if the unassigned output attributes have 
 explicit assignments in the output section. For each output attribute that is missing an assignment, an input attribute that has 
-the same name and type will be assigned to it. If there is no such input attribute or if there are more than one, an error is 
+the same name and type,
+or that has the same name and type <tt class="ph tt">T</tt>,
+where the output attribute type is <tt class="ph tt">optional&lt;T&gt;</tt>,
+will be assigned to it.
+If there is no such input attribute or if there are more than one, an error is 
 reported at compile-time. Note that an expressionMode value of Constant is incompatible with an autoAssignment value of true. 
 This combination will result in a compilation error.
     </dd>

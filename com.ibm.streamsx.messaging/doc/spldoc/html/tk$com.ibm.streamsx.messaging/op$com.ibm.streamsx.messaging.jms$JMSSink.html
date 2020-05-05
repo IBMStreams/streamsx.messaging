@@ -22,15 +22,18 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.1</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSink</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.4.3</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSink</p>
 
 </div>
 
 <div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSink.svg" width="672" height="112"/>
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSink.svg" width="872" height="112"/>
 </div>
 
 <div class="section">
+
+<p class="p"><strong class="ph b">DEPRECATED</strong>: The <tt class="ph tt">com.ibm.streamsx.messaging.jms.JMSSink</tt> operator is deprecated and is replaced by the <tt class="ph tt">com.ibm.streamsx.jms.JMSSink</tt> operator in the <tt class="ph tt">com.ibm.streamsx.jms</tt> toolkit. The deprecated operator might be removed in a future release.
+</p>
 
 <p class="p">The <tt class="ph tt">JMSSink</tt> operator creates messages from InfoSphere Streams tuples and writes the messages to a WebSphere MQ or an Apache Active MQ queue or topic.
 </p>
@@ -918,19 +921,6 @@
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics">Metrics</a></strong></p>
 <dl class="dl">
   
-    <dt class="dt dlterm"><tt class="ph tt">nTruncatedInserts</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
-
-    <dd class="dd">
-
-<p class="p">The number of tuples that had truncated attributes when they were converted to a message.
-</p>
-
-     <p class="p"/>
-
-     </dd>
-
-  
-  
     <dt class="dt dlterm"><tt class="ph tt">nFailedInserts</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
 
     <dd class="dd">
@@ -949,6 +939,19 @@
     <dd class="dd">
 
 <p class="p">The number of reconnection attempts that are made before a successful connection.
+</p>
+
+     <p class="p"/>
+
+     </dd>
+
+  
+  
+    <dt class="dt dlterm"><tt class="ph tt">nTruncatedInserts</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+
+    <dd class="dd">
+
+<p class="p">The number of tuples that had truncated attributes when they were converted to a message.
 </p>
 
      <p class="p"/>

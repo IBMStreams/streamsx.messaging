@@ -22,15 +22,18 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.1</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSource</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.4.3</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.jms.html">com.ibm.streamsx.messaging.jms</a> &gt; JMSSource</p>
 
 </div>
 
 <div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSource.svg" width="672" height="112"/>
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.jms$JMSSource.svg" width="872" height="112"/>
 </div>
 
 <div class="section">
+
+<p class="p"><strong class="ph b">DEPRECATED</strong>: The <tt class="ph tt">com.ibm.streamsx.messaging.jms.JMSSource</tt> operator is deprecated and is replaced by the <tt class="ph tt">com.ibm.streamsx.jms.JMSSource</tt> operator in the <tt class="ph tt">com.ibm.streamsx.jms</tt> toolkit. The deprecated operator might be removed in a future release.
+</p>
 
 <p class="p">The <tt class="ph tt">JMSSource</tt> operator reads data from a WebSphere MQ or an Apache Active MQ queue or a topic and creates tuples from the read data. 
 </p>
@@ -128,6 +131,26 @@
 
 <li class="li"> The <strong class="ph b">messageIDOutAttrName</strong> parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.</li>
 
+<li class="li"> The <strong class="ph b">jmsDestinationOutAttrName</strong> parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.</li>
+
+<li class="li"> The <strong class="ph b">jmsDeliveryModeOutAttrName</strong> parameter is specified but the attribute is not found in output schema or the type of attribute is not a int32 type.</li>
+
+<li class="li"> The <strong class="ph b">jmsExpirationOutAttrName</strong> parameter is specified but the attribute is not found in output schema or the type of attribute is not a int64 type.</li>
+
+<li class="li"> The <strong class="ph b">jmsPriorityOutAttrName</strong> parameter is specified but the attribute is not found in output schema or the type of attribute is not a int32 type.</li>
+
+<li class="li"> The <strong class="ph b">jmsMessageIDOutAttrName</strong> parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.</li>
+
+<li class="li"> The <strong class="ph b">jmsTimestampOutAttrName</strong> parameter is specified but the attribute is not found in output schema or the type of attribute is not a int64 type.</li>
+
+<li class="li"> The <strong class="ph b">jmsCorrelationIDOutAttrName</strong> parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.</li>
+
+<li class="li"> The <strong class="ph b">jmsReplyToOutAttrName</strong> parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.</li>
+
+<li class="li"> The <strong class="ph b">jmsTypeOutAttrName</strong> parameter is specified but the attribute is not found in output schema or the type of attribute is not a rstring type.</li>
+
+<li class="li"> The <strong class="ph b">jmsRedeliveredOutAttrName</strong> parameter is specified but the attribute is not found in output schema or the type of attribute is not a boolean type.</li>
+
 </ul>
 </li>
 
@@ -188,7 +211,7 @@
  
   <dt class="dt dlterm">Ports</dt>
 
-  <dd class="dd">This operator has 0 input port and 2 output ports.</dd>
+  <dd class="dd">This operator has 0 input ports and 2 output ports.</dd>
 
  
  
@@ -200,14 +223,14 @@
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 19 parameters.
+  <dd class="dd">This operator supports 29 parameters.
 <p class="p"> Required: 
 <a class="xref" href="#spldoc_operator__parameter__access">access</a>, <a class="xref" href="#spldoc_operator__parameter__connection">connection</a>
 
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__appConfigName">appConfigName</a>, <a class="xref" href="#spldoc_operator__parameter__codepage">codepage</a>, <a class="xref" href="#spldoc_operator__parameter__connectionDocument">connectionDocument</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__keyStore">keyStore</a>, <a class="xref" href="#spldoc_operator__parameter__keyStorePassword">keyStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__messageIDOutAttrName">messageIDOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__messageSelector">messageSelector</a>, <a class="xref" href="#spldoc_operator__parameter__passwordPropName">passwordPropName</a>, <a class="xref" href="#spldoc_operator__parameter__period">period</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionBound">reconnectionBound</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionPolicy">reconnectionPolicy</a>, <a class="xref" href="#spldoc_operator__parameter__sslConnection">sslConnection</a>, <a class="xref" href="#spldoc_operator__parameter__triggerCount">triggerCount</a>, <a class="xref" href="#spldoc_operator__parameter__trustStore">trustStore</a>, <a class="xref" href="#spldoc_operator__parameter__trustStorePassword">trustStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__userPropName">userPropName</a>
+<a class="xref" href="#spldoc_operator__parameter__appConfigName">appConfigName</a>, <a class="xref" href="#spldoc_operator__parameter__codepage">codepage</a>, <a class="xref" href="#spldoc_operator__parameter__connectionDocument">connectionDocument</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__jmsCorrelationIDOutAttrName">jmsCorrelationIDOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsDeliveryModeOutAttrName">jmsDeliveryModeOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsDestinationOutAttrName">jmsDestinationOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsExpirationOutAttrName">jmsExpirationOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsMessageIDOutAttrName">jmsMessageIDOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsPriorityOutAttrName">jmsPriorityOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsRedeliveredOutAttrName">jmsRedeliveredOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsReplyToOutAttrName">jmsReplyToOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsTimestampOutAttrName">jmsTimestampOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsTypeOutAttrName">jmsTypeOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__keyStore">keyStore</a>, <a class="xref" href="#spldoc_operator__parameter__keyStorePassword">keyStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__messageIDOutAttrName">messageIDOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__messageSelector">messageSelector</a>, <a class="xref" href="#spldoc_operator__parameter__passwordPropName">passwordPropName</a>, <a class="xref" href="#spldoc_operator__parameter__period">period</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionBound">reconnectionBound</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionPolicy">reconnectionPolicy</a>, <a class="xref" href="#spldoc_operator__parameter__sslConnection">sslConnection</a>, <a class="xref" href="#spldoc_operator__parameter__triggerCount">triggerCount</a>, <a class="xref" href="#spldoc_operator__parameter__trustStore">trustStore</a>, <a class="xref" href="#spldoc_operator__parameter__trustStorePassword">trustStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__userPropName">userPropName</a>
 
 </p>
 </dd>
@@ -331,14 +354,14 @@
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 19 parameters.
+This operator supports 29 parameters.
 <p class="p"> Required: 
 <a class="xref" href="#spldoc_operator__parameter__access">access</a>, <a class="xref" href="#spldoc_operator__parameter__connection">connection</a>
 
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__appConfigName">appConfigName</a>, <a class="xref" href="#spldoc_operator__parameter__codepage">codepage</a>, <a class="xref" href="#spldoc_operator__parameter__connectionDocument">connectionDocument</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__keyStore">keyStore</a>, <a class="xref" href="#spldoc_operator__parameter__keyStorePassword">keyStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__messageIDOutAttrName">messageIDOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__messageSelector">messageSelector</a>, <a class="xref" href="#spldoc_operator__parameter__passwordPropName">passwordPropName</a>, <a class="xref" href="#spldoc_operator__parameter__period">period</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionBound">reconnectionBound</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionPolicy">reconnectionPolicy</a>, <a class="xref" href="#spldoc_operator__parameter__sslConnection">sslConnection</a>, <a class="xref" href="#spldoc_operator__parameter__triggerCount">triggerCount</a>, <a class="xref" href="#spldoc_operator__parameter__trustStore">trustStore</a>, <a class="xref" href="#spldoc_operator__parameter__trustStorePassword">trustStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__userPropName">userPropName</a>
+<a class="xref" href="#spldoc_operator__parameter__appConfigName">appConfigName</a>, <a class="xref" href="#spldoc_operator__parameter__codepage">codepage</a>, <a class="xref" href="#spldoc_operator__parameter__connectionDocument">connectionDocument</a>, <a class="xref" href="#spldoc_operator__parameter__initDelay">initDelay</a>, <a class="xref" href="#spldoc_operator__parameter__jmsCorrelationIDOutAttrName">jmsCorrelationIDOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsDeliveryModeOutAttrName">jmsDeliveryModeOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsDestinationOutAttrName">jmsDestinationOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsExpirationOutAttrName">jmsExpirationOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsMessageIDOutAttrName">jmsMessageIDOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsPriorityOutAttrName">jmsPriorityOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsRedeliveredOutAttrName">jmsRedeliveredOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsReplyToOutAttrName">jmsReplyToOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsTimestampOutAttrName">jmsTimestampOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__jmsTypeOutAttrName">jmsTypeOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__keyStore">keyStore</a>, <a class="xref" href="#spldoc_operator__parameter__keyStorePassword">keyStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__messageIDOutAttrName">messageIDOutAttrName</a>, <a class="xref" href="#spldoc_operator__parameter__messageSelector">messageSelector</a>, <a class="xref" href="#spldoc_operator__parameter__passwordPropName">passwordPropName</a>, <a class="xref" href="#spldoc_operator__parameter__period">period</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionBound">reconnectionBound</a>, <a class="xref" href="#spldoc_operator__parameter__reconnectionPolicy">reconnectionPolicy</a>, <a class="xref" href="#spldoc_operator__parameter__sslConnection">sslConnection</a>, <a class="xref" href="#spldoc_operator__parameter__triggerCount">triggerCount</a>, <a class="xref" href="#spldoc_operator__parameter__trustStore">trustStore</a>, <a class="xref" href="#spldoc_operator__parameter__trustStorePassword">trustStorePassword</a>, <a class="xref" href="#spldoc_operator__parameter__userPropName">userPropName</a>
 
 </p>
 <dl class="dl">
@@ -510,6 +533,316 @@ This operator supports 19 parameters.
  <dd class="dd">
   <ul class="sl simple">
   <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: int64
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__jmsCorrelationIDOutAttrName"><!-- --></a><tt class="ph tt">jmsCorrelationIDOutAttrName</tt></dt>
+
+<dd class="dd">
+<p class="p">        Output attribute on output data stream to assign JMSCorrelationID to, the specified attribute in output stream must be of type rstring.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__jmsDeliveryModeOutAttrName"><!-- --></a><tt class="ph tt">jmsDeliveryModeOutAttrName</tt></dt>
+
+<dd class="dd">
+<p class="p">        Output attribute on output data stream to assign JMSDeliveryMode to, the specified attribute in output stream must be of type int32.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__jmsDestinationOutAttrName"><!-- --></a><tt class="ph tt">jmsDestinationOutAttrName</tt></dt>
+
+<dd class="dd">
+<p class="p">        Output attribute on output data stream to assign JMSDestination to, the specified attribute in output stream must be of type rstring.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__jmsExpirationOutAttrName"><!-- --></a><tt class="ph tt">jmsExpirationOutAttrName</tt></dt>
+
+<dd class="dd">
+<p class="p">        Output attribute on output data stream to assign JMSExpiration to, the specified attribute in output stream must be of type int64.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__jmsMessageIDOutAttrName"><!-- --></a><tt class="ph tt">jmsMessageIDOutAttrName</tt></dt>
+
+<dd class="dd">
+<p class="p">        Output attribute on output data stream to assign JMSMessageID to, the specified attribute in output stream must be of type rstring.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__jmsPriorityOutAttrName"><!-- --></a><tt class="ph tt">jmsPriorityOutAttrName</tt></dt>
+
+<dd class="dd">
+<p class="p">        Output attribute on output data stream to assign JMSPriority to, the specified attribute in output stream must be of type int32.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__jmsRedeliveredOutAttrName"><!-- --></a><tt class="ph tt">jmsRedeliveredOutAttrName</tt></dt>
+
+<dd class="dd">
+<p class="p">        Output attribute on output data stream to assign JMSRedelivered to, the specified attribute in output stream must be of type boolean.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__jmsReplyToOutAttrName"><!-- --></a><tt class="ph tt">jmsReplyToOutAttrName</tt></dt>
+
+<dd class="dd">
+<p class="p">        Output attribute on output data stream to assign JMSReplyTo to, the specified attribute in output stream must be of type rstring.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__jmsTimestampOutAttrName"><!-- --></a><tt class="ph tt">jmsTimestampOutAttrName</tt></dt>
+
+<dd class="dd">
+<p class="p">        Output attribute on output data stream to assign JMSTimestamp to, the specified attribute in output stream must be of type int64.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
+  </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
+     </li>
+
+     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
+     </li>
+
+  </ul>
+
+ </dd>
+
+
+</dl>
+
+</dd>
+
+
+
+<dt class="dt dlterm"><a name="spldoc_operator__parameter__jmsTypeOutAttrName"><!-- --></a><tt class="ph tt">jmsTypeOutAttrName</tt></dt>
+
+<dd class="dd">
+<p class="p">        Output attribute on output data stream to assign JMSType to, the specified attribute in output stream must be of type rstring.
+</p>
+<dl class="dl">
+
+ <dt class="dt dlterm">Properties </dt>
+
+ <dd class="dd">
+  <ul class="sl simple">
+  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: rstring
   </li>
 
      <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
@@ -978,11 +1311,11 @@ stream&lt;${streamType}&gt; ${streamName} = JMSSource()   {
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics">Metrics</a></strong></p>
 <dl class="dl">
   
-    <dt class="dt dlterm"><tt class="ph tt">nMessagesRead</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+    <dt class="dt dlterm"><tt class="ph tt">nMessagesDropped</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
 
     <dd class="dd">
 
-<p class="p">The number of messages that are read successfully from a queue or topic.
+<p class="p">The number of messages that are dropped in the application.
 </p>
 
      <p class="p"/>
@@ -991,11 +1324,11 @@ stream&lt;${streamType}&gt; ${streamName} = JMSSource()   {
 
   
   
-    <dt class="dt dlterm"><tt class="ph tt">nMessagesDropped</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
+    <dt class="dt dlterm"><tt class="ph tt">nMessagesRead</tt> - <a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__context__metrics_kind_counter">Counter</a></dt>
 
     <dd class="dd">
 
-<p class="p">The number of messages that are dropped in the application.
+<p class="p">The number of messages that are read successfully from a queue or topic.
 </p>
 
      <p class="p"/>

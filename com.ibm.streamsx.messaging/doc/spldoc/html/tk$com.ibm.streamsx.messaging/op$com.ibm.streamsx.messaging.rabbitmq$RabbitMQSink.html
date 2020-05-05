@@ -22,15 +22,18 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.1</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.rabbitmq.html">com.ibm.streamsx.messaging.rabbitmq</a> &gt; RabbitMQSink</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.4.3</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.rabbitmq.html">com.ibm.streamsx.messaging.rabbitmq</a> &gt; RabbitMQSink</p>
 
 </div>
 
 <div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.rabbitmq$RabbitMQSink.svg" width="672" height="112"/>
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.rabbitmq$RabbitMQSink.svg" width="872" height="112"/>
 </div>
 
 <div class="section">
+
+<p class="p"><strong class="ph b">DEPRECATED</strong>: The <tt class="ph tt">com.ibm.streamsx.messaging.rabbitmq.RabbitMQSink</tt> operatoris deprecated and is replaced by the <tt class="ph tt">com.ibm.streamsx.rabbitmq.RabbitMQSink</tt> operator in the<tt class="ph tt">com.ibm.streamsx.rabbitmq</tt> toolkit. The deprecated operator might be removed in a future release.
+</p>
 
 <p class="p">This operator acts as a RabbitMQ producer, sending messages to a RabbitMQ broker. The broker is assumed to be already configured and running. The incoming stream can have three attributes: message, routing_key, and messageHeader. The message is a required attribute. The exchange name, queue name, and routing key can be specified using parameters. If a specified exchange does not exist, it will be created as a non-durable exchange. All exchanges created by this operator are non-durable and auto-delete.This operator supports direct, fanout, and topic exchanges. It does not support header exchanges. Messages are non-persistent and sending will only be attempted once by default. This behavior can be modified using the deliveryMode and maxMessageSendRetries parameters. 
 </p>
@@ -49,7 +52,7 @@
  
   <dt class="dt dlterm">Ports</dt>
 
-  <dd class="dd">This operator has 1 input port and 0 output port.</dd>
+  <dd class="dd">This operator has 1 input port and 0 output ports.</dd>
 
  
  

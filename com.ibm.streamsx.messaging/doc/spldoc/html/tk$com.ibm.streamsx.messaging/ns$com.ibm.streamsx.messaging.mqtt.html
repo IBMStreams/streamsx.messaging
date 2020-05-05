@@ -22,11 +22,17 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.1</a> &gt; com.ibm.streamsx.messaging.mqtt</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.4.3</a> &gt; com.ibm.streamsx.messaging.mqtt</p>
 
 </div>
 
 <div class="section">
+
+<p class="p"><strong class="ph b">Deprecation of MQTT functions</strong>
+</p>
+
+<p class="p">The MQTT functions (operators, functions, SPL types) of this toolkit available in the <tt class="ph tt">com.ibm.streamsx.messaging.mqtt</tt> SPL namespace is deprecated. Please migrate to the <tt class="ph tt">streamsx.mqtt</tt> toolkit.
+</p>
 
   <dl class="dl"><dt class="dt dlterm"><a class="xref" href="ns$com.ibm.streamsx.messaging.mqtt$1.html">Operator control input port</a>
 </dt>
@@ -39,10 +45,10 @@
 <div class="section"><h2 class="title sectiontitle splhead-1">Operators</h2>
   
 <ul class="sl simple">
-<li class="sli"><strong class="ph b"><a class="xref" href="op$com.ibm.streamsx.messaging.mqtt$MQTTSink.html">MQTTSink</a></strong>: The MQTTSink operator creates a message for every tuple it receives on its input port and publishes the message to an MQTT server.
+<li class="sli"><strong class="ph b"><a class="xref" href="op$com.ibm.streamsx.messaging.mqtt$MQTTSink.html">MQTTSink</a></strong>: <strong class="ph b">DEPRECATED</strong>: The <tt class="ph tt">com.ibm.streamsx.messaging.mqtt.MQTTSink</tt> operator is deprecated and is replaced by the <tt class="ph tt">com.ibm.streamsx.mqtt.MQTTSink</tt> operator in the <tt class="ph tt">com.ibm.streamsx.mqtt</tt> toolkit. The deprecated operator might be removed in a future release. 
 </li>
 
-<li class="sli"><strong class="ph b"><a class="xref" href="op$com.ibm.streamsx.messaging.mqtt$MQTTSource.html">MQTTSource</a></strong>: The MQTTSource operator subscribes to MQTT topics and receives messages when they are published to subscribed topics.
+<li class="sli"><strong class="ph b"><a class="xref" href="op$com.ibm.streamsx.messaging.mqtt$MQTTSource.html">MQTTSource</a></strong>: <strong class="ph b">DEPRECATED</strong>: The <tt class="ph tt">com.ibm.streamsx.messaging.mqtt.MQTTSource</tt> operator is deprecated and is replaced by the <tt class="ph tt">com.ibm.streamsx.mqtt.MQTTSource</tt> operator in the <tt class="ph tt">com.ibm.streamsx.mqtt</tt> toolkit. The deprecated operator might be removed in a future release. 
 </li>
 
 </ul>

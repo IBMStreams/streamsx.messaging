@@ -22,15 +22,18 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.1</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.mqtt.html">com.ibm.streamsx.messaging.mqtt</a> &gt; MQTTSink</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.4.3</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.messaging.mqtt.html">com.ibm.streamsx.messaging.mqtt</a> &gt; MQTTSink</p>
 
 </div>
 
 <div class="section splprimop">
-  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.mqtt$MQTTSink.svg" width="672" height="112"/>
+  <embed class="image" src="../../image/tk$com.ibm.streamsx.messaging/op$com.ibm.streamsx.messaging.mqtt$MQTTSink.svg" width="872" height="112"/>
 </div>
 
 <div class="section">
+
+<p class="p"><strong class="ph b">DEPRECATED</strong>: The <tt class="ph tt">com.ibm.streamsx.messaging.mqtt.MQTTSink</tt> operator is deprecated and is replaced by the <tt class="ph tt">com.ibm.streamsx.mqtt.MQTTSink</tt> operator in the <tt class="ph tt">com.ibm.streamsx.mqtt</tt> toolkit. The deprecated operator might be removed in a future release.
+</p>
 
 <p class="p">The MQTTSink operator creates a message for every tuple it receives on its input port and publishes the message to an MQTT server. You can use the topic parameter to specify the topic that you want to publish to, or you can use an attribute from the input tuple to identify the topic that you want to publish to at run time.  The input tuple can optionally contain the topic and QoS for the message. This information is not considered to be part of the data.  
 </p>
@@ -52,7 +55,7 @@
  
   <dt class="dt dlterm">Ports</dt>
 
-  <dd class="dd">This operator has 1 or more input port and 1 output port.</dd>
+  <dd class="dd">This operator has 1 or more input ports and 1 output port.</dd>
 
  
  

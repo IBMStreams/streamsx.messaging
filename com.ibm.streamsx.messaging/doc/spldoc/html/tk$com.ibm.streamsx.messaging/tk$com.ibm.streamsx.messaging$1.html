@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.1.1</a> &gt; Developing and running applications that use the Messaging Toolkit</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams com.ibm.streamsx.messaging Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.messaging.html">com.ibm.streamsx.messaging 5.4.3</a> &gt; Developing and running applications that use the Messaging Toolkit</p>
 
 </div>
 
@@ -38,14 +38,14 @@
 
 <div class="p">
 <ul class="ul">
-<li class="li"> Install IBM InfoSphere Streams.  Configure the product environment variables by entering the following command: 
+<li class="li"> Install IBM Streams.  Configure the product environment variables by entering the following command: 
 <pre class="pre codeblock">
   source product-installation-root-directory/4.0.0.0/bin/streamsprofile.sh
 </pre>
 
 </li>
 
-<li class="li"> Install a supported version of WebSphere MQ Client, Apache ActiveMQ and XMS client on the same machine as InfoSphere Streams.       WebSphere MQ Server might or might not be on the same machine.  
+<li class="li"> Install a supported version of WebSphere MQ Client, Apache ActiveMQ and XMS client on the same machine as IBM Streams.       WebSphere MQ Server might or might not be on the same machine.  
 <p class="p">  For Kafka and MQTT, the toolkit ships with a set of required clients, and therefore this configuration   is not needed.
 </p>
 
@@ -55,7 +55,7 @@
 <ul class="ul">
 <li class="li"> The <tt class="ph tt">JMSSource</tt> and <tt class="ph tt">JMSSink</tt> operators support Apache ActiveMQ 5.7 and up.
 <ul class="ul">
-<li class="li"> The Apache ActiveMQ libraries must be installed on same machine as IBM InfoSphere Streams         because the <tt class="ph tt">JMSSink</tt> and <tt class="ph tt">JMSSource</tt> operators require the libraries that are installed with IBM InfoSphere Streams.         However, the ActiveMQ instance to which a message is sent can be a different machine.          You must set the <strong class="ph b">STREAMS_MESSAGING_AMQ_HOME</strong> environment variable to the location where Apache ActiveMQ is installed. For example: 
+<li class="li"> The Apache ActiveMQ libraries must be installed on same machine as IBM Streams         because the <tt class="ph tt">JMSSink</tt> and <tt class="ph tt">JMSSource</tt> operators require the libraries that are installed with IBM Streams.         However, the ActiveMQ instance to which a message is sent can be a different machine.          You must set the <strong class="ph b">STREAMS_MESSAGING_AMQ_HOME</strong> environment variable to the location where Apache ActiveMQ is installed. For example: 
 <pre class="pre codeblock">
   export STREAMS_MESSAGING_AMQ_HOME="/home/streamsuser/ApacheActiveMQ"
 </pre>
@@ -120,7 +120,7 @@
 
 <div class="p">
 <ol class="ol">
-<li class="li"> Review the list of restrictions for the InfoSphere Streams specialized toolkits in the product documentation.    For example, the <tt class="ph tt">XMSSource</tt> and <tt class="ph tt">XMSSink</tt> operators are not supported on POWER7 or POWER 8 systems. </li>
+<li class="li"> Review the list of restrictions for the IBM Streams specialized toolkits in the product documentation.    For example, the <tt class="ph tt">XMSSource</tt> and <tt class="ph tt">XMSSink</tt> operators are supported on x86_64 systems. </li>
 
 <li class="li"> Verify that the appropriate environment variables are set for the messaging systems that you use.
 <ul class="ul">
@@ -147,7 +147,7 @@
 
     where MyMain is the name of the SPL main composite.     <strong class="ph b">Note</strong>: These command parameters override the <strong class="ph b">STREAMS_SPLPATH</strong> environment variable.</li>
 
-<li class="li"> Add the toolkit location in InfoSphere Streams Studio.</li>
+<li class="li"> Add the toolkit location in IBM Streams Studio.</li>
 
 </ul>
 </li>
@@ -177,7 +177,7 @@
 
 <li class="li"> Build your application.  You can use the <strong class="ph b">sc</strong> command or Streams Studio.  </li>
 
-<li class="li"> Start the InfoSphere Streams instance. </li>
+<li class="li"> Start the IBM Streams instance. </li>
 
 <li class="li"> Run the application. You can submit the application as a job by using the <strong class="ph b">streamtool submitjob</strong> command or by using Streams Studio. </li>
 
